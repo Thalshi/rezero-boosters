@@ -200,7 +200,139 @@ function ensureDailyS(s, now = Date.now()) {
   }
   return s.daily;
 }
-function trackS(s, key, n = 1, now = Date.now()) { const d = ensureDailyS(s, now); d.prog[key] = (d.prog[key] || 0) + n; }
+function trackS(s, key, n = 1, now = Date.now()) {
+  const d = ensureDailyS(s, now); d.prog[key] = (d.prog[key] || 0) + n;
+  const w = ensureWeeklyS(s, now); w.prog[key] = (w.prog[key] || 0) + n;
+  s.counts = s.counts || {}; s.counts[key] = (s.counts[key] || 0) + n;
+}
+
+// ===== Semaine, premiers pas, succès, pack du jour (repris de Kyara) =====
+const WEEKLY = [
+  { id: "w-open20", label: "Ouvre 20 boosters",                key: "open",   goal: 20, reward: { chakra: 150 } },
+  { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend", goal: 1,  reward: { chakra: 150 } },
+  { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",   goal: 3,  reward: { chakra: 150 } },
+  { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",  goal: 2,  reward: { chakra: 200 } },
+  { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",  goal: 2,  reward: { chakra: 150 } },
+  { id: "w-epic5",  label: "Obtiens 5 Épiques ou mieux",       key: "epic",   goal: 5,  reward: { chakra: 200 } },
+];
+const DAILY_BONUS = { boosters: 1 };     // les 3 missions du jour réclamées
+const WEEKLY_BONUS = { boosters: 3 };    // les 3 missions de la semaine réclamées
+const FIRST_STEPS = [
+  { id: "f-open",   label: "Ouvre ton premier booster",    test: (s) => s.opened >= 1,                           reward: { chakra: 20 } },
+  { id: "f-coffre", label: "Ouvre un coffre hextech",      test: (s) => (s.counts?.coffre || 0) >= 1,            reward: { chakra: 30 } },
+  { id: "f-recyc",  label: "Recycle ou désenchante un doublon", test: (s) => (s.counts?.recycle || 0) >= 1,      reward: { chakra: 20 } },
+  { id: "f-wish",   label: "Ajoute 3 persos à tes envies", test: (s) => (s.wish || []).length >= 3,              reward: { chakra: 20 } },
+  { id: "f-show",   label: "Mets une carte en vitrine",    test: (s) => (s.showcase || []).length >= 1,          reward: { chakra: 20 } },
+  { id: "f-pred",   label: "Fais une prédiction",          test: (s) => (s.counts?.predict || 0) >= 1,           reward: { chakra: 30 } },
+  { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
+];
+const FIRST_BONUS = { boosters: 3 };
+const ACHIEVEMENTS = [
+  { id: "a-open10",   label: "Premiers pas",        desc: "Ouvrir 10 boosters",                 val: (s) => s.opened, goal: 10,   reward: { chakra: 10 } },
+  { id: "a-open100",  label: "Habitué",             desc: "Ouvrir 100 boosters",                val: (s) => s.opened, goal: 100,  reward: { chakra: 50 } },
+  { id: "a-open1000", label: "Va donc jouer dehors", desc: "Ouvrir 1 000 boosters",             val: (s) => s.opened, goal: 1000, reward: { chakra: 500 } },
+  { id: "a-uniq25",   label: "Collectionneur",      desc: "Posséder 25 cartes différentes",     val: (s) => statsS(s).unique, goal: 25, reward: { chakra: 20 } },
+  { id: "a-uniq75",   label: "Archiviste",          desc: "Posséder 75 cartes différentes",     val: (s) => statsS(s).unique, goal: 75, reward: { chakra: 100 } },
+  { id: "a-all",      label: "QG complet",          desc: "Posséder toutes les cartes",         val: (s) => statsS(s).unique, goal: ALL_CARDS.length, reward: { chakra: 2000 } },
+  { id: "a-epic",     label: "Épique !",            desc: "Obtenir une première Épique ou mieux", val: (s) => ALL_CARDS.some((c) => RANKS.indexOf(c.rar) >= 3 && hasCard(s, c.id)) ? 1 : 0, goal: 1, reward: { chakra: 20 } },
+  { id: "a-legend",   label: "Légendaire !",        desc: "Obtenir une première Légendaire ou mieux", val: (s) => ALL_CARDS.some((c) => RANKS.indexOf(c.rar) >= 4 && hasCard(s, c.id)) ? 1 : 0, goal: 1, reward: { chakra: 75 } },
+  { id: "a-myth",     label: "Mythique !",          desc: "Obtenir une première Mythique",      val: (s) => statsS(s).mythics, goal: 1, reward: { chakra: 200 } },
+  { id: "a-myth5",    label: "Panthéon",            desc: "Posséder 5 Mythiques différentes",   val: (s) => statsS(s).mythics, goal: 5, reward: { chakra: 500 } },
+  { id: "a-skin10",   label: "Garde-robe",          desc: "Posséder 10 skins",                  val: (s) => statsS(s).skins, goal: 10, reward: { chakra: 75 } },
+  { id: "a-prest",    label: "Prestige",            desc: "Obtenir un skin Prestige",           val: (s) => SKINS.some((c) => c.skin === "prestige" && hasCard(s, c.id)) ? 1 : 0, goal: 1, reward: { chakra: 300 } },
+  { id: "a-sale1",    label: "Première vente",      desc: "Vendre une carte au marché",         val: (s) => s.sales || 0, goal: 1,  reward: { chakra: 30 } },
+  { id: "a-sale10",   label: "Marchand",            desc: "Vendre 10 cartes",                   val: (s) => s.sales || 0, goal: 10, reward: { chakra: 100 } },
+  { id: "a-trade1",   label: "Poignée de main",     desc: "Réussir un échange",                 val: (s) => s.trades || 0, goal: 1, reward: { chakra: 30 } },
+  { id: "a-trade10",  label: "Négociateur",         desc: "Réussir 10 échanges",                val: (s) => s.trades || 0, goal: 10, reward: { chakra: 250 } },
+  { id: "a-divine",   label: "Touché par les dieux", desc: "Ouvrir un booster divin",           val: (s) => s.counts?.divine || 0, goal: 1, reward: { chakra: 500 } },
+];
+// semaine : du lundi au dimanche, heure de Paris
+function weekKey(now = Date.now()) {
+  const d = new Date(dayKey(now) + "T12:00:00Z"), dow = (d.getUTCDay() + 6) % 7;
+  return dayKey(d.getTime() - dow * 86400e3);
+}
+function ensureWeeklyS(s, now = Date.now()) {
+  const wk = weekKey(now);
+  if (!s.weekly || s.weekly.week !== wk) {
+    let h = 7; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const pool = [...WEEKLY], picks = [];
+    while (picks.length < 3) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
+    s.weekly = { week: wk, ids: picks, prog: {}, claimed: {}, bonus: false };
+  }
+  return s.weekly;
+}
+function weeklyS(s, now = Date.now()) {
+  const w = ensureWeeklyS(s, now);
+  return w.ids.map((id) => { const m = WEEKLY.find((x) => x.id === id); return { ...m, prog: Math.min(m.goal, w.prog[m.key] || 0), claimed: !!w.claimed[id] }; });
+}
+const firstStepsS = (s) => FIRST_STEPS.map((f) => ({ ...f, done: !!f.test(s), claimed: !!(s.first || {})[f.id] }));
+const achievementsS = (s) => ACHIEVEMENTS.map((a) => ({ ...a, prog: Math.min(a.goal, a.val(s)), claimed: !!(s.ach || {})[a.id] }));
+// réclamer n'importe quelle récompense ; kind : streak, mission, daily-bonus, weekly, weekly-bonus, first, first-bonus, ach, all
+function claimAnyS(s, kind, id, now = Date.now()) {
+  if (kind === "streak") return claimStreakS(s, now);
+  if (kind === "mission") return claimMissionS(s, id, now);
+  if (kind === "daily-bonus") {
+    const d = ensureDailyS(s, now);
+    if (d.bonus || missionsTodayS(s, now).some((m) => !m.claimed)) return null;
+    d.bonus = true; giveRewardS(s, DAILY_BONUS); return { reward: DAILY_BONUS };
+  }
+  if (kind === "weekly") {
+    const m = weeklyS(s, now).find((x) => x.id === id);
+    if (!m || m.prog < m.goal || m.claimed) return null;
+    s.weekly.claimed[id] = true; giveRewardS(s, m.reward); return { reward: m.reward };
+  }
+  if (kind === "weekly-bonus") {
+    const w = ensureWeeklyS(s, now);
+    if (w.bonus || weeklyS(s, now).some((m) => !m.claimed)) return null;
+    w.bonus = true; giveRewardS(s, WEEKLY_BONUS); return { reward: WEEKLY_BONUS };
+  }
+  if (kind === "first") {
+    const f = firstStepsS(s).find((x) => x.id === id);
+    if (!f || !f.done || f.claimed) return null;
+    s.first = { ...(s.first || {}), [id]: true }; giveRewardS(s, f.reward); return { reward: f.reward };
+  }
+  if (kind === "first-bonus") {
+    if ((s.first || {}).bonus || firstStepsS(s).some((f) => !f.claimed)) return null;
+    s.first = { ...s.first, bonus: true }; giveRewardS(s, FIRST_BONUS); return { reward: FIRST_BONUS };
+  }
+  if (kind === "ach") {
+    const a = achievementsS(s).find((x) => x.id === id);
+    if (!a || a.prog < a.goal || a.claimed) return null;
+    s.ach = { ...(s.ach || {}), [id]: true }; giveRewardS(s, a.reward); return { reward: a.reward };
+  }
+  if (kind === "all") {
+    const total = { boosters: 0, chakra: 0 }, add = (r) => { if (r) { total.boosters += r.reward.boosters || 0; total.chakra += r.reward.chakra || 0; } };
+    add(claimStreakS(s, now));
+    for (const m of missionsTodayS(s, now)) add(claimMissionS(s, m.id, now));
+    add(claimAnyS(s, "daily-bonus", null, now));
+    for (const m of weeklyS(s, now)) add(claimAnyS(s, "weekly", m.id, now));
+    add(claimAnyS(s, "weekly-bonus", null, now));
+    for (const f of firstStepsS(s)) add(claimAnyS(s, "first", f.id, now));
+    add(claimAnyS(s, "first-bonus", null, now));
+    for (const a of achievementsS(s)) add(claimAnyS(s, "ach", a.id, now));
+    return total.boosters || total.chakra ? { reward: total } : null;
+  }
+  return null;
+}
+function claimableCountS(s, now = Date.now()) {
+  let n = streakStateS(s, now).canClaim ? 1 : 0;
+  n += missionsTodayS(s, now).filter((m) => m.prog >= m.goal && !m.claimed).length;
+  n += weeklyS(s, now).filter((m) => m.prog >= m.goal && !m.claimed).length;
+  n += firstStepsS(s).filter((f) => f.done && !f.claimed).length;
+  n += achievementsS(s).filter((a) => a.prog >= a.goal && !a.claimed).length;
+  const d = ensureDailyS(s, now), w = ensureWeeklyS(s, now);
+  if (!d.bonus && missionsTodayS(s, now).every((m) => m.claimed)) n++;
+  if (!w.bonus && weeklyS(s, now).every((m) => m.claimed)) n++;
+  if (!(s.first || {}).bonus && firstStepsS(s).every((f) => f.claimed)) n++;
+  return n;
+}
+// pack du jour : gratuit une fois par jour, thème qui tourne, Épique ou mieux garantie
+const DAY_THEMES = ["mix", "vilains", "monde", "bande", "coffre"];
+function dailyPackOf(now = Date.now()) {
+  const k = dayKey(now); let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const base = PACKS.find((p) => p.id === DAY_THEMES[h % DAY_THEMES.length]);
+  return { ...base, id: "jour", base: base.id, name: `Pack du jour · ${base.name}`, sub: "Gratuit chaque jour · Épique ou mieux garantie", daily: true };
+}
 function missionsTodayS(s, now = Date.now()) {
   const d = ensureDailyS(s, now);
   return d.ids.map((id) => { const m = MISSIONS.find((x) => x.id === id); return { ...m, prog: Math.min(m.goal, d.prog[m.key] || 0), claimed: !!d.claimed[id] }; });
@@ -281,7 +413,7 @@ function openPackS(s, pk, pool, rng, now = Date.now()) {
   const k = pk.boost || 1;
   const divine = rng() < DIVINE_CHANCE;
   const rars = [];
-  for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : LAST, k), rng));
+  for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : pk.last || LAST, k), rng));
   s.sinceMythic++; s.sinceGold++;
   if (s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
   const cards = rars.map((r) => ({ c: pickWith(r, pool, rng), gold: rng() < GOLD_CHANCE }));
@@ -300,16 +432,29 @@ function openPackS(s, pk, pool, rng, now = Date.now()) {
   trackS(s, "epic", out.filter((x) => RANKS.indexOf(CARD_BY_ID[x.id].rar) >= 3).length, now);
   trackS(s, "rare", out.filter((x) => RANKS.indexOf(CARD_BY_ID[x.id].rar) >= 2).length, now);
   trackS(s, "new", out.filter((x) => x.isNew).length, now);
+  trackS(s, "legend", out.filter((x) => RANKS.indexOf(CARD_BY_ID[x.id].rar) >= 4).length, now);
+  if (divine) trackS(s, "divine", 1, now);
   return { cards: out, divine };
 }
 // Prend un booster (gratuit ou acheté) puis l'ouvre. Renvoie { error } ou le résultat de openPackS.
 function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   regenS(s, now);
+  if (packId === "jour") {
+    if (s.dailyPack === dayKey(now)) return { error: "Tu as déjà ouvert le pack du jour. Reviens demain !" };
+    const pk = dailyPackOf(now), pool = poolFor(pk, cfg, uid);
+    if (!pool.length) return { error: "Aucun perso du pack du jour n'est encore débloqué pour toi." };
+    s.dailyPack = dayKey(now);
+    const r = openPackS(s, { ...pk, last: { e: 85, l: 12, m: 3 } }, pool, rng, now);
+    if (pk.skins) trackS(s, "coffre", 1, now);
+    return { pack: "jour", ...r };
+  }
   const pk = packOfAt(packId, now), pool = poolFor(pk, cfg, uid);
   if (!pool.length) return { error: "Aucun perso de ce booster n'est encore débloqué pour toi. Choisis un autre booster." };
   if (paid) { if (s.chakra < PRICE) return { error: `Il te faut ${PRICE} ◆ (tu en as ${s.chakra}).` }; s.chakra -= PRICE; }
   else { if (!s.free) return { error: "Plus de booster gratuit pour l'instant." }; if (s.free === FREE_MAX) s.freeTs = now; s.free--; }
-  return { pack: pk.id, ...openPackS(s, pk, pool, rng, now) };
+  const r = openPackS(s, pk, pool, rng, now);
+  if (pk.skins) trackS(s, "coffre", 1, now);
+  return { pack: pk.id, ...r };
 }
 function packChance(rar, k = 1) {
   const a = boosted(SLOT, k), b = boosted(LAST, k);
@@ -352,7 +497,7 @@ function craftS(s, cfg, uid, rng, now = Date.now()) {
   const c = pickWith(rollWith(SLOT, rng), pool, rng);
   const isNew = addCardS(s, c.id, false, now);
   if (RANKS.indexOf(c.rar) >= 3) s.history.unshift({ id: c.id, gold: false, t: now });
-  s.crafted = (s.crafted || 0) + 1;
+  s.crafted = (s.crafted || 0) + 1; trackS(s, "craft", 1, now);
   return { card: { id: c.id, gold: false, isNew }, used: used.map((x) => x.id) };
 }
 
@@ -377,4 +522,4 @@ function plausibleSave(s) {
   return s.opened <= 400 && total <= s.opened * PACK + 10 && s.chakra <= 5000 && Object.keys(s.owned || {}).every((id) => CARD_BY_ID[id]);
 }
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, plausibleSave };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, plausibleSave };

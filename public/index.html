@@ -524,6 +524,15 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 .pick span { margin-left: auto; font: 600 .7rem var(--font-mono); color: var(--muted); white-space: nowrap; }
 .pick input { accent-color: #0ac8b9; }
 .by { cursor: pointer; }
+.daypack { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-color: var(--r-e); background: linear-gradient(120deg, rgba(176,76,224,.18), rgba(10,20,40,.94) 55%); }
+.tile-btn { cursor: pointer; font: inherit; color: inherit; }
+.tile-btn:hover { border-color: var(--gold); }
+.m-txt small { font: 500 .78rem var(--font-body); color: var(--muted); }
+.bonus { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border: 1px dashed var(--gold-d); font: 600 .85rem var(--font-body); color: var(--gold-l); }
+.bonus b { color: #5bc0de; }
+.bonus.claimed { opacity: .55; }
+.tab { position: relative; }
+.tab-dot { position: absolute; top: 8px; right: 2px; width: 7px; height: 7px; border-radius: 50%; background: #ff6ad5; box-shadow: 0 0 6px #ff6ad5; }
 .lore { display: flex; flex-direction: column; gap: 10px; }
 .lore .btn { align-self: flex-start; text-decoration: none; }
 .facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
@@ -546,6 +555,7 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" type="button" data-view="boosters" aria-selected="true">Boosters</button>
     <button class="tab" role="tab" type="button" data-view="album" aria-selected="false">Album</button>
+    <button class="tab" role="tab" type="button" data-view="missions" aria-selected="false">Missions<i class="tab-dot" id="claimDot" hidden></i></button>
     <button class="tab" role="tab" type="button" data-view="market" aria-selected="false">Marché</button>
     <button class="tab" role="tab" type="button" data-view="pred" aria-selected="false">Prédictions</button>
     <button class="tab" role="tab" type="button" data-view="community" aria-selected="false">Communauté</button>
@@ -849,7 +859,139 @@ function ensureDailyS(s, now = Date.now()) {
   }
   return s.daily;
 }
-function trackS(s, key, n = 1, now = Date.now()) { const d = ensureDailyS(s, now); d.prog[key] = (d.prog[key] || 0) + n; }
+function trackS(s, key, n = 1, now = Date.now()) {
+  const d = ensureDailyS(s, now); d.prog[key] = (d.prog[key] || 0) + n;
+  const w = ensureWeeklyS(s, now); w.prog[key] = (w.prog[key] || 0) + n;
+  s.counts = s.counts || {}; s.counts[key] = (s.counts[key] || 0) + n;
+}
+
+// ===== Semaine, premiers pas, succès, pack du jour (repris de Kyara) =====
+const WEEKLY = [
+  { id: "w-open20", label: "Ouvre 20 boosters",                key: "open",   goal: 20, reward: { chakra: 150 } },
+  { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend", goal: 1,  reward: { chakra: 150 } },
+  { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",   goal: 3,  reward: { chakra: 150 } },
+  { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",  goal: 2,  reward: { chakra: 200 } },
+  { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",  goal: 2,  reward: { chakra: 150 } },
+  { id: "w-epic5",  label: "Obtiens 5 Épiques ou mieux",       key: "epic",   goal: 5,  reward: { chakra: 200 } },
+];
+const DAILY_BONUS = { boosters: 1 };     // les 3 missions du jour réclamées
+const WEEKLY_BONUS = { boosters: 3 };    // les 3 missions de la semaine réclamées
+const FIRST_STEPS = [
+  { id: "f-open",   label: "Ouvre ton premier booster",    test: (s) => s.opened >= 1,                           reward: { chakra: 20 } },
+  { id: "f-coffre", label: "Ouvre un coffre hextech",      test: (s) => (s.counts?.coffre || 0) >= 1,            reward: { chakra: 30 } },
+  { id: "f-recyc",  label: "Recycle ou désenchante un doublon", test: (s) => (s.counts?.recycle || 0) >= 1,      reward: { chakra: 20 } },
+  { id: "f-wish",   label: "Ajoute 3 persos à tes envies", test: (s) => (s.wish || []).length >= 3,              reward: { chakra: 20 } },
+  { id: "f-show",   label: "Mets une carte en vitrine",    test: (s) => (s.showcase || []).length >= 1,          reward: { chakra: 20 } },
+  { id: "f-pred",   label: "Fais une prédiction",          test: (s) => (s.counts?.predict || 0) >= 1,           reward: { chakra: 30 } },
+  { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
+];
+const FIRST_BONUS = { boosters: 3 };
+const ACHIEVEMENTS = [
+  { id: "a-open10",   label: "Premiers pas",        desc: "Ouvrir 10 boosters",                 val: (s) => s.opened, goal: 10,   reward: { chakra: 10 } },
+  { id: "a-open100",  label: "Habitué",             desc: "Ouvrir 100 boosters",                val: (s) => s.opened, goal: 100,  reward: { chakra: 50 } },
+  { id: "a-open1000", label: "Va donc jouer dehors", desc: "Ouvrir 1 000 boosters",             val: (s) => s.opened, goal: 1000, reward: { chakra: 500 } },
+  { id: "a-uniq25",   label: "Collectionneur",      desc: "Posséder 25 cartes différentes",     val: (s) => statsS(s).unique, goal: 25, reward: { chakra: 20 } },
+  { id: "a-uniq75",   label: "Archiviste",          desc: "Posséder 75 cartes différentes",     val: (s) => statsS(s).unique, goal: 75, reward: { chakra: 100 } },
+  { id: "a-all",      label: "QG complet",          desc: "Posséder toutes les cartes",         val: (s) => statsS(s).unique, goal: ALL_CARDS.length, reward: { chakra: 2000 } },
+  { id: "a-epic",     label: "Épique !",            desc: "Obtenir une première Épique ou mieux", val: (s) => ALL_CARDS.some((c) => RANKS.indexOf(c.rar) >= 3 && hasCard(s, c.id)) ? 1 : 0, goal: 1, reward: { chakra: 20 } },
+  { id: "a-legend",   label: "Légendaire !",        desc: "Obtenir une première Légendaire ou mieux", val: (s) => ALL_CARDS.some((c) => RANKS.indexOf(c.rar) >= 4 && hasCard(s, c.id)) ? 1 : 0, goal: 1, reward: { chakra: 75 } },
+  { id: "a-myth",     label: "Mythique !",          desc: "Obtenir une première Mythique",      val: (s) => statsS(s).mythics, goal: 1, reward: { chakra: 200 } },
+  { id: "a-myth5",    label: "Panthéon",            desc: "Posséder 5 Mythiques différentes",   val: (s) => statsS(s).mythics, goal: 5, reward: { chakra: 500 } },
+  { id: "a-skin10",   label: "Garde-robe",          desc: "Posséder 10 skins",                  val: (s) => statsS(s).skins, goal: 10, reward: { chakra: 75 } },
+  { id: "a-prest",    label: "Prestige",            desc: "Obtenir un skin Prestige",           val: (s) => SKINS.some((c) => c.skin === "prestige" && hasCard(s, c.id)) ? 1 : 0, goal: 1, reward: { chakra: 300 } },
+  { id: "a-sale1",    label: "Première vente",      desc: "Vendre une carte au marché",         val: (s) => s.sales || 0, goal: 1,  reward: { chakra: 30 } },
+  { id: "a-sale10",   label: "Marchand",            desc: "Vendre 10 cartes",                   val: (s) => s.sales || 0, goal: 10, reward: { chakra: 100 } },
+  { id: "a-trade1",   label: "Poignée de main",     desc: "Réussir un échange",                 val: (s) => s.trades || 0, goal: 1, reward: { chakra: 30 } },
+  { id: "a-trade10",  label: "Négociateur",         desc: "Réussir 10 échanges",                val: (s) => s.trades || 0, goal: 10, reward: { chakra: 250 } },
+  { id: "a-divine",   label: "Touché par les dieux", desc: "Ouvrir un booster divin",           val: (s) => s.counts?.divine || 0, goal: 1, reward: { chakra: 500 } },
+];
+// semaine : du lundi au dimanche, heure de Paris
+function weekKey(now = Date.now()) {
+  const d = new Date(dayKey(now) + "T12:00:00Z"), dow = (d.getUTCDay() + 6) % 7;
+  return dayKey(d.getTime() - dow * 86400e3);
+}
+function ensureWeeklyS(s, now = Date.now()) {
+  const wk = weekKey(now);
+  if (!s.weekly || s.weekly.week !== wk) {
+    let h = 7; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    const pool = [...WEEKLY], picks = [];
+    while (picks.length < 3) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
+    s.weekly = { week: wk, ids: picks, prog: {}, claimed: {}, bonus: false };
+  }
+  return s.weekly;
+}
+function weeklyS(s, now = Date.now()) {
+  const w = ensureWeeklyS(s, now);
+  return w.ids.map((id) => { const m = WEEKLY.find((x) => x.id === id); return { ...m, prog: Math.min(m.goal, w.prog[m.key] || 0), claimed: !!w.claimed[id] }; });
+}
+const firstStepsS = (s) => FIRST_STEPS.map((f) => ({ ...f, done: !!f.test(s), claimed: !!(s.first || {})[f.id] }));
+const achievementsS = (s) => ACHIEVEMENTS.map((a) => ({ ...a, prog: Math.min(a.goal, a.val(s)), claimed: !!(s.ach || {})[a.id] }));
+// réclamer n'importe quelle récompense ; kind : streak, mission, daily-bonus, weekly, weekly-bonus, first, first-bonus, ach, all
+function claimAnyS(s, kind, id, now = Date.now()) {
+  if (kind === "streak") return claimStreakS(s, now);
+  if (kind === "mission") return claimMissionS(s, id, now);
+  if (kind === "daily-bonus") {
+    const d = ensureDailyS(s, now);
+    if (d.bonus || missionsTodayS(s, now).some((m) => !m.claimed)) return null;
+    d.bonus = true; giveRewardS(s, DAILY_BONUS); return { reward: DAILY_BONUS };
+  }
+  if (kind === "weekly") {
+    const m = weeklyS(s, now).find((x) => x.id === id);
+    if (!m || m.prog < m.goal || m.claimed) return null;
+    s.weekly.claimed[id] = true; giveRewardS(s, m.reward); return { reward: m.reward };
+  }
+  if (kind === "weekly-bonus") {
+    const w = ensureWeeklyS(s, now);
+    if (w.bonus || weeklyS(s, now).some((m) => !m.claimed)) return null;
+    w.bonus = true; giveRewardS(s, WEEKLY_BONUS); return { reward: WEEKLY_BONUS };
+  }
+  if (kind === "first") {
+    const f = firstStepsS(s).find((x) => x.id === id);
+    if (!f || !f.done || f.claimed) return null;
+    s.first = { ...(s.first || {}), [id]: true }; giveRewardS(s, f.reward); return { reward: f.reward };
+  }
+  if (kind === "first-bonus") {
+    if ((s.first || {}).bonus || firstStepsS(s).some((f) => !f.claimed)) return null;
+    s.first = { ...s.first, bonus: true }; giveRewardS(s, FIRST_BONUS); return { reward: FIRST_BONUS };
+  }
+  if (kind === "ach") {
+    const a = achievementsS(s).find((x) => x.id === id);
+    if (!a || a.prog < a.goal || a.claimed) return null;
+    s.ach = { ...(s.ach || {}), [id]: true }; giveRewardS(s, a.reward); return { reward: a.reward };
+  }
+  if (kind === "all") {
+    const total = { boosters: 0, chakra: 0 }, add = (r) => { if (r) { total.boosters += r.reward.boosters || 0; total.chakra += r.reward.chakra || 0; } };
+    add(claimStreakS(s, now));
+    for (const m of missionsTodayS(s, now)) add(claimMissionS(s, m.id, now));
+    add(claimAnyS(s, "daily-bonus", null, now));
+    for (const m of weeklyS(s, now)) add(claimAnyS(s, "weekly", m.id, now));
+    add(claimAnyS(s, "weekly-bonus", null, now));
+    for (const f of firstStepsS(s)) add(claimAnyS(s, "first", f.id, now));
+    add(claimAnyS(s, "first-bonus", null, now));
+    for (const a of achievementsS(s)) add(claimAnyS(s, "ach", a.id, now));
+    return total.boosters || total.chakra ? { reward: total } : null;
+  }
+  return null;
+}
+function claimableCountS(s, now = Date.now()) {
+  let n = streakStateS(s, now).canClaim ? 1 : 0;
+  n += missionsTodayS(s, now).filter((m) => m.prog >= m.goal && !m.claimed).length;
+  n += weeklyS(s, now).filter((m) => m.prog >= m.goal && !m.claimed).length;
+  n += firstStepsS(s).filter((f) => f.done && !f.claimed).length;
+  n += achievementsS(s).filter((a) => a.prog >= a.goal && !a.claimed).length;
+  const d = ensureDailyS(s, now), w = ensureWeeklyS(s, now);
+  if (!d.bonus && missionsTodayS(s, now).every((m) => m.claimed)) n++;
+  if (!w.bonus && weeklyS(s, now).every((m) => m.claimed)) n++;
+  if (!(s.first || {}).bonus && firstStepsS(s).every((f) => f.claimed)) n++;
+  return n;
+}
+// pack du jour : gratuit une fois par jour, thème qui tourne, Épique ou mieux garantie
+const DAY_THEMES = ["mix", "vilains", "monde", "bande", "coffre"];
+function dailyPackOf(now = Date.now()) {
+  const k = dayKey(now); let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const base = PACKS.find((p) => p.id === DAY_THEMES[h % DAY_THEMES.length]);
+  return { ...base, id: "jour", base: base.id, name: `Pack du jour · ${base.name}`, sub: "Gratuit chaque jour · Épique ou mieux garantie", daily: true };
+}
 function missionsTodayS(s, now = Date.now()) {
   const d = ensureDailyS(s, now);
   return d.ids.map((id) => { const m = MISSIONS.find((x) => x.id === id); return { ...m, prog: Math.min(m.goal, d.prog[m.key] || 0), claimed: !!d.claimed[id] }; });
@@ -930,7 +1072,7 @@ function openPackS(s, pk, pool, rng, now = Date.now()) {
   const k = pk.boost || 1;
   const divine = rng() < DIVINE_CHANCE;
   const rars = [];
-  for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : LAST, k), rng));
+  for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : pk.last || LAST, k), rng));
   s.sinceMythic++; s.sinceGold++;
   if (s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
   const cards = rars.map((r) => ({ c: pickWith(r, pool, rng), gold: rng() < GOLD_CHANCE }));
@@ -949,16 +1091,29 @@ function openPackS(s, pk, pool, rng, now = Date.now()) {
   trackS(s, "epic", out.filter((x) => RANKS.indexOf(CARD_BY_ID[x.id].rar) >= 3).length, now);
   trackS(s, "rare", out.filter((x) => RANKS.indexOf(CARD_BY_ID[x.id].rar) >= 2).length, now);
   trackS(s, "new", out.filter((x) => x.isNew).length, now);
+  trackS(s, "legend", out.filter((x) => RANKS.indexOf(CARD_BY_ID[x.id].rar) >= 4).length, now);
+  if (divine) trackS(s, "divine", 1, now);
   return { cards: out, divine };
 }
 // Prend un booster (gratuit ou acheté) puis l'ouvre. Renvoie { error } ou le résultat de openPackS.
 function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   regenS(s, now);
+  if (packId === "jour") {
+    if (s.dailyPack === dayKey(now)) return { error: "Tu as déjà ouvert le pack du jour. Reviens demain !" };
+    const pk = dailyPackOf(now), pool = poolFor(pk, cfg, uid);
+    if (!pool.length) return { error: "Aucun perso du pack du jour n'est encore débloqué pour toi." };
+    s.dailyPack = dayKey(now);
+    const r = openPackS(s, { ...pk, last: { e: 85, l: 12, m: 3 } }, pool, rng, now);
+    if (pk.skins) trackS(s, "coffre", 1, now);
+    return { pack: "jour", ...r };
+  }
   const pk = packOfAt(packId, now), pool = poolFor(pk, cfg, uid);
   if (!pool.length) return { error: "Aucun perso de ce booster n'est encore débloqué pour toi. Choisis un autre booster." };
   if (paid) { if (s.chakra < PRICE) return { error: `Il te faut ${PRICE} ◆ (tu en as ${s.chakra}).` }; s.chakra -= PRICE; }
   else { if (!s.free) return { error: "Plus de booster gratuit pour l'instant." }; if (s.free === FREE_MAX) s.freeTs = now; s.free--; }
-  return { pack: pk.id, ...openPackS(s, pk, pool, rng, now) };
+  const r = openPackS(s, pk, pool, rng, now);
+  if (pk.skins) trackS(s, "coffre", 1, now);
+  return { pack: pk.id, ...r };
 }
 function packChance(rar, k = 1) {
   const a = boosted(SLOT, k), b = boosted(LAST, k);
@@ -1001,7 +1156,7 @@ function craftS(s, cfg, uid, rng, now = Date.now()) {
   const c = pickWith(rollWith(SLOT, rng), pool, rng);
   const isNew = addCardS(s, c.id, false, now);
   if (RANKS.indexOf(c.rar) >= 3) s.history.unshift({ id: c.id, gold: false, t: now });
-  s.crafted = (s.crafted || 0) + 1;
+  s.crafted = (s.crafted || 0) + 1; trackS(s, "craft", 1, now);
   return { card: { id: c.id, gold: false, isNew }, used: used.map((x) => x.id) };
 }
 
@@ -1468,7 +1623,7 @@ const track = (key, n = 1) => trackS(save, key, n);
 const missionsToday = () => missionsTodayS(save);
 const streakState = () => streakStateS(save);
 const rewardText = (r) => [r.boosters ? `${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.chakra ? `${r.chakra} ◆` : ""].filter(Boolean).join(" + ");
-function toClaim() { return missionsToday().filter((m) => m.prog >= m.goal && !m.claimed).length + (streakState().canClaim ? 1 : 0); }
+const toClaim = () => claimableCountS(save);
 
 // ===== Carte =====
 const RINGS = `<svg class="rings" viewBox="0 0 100 140" aria-hidden="true" fill="none" stroke="#9fe8ff" stroke-width="1.4"><ellipse cx="50" cy="70" rx="44" ry="58" stroke-dasharray="6 5"/><ellipse cx="50" cy="70" rx="34" ry="46" stroke-dasharray="3 6" stroke="#c7a6ff"/><path d="M8 30l6 4M92 110l-6-4M90 26l-6 5M10 116l6-5" stroke-linecap="round"/></svg>`;
@@ -1711,6 +1866,7 @@ function boardHTML() {
 // ===== Vues =====
 let view = "boosters", opening = null;
 function header() {
+  const dot = $("claimDot"); if (dot) dot.hidden = !toClaim();
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = save.chakra;
@@ -1755,23 +1911,16 @@ function viewBoosters() {
   </section>
   <div class="tiles six">
     <div class="tile" style="color:var(--accent)"><div class="k"></div><b>${save.free}/${FREE_MAX}</b><span>gratuits</span></div>
-    <div class="tile" style="color:#5bc0de"><div class="k"></div><b>${toClaim()}</b><span>à récupérer</span></div>
+    <button class="tile tile-btn" type="button" data-go="missions" style="color:#5bc0de"><div class="k"></div><b>${toClaim()}</b><span>à récupérer</span></button>
     <div class="tile" style="color:var(--r-pc)"><div class="k"></div><b>J${st.n}/7</b><span>série</span></div>
     <div class="tile" style="color:var(--sand)"><div class="k"></div><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant la dorée</span></div>
     <div class="tile" style="color:var(--r-m)"><div class="k"></div><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
     <div class="tile" style="color:#5bc0de"><div class="k"></div><b>${save.chakra}</b><span>essence</span></div>
   </div>
-  <section class="panel daily">
-    <div class="eyebrow">Récompense du jour · <span>reviens chaque jour pour la série</span></div>
-    <div class="streak">${STREAK.map((r, i) => { const d = i + 1, done = d <= st.n, now = st.canClaim && d === st.next; return `
-      <div class="day ${done ? "done" : ""} ${now ? "now" : ""}"><i></i><b>J${d}</b><span>${rewardText(r)}</span></div>`; }).join("")}</div>
-    <button class="btn" type="button" data-act="streak" ${st.canClaim ? "" : "disabled"}>${st.canClaim ? `Récupérer J${st.next} · ${rewardText(STREAK[st.next - 1])}` : "Reviens demain"}</button>
-    <div class="eyebrow" style="margin-top:6px">Missions du jour</div>
-    <div class="missions">${ms.map((m) => `
-      <div class="mission ${m.claimed ? "claimed" : ""}">
-        <div class="m-txt"><b>${m.label}</b><span>${rewardText(m.reward)}</span><div class="m-bar"><i style="width:${m.prog / m.goal * 100}%"></i></div></div>
-        ${m.claimed ? `<span class="m-ok">Fait</span>` : `<button class="btn ghost sm" type="button" data-mission="${m.id}" ${m.prog >= m.goal ? "" : "disabled"}>${m.prog}/${m.goal}</button>`}
-      </div>`).join("")}</div>
+  <section class="panel daypack">
+    <div><div class="eyebrow">Pack du jour · <span>gratuit, Épique ou mieux garantie</span></div>
+      <h3>${dailyPackOf().name.replace("Pack du jour · ", "")}</h3><p class="note">${save.dailyPack === dayKey() ? "Déjà ouvert aujourd'hui. Un nouveau thème demain." : "Un booster offert chaque jour, avec un thème différent."}</p></div>
+    <button class="btn" type="button" data-act="open-day" ${save.dailyPack === dayKey() ? "disabled" : ""}>${save.dailyPack === dayKey() ? "Reviens demain" : "Ouvrir le pack du jour"}</button>
   </section>
   <section style="display:flex;flex-direction:column;gap:10px">
     <div class="eyebrow">Choisis ton booster</div>
@@ -1891,11 +2040,60 @@ function viewCommunity() {
   </section>`;
 }
 
+function missionRow(m, kind, id) {
+  const ok = kind === "first" ? m.done : m.prog >= m.goal;
+  return `<div class="mission ${m.claimed ? "claimed" : ""}">
+    <div class="m-txt"><b>${m.label}</b>${m.desc ? `<small>${m.desc}</small>` : ""}<span>${rewardText(m.reward)}</span>${kind === "first" ? "" : `<div class="m-bar"><i style="width:${Math.min(1, m.prog / m.goal) * 100}%"></i></div>`}</div>
+    ${m.claimed ? `<span class="m-ok">Fait</span>` : `<button class="btn ${ok ? "" : "ghost"} sm" type="button" data-claim="${kind}" data-id="${id}" ${ok ? "" : "disabled"}>${ok ? "Réclamer" : kind === "first" ? "À faire" : `${m.prog.toLocaleString("fr-FR")}/${m.goal.toLocaleString("fr-FR")}`}</button>`}
+  </div>`;
+}
+function bonusRow(label, reward, done, claimable, kind) {
+  return `<div class="bonus ${done ? "claimed" : ""}"><span>${label} → <b>${rewardText(reward)}</b></span>${done ? '<span class="m-ok">Fait</span>' : `<button class="btn sm" type="button" data-claim="${kind}" ${claimable ? "" : "disabled"}>Réclamer</button>`}</div>`;
+}
+function viewMissions() {
+  const st = streakState(), ms = missionsToday(), ws = weeklyS(save), fs = firstStepsS(save), as = achievementsS(save);
+  const d = ensureDailyS(save), w = ensureWeeklyS(save), n = toClaim();
+  const nextDay = new Date(dayKey(Date.now() + 86400e3) + "T00:00:00+02:00"), nextWeek = new Date(dayKey(new Date(weekKey() + "T12:00:00Z").getTime() + 7 * 86400e3) + "T00:00:00+02:00");
+  const left = (t) => { const m = Math.max(1, Math.round((t - Date.now()) / 60000)); return m >= 1440 ? `${Math.floor(m / 1440)} j ${Math.floor((m % 1440) / 60)} h` : `${Math.floor(m / 60)} h ${m % 60} min`; };
+  const doneAch = as.filter((a) => a.claimed).length;
+  return `
+  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <div class="eyebrow">Missions · <span>et succès</span></div>
+    <div class="row" style="justify-content:space-between"><h2 style="font-size:1.5rem;margin:0">Missions & succès</h2>
+      <button class="btn" type="button" data-claim="all" ${n ? "" : "disabled"}>Tout réclamer${n ? ` · ${n}` : ""}</button></div>
+    <p class="note">Reviens chaque jour : série de connexion, pack du jour et missions donnent de l'essence et des boosters en plus des gratuits.</p>
+  </section>
+  <section class="panel daily">
+    <div class="eyebrow">Série de 7 jours · <span>${st.n ? `jour ${st.n}` : "commence aujourd'hui"}</span></div>
+    <div class="streak">${STREAK.map((r, i) => { const dd = i + 1, done = dd <= st.n, now = st.canClaim && dd === st.next; return `
+      <div class="day ${done ? "done" : ""} ${now ? "now" : ""}"><i></i><b>J${dd}</b><span>${rewardText(r)}</span></div>`; }).join("")}</div>
+    <button class="btn" type="button" data-claim="streak" ${st.canClaim ? "" : "disabled"}>${st.canClaim ? `Récupérer J${st.next} · ${rewardText(STREAK[st.next - 1])}` : "Reviens demain"}</button>
+  </section>
+  <section class="panel daily">
+    <div class="eyebrow">Missions du jour · <span>nouvelles dans ${left(nextDay)}</span></div>
+    <div class="missions">${ms.map((m) => missionRow(m, "mission", m.id)).join("")}</div>
+    ${bonusRow("Les 3 réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}
+  </section>
+  <section class="panel daily">
+    <div class="eyebrow">Missions de la semaine · <span>nouvelles dans ${left(nextWeek)}</span></div>
+    <div class="missions">${ws.map((m) => missionRow(m, "weekly", m.id)).join("")}</div>
+    ${bonusRow("Les 3 réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}
+  </section>
+  ${(save.first || {}).bonus ? "" : `<section class="panel daily">
+    <div class="eyebrow">Premiers pas · <span>${fs.filter((f) => f.claimed).length}/${fs.length}</span></div>
+    <div class="missions">${fs.map((f) => missionRow(f, "first", f.id)).join("")}</div>
+    ${bonusRow("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}
+  </section>`}
+  <section class="panel daily">
+    <div class="eyebrow">Succès · <span>${doneAch}/${as.length}</span></div>
+    <div class="missions">${as.map((a) => missionRow(a, "ach", a.id)).join("")}</div>
+  </section>`;
+}
 function draw() {
   header();
   document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === view));
   if (opening) return drawOpening();
-  $("view").innerHTML = view === "pred" ? viewPred() : view === "admin" ? viewAdmin() : view === "album" ? viewAlbum() : view === "market" ? viewMarket() : view === "community" ? viewCommunity() : viewBoosters();
+  $("view").innerHTML = view === "missions" ? viewMissions() : view === "pred" ? viewPred() : view === "admin" ? viewAdmin() : view === "album" ? viewAlbum() : view === "market" ? viewMarket() : view === "community" ? viewCommunity() : viewBoosters();
   fillNames();
 }
 
@@ -1947,16 +2145,17 @@ function drawOpening() {
   </section>`;
 }
 let busy = false;
-async function startOpening(paid) {
+async function startOpening(paid, packId) {
   if (busy) return;
   busy = true;
   let r;
   try {
-    if (SRV) r = await srv("open", { pack: save.pack, paid });
-    else { r = takeAndOpenS(save, save.pack, paid, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
+    const pack = packId || save.pack;
+    if (SRV) r = await srv("open", { pack, paid });
+    else { r = takeAndOpenS(save, pack, paid, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
   } catch (e) { toast(e.message); header(); return; }
   finally { busy = false; }
-  const pk = packOf(r.pack);
+  const pk = r.pack === "jour" ? dailyPackOf() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
   view = "boosters";
   opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine };
@@ -2110,10 +2309,10 @@ async function recycle() {
 
 async function claim(kind, id) {
   try {
-    const r = SRV ? await srv("claim", { kind, id }) : kind === "streak" ? claimStreakS(save) : claimMissionS(save, id);
+    const r = SRV ? await srv("claim", { kind, id }) : claimAnyS(save, kind, id);
     if (!r) return;
     persist(); draw();
-    toast(kind === "streak" ? `Série J${r.day} : +${rewardText(r.reward)}` : `Mission réussie : +${rewardText(r.reward)}`);
+    toast(kind === "streak" ? `Série J${r.day} : +${rewardText(r.reward)}` : `Récupéré : +${rewardText(r.reward)}`);
   } catch (e) { toast(e.message); }
 }
 
@@ -2155,11 +2354,7 @@ document.addEventListener("click", (e) => {
   if (tab) { if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord."); opening = null; view = tab.dataset.view || tab.dataset.go; draw(); return scrollTo({ top: 0 }); }
   const pkBtn = t.closest("[data-pack]");
   if (pkBtn) { save.pack = pkBtn.dataset.pack; persist(); return draw(); }
-  const mBtn = t.closest("[data-mission]");
-  if (mBtn) {
-    claim("mission", mBtn.dataset.mission);
-    return;
-  }
+  const cBtn2 = t.closest("[data-claim]"); if (cBtn2) { cBtn2.disabled = true; return claim(cBtn2.dataset.claim, cBtn2.dataset.id); }
   const vBtn = t.closest("[data-vote]"); if (vBtn) return vote(vBtn.dataset.vote, +vBtn.dataset.idx);
   const pqBtn = t.closest("[data-pq]");
   if (pqBtn) {
@@ -2187,7 +2382,7 @@ document.addEventListener("click", (e) => {
   if (act === "recycle") return recycle();
   if (act === "craft") return craft();
   if (act === "wish-all") return wishAllMissing();
-  if (act === "streak") return claim("streak");
+  if (act === "open-day") return startOpening(false, "jour");
   if (act === "close" || t.id === "overlay") { $("overlay").hidden = true; return; }
   if (t.closest("#pack")) return tearPack();
   if (t.closest("#revealBtn")) return advance();

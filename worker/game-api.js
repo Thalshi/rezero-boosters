@@ -82,7 +82,7 @@ export async function gameRoute(req, env, user, path) {
   try {
     if (path === "/api/game/state") {
       const imported = await ensurePlayer(env, user, body.guest);
-      const r = await mutate(env, user.id, () => ({}));
+      const r = await mutate(env, user.id, (s) => { s.linked = true; return {}; });
       return json({ state: r.state, imported });
     }
     await ensurePlayer(env, user, null);
@@ -117,7 +117,7 @@ export async function gameRoute(req, env, user, path) {
     }
     if (path === "/api/game/claim") {
       const r = await mutate(env, user.id, (s, now) => {
-        const o = body.kind === "streak" ? G.claimStreakS(s, now) : G.claimMissionS(s, body.id, now);
+        const o = G.claimAnyS(s, body.kind, body.id, now);
         return o || { abort: true, error: "Rien à récupérer." };
       });
       return r.error ? fail(400, r.error) : json(r);
@@ -132,7 +132,7 @@ export async function gameRoute(req, env, user, path) {
         for (const q of fresh) s.predPaid.push(q.id);
         s.chakra += fresh.length * 50;
         const d = G.ensureDailyS(s, now);
-        if (Object.keys(votes).length && !d.prog.predict) d.prog.predict = 1;
+        if (Object.keys(votes).length && !d.prog.predict) G.trackS(s, "predict", 1, now);
         return { won: fresh.length, value: fresh.length * 50 };
       });
       return json(r);
@@ -173,7 +173,7 @@ export async function gameRoute(req, env, user, path) {
         return {};
       });
       if (r.error) { await writeDoc(env, "market", body.lid, l); return fail(400, r.error); }
-      await mutate(env, l.seller, (s) => { s.chakra += l.price; s.sales = (s.sales || 0) + 1; return {}; }).catch(() => {});
+      await mutate(env, l.seller, (s, now) => { s.chakra += l.price; s.sales = (s.sales || 0) + 1; G.trackS(s, "sold", 1, now); return {}; }).catch(() => {});
       return json({ ...r, card: l.card, price: l.price });
     }
     if (path === "/api/game/market/cancel") {
@@ -229,11 +229,11 @@ export async function gameRoute(req, env, user, path) {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
         for (const it of t.want) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
         for (const it of t.give) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now);
-        s.chakra += t.chakra; s.trades = (s.trades || 0) + 1;
+        s.chakra += t.chakra; s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now);
         return {};
       });
       if (r.error) { await writeDoc(env, "trades", body.tid, t); return fail(400, r.error); }
-      await mutate(env, t.from, (s, now) => { for (const it of t.want) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.trades = (s.trades || 0) + 1; return {}; });
+      await mutate(env, t.from, (s, now) => { for (const it of t.want) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now); return {}; });
       return json(r);
     }
 

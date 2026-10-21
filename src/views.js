@@ -147,7 +147,7 @@ function drawNotifs() {
 let heroIdx = 0, packTab = "free", heroT = null;
 function heroSlides() {
   const out = [];
-  const dp = dailyPackOf(), done = save.dailyPack === dayKey();
+  const dp = dailyPack(), done = save.dailyPack === dayKey() || dp.closed;
   out.push({ cls: "", eb: "Pack du jour · gratuit", title: dp.name.replace("Pack du jour · ", ""), txt: "Un booster offert chaque jour, thème différent, Épique garantie.",
     btns: `<button class="btn gold big" type="button" data-act="open-day" ${done ? "disabled" : ""}>${done ? "Reviens demain" : "Ouvrir le pack du jour"}</button><button class="btn big" type="button" data-act="see-pack" data-p="jour">Voir le booster</button>`,
     pool: poolFor(dp, CONFIG, ME) });
@@ -183,7 +183,7 @@ function qsHTML() {
   </div>`;
 }
 function packsForTab() {
-  if (packTab === "day") return [dailyPackOf(), ...packsNow().filter((p) => p.limited)];
+  if (packTab === "day") return [dailyPack(), ...packsNow().filter((p) => p.limited)];
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
@@ -195,11 +195,15 @@ function selPack() {
   return list.find((p) => p.id === id) || list[0];
 }
 function boosterZone() {
-  const list = packsForTab(), pk = selPack(), pool = pk.daily ? poolFor(pk, CONFIG, ME) : poolOf(pk), k = pk.boost || 1;
+  const list = packsForTab(), pk = selPack(), pool = poolOf(pk), k = pk.boost || 1;
   const dayDone = save.dailyPack === dayKey(), shop = packTab === "shop";
-  const label = (p) => p.daily ? (dayDone ? "Demain" : "Gratuit") : p.limited ? "Limité" : shop ? `${PRICE} ◆` : "Gratuit";
+  // booster thématique pas encore ouvert : arrive avec un prochain épisode
+  const opensAt = (p) => packOpensAt(p, CONFIG, ME), soon = (p) => (opensAt(p) ? `Épisode ${opensAt(p)}` : "Bientôt");
+  const label = (p) => !packOpen(p) ? soon(p) : p.daily ? (dayDone ? "Demain" : "Gratuit") : p.limited ? "Limité" : shop ? `${PRICE} ◆` : "Gratuit";
+  const fill = packOpen(pk) ? mixFillOf(pk, CONFIG, ME) : [];
   let btn;
-  if (pk.daily) btn = `<button class="bigopen" type="button" data-act="open-day" ${dayDone ? "disabled" : ""}><b>Ouvrir</b><span>${dayDone ? "Déjà ouvert · reviens demain" : "Gratuit · 1 par jour"}</span></button>`;
+  if (!packOpen(pk)) btn = `<button class="bigopen" type="button" disabled><b>${pk.daily ? "Indisponible" : "Bientôt"}</b><span>${pk.daily ? "Aucun booster n'est encore ouvert" : opensAt(pk) ? `Arrive avec l'épisode ${opensAt(pk)}` : "Pas encore assez de persos"}</span></button>`;
+  else if (pk.daily) btn = `<button class="bigopen" type="button" data-act="open-day" ${dayDone ? "disabled" : ""}><b>Ouvrir</b><span>${dayDone ? "Déjà ouvert · reviens demain" : "Gratuit · 1 par jour"}</span></button>`;
   else if (shop) btn = `<button class="bigopen acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}><b>Acheter</b><span>${PRICE} ◆ · tu as ${fmtN(save.chakra)} ◆</span></button>`;
   else btn = `<button class="bigopen" type="button" data-act="open-pack" data-p="${pk.id}" ${save.free ? "" : "disabled"}><b>Ouvrir</b><span>${save.free ? `Gratuit · ${save.free} restant${save.free > 1 ? "s" : ""}` : `Prochain dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}`}</span></button>`;
   return `<section class="sec" id="boosters">
@@ -213,7 +217,8 @@ function boosterZone() {
           <div><b style="color:var(--acc)">${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
-        <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = pk.daily && r === "r" ? 1 : packChance(r, k); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
+        <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
+        ${fill.length ? `<p class="note">Pas encore de ${fill.map((r) => RAR[r].label).join(", ")} dans ce booster : ces raretés viennent du Mix, avec les mêmes chances.</p>` : ""}
         ${btn}
       </div>
     </div>

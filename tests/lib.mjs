@@ -100,5 +100,13 @@ export function reporter(title) {
   console.log(`\n===== ${title}`);
   return out;
 }
+// Donne des boosters gratuits ou de l'essence à des joueurs de test (base locale uniquement),
+// pour les scénarios qui en demandent plus que la réserve normale.
+export function grant(srv, players, { free, chakra } = {}) {
+  for (const p of [].concat(players)) {
+    const sets = [free != null && `'$.free', ${+free}`, chakra != null && `'$.chakra', ${+chakra}`].filter(Boolean).join(", ");
+    srv.sql(`UPDATE players SET data = json_set(data, ${sets}) WHERE uid = '${p.id}'`);
+  }
+}
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const total = (s) => Object.values(s.owned || {}).reduce((a, o) => a + o.n + o.gold, 0);

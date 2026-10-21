@@ -115,17 +115,26 @@ const PACKS = [
   { id: "coffre",  name: "Coffre hextech", sub: "Skins des membres du QG",            kanji: "匠", color: "#b04ce0", fac: ["irl"], skins: true },
 ];
 const RAR = {
-  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 2 },
-  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 4 },
-  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 10 },
-  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 30 },
-  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 80 },
-  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 250 },
+  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 1 },
+  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 2 },
+  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 5 },
+  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 15 },
+  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 40 },
+  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 100 },
 };
 const RANKS = ["c", "pc", "r", "e", "l", "m"];
 const SLOT = { c: 52, pc: 27, r: 14, e: 5, l: 1.6, m: 0.4 };   // cartes 1 à 4
 const LAST = { r: 80, e: 15, l: 4, m: 1 };                        // 5e carte : Rare ou mieux
-const PACK = 5, FREE_MAX = 10, REGEN = 20 * 60e3, PRICE = 60, GOLD_EVERY = 10, MYTHIC_PITY = 120, GOLD_CHANCE = 0.02;
+// une constante par ligne : build.py exporte chaque nom vers le serveur
+const PACK = 5;
+const FREE_MAX = 3;                    // réserve de boosters gratuits
+const REGEN = 2 * 3600e3;              // un booster gratuit de plus toutes les 2 h
+const PRICE = 100;                     // prix d'un booster en boutique (◆)
+const GOLD_EVERY = 10;
+const MYTHIC_PITY = 120;
+const GOLD_CHANCE = 0.02;
+const THEME_MIN = 8;                   // persos débloqués avant qu'un booster thématique s'ouvre
+const DAILY_LAST = { e: 85, l: 12, m: 3 }; // 5e carte du pack du jour : Épique ou mieux
 const STREAK = [{ boosters: 1 }, { chakra: 50 }, { boosters: 1 }, { chakra: 100 }, { boosters: 2 }, { chakra: 150 }, { boosters: 3, chakra: 300 }];
 const MISSIONS = [
   { id: "open3",  label: "Ouvre 3 boosters",                     key: "open",    goal: 3, reward: { chakra: 40 } },
@@ -143,7 +152,8 @@ const MISSIONS = [
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
 const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "sultran", "shiro", "mahed", "reichi", "sasori", "iouaf", "sakuto", "rayzo", "teo"];
-const EP_MAX = 12, HIDDEN = 99;
+const EP_MAX = 12;
+const HIDDEN = 99;
 const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });
 
 // ===== Skins des persos IRL (gammes façon LoL, une par rareté) =====
@@ -345,12 +355,21 @@ function claimableCountS(s, now = Date.now()) {
   if (!(s.first || {}).bonus && firstStepsS(s).every((f) => f.claimed)) n++;
   return n;
 }
-// pack du jour : gratuit une fois par jour, thème qui tourne, Épique ou mieux garantie
+// pack du jour : gratuit une fois par jour, Épique ou mieux garantie. Le thème tourne dans l'ordre
+// parmi les boosters ouverts à l'épisode en cours (jamais deux jours de suite le même s'il y en a deux ou plus).
+// Si le thème du jour n'est pas encore ouvert pour ce joueur, son pack du jour est un Mix.
 const DAY_THEMES = ["mix", "vilains", "monde", "bande", "coffre"];
-function dailyPackOf(now = Date.now()) {
-  const k = dayKey(now); let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  const base = PACKS.find((p) => p.id === DAY_THEMES[h % DAY_THEMES.length]);
-  return { ...base, id: "jour", base: base.id, name: `Pack du jour · ${base.name}`, sub: "Gratuit chaque jour · Épique ou mieux garantie", daily: true };
+const dayNumber = (now = Date.now()) => Math.round(Date.parse(dayKey(now) + "T12:00:00Z") / 86400e3);
+function dailyThemeOf(now = Date.now(), cfg = DEFAULT_CONFIG()) {
+  const open = DAY_THEMES.filter((id) => dailyOpenFor(PACKS.find((p) => p.id === id), cfg, null));
+  return open.length ? open[dayNumber(now) % open.length] : null;
+}
+function dailyPackOf(now = Date.now(), cfg = DEFAULT_CONFIG(), uid = null) {
+  const id = dailyThemeOf(now, cfg), mix = PACKS.find((p) => p.id === "mix");
+  let base = id ? PACKS.find((p) => p.id === id) : mix;
+  if (!dailyOpenFor(base, cfg, uid)) base = mix;
+  return { ...base, id: "jour", base: base.id, name: `Pack du jour · ${base.name}`, sub: "Gratuit chaque jour · Épique ou mieux garantie", daily: true,
+    last: DAILY_LAST, closed: !dailyOpenFor(base, cfg, uid) };
 }
 function missionsTodayS(s, now = Date.now()) {
   const d = ensureDailyS(s, now);
@@ -390,6 +409,29 @@ const unlockedFor = (cfg, who, uid) => epOfCfg(cfg, who) <= progressOfCfg(cfg, u
 const canPackFor = (cfg, c, uid) => unlockedFor(cfg, c.who, uid);
 // les skins ne sortent que du coffre hextech (et de la combinaison de doublons), comme dans LoL
 const poolFor = (pk, cfg, uid) => (pk.skins ? SKINS : CARDS).filter((c) => (!pk.fac || pk.fac.includes(PEOPLE[c.who].fac)) && canPackFor(cfg, c, uid));
+// le Mix d'un joueur : toutes ses cartes débloquées (tous ses skins pour le coffre). Il complète un thème
+// qui n'a pas encore la rareté tirée, pour que les chances affichées restent exactes.
+const mixPoolFor = (pk, cfg, uid) => (pk.skins ? SKINS : CARDS).filter((c) => canPackFor(cfg, c, uid));
+const themeSize = (pool) => new Set(pool.map((c) => c.who)).size;
+// Un booster s'ouvre si son Mix a au moins une Commune (aucune carte ne monte donc jamais en rareté)
+// et, pour un booster thématique, si son thème a au moins THEME_MIN persos débloqués.
+function packOpenFor(pk, cfg, uid) {
+  const pool = poolFor(pk, cfg, uid);
+  if (!pool.length || !mixPoolFor(pk, cfg, uid).some((c) => c.rar === "c")) return false;
+  return !pk.fac || themeSize(pool) >= THEME_MIN;
+}
+// le pack du jour doit en plus pouvoir tenir sa promesse : au moins une carte Épique ou mieux
+const dailyOpenFor = (pk, cfg, uid) => packOpenFor(pk, cfg, uid) && mixPoolFor(pk, cfg, uid).some((c) => RANKS.indexOf(c.rar) >= 3);
+// premier épisode où le booster s'ouvre pour ce joueur (null : aucun épisode prévu)
+function packOpensAt(pk, cfg, uid) {
+  for (let ep = progressOfCfg(cfg, uid) + 1; ep <= EP_MAX; ep++) {
+    const c = { ...cfg, def: ep, progress: uid ? { ...cfg.progress, [uid]: ep } : cfg.progress };
+    if (packOpenFor(pk, c, uid)) return ep;
+  }
+  return null;
+}
+// raretés absentes du thème, complétées par le Mix (à afficher au joueur)
+const mixFillOf = (pk, cfg, uid) => { const pool = poolFor(pk, cfg, uid); return pk.fac ? RANKS.filter((r) => !pool.some((c) => c.rar === r)) : []; };
 function configFrom(data) {
   const d = DEFAULT_CONFIG();
   return { ep: { ...d.ep, ...(data?.ep || {}) }, progress: { ...(data?.progress || {}) }, def: data?.def ?? d.def, extra: JSON.parse(JSON.stringify(data?.extra || {})) };
@@ -400,16 +442,16 @@ function rollWith(table, rng) {
   for (const [k, p] of Object.entries(table)) if ((r -= p) < 0) return k;
   return Object.keys(table)[0];
 }
-function pickWith(rar, pool, rng) {
-  // si le booster n'a pas cette rareté, on prend la plus proche (d'abord en dessous)
-  const i = RANKS.indexOf(rar);
-  for (let d = 0; d < RANKS.length; d++) {
-    for (const j of [i - d, i + d]) {
-      const list = pool.filter((c) => c.rar === RANKS[j]);
-      if (list.length) return list[Math.floor(rng() * list.length)];
+// La rareté est tirée d'abord. Le perso vient du thème ; si le thème n'a pas cette rareté, du Mix (même rareté) ;
+// si le Mix non plus, de la rareté inférieure la plus proche. Jamais d'une rareté plus haute.
+function pickWith(rar, pool, rng, mix = pool) {
+  for (let j = RANKS.indexOf(rar); j >= 0; j--) {
+    for (const list of [pool, mix]) {
+      const l = list.filter((c) => c.rar === RANKS[j]);
+      if (l.length) return l[Math.floor(rng() * l.length)];
     }
   }
-  return pool[0];
+  return null;
 }
 function addCardS(s, id, gold, now = Date.now()) {
   const o = { ...ownOf(s, id) };
@@ -427,15 +469,18 @@ function removeCardS(s, id, gold, n = 1) {
   return true;
 }
 // Ouvre un booster dans l'état `s`. Renvoie les cartes tirées, ou null si le booster n'a aucune carte débloquée.
-function openPackS(s, pk, pool, rng, now = Date.now()) {
+function openPackS(s, pk, pool, rng, now = Date.now(), mix = pool) {
   if (!pool.length) return null;
   const k = pk.boost || 1;
   const divine = rng() < DIVINE_CHANCE;
   const rars = [];
   for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : pk.last || LAST, k), rng));
-  s.sinceMythic++; s.sinceGold++;
-  if (s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
-  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng), gold: rng() < GOLD_CHANCE }));
+  // le pity ne compte que les boosters qui peuvent donner une Mythique (sinon il forcerait une carte impossible)
+  const canMythic = pool.some((c) => c.rar === "m") || mix.some((c) => c.rar === "m");
+  if (canMythic) s.sinceMythic++;
+  s.sinceGold++;
+  if (canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
+  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix), gold: rng() < GOLD_CHANCE }));
   if (cards.some((x) => x.c.rar === "m")) s.sinceMythic = 0;
   cards.sort((a, b) => RANKS.indexOf(a.c.rar) - RANKS.indexOf(b.c.rar));
   if (s.sinceGold >= GOLD_EVERY) cards[PACK - 1].gold = true;
@@ -460,24 +505,26 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   regenS(s, now);
   if (packId === "jour") {
     if (s.dailyPack === dayKey(now)) return { error: "Tu as déjà ouvert le pack du jour. Reviens demain !" };
-    const pk = dailyPackOf(now), pool = poolFor(pk, cfg, uid);
-    if (!pool.length) return { error: "Aucun perso du pack du jour n'est encore débloqué pour toi." };
+    const pk = dailyPackOf(now, cfg, uid);
+    if (pk.closed) return { error: "Pas de pack du jour pour l'instant : aucun booster n'est encore ouvert." };
     s.dailyPack = dayKey(now);
-    const r = openPackS(s, { ...pk, last: { e: 85, l: 12, m: 3 } }, pool, rng, now);
+    const r = openPackS(s, pk, poolFor(pk, cfg, uid), rng, now, mixPoolFor(pk, cfg, uid));
     trackS(s, "day", 1, now);
     if (pk.skins) trackS(s, "coffre", 1, now);
     return { pack: "jour", ...r };
   }
   const pk = packOfAt(packId, now), pool = poolFor(pk, cfg, uid);
-  if (!pool.length) return { error: "Aucun perso de ce booster n'est encore débloqué pour toi. Choisis un autre booster." };
+  // les éditions limitées ne s'achètent pas : seulement avec un booster gratuit
+  if (paid && pk.limited) return { error: `${pk.name} ne s'achète pas : ouvre-le avec un booster gratuit.` };
+  if (!packOpenFor(pk, cfg, uid)) { const ep = packOpensAt(pk, cfg, uid); return { error: ep ? `Ce booster arrive avec l'épisode ${ep}. Choisis un autre booster.` : "Ce booster n'est pas encore disponible. Choisis un autre booster." }; }
   if (paid) { if (s.chakra < PRICE) return { error: `Il te faut ${PRICE} ◆ (tu en as ${s.chakra}).` }; s.chakra -= PRICE; }
   else { if (!s.free) return { error: "Plus de booster gratuit pour l'instant." }; if (s.free === FREE_MAX) s.freeTs = now; s.free--; }
-  const r = openPackS(s, pk, pool, rng, now);
+  const r = openPackS(s, pk, pool, rng, now, mixPoolFor(pk, cfg, uid));
   if (pk.skins) trackS(s, "coffre", 1, now);
   return { pack: pk.id, ...r };
 }
-function packChance(rar, k = 1) {
-  const a = boosted(SLOT, k), b = boosted(LAST, k);
+function packChance(rar, k = 1, last = LAST) {
+  const a = boosted(SLOT, k), b = boosted(last, k);
   const p1 = (a[rar] || 0) / Object.values(a).reduce((x, y) => x + y, 0);
   const p5 = (b[rar] || 0) / Object.values(b).reduce((x, y) => x + y, 0);
   return 1 - Math.pow(1 - p1, PACK - 1) * (1 - p5);
@@ -511,7 +558,8 @@ function craftS(s, cfg, uid, rng, now = Date.now()) {
   const dupes = craftableDupes(s);
   if (dupes.length < CRAFT_COST) return { error: `Il te faut ${CRAFT_COST} doublons (tu en as ${dupes.length}).` };
   const pool = SKINS.filter((c) => canPackFor(cfg, c, uid));
-  if (!pool.length) return { error: "Aucun skin n'est encore débloqué pour toi." };
+  // une Commune au moins : le tirage ne remonte jamais en rareté, il trouve donc toujours un skin
+  if (!pool.some((c) => c.rar === "c")) return { error: "Aucun skin n'est encore débloqué pour toi." };
   const used = dupes.slice(0, CRAFT_COST);
   for (const c of used) removeCardS(s, c.id, false);
   const c = pickWith(rollWith(SLOT, rng), pool, rng);
@@ -543,7 +591,8 @@ function tradeFair(give, want, chakraGive = 0) {
 // Rien de ce qu'elle contient ne peut être vérifié : on repart d'un compte neuf et on ne reprend
 // que quelques cartes peu précieuses. Boosters, essence, compteurs, cartes dorées et récompenses
 // déjà réclamées ne sont jamais repris.
-const IMPORT_RARITIES = ["c", "pc"], IMPORT_MAX_CARDS = 50;
+const IMPORT_RARITIES = ["c", "pc"];
+const IMPORT_MAX_CARDS = 50;
 function importSaveS(cand, now = Date.now()) {
   const src = cand && typeof cand === "object" ? cand : {};
   const owned = src.owned && typeof src.owned === "object" ? src.owned : {};
@@ -567,4 +616,4 @@ function importSaveS(cand, now = Date.now()) {
 // Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
 const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, importSaveS, predVoteOk };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk };

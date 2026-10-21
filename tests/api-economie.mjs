@@ -1,5 +1,6 @@
 // Économie et concurrence : boosters, marché, échanges, comptoir, notifications (côté serveur).
-import { startServer, player, reporter, IDS } from "./lib.mjs";
+import { startServer, player, reporter, IDS, grant } from "./lib.mjs";
+import * as G from "../worker/game.js";
 
 const srv = await startServer({ port: +(process.env.PORT || 8802) });
 const t = reporter("API · économie et multijoueur");
@@ -11,14 +12,18 @@ try {
   const opens = await Promise.all(Array.from({ length: 15 }, () => T.api("open", { pack: "mix" })));
   let s = (await T.api("state")).state;
   const ok = opens.filter((o) => o.status === 200).length;
-  t.check("ouvertures simultanées : jamais plus que les boosters gratuits", ok <= 10 && s.opened === ok && s.free === 10 - ok, { réussies: ok, refusées: opens.filter((o) => o.status !== 200).map((o) => o.status) });
+  t.check("ouvertures simultanées : jamais plus que les boosters gratuits", ok <= G.FREE_MAX && s.opened === ok && s.free === G.FREE_MAX - ok, { réussies: ok, refusées: opens.filter((o) => o.status !== 200).map((o) => o.status) });
   if (opens.some((o) => o.status === 503)) t.note("Comportement actuel connu : sous forte concurrence, certaines ouvertures reçoivent 503 « serveur occupé » (aucune duplication).");
   const o1 = await A.api("open", { pack: "mix" });
-  t.check("ouverture : 5 cartes, essence et gratuits cohérents", o1.status === 200 && o1.cards.length === 5 && o1.state.free === 9);
+  t.check("ouverture : 5 cartes, essence et gratuits cohérents", o1.status === 200 && o1.cards.length === 5 && o1.state.free === G.FREE_MAX - 1);
   const Pb = await player(srv.base, IDS.p2, "Payeur"); await Pb.api("state");
   const paidRuns = [];
   for (let i = 0; i < 3; i++) paidRuns.push((await Pb.api("open", { pack: "mix", paid: true })).status);
-  t.check("boosters payants : 2 achetés avec 120 ◆, le 3e refusé", paidRuns.join() === "200,200,400", paidRuns);
+  const canBuy = Math.floor(120 / G.PRICE), expected = [...Array(canBuy).fill(200), 400].slice(0, 3).join();
+  t.check(`boosters payants : ${canBuy} acheté(s) avec 120 ◆ à ${G.PRICE} ◆, le suivant refusé`, paidRuns.slice(0, canBuy + 1).join() === expected, paidRuns);
+  t.check("Saison 1 (édition limitée) : achat refusé par le serveur", (await Pb.api("open", { pack: "saison1", paid: true })).status === 400);
+  // le marché s'ouvre après 10 boosters : on donne des boosters aux joueurs de test
+  grant(srv, [A, R, T], { free: 30 });
   for (let i = 0; i < 10; i++) { await A.api("open", { pack: "mix" }); await R.api("open", { pack: "mix" }); }
   for (let i = 0; i < 10 - ok; i++) await T.api("open", { pack: "mix" });
 

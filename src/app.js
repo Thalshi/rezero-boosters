@@ -331,6 +331,8 @@ const limitedOn = () => limitedOnAt(Date.now());
 const packsNow = () => packsAt(Date.now());
 const packOf = (id) => packOfAt(id, Date.now());
 const poolOf = (pk) => poolFor(pk, CONFIG, ME);
+const dailyPack = () => dailyPackOf(Date.now(), CONFIG, ME);
+const packOpen = (pk) => (pk.daily ? !pk.closed : packOpenFor(pk, CONFIG, ME));
 
 
 // ===== Multijoueur : marché, échanges, profils, envies, classement =====
@@ -448,7 +450,7 @@ async function startOpening(paid, packId) {
     else { r = takeAndOpenS(save, pack, paid, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
   } catch (e) { toast(e.message); header(); return; }
   finally { busy = false; }
-  const pk = r.pack === "jour" ? dailyPackOf() : packOf(r.pack);
+  const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
   opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine };
   closeMenu(); $("overlay").hidden = true;

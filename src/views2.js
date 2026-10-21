@@ -427,7 +427,7 @@ function openBonus(uid) {
 
 // ===== Liste des persos d'un booster =====
 function openPool(id) {
-  const pk = id === "jour" ? dailyPackOf() : packOf(id), pool = id === "jour" ? poolFor(pk, CONFIG, ME) : poolOf(pk);
+  const pk = id === "jour" ? dailyPack() : packOf(id), pool = poolOf(pk);
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Persos du booster" style="max-width:760px"><div class="sheet-h"><h2>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name} · ${pool.length} cartes</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b"><div class="cgrid">${pool.sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank).map((c) => cardFor(c, { click: true })).join("")}</div></div></div>`;
   $("overlay").hidden = false;

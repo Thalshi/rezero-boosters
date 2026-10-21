@@ -173,7 +173,7 @@ async function addQuestion(form) {
 
 
 // ===== Épisodes et rôles : Billy (éditeur de l'app) décide qui peut packer quoi =====
-let CONFIG = configFrom(null), IS_ADMIN = false, configT = null;
+let CONFIG = configFrom(null), IS_ADMIN = false, IS_DEV = false, configT = null;
 const epOf = (who) => epOfCfg(CONFIG, who);
 const progressOf = (uid) => progressOfCfg(CONFIG, uid);
 const unlockedChar = (who, uid = ME) => unlockedFor(CONFIG, who, uid);
@@ -217,6 +217,7 @@ async function connect() {
     if (!db || !id) return;
     DB = db; USER = user; ME = id;
     IS_ADMIN = !!(await user.canEdit?.());
+    IS_DEV = !!(window.DISCORD_LOGIN && (await window.discordMe())?.dev);
     canShare = (await user.can?.("data.write")) !== false;
     if (window.DISCORD_LOGIN) {
       const guest = save.opened ? save : null;

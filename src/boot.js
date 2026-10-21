@@ -47,6 +47,7 @@ document.addEventListener("click", (e) => {
   if (act === "stage-back") { if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }
+  if (act === "dev-refresh") { devData.stats = null; devData.audit = null; draw(); return loadDev(true); }
   if (act === "recycle") return recycle();
   if (act === "craft") return craft();
   if (act === "wish-all") return wishAllMissing();

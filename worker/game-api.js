@@ -105,6 +105,26 @@ async function auditPlayers(env) {
   return { checked: results.length, flagged, undatedVotes: undated, note: "Lecture seule : rien n'a été modifié. Les seuils sont larges, un signalement n'est pas une preuve de triche." };
 }
 
+// État du serveur pour la vue dev (lecture seule)
+async function devStats(env) {
+  const now = Date.now(), one = async (sql, ...a) => (await env.DB.prepare(sql).bind(...a).first()) || {};
+  const [players, active, users, members, sessions, chat, notifs, market, trades, eco] = await Promise.all([
+    one("SELECT COUNT(*) AS n FROM players"),
+    one("SELECT COUNT(*) AS n FROM players WHERE updated > ?", now - 86400e3),
+    one("SELECT COUNT(*) AS n FROM users"),
+    one("SELECT COUNT(*) AS n FROM users WHERE member = 1"),
+    one("SELECT COUNT(*) AS n FROM sessions WHERE expires > ?", now),
+    one("SELECT COUNT(*) AS n, MAX(ts) AS last FROM chat WHERE deleted = 0"),
+    one("SELECT COUNT(*) AS n FROM notifs"),
+    one("SELECT SUM(json_extract(data, '$.status') = 'open') AS open, SUM(json_extract(data, '$.status') = 'sold') AS sold FROM docs WHERE coll = 'market'"),
+    one("SELECT SUM(json_extract(data, '$.status') = 'open') AS open, COUNT(*) AS n FROM docs WHERE coll = 'trades'"),
+    one("SELECT SUM(json_extract(data, '$.chakra')) AS chakra, SUM(json_extract(data, '$.opened')) AS opened, SUM(json_extract(data, '$.free')) AS free FROM players"),
+  ]);
+  const colls = (await env.DB.prepare("SELECT coll, COUNT(*) AS n FROM docs GROUP BY coll ORDER BY n DESC LIMIT 20").all()).results;
+  return { now, players: players.n, activeToday: active.n, users: users.n, members: members.n, sessions: sessions.n,
+    chat: chat.n, lastChat: chat.last, notifs: notifs.n, market, trades, economy: eco, collections: colls };
+}
+
 // ---------- chat et notifications ----------
 const cardName = (id) => { const c = G.CARD_BY_ID[id]; return c ? `${G.PEOPLE[c.who].name} · ${c.title}` : "une carte"; };
 async function sayChat(env, uid, kind, text, card = null, gold = false) {
@@ -215,9 +235,13 @@ export async function gameRoute(req, env, user, path) {
   try {
     const chatRes = await chatRoute(env, user, path, body);
     if (chatRes) return chatRes;
-    if (path === "/api/game/admin/audit") {
-      if (!user.admin) return fail(403, "Réservé à l'admin.");
+    if (path === "/api/game/admin/audit" || path === "/api/game/dev/audit") {
+      if (!user.dev) return fail(403, "Réservé au dev.");
       return json(await auditPlayers(env));
+    }
+    if (path === "/api/game/dev/stats") {
+      if (!user.dev) return fail(403, "Réservé au dev.");
+      return json(await devStats(env));
     }
     if (path === "/api/game/state") {
       const imported = await ensurePlayer(env, user, body.guest);

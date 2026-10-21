@@ -374,7 +374,6 @@ async function sendBug() {
 let bugs = null;
 function viewAdmin() {
   if (!IS_ADMIN) return `<div class="wrap page">${empty("Cette page est réservée à Billy.")}</div>`;
-  if (bugs === null && DB) { bugs = []; DB.collection("bugs").orderBy("t", "desc").limit(50).get().then((s) => { bugs = s.docs.map((d) => ({ id: d.id, ...d.data() })); if (view === "admin") draw(); }).catch(() => {}); }
   const ids = [...new Set([...shared.players.map((p) => p.uid), ...Object.keys(CONFIG.progress), ...Object.keys(CONFIG.extra)])];
   const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
   return `<div class="wrap page" style="max-width:900px">${head("Admin · 管理", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
@@ -384,6 +383,37 @@ function viewAdmin() {
         <select aria-label="Épisode atteint" data-prog="${uid}"><option value="" ${CONFIG.progress[uid] == null ? "selected" : ""}>Par défaut (${epLabel(CONFIG.def)})</option>${epOptions(CONFIG.progress[uid])}</select>
         <button class="btn sm" type="button" data-bonus="${uid}">Bonus · ${(CONFIG.extra[uid] || []).length}</button></div>`).join("")}</div>` : `<p class="note">Les joueurs apparaissent ici dès qu'ils ouvrent l'app.</p>`}</section>
     <section class="sec"><h2>Persos par épisode</h2><div class="adm-list">${chars.map(([k, p]) => `<div class="adm-row"><span class="adm-name"><b>${esc(p.name)}${k === "monoco2" ? " (singe)" : ""}</b><span>${FACTIONS[p.fac].label}</span></span><select aria-label="Épisode de ${esc(p.name)}" data-ep="${k}">${epOptions(epOf(k), true)}</select></div>`).join("")}</div></section>
+  </div>`;
+}
+// ===== Dev : outils techniques (Reichi) =====
+const devData = { stats: null, audit: null, loading: false };
+async function loadDev(force) {
+  if (!SRV || devData.loading || (devData.stats && !force)) return;
+  devData.loading = true;
+  const get = (a) => fetch("/api/game/" + a, { credentials: "same-origin" }).then((r) => r.json()).catch(() => ({ error: "Indisponible." }));
+  const [stats, audit, b] = await Promise.all([get("dev/stats"), get("dev/audit"), DB.collection("bugs").orderBy("t", "desc").limit(50).get().catch(() => null)]);
+  devData.stats = stats; devData.audit = audit; bugs = b ? b.docs.map((d) => ({ id: d.id, ...d.data() })) : [];
+  devData.loading = false;
+  if (view === "dev") draw();
+}
+function viewDev() {
+  if (!IS_DEV) return `<div class="wrap page">${empty("Cette page est réservée au développeur.")}</div>`;
+  if (!SRV) return `<div class="wrap page">${empty("La vue dev marche sur le site en ligne, connecté avec Discord.")}</div>`;
+  loadDev();
+  const st = devData.stats, au = devData.audit;
+  const kv = (label, v) => `<div><b>${v ?? "—"}</b><span>${label}</span></div>`;
+  return `<div class="wrap page" style="max-width:1000px">${head("Dev · 開発", "Outils du développeur", "Ce qui se passe sous le capot : état du serveur, contrôle des comptes et bugs signalés. Tout ici est en lecture seule.")}
+    <div class="row"><button class="btn sm" type="button" data-act="dev-refresh">↻ Actualiser</button>${st?.now ? `<span class="mono mut" style="font-size:12px">mis à jour ${ago(st.now)}</span>` : ""}</div>
+    ${!st ? `<div class="card">${empty("Chargement…")}</div>` : st.error ? `<div class="card">${empty(esc(st.error))}</div>` : `
+    <section class="sec"><h2>Serveur</h2>
+      <div class="card stat4">${kv("Joueurs", fmtN(st.players))}${kv("Actifs (24 h)", fmtN(st.activeToday))}${kv("Membres du QG connectés", `${fmtN(st.members)}/${fmtN(st.users)}`)}${kv("Sessions ouvertes", fmtN(st.sessions))}</div>
+      <div class="card stat4">${kv("Boosters ouverts", fmtN(st.economy?.opened))}${kv("Essence en circulation", fmtN(st.economy?.chakra) + " ◆")}${kv("Boosters gratuits en réserve", fmtN(st.economy?.free))}${kv("Annonces en vente", fmtN(st.market?.open))}</div>
+      <div class="card stat4">${kv("Ventes conclues", fmtN(st.market?.sold))}${kv("Échanges en cours", fmtN(st.trades?.open))}${kv("Messages au comptoir", fmtN(st.chat))}${kv("Notifications stockées", fmtN(st.notifs))}</div>
+      <div class="card"><p class="eyebrow mut">Documents par collection</p><div class="rarbars" style="margin-top:10px">${(st.collections || []).map((c) => `<div><small>${esc(c.coll)}</small><b>${fmtN(c.n)}</b></div>`).join("")}</div></div></section>`}
+    <section class="sec"><h2>Contrôle des comptes</h2><p class="note">${esc(au?.note || "Signale les comptes dont les ressources paraissent anormales. Rien n'est modifié.")}</p>
+      ${!au ? "" : au.error ? empty(esc(au.error)) : `<p class="mono mut" style="margin:0;font-size:13px">${au.checked} comptes vérifiés · ${au.flagged.length} signalé${au.flagged.length > 1 ? "s" : ""}</p>
+        ${au.flagged.length ? `<div class="rank-list">${au.flagged.map((f) => `<button class="rk" type="button" data-nav="profil" data-p="${f.uid}">${av(f.uid)}<span class="nm"><span data-uid="${f.uid}">${esc(f.name || f.uid)}</span><small class="note" style="display:block;font-weight:500">${f.why.map(esc).join(" · ")}</small></span><span class="v">${fmtN(f.chakra)} ◆<small>${f.opened} boosters · ${f.free} gratuits</small></span></button>`).join("")}</div>` : `<p class="note" style="color:var(--ok)">Aucun compte suspect.</p>`}
+        ${au.undatedVotes?.length ? `<p class="note">Anciens votes sans heure sur des questions résolues (faits avant le correctif) : ${au.undatedVotes.map((v) => `<b data-uid="${v.uid}">…</b> (${v.questions.length})`).join(", ")}.</p>` : ""}`}</section>
     <section class="sec"><h2>Bugs signalés</h2>${(bugs || []).length ? bugs.map((b) => `<div class="rv"><div class="rv-h">${av(b.uid)}${nm(b.uid)}<time>${ago(b.t)}</time></div><p>${esc(b.text)}</p></div>`).join("") : `<p class="note">Aucun signalement.</p>`}</section>
   </div>`;
 }
@@ -520,7 +550,7 @@ function pickChatCard() {
 }
 
 // ===== Rendu =====
-const VIEWS = { boosters: viewBoosters, collection: viewCollection, wiki: viewWiki, carte: viewCard, market: viewMarket, missions: viewMissions, pred: viewPred, classement: viewClassement, profil: viewProfil, raretes: viewRaretes, regles: viewRegles, infos: viewInfos, nouveautes: viewNouveautes, avis: viewAvis, admin: viewAdmin };
+const VIEWS = { boosters: viewBoosters, collection: viewCollection, wiki: viewWiki, carte: viewCard, market: viewMarket, missions: viewMissions, pred: viewPred, classement: viewClassement, profil: viewProfil, raretes: viewRaretes, regles: viewRegles, infos: viewInfos, nouveautes: viewNouveautes, avis: viewAvis, admin: viewAdmin, dev: viewDev };
 function draw() {
   header(); drawNav();
   if (menuOpen) drawMenu();

@@ -62,14 +62,17 @@ function cookie(req, name) {
   const m = (req.headers.get("cookie") || "").match(new RegExp("(?:^|;\\s*)" + name + "=([^;]+)"));
   return m ? decodeURIComponent(m[1]) : null;
 }
-const isAdmin = (env, discordId) => String(env.ADMIN_IDS || "").split(/[\s,]+/).filter(Boolean).includes(discordId);
+// admin (Billy) : le contenu du jeu ; dev (Reichi) : les outils techniques, et aussi tous les droits d'admin
+const inList = (list, discordId) => String(list || "").split(/[\s,]+/).filter(Boolean).includes(discordId);
+const isDev = (env, discordId) => inList(env.DEV_IDS, discordId);
+const isAdmin = (env, discordId) => inList(env.ADMIN_IDS, discordId) || isDev(env, discordId);
 async function currentUser(req, env) {
   const token = cookie(req, "rz_session");
   if (!token) return null;
   const row = await env.DB.prepare("SELECT s.uid, s.expires, u.name, u.avatar, u.member FROM sessions s JOIN users u ON u.id = s.uid WHERE s.token = ?").bind(token).first();
   if (!row || row.expires < Date.now()) return null;
   const discordId = row.uid.slice(1);
-  return { id: row.uid, name: row.name, avatar: row.avatar, member: !!row.member, admin: isAdmin(env, discordId) };
+  return { id: row.uid, name: row.name, avatar: row.avatar, member: !!row.member, admin: isAdmin(env, discordId), dev: isDev(env, discordId) };
 }
 const randomToken = () => [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toString(16).padStart(2, "0")).join("");
 

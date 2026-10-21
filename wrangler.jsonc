@@ -15,6 +15,7 @@
   // DISCORD_CLIENT_SECRET se règlent dans le tableau de bord ; ne pas les écraser au déploiement.
   "vars": { "DISCORD_CLIENT_ID": "1562448304791359599", "GUILD_ID": "1422236490624143481",
             // admins (onglet Admin) : identifiants Discord séparés par des virgules
-            "ADMIN_IDS": "318510456459362306,666024039776518157" },
+            "ADMIN_IDS": "318510456459362306",
+            "DEV_IDS": "666024039776518157" },
   "keep_vars": true
 }

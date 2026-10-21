@@ -16,5 +16,6 @@ Jeu de collection de cartes inspiré de Kyara, autour de *Re Zéro : LoL*, l'ani
 - `DISCORD_CLIENT_SECRET` (secret) : le secret de l'application Discord.
 - `GUILD_ID` : l'identifiant du serveur QG de Shinjuku (seuls ses membres peuvent voter, vendre et apparaître au classement).
 - `ADMIN_IDS` : les identifiants Discord des admins, séparés par des virgules (Billy…).
+- `DEV_IDS` : les identifiants Discord des développeurs (Reichi). Ils ont tous les droits d'admin, plus la vue Dev (état du serveur, contrôle des comptes, bugs signalés).
 
 Dans Discord Developer Portal → OAuth2 → Redirects : `https://<adresse du site>/auth/callback`.

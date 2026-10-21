@@ -1,5 +1,5 @@
 // ===== Interface façon Kyara : navigation, cartes, pages =====
-const ROUTES = ["boosters", "collection", "wiki", "carte", "market", "missions", "pred", "classement", "profil", "raretes", "regles", "infos", "nouveautes", "avis", "admin"];
+const ROUTES = ["dev", "boosters", "collection", "wiki", "carte", "market", "missions", "pred", "classement", "profil", "raretes", "regles", "infos", "nouveautes", "avis", "admin"];
 let param = null;
 function nav(v, p = null) {
   if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord.");
@@ -67,7 +67,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
   ["missions", "務", "Missions", toClaim()], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
-  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : []),
+  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -75,7 +75,7 @@ function drawNav() {
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>予 Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
-      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "典", "Wiki"], ["classement", "順", "Classement"], ["raretes", "稀", "Raretés"], ["regles", "規", "Règles"], ["infos", "報", "Infos"], ["nouveautes", "新", "Nouveautés"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${k}</i>${l}</a>`).join("")}</div></div>`;
+      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "典", "Wiki"], ["classement", "順", "Classement"], ["raretes", "稀", "Raretés"], ["regles", "規", "Règles"], ["infos", "報", "Infos"], ["nouveautes", "新", "Nouveautés"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${k}</i>${l}</a>`).join("")}</div></div>`;
 }
 let ACCT = null;
 async function loadAccount() {
@@ -92,7 +92,7 @@ function drawMenu() {
   const guest = !a, nameTxt = a?.name || "Invité";
   $("menu").innerHTML = `<div class="acc-card">
     <div class="acc-top"><span class="ring-av">${a?.avatar ? `<img src="${esc(a.avatar)}" alt="">` : `<span>${esc(nameTxt[0].toUpperCase())}</span>`}</span>
-      <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
+      <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
     ${guest && window.DISCORD_LOGIN ? `<div class="disc-box">Lie ton compte Discord pour ne pas perdre ta collection et jouer avec le QG.<a class="btn-disc" href="/auth/login">${icon.discord}Se connecter avec Discord</a></div>` : ""}
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
     <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié M</small><b>${save.sinceMythic}/${MYTHIC_PITY}</b></div></div>

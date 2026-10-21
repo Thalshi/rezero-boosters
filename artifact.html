@@ -531,6 +531,66 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 .empty.panel { padding: 22px; }
 .tab { letter-spacing: .1em; font-size: .78rem; }
 @media (max-width: 420px) { .tab { letter-spacing: .04em; font-size: .72rem; } .day span { font-size: .56rem; } .board-list li { grid-template-columns: 24px 1fr; } .pl-stat { grid-column: 2; text-align: left; } }
+/* ===== Notifications (cloche) et chat du QG ===== */
+.bell { flex: none; position: relative; width: 40px; height: 40px; padding: 0; display: grid; place-items: center; background: #010a13; border: 1px solid var(--gold-d); color: var(--gold-l); cursor: pointer; }
+.bell:hover, .bell[aria-expanded="true"] { border-color: var(--gold); color: #f0e6d2; }
+.bell svg { width: 20px; height: 20px; }
+.badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; display: grid; place-items: center; background: #0ac8b9; color: #010a13; font: 800 .68rem/1 var(--font-mono); border: 2px solid #010a13; border-radius: 9px; box-shadow: 0 0 10px rgba(10,200,185,.7); }
+.badge[hidden] { display: none; }
+.np { position: fixed; z-index: 35; top: 64px; right: 12px; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 560px); overflow: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(180deg, #0a1428, #010a13); border: 1px solid var(--gold); box-shadow: 0 18px 40px rgba(0,0,0,.7); }
+.np[hidden] { display: none; }
+.np-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.np-head b { font: 700 1.05rem var(--font-display); color: var(--gold-l); letter-spacing: .04em; }
+.linkbtn { background: none; border: 0; padding: 4px 0; color: #0ac8b9; font: 600 .74rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.np-sec { margin-top: 6px; font: 700 .68rem var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.np-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px; text-align: left; background: rgba(30,35,40,.55); border: 1px solid #1e2328; color: var(--ink, #f0e6d2); font: 500 .86rem/1.35 var(--font-body, inherit); cursor: pointer; }
+.np-item:hover { border-color: var(--gold-d); }
+.np-item.unread { border-color: #0ac8b9; background: rgba(10,200,185,.08); }
+.np-item small { display: block; margin-top: 3px; color: var(--muted); font: 600 .7rem var(--font-mono); }
+.np-ic { flex: none; width: 26px; height: 26px; display: grid; place-items: center; font-style: normal; font-weight: 800; color: #010a13; background: var(--gold); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.np-ic.k-sold { background: #5bc0de; } .np-ic.k-trade { background: #0ac8b9; } .np-ic.k-mention { background: #c7a6ff; } .np-ic.k-episode, .np-ic.k-announce { background: #f0d38a; } .np-ic.todo { background: #e84057; color: #fff; }
+.chat-fab { position: fixed; z-index: 26; right: 16px; bottom: 16px; width: 58px; height: 58px; padding: 0; display: grid; place-items: center; cursor: pointer; color: #f0e6d2; background: radial-gradient(circle at 50% 35%, #0a323c, #010a13 70%); border: 2px solid var(--gold); border-radius: 50%; box-shadow: 0 0 0 3px #010a13, 0 0 18px rgba(10,200,185,.45); }
+.chat-fab svg { width: 26px; height: 26px; }
+.chat-fab:hover { box-shadow: 0 0 0 3px #010a13, 0 0 26px rgba(10,200,185,.8); }
+.chat-fab .badge { top: -2px; right: -2px; }
+.chat { position: fixed; z-index: 28; right: 0; bottom: 0; top: 0; width: min(420px, 100vw); display: flex; flex-direction: column; background: linear-gradient(180deg, #0a1428, #010a13 40%); border-left: 1px solid var(--gold); box-shadow: -18px 0 40px rgba(0,0,0,.6); }
+.chat[hidden] { display: none; }
+.chat-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--gold-d); }
+.chat-head h2 { margin: 0; font-size: 1.2rem; flex: 1; }
+.chat-head h2 small { display: block; font: 600 .68rem var(--font-mono); letter-spacing: .12em; color: #0ac8b9; text-transform: uppercase; }
+.chat-x { width: 36px; height: 36px; padding: 0; background: none; border: 1px solid var(--gold-d); color: var(--gold-l); font-size: 1.2rem; cursor: pointer; }
+.chat-list { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+.cm { display: flex; gap: 10px; align-items: flex-start; }
+.cm .av { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold-d); flex: none; object-fit: cover; }
+.cm-b { min-width: 0; flex: 1; }
+.cm-h { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.cm-h b { font: 700 .86rem var(--font-body, inherit); color: var(--gold-l); cursor: pointer; }
+.cm.me .cm-h b { color: #0ac8b9; }
+.cm-h time { font: 600 .66rem var(--font-mono); color: var(--muted); }
+.tagadm { font: 800 .6rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; font-style: normal; color: #010a13; background: var(--gold); padding: 1px 5px; }
+.cm-del { margin-left: auto; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 4px; opacity: .5; }
+.cm-del:hover { opacity: 1; color: #e84057; }
+.cm p { margin: 2px 0 0; font-size: .92rem; line-height: 1.4; color: #f0e6d2; overflow-wrap: anywhere; }
+.cm p mark { background: rgba(199,166,255,.18); color: #c7a6ff; padding: 0 2px; }
+.cm.ping .cm-b { border-left: 2px solid #c7a6ff; padding-left: 8px; }
+.cm.sys { gap: 4px 6px; justify-content: center; text-align: center; flex-wrap: wrap; align-items: center; padding: 8px 10px; font: 600 .78rem var(--font-mono); color: var(--muted); border: 1px solid #1e2328; background: rgba(1,10,19,.6); }
+.cm.sys.ann { color: #f0e6d2; border-color: var(--gold); background: linear-gradient(90deg, rgba(200,170,110,.12), rgba(1,10,19,.6)); font: 500 .9rem var(--font-body, inherit); text-align: left; justify-content: flex-start; }
+.cm.sys.ann b { color: var(--gold); font: 800 .66rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; margin-right: 6px; }
+.cm.sys.pull { border-color: var(--r-m, #e84057); }
+.cchip { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 4px 10px 4px 4px; max-width: 100%; background: #010a13; border: 1px solid var(--cc, var(--gold-d)); color: #f0e6d2; font: 600 .8rem var(--font-body, inherit); cursor: pointer; text-align: left; }
+.cchip .th { width: 30px; height: 40px; flex: none; background: var(--cc, #1e2328) center/cover; border: 1px solid rgba(0,0,0,.5); }
+.cchip em { display: block; font: 700 .62rem var(--font-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--cc); }
+.chat-foot { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--gold-d); display: flex; flex-direction: column; gap: 8px; }
+.chat-form { display: flex; gap: 6px; }
+.chat-form input { flex: 1; min-width: 0; padding: 10px 12px; background: #010a13; border: 1px solid var(--gold-d); color: #f0e6d2; font: 500 .92rem var(--font-body, inherit); }
+.chat-form input:focus { outline: none; border-color: #0ac8b9; }
+.chat-form .btn { padding: 8px 12px; }
+.chat-att { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--muted); }
+.chat-att[hidden] { display: none; }
+.chat-empty { margin: auto; text-align: center; color: var(--muted); font-size: .9rem; max-width: 280px; }
+@media (max-width: 520px) { .chat { width: 100vw; border-left: 0; } .chat-fab { width: 52px; height: 52px; right: 12px; bottom: 12px; } }
+.cchip .th { position: relative; overflow: hidden; display: grid; place-items: center; font: 700 .9rem var(--font-display); color: #010a13; }
+.cchip .th .layer, .cchip .th .photo { position: absolute; inset: 0; background-size: cover; background-position: 50% 25%; }
 </style>
 
 <div class="app">
@@ -541,6 +601,7 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
       <span class="gauge"><i id="wGauge"></i></span><span id="wFree">10/10</span>
       <span class="chakra">◆ <span id="wChakra">0</span></span>
     </div>
+    <button class="bell" id="bellBtn" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i class="badge" id="bellN" hidden></i></button>
     <div class="acct" id="acct" hidden></div>
   </header>
 
@@ -559,6 +620,9 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 
 <div class="overlay" id="overlay" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="np" id="notifPanel" role="dialog" aria-label="Notifications" hidden></div>
+<button class="chat-fab" id="chatFab" type="button" aria-label="Ouvrir le chat du QG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><i class="badge" id="chatN" hidden></i></button>
+<aside class="chat" id="chatPanel" aria-label="Chat du QG" hidden></aside>
 
 <script>
 // Données et règles du jeu, communes au navigateur et au serveur Cloudflare.
@@ -1370,7 +1434,13 @@ function viewAdmin() {
     <h2 style="font-size:1.4rem">Qui peut packer quoi</h2>
     <p class="note">Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés dans son album, sans nom ni image. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.</p>
     <label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label>
+    <p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p>
   </section>
+  ${SRV ? `<section class="panel admin">
+    <div class="eyebrow">Annonce · <span>chat + notification pour tout le QG</span></div>
+    <form id="annForm" class="pq-form"><label class="field" for="annText">Message<textarea id="annText" rows="2" maxlength="300" placeholder="Ex. : l'épisode 2 sort samedi à 18 h !"></textarea></label>
+    <button class="btn" type="submit">Envoyer l'annonce</button></form>
+  </section>` : ""}
   <section class="panel admin">
     <div class="eyebrow">Joueurs · <span>${ids.length}</span></div>
     ${ids.length ? `<div class="adm-list">${ids.map((uid) => `
@@ -1436,6 +1506,8 @@ async function connect() {
       if (r.imported === "invité") toast("Ta collection d'invité est maintenant sur ton compte Discord.");
       subscribeShared();
       subscribePred();
+      MYNAME = (await window.discordMe())?.name || "";
+      pulse();
       $("adminTab").hidden = !IS_ADMIN;
       if (!opening) draw();
       return;
@@ -1450,6 +1522,8 @@ async function connect() {
     } else persist();
     subscribeShared();
     subscribePred();
+    MYNAME = (await user.me?.())?.name || "";
+    if (chat.open) subscribeChat();
     $("adminTab").hidden = !IS_ADMIN;
     publishPlayer();
     if (!opening) draw();
@@ -1773,6 +1847,7 @@ function header() {
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = save.chakra;
+  badges();
 }
 function fmtWait(ms) { const m = Math.max(1, Math.ceil(ms / 60000)); return m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : `${m} min`; }
 function pct(x) { return (x * 100).toLocaleString("fr-FR", { maximumFractionDigits: x < .01 ? 2 : 1 }) + " %"; }
@@ -2247,6 +2322,233 @@ function unlocked(x) {
   draw();
 }
 
+// ===== Chat du QG et notifications =====
+// Sur le site Cloudflare, tout passe par /api/game/pulse (un seul appel régulier) ;
+// sur claude.ai, le chat utilise la base partagée de l'app et les notifs restent locales.
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const chat = { msgs: [], open: false, last: null, seen: +(lsGet("rzlol-chat-seen") || 0), card: null, loaded: false, sub: false };
+const notif = { items: [], read: 0, unread: 0, open: false, max: 0, loaded: false };
+let MYNAME = "";
+const NICON = { sold: "◆", trade: "⇄", mention: "@", episode: "★", pred: "?", announce: "!" };
+const canChat = () => (SRV ? true : !!(DB && ME && canShare));
+
+function todos() {
+  const out = [];
+  if (save.dailyPack !== dayKey()) out.push({ text: "Ton pack du jour t'attend.", go: "boosters" });
+  const n = toClaim(); if (n) out.push({ text: `${n} récompense${n > 1 ? "s" : ""} à récupérer dans Missions.`, go: "missions" });
+  if (save.free >= FREE_MAX) out.push({ text: "Tes boosters gratuits sont pleins : ouvre-les pour qu'ils se rechargent.", go: "boosters" });
+  const p = SRV ? pendingTrades().length : 0; if (p) out.push({ text: `${p} échange${p > 1 ? "s" : ""} attend${p > 1 ? "ent" : ""} ta réponse.`, go: "trades" });
+  return out;
+}
+function bellCount() { return notif.unread + todos().length; }
+const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
+function badges() {
+  const b = $("bellN"), c = $("chatN"); if (!b) return;
+  const n = bellCount(), u = chat.open ? 0 : chatUnread();
+  b.hidden = !n; b.textContent = n > 9 ? "9+" : n;
+  c.hidden = !u; c.textContent = u > 9 ? "9+" : u;
+  document.title = (n + u ? `(${n + u}) ` : "") + "Re Zéro : LoL";
+}
+
+// --- notifications de l'appareil (quand l'onglet est en arrière-plan) ---
+const pushOn = () => lsGet("rzlol-push") === "1" && "Notification" in window && Notification.permission === "granted";
+function pushOS(text) {
+  if (!pushOn() || !document.hidden) return;
+  try { new Notification("Re Zéro : LoL", { body: text, tag: "rzlol-" + text.slice(0, 40) }); } catch (e) {}
+}
+async function togglePush() {
+  if (!("Notification" in window)) return toast("Ton navigateur ne gère pas les notifications.");
+  if (pushOn()) { lsSet("rzlol-push", "0"); toast("Notifications de l'appareil coupées."); return drawNotifs(); }
+  const p = await Notification.requestPermission();
+  if (p !== "granted") return toast("Autorise les notifications dans ton navigateur pour les recevoir.");
+  lsSet("rzlol-push", "1"); toast("C'est bon : tu seras prévenu même quand l'onglet est en arrière-plan."); drawNotifs();
+}
+
+// --- cloche ---
+function drawNotifs() {
+  const box = $("notifPanel"); if (!box) return;
+  const td = todos();
+  const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
+  box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
+    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
+    <div class="np-sec">Récent</div>
+    ${SRV ? (notif.items.length ? notif.items.map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+      : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
+      : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
+    ${"Notification" in window ? `<button class="btn ghost sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
+}
+function toggleNotifs(force) {
+  notif.open = force ?? !notif.open;
+  $("notifPanel").hidden = !notif.open; $("bellBtn").setAttribute("aria-expanded", notif.open);
+  if (notif.open) { drawNotifs(); markRead(); }
+}
+function markRead() {
+  if (!SRV || !notif.max || notif.read >= notif.max) return;
+  notif.read = notif.max; notif.unread = 0; badges();
+  srv("notifs/read", { last: notif.max }).catch(() => {});
+}
+function goTo(go) {
+  toggleNotifs(false);
+  if (go === "chat") return openChat(true);
+  if (!go) return;
+  if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord.");
+  opening = null;
+  if (go === "trades" || go === "market") { view = "market"; marketTab = go === "trades" ? "trades" : "mine"; } else view = go;
+  $("overlay").hidden = true; draw(); scrollTo({ top: 0 });
+}
+
+// --- appel régulier au serveur ---
+let pulseT = null, pulsing = false;
+function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open ? 3000 : document.hidden ? 60000 : 15000); }
+async function pulse() {
+  if (!SRV || pulsing) return;
+  pulsing = true;
+  try {
+    const r = await srv("pulse", { after: chat.last });
+    if (r.gone?.length) chat.msgs = chat.msgs.filter((m) => !r.gone.includes(m.id));
+    if (r.chat?.length) {
+      chat.msgs = chat.loaded ? [...chat.msgs, ...r.chat].slice(-200) : r.chat;
+      chat.last = chat.msgs[chat.msgs.length - 1].id;
+      if (chat.loaded) for (const m of r.chat) if (m.uid !== ME && m.kind === "msg" && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase())) pushOS(`${m.name} : ${m.text}`);
+    } else if (!chat.loaded) chat.last = 0;
+    if (!chat.loaded && !chat.seen) chat.seen = chat.msgs.length ? chat.msgs[chat.msgs.length - 1].ts : Date.now();
+    chat.loaded = true;
+    const n = r.notifs;
+    if (n) {
+      const fresh = n.items.filter((x) => x.id > notif.max && x.id > n.read);
+      notif.items = n.items; notif.read = Math.max(notif.read, n.read);
+      notif.unread = n.items.filter((x) => x.id > notif.read).length;
+      notif.max = n.items.reduce((m, x) => Math.max(m, x.id), 0);
+      if (notif.loaded && fresh.length) {
+        toast(fresh[0].text); fresh.forEach((x) => pushOS(x.text));
+        // une vente ou un échange a changé ta collection : on la recharge
+        if (fresh.some((x) => x.kind === "sold" || x.kind === "trade")) srv("state").then(() => { if (!opening && $("overlay").hidden) draw(); }).catch(() => {});
+      }
+      notif.loaded = true;
+      if (notif.open) { drawNotifs(); markRead(); }
+    }
+    if (chat.open) drawChatList();
+    badges();
+  } catch (e) {}
+  pulsing = false;
+  schedulePulse();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden && SRV) pulse(); });
+
+// --- chat ---
+function subscribeChat() {
+  if (SRV || !DB || chat.sub) return;
+  chat.sub = true;
+  DB.collection("chat").orderBy("t", "desc").limit(80).onSnapshot((s) => {
+    chat.msgs = s.docs.map((d) => { const m = d.data(); return { id: d.id, uid: m.uid, kind: m.kind || "msg", text: String(m.text || "").slice(0, 300), card: m.card || null, gold: !!m.gold, ts: m.t || 0 }; }).reverse();
+    if (!chat.loaded && !chat.seen) chat.seen = Date.now();
+    chat.loaded = true;
+    if (chat.open) drawChatList();
+    badges();
+  }, () => {});
+}
+function cardChip(id, gold) {
+  const c = byId[id]; if (!c) return "";
+  const key = ART[c.img] ? c.img : ART[c.who] ? c.who : null;
+  const th = key ? `<span class="th who-${key}"><span class="layer"></span></span>` : PHOTO[c.who] ? `<span class="th who-${c.who}"><span class="photo"></span></span>` : `<span class="th">${PEOPLE[c.who].kanji || ""}</span>`;
+  return `<button class="cchip" type="button" data-card="${id}" style="--cc:${gold ? "#f0d38a" : `var(--r-${c.rar})`}">${th}<span><em>${RAR[c.rar].label}${gold ? " · dorée" : ""}</em>${esc(PEOPLE[c.who].name)} · ${esc(c.title)}</span></button>`;
+}
+const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+function msgHTML(m) {
+  const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
+  const av = `<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">`;
+  if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
+  if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
+  const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
+  const text = esc(m.text).replace(/@([^\s@&<,.!?;:]{2,32})/g, "<mark>@$1</mark>");
+  return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${av}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">×</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
+}
+function drawChatList() {
+  const list = $("chatList"); if (!list) return;
+  const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 80;
+  list.innerHTML = chat.msgs.length ? chat.msgs.map(msgHTML).join("")
+    : `<p class="chat-empty">${!canChat() ? "Ici, tout le QG discute en direct, partage ses cartes et ses meilleurs tirages." : chat.loaded ? "Personne n'a encore écrit. Lance la discussion !" : "Chargement…"}</p>`;
+  if (atBottom || !list.dataset.ready) list.scrollTop = list.scrollHeight;
+  list.dataset.ready = "1";
+  fillNames();
+  if (chat.msgs.length) { chat.seen = Math.max(chat.seen, chat.msgs[chat.msgs.length - 1].ts); lsSet("rzlol-chat-seen", chat.seen); }
+  badges();
+}
+function drawChat() {
+  const box = $("chatPanel");
+  const foot = canChat()
+    ? `<div class="chat-att" id="chatAtt" ${chat.card ? "" : "hidden"}>${chat.card ? `${cardChip(chat.card.id, chat.card.gold)}<button class="linkbtn" type="button" data-act="chat-uncard">Retirer</button>` : ""}</div>
+       <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatIn" maxlength="300" placeholder="Écris au QG… (@Nom pour mentionner)" aria-label="Message">
+       <button class="btn ghost sm" type="button" data-act="chat-card" title="Montrer une de tes cartes">Carte</button><button class="btn sm" type="submit">Envoyer</button></form>`
+    : `<p class="note" style="margin:0">${window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour discuter avec le QG.` : "Le chat s'active quand tu es connecté à l'app."}</p>`;
+  box.innerHTML = `<div class="chat-head"><h2>Chat du QG<small>QG de Shinjuku · en direct</small></h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le chat">×</button></div>
+    <div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
+  drawChatList();
+}
+function openChat(open) {
+  chat.open = open; $("chatPanel").hidden = !open; $("chatFab").hidden = open;
+  if (open) { toggleNotifs(false); drawChat(); subscribeChat(); if (SRV) pulse(); setTimeout(() => $("chatIn")?.focus(), 50); }
+  else schedulePulse();
+  badges();
+}
+async function sendChat() {
+  const inp = $("chatIn"), text = inp.value.trim(), card = chat.card;
+  if (!text && !card) return;
+  const body = { text, card: card?.id || null, gold: !!card?.gold };
+  inp.value = ""; chat.card = null; $("chatAtt").hidden = true; $("chatAtt").innerHTML = "";
+  try {
+    if (SRV) { await srv("chat/send", body); await pulse(); }
+    else { await DB.collection("chat").add({ uid: ME, kind: "msg", text: text.slice(0, 300), card: body.card, gold: body.gold, t: Date.now() }); }
+  } catch (e) { inp.value = text; chat.card = card; toast(e.message || "Message pas envoyé."); }
+}
+function pickChatCard() {
+  const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
+  if (!mine.length) return toast("Ouvre d'abord un booster pour avoir des cartes à montrer.");
+  const opts = mine.flatMap((c) => { const o = own(c.id), lbl = `${PEOPLE[c.who].name} · ${c.title} (${RAR[c.rar].label})`; return [...(o.n ? [`<option value="${c.id}|">${esc(lbl)}</option>`] : []), ...(o.gold ? [`<option value="${c.id}|1">${esc(lbl)} · dorée</option>`] : [])]; }).join("");
+  $("overlay").innerHTML = `<form class="sheet" id="chatCardForm" role="dialog" aria-modal="true" aria-label="Montrer une carte">
+    <div class="eyebrow">Chat du QG</div><h2 style="font-size:1.3rem">Montrer une carte</h2>
+    <label class="field" for="chatCardSel">Ta carte<select id="chatCardSel">${opts}</select></label>
+    <button class="btn" type="submit">Joindre au message</button><button class="btn ghost" type="button" data-act="close">Annuler</button></form>`;
+  $("overlay").hidden = false;
+}
+async function deleteChat(id) {
+  try { await srv("chat/delete", { id: +id }); chat.msgs = chat.msgs.filter((m) => m.id !== +id); drawChatList(); } catch (e) { toast(e.message); }
+}
+async function announce(form) {
+  const text = form.querySelector("textarea").value.trim();
+  if (!text) return toast("Écris l'annonce.");
+  try { await srv("announce", { text }); form.reset(); toast("Annonce envoyée à tout le QG."); pulse(); } catch (e) { toast(e.message); }
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.closest("#bellBtn")) return toggleNotifs();
+  if (notif.open && !t.closest("#notifPanel")) toggleNotifs(false);
+  if (t.closest("#chatFab")) return openChat(true);
+  const ng = t.closest("[data-ngo]"); if (ng) return goTo(ng.dataset.ngo);
+  const del = t.closest("[data-chatdel]"); if (del) return deleteChat(del.dataset.chatdel);
+  const mn = t.closest("[data-mention]"); if (mn && $("chatIn")) { const i = $("chatIn"); i.value = (i.value ? i.value.replace(/\s*$/, " ") : "") + "@" + mn.dataset.mention + " "; return i.focus(); }
+  const act = t.closest("[data-act]")?.dataset.act;
+  if (act === "notif-read") { markRead(); return drawNotifs(); }
+  if (act === "notif-push") return togglePush();
+  if (act === "chat-close") return openChat(false);
+  if (act === "chat-card") return pickChatCard();
+  if (act === "chat-uncard") { chat.card = null; $("chatAtt").hidden = true; $("chatAtt").innerHTML = ""; }
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id === "chatForm") { e.preventDefault(); sendChat(); }
+  if (e.target.id === "annForm") { e.preventDefault(); announce(e.target); }
+  if (e.target.id === "chatCardForm") {
+    e.preventDefault();
+    const [id, g] = $("chatCardSel").value.split("|");
+    chat.card = { id, gold: !!g }; $("overlay").hidden = true;
+    const att = $("chatAtt"); if (att) { att.innerHTML = `${cardChip(id, !!g)}<button class="linkbtn" type="button" data-act="chat-uncard">Retirer</button>`; att.hidden = false; }
+    $("chatIn")?.focus();
+  }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (chat.open && $("overlay").hidden) openChat(false); toggleNotifs(false); } });
+
 let toastT;
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
 
@@ -2332,6 +2634,8 @@ document.addEventListener("click", (e) => {
 });
 drawAccount();
 regen(); ensureDaily(); draw();
+let wasFull = save.free >= FREE_MAX;
+setInterval(() => { const full = save.free >= FREE_MAX; if (full && !wasFull) pushOS("Tes boosters gratuits sont pleins : viens les ouvrir !"); wasFull = full; }, 30000);
 setInterval(() => { if (regen()) persist(); if (!opening && $("overlay").hidden && view === "boosters") draw(); else header(); }, 30000);
 // en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
 setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => draw()).catch(() => {}); }, 45000);

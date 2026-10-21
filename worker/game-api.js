@@ -10,6 +10,10 @@ const newId = () => [...crypto.getRandomValues(new Uint8Array(10))].map((b) => b
 export async function ensureGameSchema(db) {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS players (uid TEXT PRIMARY KEY, data TEXT NOT NULL, version INTEGER NOT NULL, updated INTEGER NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS chat (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL, card TEXT, gold INTEGER NOT NULL DEFAULT 0, ts INTEGER NOT NULL, deleted INTEGER NOT NULL DEFAULT 0)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS notifs (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL, data TEXT, ts INTEGER NOT NULL)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS notifs_uid ON notifs (uid, id)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS notif_read (uid TEXT PRIMARY KEY, last INTEGER NOT NULL)"),
   ]);
 }
 
@@ -53,7 +57,91 @@ async function writeDoc(env, coll, id, data) {
 async function postFeed(env, uid, cards) {
   const big = cards.filter((x) => G.RANKS.indexOf(G.CARD_BY_ID[x.id].rar) >= 4 || x.gold);
   for (const x of big) await writeDoc(env, "feed", newId(), { uid, card: x.id, gold: x.gold, t: Date.now() });
+  // les Mythiques et les Légendaires dorées s'annoncent aussi dans le chat
+  for (const x of big.filter((x) => G.CARD_BY_ID[x.id].rar === "m" || (x.gold && G.CARD_BY_ID[x.id].rar === "l"))) await sayChat(env, uid, "pull", "", x.id, x.gold);
 }
+
+// ---------- chat et notifications ----------
+const cardName = (id) => { const c = G.CARD_BY_ID[id]; return c ? `${G.PEOPLE[c.who].name} · ${c.title}` : "une carte"; };
+async function sayChat(env, uid, kind, text, card = null, gold = false) {
+  await env.DB.prepare("INSERT INTO chat (uid, kind, text, card, gold, ts) VALUES (?, ?, ?, ?, ?, ?)").bind(uid, kind, text, card, gold ? 1 : 0, Date.now()).run();
+}
+// uid "*" : notification pour tout le monde (annonce, nouvel épisode, prédictions)
+export async function notify(env, uid, kind, text, data = null) {
+  await env.DB.prepare("INSERT INTO notifs (uid, kind, text, data, ts) VALUES (?, ?, ?, ?, ?)").bind(uid, kind, text.slice(0, 300), data ? JSON.stringify(data) : null, Date.now()).run();
+}
+// Appelé par le serveur de documents après une écriture de Billy : nouvel épisode, nouvelle prédiction, résultat.
+export async function afterAdminWrite(env, path, before, after) {
+  try {
+    if (path === "config/game") {
+      const b = G.configFrom(before), a = G.configFrom(after);
+      if (a.def > b.def) await notify(env, "*", "episode", `Épisode ${a.def} débloqué : de nouveaux persos arrivent dans les boosters !`, { go: "boosters" });
+      for (const [uid, ep] of Object.entries(a.progress)) if (ep > (b.progress[uid] ?? b.def) && ep > a.def) await notify(env, uid, "episode", `Billy t'a débloqué l'épisode ${ep} : de nouveaux persos à packer !`, { go: "boosters" });
+    }
+    if (path.startsWith("predq/") && after) {
+      if (!before) await notify(env, "*", "pred", `Nouvelle prédiction : ${after.text}`, { go: "pred" });
+      else if (after.status === "resolved" && before.status !== "resolved") await notify(env, "*", "pred", `Résultat : ${after.text} → ${after.options?.[after.answer] ?? "?"}`, { go: "pred" });
+    }
+  } catch (e) { /* une notif ratée ne doit jamais bloquer l'écriture */ }
+}
+const CHAT_MAX = 300;
+async function chatRoute(env, user, path, body) {
+  if (path === "/api/game/pulse") {
+    // un seul appel régulier : nouveaux messages du chat + notifications
+    const after = Number.isFinite(+body.after) && body.after !== null ? +body.after : null;
+    const sel = "SELECT c.id, c.uid, c.kind, c.text, c.card, c.gold, c.ts, u.name, u.avatar FROM chat c LEFT JOIN users u ON u.id = c.uid WHERE c.deleted = 0";
+    const chat = after == null
+      ? (await env.DB.prepare(sel + " ORDER BY c.id DESC LIMIT 60").all()).results.reverse()
+      : (await env.DB.prepare(sel + " AND c.id > ? ORDER BY c.id ASC LIMIT 100").bind(after).all()).results;
+    const gone = after == null ? [] : (await env.DB.prepare("SELECT id FROM chat WHERE deleted = 1 AND id > ? - 300").bind(after).all()).results.map((r) => r.id);
+    const items = (await env.DB.prepare("SELECT id, kind, text, data, ts FROM notifs WHERE uid IN (?, '*') ORDER BY id DESC LIMIT 30").bind(user.id).all()).results
+      .map((n) => ({ ...n, data: n.data ? JSON.parse(n.data) : null }));
+    const read = (await env.DB.prepare("SELECT last FROM notif_read WHERE uid = ?").bind(user.id).first())?.last ?? 0;
+    return json({ chat: chat.map((m) => ({ ...m, gold: !!m.gold, admin: isAdminId(env, m.uid) })), gone, notifs: { items, read, unread: items.filter((n) => n.id > read).length } });
+  }
+  if (path === "/api/game/notifs/read") {
+    const last = Math.max(0, Math.round(+body.last || 0));
+    await env.DB.prepare("INSERT INTO notif_read (uid, last) VALUES (?, ?) ON CONFLICT(uid) DO UPDATE SET last = MAX(last, excluded.last)").bind(user.id, last).run();
+    return json({ ok: true });
+  }
+  if (path === "/api/game/chat/send") {
+    if (!user.member && !user.admin) return fail(403, "Le chat est réservé aux membres du QG de Shinjuku.");
+    const text = String(body.text || "").replace(/\s+/g, " ").trim().slice(0, CHAT_MAX);
+    const card = body.card && G.CARD_BY_ID[body.card] ? body.card : null, gold = !!body.gold && !!card;
+    if (!text && !card) return fail(400, "Écris un message.");
+    const last = await env.DB.prepare("SELECT ts FROM chat WHERE uid = ? AND kind = 'msg' ORDER BY id DESC LIMIT 1").bind(user.id).first();
+    if (last && Date.now() - last.ts < 1200) return fail(429, "Doucement, un message à la fois.");
+    if (card) {
+      const row = await loadRow(env, user.id), s = row && G.normalizeSave(JSON.parse(row.data));
+      const o = s && G.ownOf(s, card);
+      if (!o || (gold ? o.gold < 1 : o.n + o.gold < 1)) return fail(400, "Tu ne peux montrer que tes propres cartes.");
+    }
+    await sayChat(env, user.id, "msg", text, card, gold);
+    // mentions : @Nom d'un joueur connu → notification pour lui
+    if (text.includes("@")) {
+      const low = text.toLowerCase(), { results } = await env.DB.prepare("SELECT id, name FROM users WHERE name IS NOT NULL").all();
+      for (const u of results) if (u.id !== user.id && u.name && low.includes("@" + u.name.toLowerCase())) await notify(env, u.id, "mention", `${user.name} t'a mentionné : « ${text.slice(0, 120)} »`, { chat: true });
+    }
+    return json({ ok: true });
+  }
+  if (path === "/api/game/chat/delete") {
+    const m = await env.DB.prepare("SELECT uid FROM chat WHERE id = ?").bind(+body.id || 0).first();
+    if (!m) return fail(404, "Message introuvable.");
+    if (m.uid !== user.id && !user.admin) return fail(403, "Tu ne peux effacer que tes messages.");
+    await env.DB.prepare("UPDATE chat SET deleted = 1 WHERE id = ?").bind(+body.id).run();
+    return json({ ok: true });
+  }
+  if (path === "/api/game/announce") {
+    if (!user.admin) return fail(403, "Réservé à l'admin.");
+    const text = String(body.text || "").replace(/\s+/g, " ").trim().slice(0, CHAT_MAX);
+    if (!text) return fail(400, "Écris l'annonce.");
+    await sayChat(env, user.id, "announce", text);
+    await notify(env, "*", "announce", `Annonce de ${user.name} : ${text}`, { chat: true });
+    return json({ ok: true });
+  }
+  return null;
+}
+const isAdminId = (env, uid) => String(env.ADMIN_IDS || "").split(/[\s,]+/).filter(Boolean).includes(String(uid).slice(1));
 
 // Premier passage : crée le compte, en reprenant si possible la collection d'invité du navigateur
 // ou l'ancienne sauvegarde du compte, à condition qu'elle soit plausible.
@@ -80,6 +168,8 @@ const marketBlock = (s) => `Le marché et les échanges s'ouvrent après ${G.MAR
 export async function gameRoute(req, env, user, path) {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   try {
+    const chatRes = await chatRoute(env, user, path, body);
+    if (chatRes) return chatRes;
     if (path === "/api/game/state") {
       const imported = await ensurePlayer(env, user, body.guest);
       const r = await mutate(env, user.id, (s) => { s.linked = true; return {}; });
@@ -174,6 +264,7 @@ export async function gameRoute(req, env, user, path) {
       });
       if (r.error) { await writeDoc(env, "market", body.lid, l); return fail(400, r.error); }
       await mutate(env, l.seller, (s, now) => { s.chakra += l.price; s.sales = (s.sales || 0) + 1; G.trackS(s, "sold", 1, now); return {}; }).catch(() => {});
+      await notify(env, l.seller, "sold", `${user.name} a acheté ta carte ${cardName(l.card)}${l.gold ? " dorée" : ""} : +${l.price} ◆`, { go: "market" });
       return json({ ...r, card: l.card, price: l.price });
     }
     if (path === "/api/game/market/cancel") {
@@ -207,6 +298,7 @@ export async function gameRoute(req, env, user, path) {
       });
       if (r.error) return fail(400, r.error);
       await writeDoc(env, "trades", tid, { from: user.id, to, give, want, chakra, status: "open", t: Date.now() });
+      await notify(env, to, "trade", `${user.name} te propose un échange.`, { go: "trades" });
       return json(r);
     }
     if (path === "/api/game/trade/answer") {
@@ -223,6 +315,8 @@ export async function gameRoute(req, env, user, path) {
       if (!accept) {
         await mutate(env, t.from, (s, now) => { for (const it of t.give) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.chakra += t.chakra; return {}; });
         const r = await mutate(env, user.id, () => ({}));
+        if (status === "refused") await notify(env, t.from, "trade", `${user.name} a refusé ton échange. Tes cartes sont revenues.`, { go: "trades" });
+        else await notify(env, t.to, "trade", `${user.name} a annulé sa proposition d'échange.`, { go: "trades" });
         return json(r);
       }
       const r = await mutate(env, user.id, (s, now) => {
@@ -234,6 +328,7 @@ export async function gameRoute(req, env, user, path) {
       });
       if (r.error) { await writeDoc(env, "trades", body.tid, t); return fail(400, r.error); }
       await mutate(env, t.from, (s, now) => { for (const it of t.want) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now); return {}; });
+      await notify(env, t.from, "trade", `${user.name} a accepté ton échange !`, { go: "trades" });
       return json(r);
     }
 

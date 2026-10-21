@@ -105,7 +105,11 @@ export function reporter(title) {
 export function grant(srv, players, { free, chakra } = {}) {
   for (const p of [].concat(players)) {
     const sets = [free != null && `'$.free', ${+free}`, chakra != null && `'$.chakra', ${+chakra}`].filter(Boolean).join(", ");
-    srv.sql(`UPDATE players SET data = json_set(data, ${sets}) WHERE uid = '${p.id}'`);
+    // la base locale peut être occupée par le serveur (SQLITE_BUSY) : on réessaie quelques fois
+    for (let i = 0; ; i++) {
+      try { srv.sql(`UPDATE players SET data = json_set(data, ${sets}) WHERE uid = '${p.id}'`); break; }
+      catch (e) { if (i >= 5 || !String(e.stderr || e.message).includes("SQLITE_BUSY")) throw e; Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 400); }
+    }
   }
 }
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

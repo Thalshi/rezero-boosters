@@ -61,6 +61,50 @@ async function postFeed(env, uid, cards) {
   for (const x of big.filter((x) => G.CARD_BY_ID[x.id].rar === "m" || (x.gold && G.CARD_BY_ID[x.id].rar === "l"))) await sayChat(env, uid, "pull", "", x.id, x.gold);
 }
 
+// Enregistre un vote dans votes/<uid> (même format qu'avant, plus l'heure de chaque vote).
+async function writeVote(env, uid, qid, idx, now) {
+  const path = "votes/" + uid;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const row = await env.DB.prepare("SELECT data, version FROM docs WHERE path = ?").bind(path).first();
+    const v = row ? JSON.parse(row.data) : { uid, answers: {} };
+    v.uid = uid; v.answers = { ...(v.answers || {}), [qid]: idx }; v.at = { ...(v.at || {}), [qid]: now }; v.t = now;
+    const res = row
+      ? await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ?").bind(JSON.stringify(v), now, path, row.version).run()
+      : await env.DB.prepare("INSERT OR IGNORE INTO docs (path, coll, id, data, version, updated) VALUES (?, 'votes', ?, ?, 1, ?)").bind(path, uid, JSON.stringify(v), now).run();
+    if (res.meta.changes) return { ok: true, answers: v.answers };
+  }
+  throw new Error("busy");
+}
+// Billy ferme, résout ou rouvre une question : on note l'heure de fermeture, qui sert à valider les votes.
+export function stampPredq(before, after, now = Date.now()) {
+  if (!after || typeof after !== "object") return after;
+  if (after.status === "open") { delete after.closedAt; delete after.resolvedAt; return after; }
+  if (!after.closedAt) after.closedAt = before?.status === "open" || !before ? now : before.closedAt || now;
+  if (after.status === "resolved" && !after.resolvedAt) after.resolvedAt = now;
+  return after;
+}
+
+// ---------- contrôle des comptes (lecture seule, réservé à l'admin) ----------
+async function auditPlayers(env) {
+  const { results } = await env.DB.prepare("SELECT p.uid, p.data, u.name FROM players p LEFT JOIN users u ON u.id = p.uid").all();
+  const flagged = [];
+  for (const row of results) {
+    const s = G.normalizeSave(JSON.parse(row.data)), st = G.statsS(s), n = s.opened || 0, why = [];
+    const golds = Object.values(s.owned).reduce((a, o) => a + (o.gold || 0), 0);
+    if (s.free > 40) why.push(`${s.free} boosters gratuits en réserve (normal : 10 à 40)`);
+    if (s.chakra > 2000 + n * 40) why.push(`${s.chakra} ◆ pour ${n} boosters ouverts`);
+    if (st.mythics > Math.ceil(n * 0.06) + 2 + Math.floor(n / G.MYTHIC_PITY)) why.push(`${st.mythics} Mythiques pour ${n} boosters`);
+    if (golds > Math.ceil(n * 0.25) + 3) why.push(`${golds} cartes dorées pour ${n} boosters`);
+    if (st.total > n * G.PACK * 1.5 + 50) why.push(`${st.total} cartes pour ${n} boosters`);
+    if (why.length) flagged.push({ uid: row.uid, name: row.name, opened: n, free: s.free, chakra: s.chakra, mythics: st.mythics, why });
+  }
+  // anciens votes sans heure sur des questions déjà résolues : impossibles à dater, à vérifier à la main
+  const qs = (await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'predq'").all()).results.map((q) => ({ id: q.id, ...JSON.parse(q.data) })).filter((q) => q.status === "resolved");
+  const votes = (await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'votes'").all()).results.map((v) => ({ uid: v.id, ...JSON.parse(v.data) }));
+  const undated = votes.map((v) => ({ uid: v.uid, questions: qs.filter((q) => v.answers?.[q.id] != null && !v.at?.[q.id]).map((q) => q.id) })).filter((v) => v.questions.length);
+  return { checked: results.length, flagged, undatedVotes: undated, note: "Lecture seule : rien n'a été modifié. Les seuils sont larges, un signalement n'est pas une preuve de triche." };
+}
+
 // ---------- chat et notifications ----------
 const cardName = (id) => { const c = G.CARD_BY_ID[id]; return c ? `${G.PEOPLE[c.who].name} · ${c.title}` : "une carte"; };
 async function sayChat(env, uid, kind, text, card = null, gold = false) {
@@ -144,18 +188,18 @@ async function chatRoute(env, user, path, body) {
 }
 const isAdminId = (env, uid) => String(env.ADMIN_IDS || "").split(/[\s,]+/).filter(Boolean).includes(String(uid).slice(1));
 
-// Premier passage : crée le compte, en reprenant si possible la collection d'invité du navigateur
-// ou l'ancienne sauvegarde du compte, à condition qu'elle soit plausible.
+// Premier passage : crée le compte. Si le navigateur envoie une partie jouée en invité, ou s'il existe
+// une ancienne sauvegarde du compte, on n'en reprend que des cartes peu précieuses (voir importSaveS) :
+// le client ne peut imposer ni boosters, ni essence, ni cartes rares.
 async function ensurePlayer(env, user, guest) {
   if (await loadRow(env, user.id)) return null;
-  let s = null, imported = null;
+  let s = G.freshSave(), imported = null;
   const legacy = await readDoc(env, `data/users/${user.id}/rzlol`);
   for (const [src, cand] of [["compte", legacy?.data], ["invité", guest]]) {
     if (!cand) continue;
-    const n = G.normalizeSave(cand);
-    if (G.plausibleSave(n)) { s = n; imported = src; break; }
+    const n = G.importSaveS(cand);
+    if (n.imported.cards) { s = n; s.imported.from = src; imported = src; break; }
   }
-  if (!s) s = G.freshSave();
   s.updated = Date.now();
   await env.DB.prepare("INSERT OR IGNORE INTO players (uid, data, version, updated) VALUES (?, ?, 1, ?)").bind(user.id, JSON.stringify(s), Date.now()).run();
   await publishStats(env, user.id, s);
@@ -171,6 +215,10 @@ export async function gameRoute(req, env, user, path) {
   try {
     const chatRes = await chatRoute(env, user, path, body);
     if (chatRes) return chatRes;
+    if (path === "/api/game/admin/audit") {
+      if (!user.admin) return fail(403, "Réservé à l'admin.");
+      return json(await auditPlayers(env));
+    }
     if (path === "/api/game/state") {
       const imported = await ensurePlayer(env, user, body.guest);
       const r = await mutate(env, user.id, (s) => { s.linked = true; return {}; });
@@ -221,12 +269,22 @@ export async function gameRoute(req, env, user, path) {
       });
       return r.error ? fail(400, r.error) : json(r);
     }
+    if (path === "/api/game/vote") {
+      // le vote passe par le serveur : refusé dès que la question est fermée ou résolue
+      if (!user.member && !user.admin) return fail(403, "Il faut être membre du QG de Shinjuku pour voter.");
+      const now = Date.now(), qid = String(body.qid || ""), idx = Number(body.idx);
+      const q = qid && (await readDoc(env, "predq/" + qid))?.data;
+      if (!q) return fail(404, "Cette question n'existe plus.");
+      if (q.status !== "open") return fail(409, "Les votes sont fermés pour cette question.");
+      if (!Number.isInteger(idx) || idx < 0 || idx >= (q.options || []).length) return fail(400, "Réponse invalide.");
+      return json(await writeVote(env, user.id, qid, idx, now));
+    }
     if (path === "/api/game/predictions") {
       // crédite les bonnes prédictions validées par Billy, et la mission « fais une prédiction »
-      const votes = (await readDoc(env, "votes/" + user.id))?.data?.answers || {};
+      const vdoc = (await readDoc(env, "votes/" + user.id))?.data || {}, votes = vdoc.answers || {};
       const { results } = await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'predq'").all();
       const qs = results.map((q) => ({ id: q.id, ...JSON.parse(q.data) }));
-      const won = qs.filter((q) => q.status === "resolved" && votes[q.id] === q.answer);
+      const won = qs.filter((q) => q.status === "resolved" && votes[q.id] === q.answer && G.predVoteOk(q, vdoc));
       const r = await mutate(env, user.id, (s, now) => {
         // chaque nouveau vote compte pour les missions « vote pour une prédiction »
         const voted = qs.filter((q) => votes[q.id] != null && !s.predVoted.includes(q.id));

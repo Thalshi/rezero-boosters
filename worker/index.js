@@ -1,7 +1,7 @@
 // Serveur de l'app sur Cloudflare : connexion Discord + petite base de documents (D1)
 // qui reproduit ce que la version claude.ai fait avec ses capacités `db` et `user`.
 // Le jeu lui-même (tirages, essence, marché, échanges) est décidé par game-api.js.
-import { ensureGameSchema, gameRoute, afterAdminWrite } from "./game-api.js";
+import { ensureGameSchema, gameRoute, afterAdminWrite, stampPredq } from "./game-api.js";
 
 const SESSION_DAYS = 30;
 const json = (data, status = 200, headers = {}) =>
@@ -32,7 +32,8 @@ function parsePath(path, wantDoc) {
 
 // ---------- Droits ----------
 // lecture : tout joueur connecté ; écriture : membre du serveur Discord ; admin : ADMIN_IDS.
-// data/users/<id>/… : privé à ce joueur. votes : chacun le sien, l'admin lit tout.
+// data/users/<id>/… : ancienne sauvegarde, lisible par ce joueur seulement.
+// votes : écrits par le serveur du jeu ; chacun lit le sien, l'admin lit tout.
 // config, predq, pred : écriture réservée à l'admin. avis : le sien. bugs : lus par l'admin seulement.
 // feed, players, market, trades : écrits seulement par le serveur du jeu (game-api.js).
 const SERVER_ONLY = ["feed", "players", "market", "trades"];
@@ -41,10 +42,13 @@ function allowed(user, segs, op) {
   const write = op !== "read" && op !== "list";
   const top = segs[0];
   if (SERVER_ONLY.includes(top)) return !write;
-  if (top === "data" && segs[1] === "users") return segs.length >= 3 && segs[2] === user.id && (!write || user.member || user.admin);
+  // ancienne sauvegarde du compte : lisible par son joueur, plus modifiable (le serveur tient la partie)
+  if (top === "data" && segs[1] === "users") return segs.length >= 3 && segs[2] === user.id && !write;
+  // votes : écrits seulement par le serveur (/api/game/vote vérifie que la question est ouverte)
   if (top === "votes") {
+    if (write) return false;
     if (segs.length === 1) return op === "list" && user.admin;
-    return segs[1] === user.id ? (!write || user.member || user.admin) : op === "read" && user.admin;
+    return segs[1] === user.id || (op === "read" && user.admin);
   }
   if (["config", "predq", "pred"].includes(top)) return !write || user.admin;
   // avis : chacun écrit le sien ; bugs : on peut en envoyer, seul l'admin les lit
@@ -148,6 +152,8 @@ async function docRoute(req, env, user) {
   const watched = segs[0] === "config" || segs[0] === "predq";
   const before = watched ? await env.DB.prepare("SELECT data FROM docs WHERE path = ?").bind(path).first().then((r) => (r ? JSON.parse(r.data) : null)) : null;
   if (method === "PUT") {
+    if (segs[0] === "predq") stampPredq(before, body);
+    const text = JSON.stringify(body);
     await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, ?, ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
       .bind(path, coll, id, text, Date.now()).run();
     if (watched) await afterAdminWrite(env, path, before, body);
@@ -156,7 +162,9 @@ async function docRoute(req, env, user) {
   if (method === "PATCH") {
     const r = await env.DB.prepare("SELECT data, version FROM docs WHERE path = ?").bind(path).first();
     if (!r) return fail(404, "invalid_argument", "Document introuvable.");
-    const next = JSON.stringify(merge(JSON.parse(r.data), body));
+    const merged = merge(JSON.parse(r.data), body);
+    if (segs[0] === "predq") stampPredq(before, merged);
+    const next = JSON.stringify(merged);
     const res = await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ?").bind(next, Date.now(), path, r.version).run();
     if (!res.meta.changes) return fail(409, "conflict", "Le document a changé entre-temps.");
     if (watched) await afterAdminWrite(env, path, before, JSON.parse(next));
@@ -187,7 +195,11 @@ async function collRoute(req, env, user) {
     const body = await req.json().catch(() => null);
     if (!isObj(body)) return fail(400, "invalid_argument", "Le document doit être un objet JSON.");
     await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, ?, ?, ?, 1, ?)").bind(coll + "/" + id, coll, id, JSON.stringify(body), Date.now()).run();
-    if (coll === "predq") await afterAdminWrite(env, coll + "/" + id, null, body);
+    if (coll === "predq") {
+      // une question créée déjà fermée reçoit tout de suite son heure de fermeture
+      if (body.status !== "open") { stampPredq(null, body); await env.DB.prepare("UPDATE docs SET data = ? WHERE path = ?").bind(JSON.stringify(body), coll + "/" + id).run(); }
+      await afterAdminWrite(env, coll + "/" + id, null, body);
+    }
     return json({ id });
   }
   if (!allowed(user, segs, "list")) {

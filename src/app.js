@@ -131,22 +131,23 @@ function creditPredictions() {
 async function vote(qid, idx) {
   const q = pred.questions.find((x) => x.id === qid);
   if (!q || q.status !== "open") return toast("Les votes sont fermés pour cette question.");
-  const first = pred.mine[qid] == null;
+  const first = pred.mine[qid] == null, prev = pred.mine;
   pred.mine = { ...pred.mine, [qid]: idx }; draw();
   try {
-    await DB.doc("votes/" + ME).set({ uid: ME, answers: pred.mine, t: Date.now() });
-    if (SRV) creditPredictions();
-    else if (first) { track("predict"); persist(); }
+    if (SRV) { await srv("vote", { qid, idx }); creditPredictions(); }
+    else { await DB.doc("votes/" + ME).set({ uid: ME, answers: pred.mine, t: Date.now() }); if (first) { track("predict"); persist(); } }
     if (first) toast("Vote enregistré. Tu peux le changer tant que les votes sont ouverts.");
-  } catch (e) { toast("Ton vote n'est pas passé. Il faut l'accès « Contributeur »."); }
+  } catch (e) { pred.mine = prev; draw(); toast(SRV ? e.message : "Ton vote n'est pas passé. Il faut l'accès « Contributeur »."); }
 }
 async function recomputeScores() {
-  const s = await DB.collection("votes").get();
+  // relit les questions (le serveur y a noté l'heure de fermeture) et ne compte que les votes faits à temps
+  const [s, qs] = await Promise.all([DB.collection("votes").get(), DB.collection("predq").get()]);
+  const questions = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
   const scores = {};
   for (const d of s.docs) {
     const v = d.data(), uid = v.uid || d.id;
     scores[uid] = 0;
-    for (const q of pred.questions) if (q.status === "resolved" && v.answers?.[q.id] === q.answer) scores[uid] += q.points || 1;
+    for (const q of questions) if (q.status === "resolved" && v.answers?.[q.id] === q.answer && predVoteOk(q, v)) scores[uid] += q.points || 1;
   }
   await DB.doc("pred/scores").set({ scores, t: Date.now() });
 }
@@ -221,7 +222,7 @@ async function connect() {
       const guest = save.opened ? save : null;
       SRV = true;
       const r = await srv("state", { guest });
-      if (r.imported === "invité") toast("Ta collection d'invité est maintenant sur ton compte Discord.");
+      if (r.imported === "invité") toast("Tes cartes communes jouées en invité ont été reprises sur ton compte Discord.");
       subscribeShared();
       subscribePred();
       MYNAME = (await window.discordMe())?.name || "";

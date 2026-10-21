@@ -539,9 +539,32 @@ function tradeFair(give, want, chakraGive = 0) {
   return Math.min(a, b) * TRADE_MAX_RATIO >= Math.max(a, b);
 }
 // Une collection d'invité est-elle plausible ? (sinon on ne l'importe pas sur le compte)
-function plausibleSave(s) {
-  const total = Object.values(s.owned || {}).reduce((a, o) => a + (o.n || 0) + (o.gold || 0), 0);
-  return s.opened <= 400 && total <= s.opened * PACK + 10 && s.chakra <= 5000 && Object.keys(s.owned || {}).every((id) => CARD_BY_ID[id]);
+// Reprise d'une sauvegarde venue du navigateur (partie en invité ou ancienne version du site).
+// Rien de ce qu'elle contient ne peut être vérifié : on repart d'un compte neuf et on ne reprend
+// que quelques cartes peu précieuses. Boosters, essence, compteurs, cartes dorées et récompenses
+// déjà réclamées ne sont jamais repris.
+const IMPORT_RARITIES = ["c", "pc"], IMPORT_MAX_CARDS = 50;
+function importSaveS(cand, now = Date.now()) {
+  const src = cand && typeof cand === "object" ? cand : {};
+  const owned = src.owned && typeof src.owned === "object" ? src.owned : {};
+  const s = freshSave(now);
+  let left = IMPORT_MAX_CARDS;
+  for (const [id, o] of Object.entries(owned)) {
+    const c = CARD_BY_ID[id];
+    if (!c || !IMPORT_RARITIES.includes(c.rar) || left <= 0) continue;
+    const n = Math.min(left, Math.max(0, Math.floor(+o?.n || 0)));
+    if (!n) continue;
+    const first = +o.first > 0 && +o.first <= now ? +o.first : now;
+    s.owned[id] = { n, gold: 0, first };
+    left -= n;
+  }
+  s.wish = (Array.isArray(src.wish) ? src.wish : []).filter((id) => CARD_BY_ID[id]).slice(0, 300);
+  if (PACKS.some((p) => p.id === src.pack)) s.pack = src.pack;
+  s.imported = { at: now, cards: IMPORT_MAX_CARDS - left };
+  return s;
 }
+// Un vote compte s'il a été enregistré avant la fermeture de la question.
+// Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
+const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, plausibleSave };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, importSaveS, predVoteOk };

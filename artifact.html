@@ -457,6 +457,34 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 .skin-row { display: grid; grid-auto-flow: column; grid-auto-columns: 96px; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; }
 .skin-row .kc { --w: 96px; }
 .craft-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+/* --- Ouverture façon LoL : coffre hextech --- */
+.chest-stage { position: relative; display: grid; place-items: center; min-height: 360px; width: 100%; overflow: hidden; }
+.chest-stage::before { content: ""; position: absolute; inset: 0; background: radial-gradient(45% 40% at 50% 52%, color-mix(in srgb, var(--glow) 35%, transparent), transparent 70%); animation: halo 2.4s ease-in-out infinite; }
+.chest { position: relative; transform-origin: 50% 50%; width: 210px; aspect-ratio: 1 / 1.08; border: 0; background: none; padding: 0; cursor: pointer; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)) drop-shadow(0 0 22px color-mix(in srgb, var(--glow) 55%, transparent)); }
+.chest .hex { position: absolute; inset: 0; clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%); }
+.chest .h1 { background: linear-gradient(160deg, #f0e6d2, #c8aa6e 30%, #785a28 60%, #3c2a10); }
+.chest .h2 { inset: 7%; background: linear-gradient(180deg, #0b2a36, #010a13 70%); }
+.chest .h3 { inset: 12%; background: repeating-conic-gradient(from 0deg, rgba(10,200,185,.12) 0 10deg, transparent 10deg 30deg), radial-gradient(circle at 50% 50%, #0a3a44, #010a13 70%); }
+.chest .gem { position: absolute; left: 50%; top: 50%; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%) rotate(45deg); background: linear-gradient(135deg, #fff 0%, var(--glow) 35%, color-mix(in srgb, var(--glow) 50%, #000) 100%); box-shadow: 0 0 20px var(--glow), 0 0 50px var(--glow), inset 0 0 12px #fff; border: 3px solid #f0e6d2; animation: gem 1.6s ease-in-out infinite; }
+.chest .ring { position: absolute; inset: 17% 17%; border-radius: 50%; border: 2px dashed color-mix(in srgb, var(--glow) 80%, #fff); animation: spin 9s linear infinite; opacity: .8; }
+.chest .ring.r2 { inset: 10% 10%; border-style: dotted; animation-direction: reverse; animation-duration: 14s; opacity: .5; }
+.chest .bolt { position: absolute; top: 4%; bottom: 4%; left: 50%; width: 3px; transform: translateX(-50%); background: linear-gradient(180deg, transparent, #f0e6d2, transparent); opacity: .7; }
+.chest.shake { animation: shake .55s ease-in-out; }
+.chest.chest-out { animation: chestout .7s ease-in forwards; }
+.flash { position: fixed; inset: 0; z-index: 40; pointer-events: none; background: radial-gradient(circle at 50% 45%, #fff, color-mix(in srgb, var(--glow) 70%, #fff) 30%, transparent 70%); animation: flash .9s ease-out forwards; }
+.shard { position: absolute; left: 50%; top: 50%; width: 10px; height: 22px; background: linear-gradient(180deg, #fff, var(--glow)); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); animation: shard .9s ease-out forwards; }
+.rays { position: absolute; left: 50%; top: 50%; width: 170%; aspect-ratio: 1; margin-left: -85%; margin-top: -85%; background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--rc) 55%, transparent) 0 8deg, transparent 8deg 24deg); mask: radial-gradient(circle, #000 20%, transparent 62%); -webkit-mask: radial-gradient(circle, #000 20%, transparent 62%); animation: spin 12s linear infinite; opacity: 0; transition: opacity .4s; pointer-events: none; }
+.reveal-wrap { position: relative; display: grid; place-items: center; padding: 30px 0; width: 100%; }
+.reveal-wrap.on .rays { opacity: 1; }
+.reveal-wrap.on.big .rays { animation-duration: 6s; }
+.divine-banner { font: 700 1.1rem var(--font-display); color: #fff; text-shadow: 0 0 12px #ff6ad5, 0 0 24px #e8b84a; letter-spacing: .06em; }
+@keyframes float { 50% { transform: translateY(-10px); } }
+@keyframes halo { 50% { opacity: .6; } }
+@keyframes gem { 50% { box-shadow: 0 0 30px var(--glow), 0 0 80px var(--glow), inset 0 0 18px #fff; } }
+@keyframes shake { 15% { transform: translateX(-6px) rotate(-2deg); } 30% { transform: translateX(6px) rotate(2deg); } 45% { transform: translateX(-8px) rotate(-3deg); } 60% { transform: translateX(8px) rotate(3deg); } 80% { transform: scale(1.06); } }
+@keyframes chestout { from { transform: scale(1); } to { transform: scale(1.5); opacity: 0; filter: brightness(3); } }
+@keyframes flash { from { opacity: 1; } to { opacity: 0; } }
+@keyframes shard { from { transform: translate(-50%, -50%) rotate(var(--a)) translateY(0); opacity: 1; } to { transform: translate(-50%, -50%) rotate(var(--a)) translateY(-190px); opacity: 0; } }
 .lore { display: flex; flex-direction: column; gap: 10px; }
 .lore .btn { align-self: flex-start; text-decoration: none; }
 .facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
@@ -1571,27 +1599,33 @@ function draw() {
 }
 
 // ===== Ouverture =====
-function packHTML(pk) {
-  return `<button class="pack" type="button" id="pack" aria-label="Ouvrir le booster" style="--pcol:${pk.color}">
-    <span class="pk-faces" aria-hidden="true"><i class="who-billy"><em class="photo"></em></i><i class="who-rayzo"><em class="layer"></em></i><i class="who-sultran"><em class="photo"></em></i></span>
-    <b>${pk.name}</b><small>RE ZÉRO : LOL · 5 CARTES</small></button>`;
+// couleur de la lueur du coffre : celle de la meilleure carte, comme les coffres de LoL
+const glowOf = (o) => { const best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]); return o.divine ? "#ff6ad5" : RAR[best.c.rar].rank >= 3 || best.gold ? (best.gold ? "#f0d38a" : `var(--r-${best.c.rar})`) : "#0ac8b9"; };
+function chestHTML(o) {
+  return `<div class="chest-stage" style="--glow:${glowOf(o)}">
+    <button class="chest" type="button" id="pack" aria-label="Ouvrir le coffre">
+      <span class="hex h1"></span><span class="hex h2"></span><span class="hex h3"></span>
+      <span class="ring"></span><span class="ring r2"></span><span class="bolt"></span><span class="gem"></span>
+    </button></div>`;
 }
 function drawOpening() {
   const o = opening, el = $("view");
   if (o.phase === "pack") {
-    el.innerHTML = `<section class="stage"><div class="eyebrow">Booster ${o.paid ? "acheté" : "gratuit"} · <span>${o.pk.sub}</span></div>${packHTML(o.pk)}<div class="hint">Touche le booster pour l'ouvrir</div></section>`;
+    el.innerHTML = `<section class="stage"><div class="eyebrow">${o.pk.skins ? "Coffre hextech" : o.pk.name} · <span>${o.paid ? "acheté" : "gratuit"}</span></div>${chestHTML(o)}<div class="hint">Touche le coffre pour l'ouvrir</div></section>`;
     return;
   }
   if (o.phase === "cards") {
     const x = o.cards[o.i];
     el.innerHTML = `<section class="stage">
       <div class="dots">${o.cards.map((_, j) => `<i class="${j <= o.i ? "on" : ""}"></i>`).join("")}</div>
+      ${o.divine && o.i === 0 ? '<div class="divine-banner">Booster divin !</div>' : ""}
+      <div class="reveal-wrap ${o.flipped ? "on" : ""} ${RAR[x.c.rar].rank >= 3 || x.gold ? "big" : ""}" style="--rc:${x.gold ? "#f0d38a" : RAR[x.c.rar].color}"><span class="rays"></span>
       <button class="reveal-card ${o.flipped ? "on" : ""}" type="button" id="revealBtn" aria-label="${o.flipped ? "Carte suivante" : "Retourner la carte"}">
         <div class="in">
           <div class="face"><div class="cardback r-${x.c.rar}"></div></div>
           <div class="face front">${o.flipped ? `<span class="burst" style="--rc:${RAR[x.c.rar].color}"></span>` : ""}${cardHTML(x.c, { gold: x.gold, isNew: x.isNew })}</div>
         </div>
-      </button>
+      </button></div>
       <div class="hint">${o.flipped ? `${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `Carte ${o.i + 1} sur ${PACK} — touche pour retourner`}</div>
       <button class="btn ghost" type="button" data-act="skip">Tout voir</button>
     </section>`;
@@ -1629,9 +1663,15 @@ async function startOpening(paid) {
   scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
 }
 async function tearPack() {
-  const p = $("pack"); if (!p || p.classList.contains("tear")) return;
-  p.classList.add("tear");
-  await sleep(reduced ? 0 : 560);
+  const p = $("pack"); if (!p || p.classList.contains("shake") || p.classList.contains("chest-out")) return;
+  if (!reduced) {
+    p.classList.add("shake"); await sleep(560);
+    p.classList.remove("shake"); p.classList.add("chest-out");
+    const stage = p.parentElement, glow = getComputedStyle(stage).getPropertyValue("--glow");
+    for (let i = 0; i < 14; i++) { const s = document.createElement("i"); s.className = "shard"; s.style.setProperty("--a", `${i * (360 / 14) + Math.random() * 12}deg`); stage.appendChild(s); }
+    const f = document.createElement("div"); f.className = "flash"; f.style.setProperty("--glow", glow); document.body.appendChild(f); setTimeout(() => f.remove(), 900);
+    await sleep(650);
+  }
   opening.phase = "cards"; draw();
 }
 function advance() {

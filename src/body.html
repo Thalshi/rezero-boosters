@@ -283,6 +283,37 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 @keyframes chestout { from { transform: scale(1); } to { transform: scale(1.5); opacity: 0; filter: brightness(3); } }
 @keyframes flash { from { opacity: 1; } to { opacity: 0; } }
 @keyframes shard { from { transform: translate(-50%, -50%) rotate(var(--a)) translateY(0); opacity: 1; } to { transform: translate(-50%, -50%) rotate(var(--a)) translateY(-190px); opacity: 0; } }
+.subtabs { display: flex; gap: 0; border-bottom: 1px solid var(--gold-d); overflow-x: auto; scrollbar-width: none; }
+.subtab { flex: 1 0 auto; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 8px 10px; font: 700 .75rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
+.subtab[aria-selected="true"] { color: var(--gold-l); border-bottom-color: var(--accent); }
+.filters { display: flex; gap: 10px; flex-wrap: wrap; }
+.field.inline { flex: 1; min-width: 140px; }
+.field input[type="search"], .field select { font: 600 .95rem var(--font-body); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 9px 10px; border-radius: 0; }
+.pull.wished { border-color: #ff6ad5; box-shadow: inset 3px 0 0 #ff6ad5; }
+.gate { color: var(--r-l) !important; }
+.trade { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--gold-d); background: rgba(1,10,19,.6); }
+.trade-who { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.trade-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.trade-sides > div { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; }
+.trade-sides small { width: 100%; font: 600 .7rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.ti { font: 600 .75rem var(--font-body); padding: 2px 7px; border: 1px solid var(--rc, var(--gold-d)); color: var(--gold-l); background: rgba(10,20,40,.8); }
+.ti.r-c { --rc: var(--r-c); } .ti.r-pc { --rc: var(--r-pc); } .ti.r-r { --rc: var(--r-r); } .ti.r-e { --rc: var(--r-e); } .ti.r-l { --rc: var(--r-l); } .ti.r-m { --rc: var(--r-m); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; width: 100%; }
+.profile .pf-head { display: flex; align-items: center; gap: 12px; width: 100%; }
+.av.big { width: 56px; height: 56px; }
+.profile h2 { font-size: 1.3rem; margin: 0; }
+.rar-bars { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 600 .78rem var(--font-mono); width: 100%; justify-content: center; }
+.trade-form { max-width: 620px; }
+.trade-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+@media (max-width: 520px) { .trade-cols { grid-template-columns: 1fr; } }
+.trade-cols fieldset { border: 1px solid var(--gold-d); padding: 8px; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.trade-cols legend { font: 700 .75rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); padding: 0 6px; }
+.pick-list { display: flex; flex-direction: column; gap: 4px; max-height: 38vh; overflow-y: auto; }
+.pick { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--gold-d); border-left: 3px solid var(--rc, var(--gold-d)); font: 600 .85rem var(--font-body); color: var(--gold-l); cursor: pointer; }
+.pick.r-c { --rc: var(--r-c); } .pick.r-pc { --rc: var(--r-pc); } .pick.r-r { --rc: var(--r-r); } .pick.r-e { --rc: var(--r-e); } .pick.r-l { --rc: var(--r-l); } .pick.r-m { --rc: var(--r-m); }
+.pick span { margin-left: auto; font: 600 .7rem var(--font-mono); color: var(--muted); white-space: nowrap; }
+.pick input { accent-color: #0ac8b9; }
+.by { cursor: pointer; }
 .lore { display: flex; flex-direction: column; gap: 10px; }
 .lore .btn { align-self: flex-start; text-decoration: none; }
 .facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
@@ -448,7 +479,7 @@ async function srv(action, body = {}) {
   return out;
 }
 let DB = null, USER = null, ME = null, canShare = false;
-const shared = { feed: [], players: [], market: [] };
+const shared = { feed: [], players: [], market: [], trades: [] };
 // ===== Prédictions (comme sur le Discord de Billy) =====
 // Billy (éditeur) crée les questions et valide les bonnes réponses ; chaque joueur vote une fois par question.
 const PRED_REWARD = 50;
@@ -688,7 +719,12 @@ function subscribeShared() {
   DB.doc("config/game").onSnapshot((s) => { applyConfig(s.exists ? s.data() : null); if (view !== "admin") sharedChanged(); }, () => {});
   DB.collection("feed").orderBy("t", "desc").limit(30).onSnapshot((s) => { shared.feed = map(s); sharedChanged(); }, () => {});
   DB.collection("players").orderBy("cards", "desc").limit(50).onSnapshot((s) => { shared.players = map(s); sharedChanged(); }, () => {});
-  DB.collection("market").orderBy("t", "desc").limit(300).onSnapshot((s) => { shared.market = map(s); collectSales(); sharedChanged(); }, () => {});
+  DB.collection("market").orderBy("t", "desc").limit(300).onSnapshot((s) => { shared.market = map(s); collectSales(); wishAlerts(); sharedChanged(); }, () => {});
+  if (SRV) DB.collection("trades").orderBy("t", "desc").limit(100).onSnapshot((s) => {
+    const before = pendingTrades().length; shared.trades = map(s);
+    if (pendingTrades().length > before) toast("Nouvelle proposition d'échange : va voir dans Marché → Échanges.");
+    sharedChanged();
+  }, () => {});
 }
 let sharedT;
 function sharedChanged() {
@@ -723,10 +759,6 @@ async function collectSales() {
   save.chakra += sum; persist(); header();
   toast(`Vente${due.length > 1 ? "s" : ""} au marché : +${sum} ◆`);
   collecting = false;
-}
-function cote(id) {
-  const sold = shared.market.filter((l) => l.card === id && l.status === "sold" && !l.gold).slice(0, 5);
-  return sold.length ? Math.round(sold.reduce((a, l) => a + l.price, 0) / sold.length) : null;
 }
 // noms et avatars, résolus à chaque affichage
 async function fillNames() {
@@ -795,6 +827,201 @@ const limitedOn = () => limitedOnAt(Date.now());
 const packsNow = () => packsAt(Date.now());
 const packOf = (id) => packOfAt(id, Date.now());
 const poolOf = (pk) => poolFor(pk, CONFIG, ME);
+
+
+// ===== Multijoueur : marché, échanges, profils, envies, classement =====
+let marketTab = "buy", boardTab = "collection", marketQuery = "", marketRar = "";
+const wishSet = () => new Set(save.wish || []);
+const myName = (uid) => `<span class="by">${who(uid)}</span>`;
+function marketGate() {
+  if (!SRV) return "";
+  if (save.opened < MARKET_MIN_OPENED) return `<p class="note gate">Le marché et les échanges s'ouvrent après ${MARKET_MIN_OPENED} boosters ouverts (tu en es à ${save.opened}). Ça évite les comptes jetables.</p>`;
+  return "";
+}
+function median(nums) { if (!nums.length) return null; const a = [...nums].sort((x, y) => x - y), m = a.length >> 1; return a.length % 2 ? a[m] : Math.round((a[m - 1] + a[m]) / 2); }
+function cote(id) {
+  const since = Date.now() - 30 * 86400e3;
+  const sold = shared.market.filter((l) => l.card === id && l.status === "sold" && !l.gold && (l.soldAt || l.t) > since).map((l) => l.price);
+  return median(sold);
+}
+function listingRow(l, actions) {
+  const c = byId[l.card]; if (!c) return "";
+  const vis = visible(c), wished = wishSet().has(l.card) && !has(l.card);
+  return `<div class="pull ${wished ? "wished" : ""}">${vis ? cardHTML(c, { gold: l.gold, click: true }) : cardHTML(c, { locked: true, soon: true })}
+    <div class="who"><b>${vis ? PEOPLE[c.who].name : "???"}${l.gold ? " · dorée" : ""}</b><span>${vis ? c.title : ""} · ${RAR[c.rar].label}${wished ? " · dans tes envies" : ""}</span>
+      <span>${l.seller === ME ? ago(l.t) : myName(l.seller)}${cote(l.card) ? ` · cote ~${cote(l.card)} ◆` : ""}</span></div>
+    <span class="price">${l.price} ◆</span>${actions}</div>`;
+}
+function viewMarket() {
+  const tabs = `<div class="subtabs" role="tablist">${[["buy", "Acheter"], ["mine", "Mes ventes"], ["trades", `Échanges${pendingTrades().length ? ` · ${pendingTrades().length}` : ""}`]]
+    .map(([k, l]) => `<button class="subtab" type="button" role="tab" data-mtab="${k}" aria-selected="${marketTab === k}">${l}</button>`).join("")}</div>`;
+  const head = `<section class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <div class="eyebrow">Hôtel des ventes · <span>entre joueurs du QG</span></div>
+    <h2 style="font-size:1.5rem">Le marché</h2>
+    <p class="note">Achète la carte qui te manque, vends tes doublons, échange directement avec les autres. Pour vendre, ouvre une carte de ton album et touche « Vendre ».</p>
+    ${sharedNote()}${marketGate()}
+    ${tabs}
+  </section>`;
+  if (marketTab === "trades") return head + viewTrades();
+  if (marketTab === "mine") {
+    const mine = shared.market.filter((l) => l.seller === ME && l.status !== "cancelled").slice(0, 40);
+    return head + (mine.length ? `<div class="pulls">${mine.map((l) => listingRow(l, l.status === "open" ? `<button class="btn ghost sm" type="button" data-cancel="${l.id}">Retirer</button>` : `<span class="m-ok">Vendue</span>`)).join("")}</div>`
+      : `<div class="empty panel">Tu n'as rien mis en vente.</div>`);
+  }
+  const q = marketQuery.trim().toLowerCase();
+  const open = shared.market.filter((l) => l.status === "open" && l.seller !== ME && byId[l.card])
+    .filter((l) => !marketRar || byId[l.card].rar === marketRar)
+    .filter((l) => !q || (visible(byId[l.card]) && (PEOPLE[byId[l.card].who].name + " " + byId[l.card].title).toLowerCase().includes(q)))
+    .sort((a, b) => (wishSet().has(b.card) && !has(b.card)) - (wishSet().has(a.card) && !has(a.card)) || a.price - b.price);
+  const locked = !SRV ? !canShare : save.opened < MARKET_MIN_OPENED;
+  return head + `<div class="filters"><label class="field inline" for="mq">Rechercher<input id="mq" type="search" value="${marketQuery.replace(/"/g, "&quot;")}" placeholder="Billy, Kaï…"></label>
+    <label class="field inline" for="mr">Rareté<select id="mr"><option value="">Toutes</option>${RANKS.map((k) => `<option value="${k}" ${marketRar === k ? "selected" : ""}>${RAR[k].label}</option>`).join("")}</select></label></div>
+  ${open.length ? `<div class="pulls">${open.map((l) => listingRow(l, canPack(byId[l.card]) || has(l.card) ? `<button class="btn sm" type="button" data-buy="${l.id}" ${save.chakra < l.price || locked ? "disabled" : ""}>Acheter</button>` : `<span class="soon-tag">Pas encore débloquée</span>`)).join("")}</div>`
+    : `<div class="empty panel">${q || marketRar ? "Aucune carte ne correspond." : "Rien en vente pour l'instant. Sois le premier à mettre un doublon sur le marché."}</div>`}`;
+}
+
+// --- échanges ---
+const pendingTrades = () => (shared.trades || []).filter((t) => t.status === "open" && t.to === ME);
+const itemsHTML = (items, chakra) => [...items.map((it) => { const c = byId[it.id]; return `<span class="ti r-${c.rar}">${PEOPLE[c.who].name}${c.skin ? " · " + c.title.replace("Skin ", "") : c.id.includes("-") ? " · " + c.title : ""}${it.gold ? " ★" : ""}${it.n > 1 ? ` ×${it.n}` : ""}</span>`; }), chakra ? `<span class="ti">${chakra} ◆</span>` : ""].join("") || '<span class="muted">rien</span>';
+function viewTrades() {
+  if (!SRV) return `<div class="empty panel">${offlineMsg("échanger avec les autres joueurs")}</div>`;
+  const list = shared.trades || [];
+  const block = (title, arr, me) => `<section class="panel" style="display:flex;flex-direction:column;gap:10px"><div class="eyebrow">${title}</div>
+    ${arr.length ? arr.map((t) => `<div class="trade">
+      <div class="trade-who">${myName(me ? t.to : t.from)} <span class="muted">${ago(t.t)}</span></div>
+      <div class="trade-sides"><div><small>${me ? "Tu donnes" : "Tu reçois"}</small>${itemsHTML(t.give, t.chakra)}</div><div><small>${me ? "Tu reçois" : "Tu donnes"}</small>${itemsHTML(t.want)}</div></div>
+      ${t.status === "open" ? `<div class="row">${!me ? `<button class="btn sm" type="button" data-trade="${t.id}" data-ta="accept">Accepter</button><button class="btn ghost sm" type="button" data-trade="${t.id}" data-ta="refuse">Refuser</button>`
+        : `<button class="btn ghost sm" type="button" data-trade="${t.id}" data-ta="cancel">Annuler</button>`}</div>`
+        : `<span class="m-ok">${{ done: "Échange fait", refused: "Refusé", cancelled: "Annulé" }[t.status] || t.status}</span>`}
+    </div>`).join("") : `<p class="note">Rien pour l'instant.</p>`}</section>`;
+  return `<p class="note" style="margin:4px 2px">Pour proposer un échange, touche le nom d'un joueur (classement, marché, gros tirages) puis « Proposer un échange ». Les cartes proposées sont mises de côté jusqu'à la réponse.</p>
+    ${block("Reçus", list.filter((t) => t.to === ME && t.status === "open"), false)}
+    ${block("Envoyés", list.filter((t) => t.from === ME && t.status === "open"), true)}
+    ${block("Historique", list.filter((t) => t.status !== "open").slice(0, 15), false)}`;
+}
+async function answerTrade(tid, action) {
+  try { await srv("trade/answer", { tid, action }); toast({ accept: "Échange fait !", refuse: "Échange refusé.", cancel: "Échange annulé, tes cartes reviennent." }[action]); }
+  catch (e) { toast(e.message); }
+  draw();
+}
+
+// --- profils publics ---
+async function openProfile(uid) {
+  if (!SRV) return;
+  let p;
+  try { p = await (await fetch("/api/game/profile", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ uid }) })).json(); }
+  catch (e) { return toast("Profil indisponible."); }
+  if (p.error) return toast(p.error);
+  const st = p.stats, isMe = uid === ME;
+  const ownedIds = Object.keys(p.owned);
+  const byRar = RANKS.slice().reverse().map((k) => [k, ownedIds.filter((id) => byId[id]?.rar === k).length]);
+  const dupes = ownedIds.filter((id) => p.owned[id][0] > 1 && visible(byId[id])).sort((a, b) => RAR[byId[b].rar].rank - RAR[byId[a].rar].rank);
+  const show = (p.showcase || []).filter((id) => byId[id]);
+  $("overlay").innerHTML = `<div class="sheet profile" role="dialog" aria-modal="true" aria-label="Profil">
+    <div class="pf-head"><img class="av big" data-uid="${uid}" alt=""><div><h2 data-uid="${uid}">…</h2><span class="muted">${st.unique}/${ALL_CARDS.length} cartes · ${st.opened} boosters</span></div></div>
+    <div class="statline">
+      <div class="tile"><b>${Math.round(st.unique / ALL_CARDS.length * 100)} %</b><span>complétion</span></div>
+      <div class="tile"><b>${st.mythics}</b><span>mythiques</span></div>
+      <div class="tile"><b>${st.skins}</b><span>skins</span></div>
+    </div>
+    <div class="eyebrow">Vitrine</div>
+    ${show.length ? `<div class="summary">${show.map((id) => cardHTML(byId[id], { click: true })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Mettre en vitrine »." : "Pas encore de vitrine."}</p>`}
+    <div class="rar-bars">${byRar.map(([k, n]) => `<span style="color:${RAR[k].color}">${RAR[k].label} <b>${n}</b></span>`).join("")}</div>
+    ${!isMe ? `<div class="eyebrow">Il échange · <span>ses doublons</span></div>
+      ${dupes.length ? `<div class="chips">${dupes.slice(0, 30).map((id) => `<span class="ti r-${byId[id].rar}">${PEOPLE[byId[id].who].name}${byId[id].skin ? " · " + byId[id].title.replace("Skin ", "") : ""} ×${p.owned[id][0] - 1}</span>`).join("")}</div>` : `<p class="note">Pas de doublon pour l'instant.</p>`}
+      <div class="row" style="justify-content:center"><button class="btn" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>Proposer un échange</button></div>` : ""}
+    <button class="btn ghost" type="button" data-act="close">Fermer</button>
+  </div>`;
+  $("overlay").hidden = false;
+  shared.lastProfile = p;
+  fillNames();
+}
+function tradeOptions(owned, keepOne) {
+  return Object.entries(owned).flatMap(([id, v]) => {
+    const c = byId[id]; if (!c) return [];
+    const [n, g] = Array.isArray(v) ? v : [v.n, v.gold];
+    const out = [];
+    if (n - (keepOne ? 1 : 0) > 0) out.push({ id, gold: false, max: n - (keepOne ? 1 : 0) });
+    if (g - (keepOne && !n ? 1 : 0) > 0) out.push({ id, gold: true, max: g - (keepOne && !n ? 1 : 0) });
+    return out;
+  }).filter((o) => visible(byId[o.id])).sort((a, b) => RAR[byId[b.id].rar].rank - RAR[byId[a.id].rar].rank);
+}
+function openTradeBuilder(uid) {
+  const p = shared.lastProfile; if (!p || p.uid !== uid) return;
+  const mine = tradeOptions(save.owned, false), theirs = tradeOptions(p.owned, false);
+  const opt = (o, side) => { const c = byId[o.id]; return `<label class="pick r-${c.rar}"><input type="checkbox" data-side="${side}" data-id="${o.id}" data-gold="${o.gold ? 1 : ""}"> ${PEOPLE[c.who].name}${c.skin ? " · " + c.title.replace("Skin ", "") : c.id.includes("-") ? " · " + c.title : ""}${o.gold ? " ★" : ""} <span>${RAR[c.rar].label} · ×${o.max}</span></label>`; };
+  $("overlay").innerHTML = `<form class="sheet trade-form" id="tradeForm" data-to="${uid}" aria-label="Proposer un échange">
+    <h2 style="font-size:1.3rem;text-align:center">Échange avec <span data-uid="${uid}">…</span></h2>
+    <div class="trade-cols">
+      <fieldset><legend>Tu donnes</legend><div class="pick-list">${mine.map((o) => opt(o, "give")).join("") || '<p class="note">Rien à donner.</p>'}</div>
+        <label class="field" for="tradeEss">Essence en plus ◆<input id="tradeEss" type="number" min="0" max="${save.chakra}" value="0"></label></fieldset>
+      <fieldset><legend>Tu reçois</legend><div class="pick-list">${theirs.map((o) => opt(o, "want")).join("") || '<p class="note">Rien à recevoir.</p>'}</div></fieldset>
+    </div>
+    <p class="note" id="tradeFair" style="text-align:center">Choisis des cartes des deux côtés.</p>
+    <div class="row" style="justify-content:center"><button class="btn" type="submit">Envoyer la proposition</button><button class="btn ghost" type="button" data-act="close">Annuler</button></div>
+  </form>`;
+  $("overlay").hidden = false;
+  fillNames();
+}
+function tradeSelection() {
+  const f = $("tradeForm"); if (!f) return null;
+  const pick = (side) => [...f.querySelectorAll(`input[data-side=${side}]:checked`)].map((i) => ({ id: i.dataset.id, gold: !!i.dataset.gold, n: 1 }));
+  return { to: f.dataset.to, give: pick("give"), want: pick("want"), chakra: Math.max(0, Math.round(+$("tradeEss").value || 0)) };
+}
+function updateTradeFair() {
+  const s = tradeSelection(); if (!s) return;
+  const a = itemsValue(s.give) + s.chakra, b = itemsValue(s.want);
+  $("tradeFair").textContent = !s.want.length ? "Choisis au moins une carte à recevoir." : tradeFair(s.give, s.want, s.chakra) ? `Échange équilibré (${a} ◆ contre ${b} ◆ en valeur de recyclage).` : `Trop déséquilibré (${a} ◆ contre ${b} ◆) : les gros dons sont bloqués.`;
+}
+async function sendTrade() {
+  const s = tradeSelection();
+  try { await srv("trade/propose", s); $("overlay").hidden = true; toast("Proposition envoyée."); marketTab = "trades"; view = "market"; draw(); }
+  catch (e) { toast(e.message); }
+}
+
+// --- envies et vitrine ---
+async function toggleWish(id) {
+  if (!SRV) return toast(offlineMsg("garder une liste d'envies").replace(/<[^>]+>/g, ""));
+  const on = wishSet().has(id);
+  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); openSheet(id); }
+  catch (e) { toast(e.message); }
+}
+async function wishAllMissing() {
+  const ids = ALL_CARDS.filter((c) => !has(c.id) && visible(c)).map((c) => c.id);
+  try { await srv("wish", { add: ids }); toast(`${ids.length} cartes ajoutées à tes envies.`); draw(); } catch (e) { toast(e.message); }
+}
+async function toggleShowcase(id) {
+  const cur = (save.showcase || []).filter((x) => has(x));
+  const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id].slice(-4);
+  try { await srv("showcase", { ids: next }); toast(cur.includes(id) ? "Retirée de ta vitrine." : "Ajoutée à ta vitrine."); openSheet(id); } catch (e) { toast(e.message); }
+}
+// alerte quand une carte de tes envies arrive au marché
+let seenListings = null;
+function wishAlerts() {
+  const open = shared.market.filter((l) => l.status === "open" && l.seller !== ME);
+  if (seenListings) {
+    const w = wishSet();
+    const fresh = open.filter((l) => !seenListings.has(l.id) && w.has(l.card) && !has(l.card) && visible(byId[l.card]));
+    if (fresh.length) toast(`Dans tes envies, en vente : ${PEOPLE[byId[fresh[0].card].who].name}${fresh.length > 1 ? ` et ${fresh.length - 1} autre${fresh.length > 2 ? "s" : ""}` : ""}.`);
+  }
+  seenListings = new Set(open.map((l) => l.id));
+}
+
+// --- classement ---
+const BOARDS = [
+  ["collection", "Collection", (p) => p.unique ?? p.cards, (p) => `${p.unique ?? p.cards}/${ALL_CARDS.length} cartes${p.mythics ? ` · ${p.mythics} M` : ""}`],
+  ["mythics", "Mythiques", (p) => p.mythics || 0, (p) => `${p.mythics || 0} mythique${p.mythics > 1 ? "s" : ""}`],
+  ["skins", "Skins", (p) => p.skins || 0, (p) => `${p.skins || 0}/${SKINS.length} skins`],
+  ["boosters", "Boosters", (p) => p.opened || 0, (p) => `${p.opened || 0} boosters ouverts`],
+  ["commerce", "Commerce", (p) => (p.sales || 0) + (p.trades || 0), (p) => `${p.sales || 0} ventes · ${p.trades || 0} échanges`],
+];
+function boardHTML() {
+  const [, , score, label] = BOARDS.find((b) => b[0] === boardTab) || BOARDS[0];
+  const list = [...shared.players].sort((a, b) => score(b) - score(a) || (b.mythics || 0) - (a.mythics || 0)).slice(0, 50);
+  return `<div class="subtabs" role="tablist">${BOARDS.map(([k, l]) => `<button class="subtab" type="button" role="tab" data-btab="${k}" aria-selected="${boardTab === k}">${l}</button>`).join("")}</div>
+    ${list.length ? `<ol class="board-list">${list.map((p, i) => `<li class="${p.uid === ME ? "me" : ""}"><span class="rank">${i + 1}</span>${myName(p.uid)}<span class="pl-stat">${label(p)}</span></li>`).join("")}</ol>`
+      : `<div class="empty">Le classement apparaîtra dès que des joueurs auront ouvert des boosters.</div>`}`;
+}
 
 // ===== Vues =====
 let view = "boosters", opening = null;
@@ -930,6 +1157,7 @@ function viewAlbum() {
     <div class="row" style="justify-content:space-between">
       <p class="note">Touche une carte pour ouvrir sa fiche, la vendre ou voir sa cote.</p>
       <button class="btn ghost" type="button" data-act="recycle" ${dv ? "" : "disabled"}>Recycler les doublons · +${dv} ◆</button>
+      ${SRV ? `<button class="btn ghost" type="button" data-act="wish-all">♡ Toutes les manquantes en envies</button>` : ""}
     </div>
   </section>
   ${sections}
@@ -949,27 +1177,6 @@ function viewSkins() {
   }).join("")}`;
 }
 
-function viewMarket() {
-  const open = shared.market.filter((l) => l.status === "open");
-  const others = open.filter((l) => l.seller !== ME);
-  const mine = shared.market.filter((l) => l.seller === ME && l.status !== "cancelled").slice(0, 20);
-  const row = (l, actions) => { const c = byId[l.card]; if (!c) return ""; const vis = visible(c); return `
-    <div class="pull">${vis ? cardHTML(c, { gold: l.gold, click: true }) : cardHTML(c, { locked: true, soon: true })}
-      <div class="who"><b>${vis ? PEOPLE[c.who].name : "???"}${l.gold ? " · dorée" : ""}</b><span>${RAR[c.rar].label} · ${l.seller === ME ? ago(l.t) : `<span class="by">${who(l.seller)}</span>`}</span></div>
-      <span class="price">${l.price} ◆</span>${actions}</div>`; };
-  return `
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Marché · <span>entre joueurs</span></div>
-    <h2 style="font-size:1.5rem">${others.length} carte${others.length > 1 ? "s" : ""} en vente</h2>
-    <p class="note">Achète les cartes des autres avec ton essence. Pour vendre, ouvre une carte de ton album et touche « Vendre ».</p>
-    ${sharedNote()}
-  </section>
-  ${others.length ? `<div class="pulls">${others.map((l) => row(l, (canPack(byId[l.card]) ? `<button class="btn sm" type="button" data-buy="${l.id}" ${save.chakra < l.price || !canShare ? "disabled" : ""}>Acheter</button>` : `<span class="soon-tag">Pas encore débloquée</span>`))).join("")}</div>`
-    : `<div class="empty panel">Rien en vente pour l'instant. Sois le premier à mettre un doublon sur le marché.</div>`}
-  ${mine.length ? `<section class="panel" style="display:flex;flex-direction:column;gap:10px"><div class="eyebrow">Mes ventes</div>
-    <div class="pulls">${mine.map((l) => row(l, l.status === "open" ? `<button class="btn ghost sm" type="button" data-cancel="${l.id}">Retirer</button>` : `<span class="m-ok">Vendue</span>`)).join("")}</div></section>` : ""}`;
-}
-
 function viewCommunity() {
   const s = stats();
   const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -985,11 +1192,8 @@ function viewCommunity() {
     ${shared.feed.length ? `<div class="pulls">${shared.feed.map(feedRow).join("")}</div>` : `<div class="empty">Personne n'a encore sorti de Légendaire. À toi de jouer.</div>`}
   </section>
   <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Top collectionneurs</div>
-    ${shared.players.length ? `<ol class="board-list">${shared.players.map((p, i) => `
-      <li class="${p.uid === ME ? "me" : ""}"><span class="rank">${i + 1}</span><span class="by">${who(p.uid)}</span>
-        <span class="pl-stat">${p.cards}/${ALL_CARDS.length} cartes · ${p.gold} dorées${p.mythics ? ` · ${p.mythics} mythique${p.mythics > 1 ? "s" : ""}` : ""}</span></li>`).join("")}</ol>`
-      : `<div class="empty">Le classement apparaîtra dès que des joueurs auront ouvert des boosters.</div>`}
+    <div class="eyebrow">Classement · <span>touche un joueur pour voir son profil</span></div>
+    ${boardHTML()}
   </section>
   <section class="panel" style="display:flex;flex-direction:column;gap:12px">
     <div class="eyebrow">Mes gros tirages · <span>Épique et mieux, et les dorées</span></div>
@@ -1119,8 +1323,10 @@ function openSheet(id) {
     <div class="row" style="justify-content:center">
       ${DB && canShare ? `<button class="btn" type="button" data-sell="${id}">Vendre au marché</button>` : ""}
       <button class="btn ghost" type="button" data-share="${id}" data-gold="${!o.n && o.gold ? 1 : ""}">Partager</button>
+      ${SRV ? `<button class="btn ghost" type="button" data-show="${id}">${(save.showcase || []).includes(id) ? "Retirer de la vitrine" : "Mettre en vitrine"}</button>` : ""}
       ${o.n + o.gold > 1 ? `<button class="btn ghost" type="button" data-dis="${id}" data-gold="${o.n > 1 ? "" : 1}">Désenchanter un doublon · +${cardValue(id, !(o.n > 1))} ◆</button>` : ""}
-    </div>` : `<p class="note" style="text-align:center">Carte ${RAR[c.rar].label.toLowerCase()} pas encore obtenue. Ouvre des boosters pour débloquer sa fiche${cv ? `, ou achète-la au marché (cote ~${cv} ◆)` : ""}.</p>`}
+    </div>` : `<p class="note" style="text-align:center">Carte ${RAR[c.rar].label.toLowerCase()} pas encore obtenue. Ouvre des boosters pour débloquer sa fiche${cv ? `, ou achète-la au marché (cote ~${cv} ◆)` : ""}.</p>
+    ${SRV ? `<div class="row" style="justify-content:center"><button class="btn ghost" type="button" data-wish="${id}">${wishSet().has(id) ? "♥ Retirer de mes envies" : "♡ Ajouter à mes envies"}</button></div>` : ""}`}
     <button class="btn ghost" type="button" data-act="close">Fermer</button>
   </div>`;
   $("overlay").hidden = false;
@@ -1277,6 +1483,12 @@ document.addEventListener("click", (e) => {
     return adminPred(a, qid);
   }
   const bonusBtn = t.closest("[data-bonus]"); if (bonusBtn) return openBonus(bonusBtn.dataset.bonus);
+  const mt = t.closest("[data-mtab]"); if (mt) { marketTab = mt.dataset.mtab; return draw(); }
+  const bt = t.closest("[data-btab]"); if (bt) { boardTab = bt.dataset.btab; return draw(); }
+  const tr = t.closest("[data-trade]"); if (tr) { tr.disabled = true; return answerTrade(tr.dataset.trade, tr.dataset.ta); }
+  const pr = t.closest("[data-propose]"); if (pr) return openTradeBuilder(pr.dataset.propose);
+  const wi = t.closest("[data-wish]"); if (wi) return toggleWish(wi.dataset.wish);
+  const sh = t.closest("[data-show]"); if (sh) return toggleShowcase(sh.dataset.show);
   const disBtn = t.closest("[data-dis]"); if (disBtn) return disenchant(disBtn.dataset.dis, !!disBtn.dataset.gold);
   const shareBtn = t.closest("[data-share]"); if (shareBtn) return share(shareBtn.dataset.share, !!shareBtn.dataset.gold);
   const sellBtn = t.closest("[data-sell]"); if (sellBtn) return openSell(sellBtn.dataset.sell);
@@ -1289,16 +1501,28 @@ document.addEventListener("click", (e) => {
   if (act === "to-album") { opening = null; view = "album"; return draw(); }
   if (act === "recycle") return recycle();
   if (act === "craft") return craft();
+  if (act === "wish-all") return wishAllMissing();
   if (act === "streak") return claim("streak");
   if (act === "close" || t.id === "overlay") { $("overlay").hidden = true; return; }
   if (t.closest("#pack")) return tearPack();
   if (t.closest("#revealBtn")) return advance();
-  if (t.closest(".by")) return;
+  const by = t.closest(".by");
+  if (by) { const u = by.querySelector("[data-uid]")?.dataset.uid; if (u && SRV) openProfile(u); return; }
   const card = t.closest("[data-card]"); if (card) return openSheet(card.dataset.card);
 });
 document.addEventListener("submit", (e) => {
   if (e.target.id === "sellForm") { e.preventDefault(); confirmSell(e.target); }
   if (e.target.id === "pqForm") { e.preventDefault(); addQuestion(e.target); }
+  if (e.target.id === "tradeForm") { e.preventDefault(); sendTrade(); }
+});
+let mqT;
+document.addEventListener("input", (e) => {
+  if (e.target.id === "mq") { marketQuery = e.target.value; clearTimeout(mqT); mqT = setTimeout(() => { draw(); const i = $("mq"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); }
+  if (e.target.closest?.("#tradeForm")) updateTradeFair();
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id === "mr") { marketRar = e.target.value; draw(); }
+  if (e.target.closest?.("#tradeForm")) updateTradeFair();
 });
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") $("overlay").hidden = true;

@@ -21,8 +21,14 @@ def main():
     art = (ROOT / "src/art.js").read_text(encoding="utf8").replace(
         "};\n", f'  rayzoS: "{uri("rayzoS")}",\n  rayzoH: "{uri("rayzoH")}",\n  billyFA: "{uri("billyFA")}",\n  reichiFA: "{uri("reichiFA")}",\n}};\n', 1)
     page = (head + body).replace("/*ART*/", art)
-    (ROOT / "index.html").write_text(SKELETON + page + "\n</body>\n</html>\n", encoding="utf8")
-    print("index.html", len(page))
+    # claude.ai : la page telle quelle (le site l'enveloppe lui-même)
+    (ROOT / "artifact.html").write_text(page, encoding="utf8")
+    # Cloudflare : page complète + connexion Discord, servie depuis public/
+    discord = (ROOT / "src/discord.js").read_text(encoding="utf8")
+    site = page.replace("<script>", "<script>\n" + discord + "\n</script>\n<script>", 1)
+    (ROOT / "public").mkdir(exist_ok=True)
+    (ROOT / "public/index.html").write_text(SKELETON + site + "\n</body>\n</html>\n", encoding="utf8")
+    print("public/index.html", len(site), "· artifact.html", len(page))
 
 
 if __name__ == "__main__":

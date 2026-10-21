@@ -1,0 +1,17 @@
+// Configuration Cloudflare du site Re Zéro : LoL — Boosters
+{
+  "name": "rezero-boosters",
+  "main": "worker/index.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/auth/*"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "rezero-boosters", "database_id": "REMPLACER_PAR_ID_D1" }
+  ],
+  // Les variables (DISCORD_CLIENT_ID, GUILD_ID, ADMIN_IDS) et le secret DISCORD_CLIENT_SECRET
+  // se règlent dans le tableau de bord Cloudflare ; ne pas les écraser au déploiement.
+  "keep_vars": true
+}

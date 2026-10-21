@@ -1,11 +1,3 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-</head>
-<body>
 <title>Boosters Re Zéro : LoL</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -416,6 +408,19 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 .kc.fa .rar::after { content: " · Full Art"; }
 .kc.fa .foot b { font-size: 1.4em; text-shadow: 0 2px 10px #000, 0 0 18px rgba(255,40,40,.45); }
 .note a, .empty a { color: var(--accent); }
+.bar { position: relative; }
+.acct { flex: none; position: relative; }
+.acct-btn { width: 40px; height: 40px; border-radius: 50%; padding: 0; border: 2px solid var(--gold); background: #010a13; cursor: pointer; overflow: hidden; }
+.acct-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.acct-login { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #5865f2; color: #fff; font: 700 .8rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+.acct-login svg { width: 18px; height: 18px; }
+.acct-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 25; width: 240px; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: #0a1428; border: 1px solid var(--gold); box-shadow: 0 12px 30px rgba(0,0,0,.6); }
+.acct-who { display: flex; align-items: center; gap: 10px; }
+.acct-who img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold-d); }
+.acct-who b { display: block; font: 700 .95rem var(--font-display); color: var(--gold-l); }
+.acct-who span { font: 600 .72rem var(--font-mono); color: var(--muted); letter-spacing: .04em; }
+.acct-menu .btn { text-decoration: none; }
+@media (max-width: 420px) { .wallet { padding: 6px 8px; gap: 6px; } .wallet .gauge { display: none; } .acct-login span { display: none; } .brand small { display: none; } }
 .lore { display: flex; flex-direction: column; gap: 10px; }
 .lore .btn { align-self: flex-start; text-decoration: none; }
 .facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
@@ -432,6 +437,7 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
       <span class="gauge"><i id="wGauge"></i></span><span id="wFree">10/10</span>
       <span class="chakra">◆ <span id="wChakra">0</span></span>
     </div>
+    <div class="acct" id="acct" hidden></div>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -654,7 +660,9 @@ const svg = (i) => `<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-wi
 
 const $ = (id) => document.getElementById(id);
 const ONLINE = "https://bit.ly/rezero-boosters";
-const offlineMsg = (what) => window.claude?.use
+const offlineMsg = (what) => window.DISCORD_LOGIN
+  ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour ${what}.`
+  : window.claude?.use
   ? `Connecte-toi à claude.ai pour ${what}.`
   : `Ici, l'app est en mode solo. Pour ${what} avec le QG, joue sur la version en ligne : <a href="${ONLINE}" target="_blank" rel="noopener">${ONLINE.replace("https://", "")}</a>`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -1147,7 +1155,7 @@ function openButtons() {
 }
 function sharedNote() {
   if (!DB) return `<p class="note">${offlineMsg("voir les autres joueurs")}</p>`;
-  if (!canShare) return `<p class="note">Tu peux regarder, mais pour apparaître ici et utiliser le marché, demande au propriétaire de l'app l'accès « Contributeur ».</p>`;
+  if (!canShare) return `<p class="note">${window.DISCORD_LOGIN ? "Tu peux regarder, mais pour apparaître ici, voter et utiliser le marché, il faut être membre du serveur Discord QG de Shinjuku." : "Tu peux regarder, mais pour apparaître ici et utiliser le marché, demande au propriétaire de l'app l'accès « Contributeur »."}</p>`;
   return "";
 }
 
@@ -1555,10 +1563,26 @@ document.addEventListener("keydown", (e) => {
   if ((e.key === "Enter" || e.key === " ") && e.target.matches("[data-card]")) { e.preventDefault(); openSheet(e.target.dataset.card); }
 });
 
+// ===== Compte Discord (version Cloudflare) =====
+async function drawAccount() {
+  if (!window.DISCORD_LOGIN) return;
+  const box = $("acct"), m = await window.discordMe();
+  box.hidden = false;
+  box.innerHTML = m
+    ? `<button class="acct-btn" type="button" data-act="acct" aria-label="Mon compte"><img src="${m.avatar}" alt=""></button>
+       <div class="acct-menu" id="acctMenu" hidden>
+         <div class="acct-who"><img src="${m.avatar}" alt=""><div><b></b><span>${m.admin ? "Admin" : m.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</span></div></div>
+         <a class="btn ghost sm" href="/auth/logout">Se déconnecter</a></div>`
+    : `<a class="acct-login" href="/auth/login"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.6 1.3a18.3 18.3 0 0 0-5.5 0L8.6 3a19.7 19.7 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18a19.9 19.9 0 0 0 6 3l1.3-2a12.9 12.9 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12.2 0l.5.4c-.6.4-1.3.7-2 1l1.3 2a19.8 19.8 0 0 0 6-3c.5-5.1-.8-9.6-3.6-13.6ZM8 15.3c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.5 8 10.5s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg><span>Discord</span></a>`;
+  if (m) box.querySelector(".acct-who b").textContent = m.name || "Joueur";
+}
+document.addEventListener("click", (e) => {
+  const menu = $("acctMenu"); if (!menu) return;
+  if (e.target.closest("[data-act=acct]")) { menu.hidden = !menu.hidden; return; }
+  if (!e.target.closest("#acctMenu")) menu.hidden = true;
+});
+drawAccount();
 regen(); ensureDaily(); draw();
 setInterval(() => { if (regen()) persist(); if (!opening && $("overlay").hidden && view === "boosters") draw(); else header(); }, 30000);
 connect();
 </script>
-
-</body>
-</html>

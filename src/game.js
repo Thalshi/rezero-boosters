@@ -34,16 +34,18 @@ const PEOPLE = {
              power: "Explosifs, canon au bras orné d’un crâne, bombes", look: "Petite créature ronde, cheveux en pics orange, lunettes vertes, tenue rouge blindée", mood: "", quote: "" },
   valcer:  { name: "Valcer", fac: "enn", rar: "r", kanji: "剣", color: "#6c5a9e", icon: "rapier", tag: "Duelliste",
              power: "Rapière, c’est un duelliste", look: "Cheveux longs gris, yeux pâles, cape sombre et violette, un seul bras", mood: "Précis, calculateur, aristocrate, dangereux, toujours maître de lui", quote: "La perfection n’a pas besoin d’être complète." },
-  ogre1:   { name: "Ogre 1", fac: "enn", rar: "c", kanji: "鬼", color: "#5f7d3a", icon: "mono", tag: "Ogre vert",
-             power: "", look: "Ogre à la peau verte, tenue de cuir", mood: "", quote: "" },
+  ogre1:   { name: "Ogre 1", fac: "enn", rar: "c", kanji: "鬼", color: "#5f7d3a", icon: "mono", tag: "Ogre vert barbu",
+             power: "", look: "Ogre à la peau verte, barbe, tenue de cuir", mood: "", quote: "Quoi ? T’en veux encore ?" },
   ogre2:   { name: "Ogre 2", fac: "enn", rar: "c", kanji: "鬼", color: "#3a6f9e", icon: "mono", tag: "Ogre bleu",
              power: "", look: "Ogre massif à la peau bleue", mood: "", quote: "" },
   ogre3:   { name: "Ogre 3", fac: "enn", rar: "pc", kanji: "鬼", color: "#4f6a33", icon: "mono", tag: "Ogre vert",
              power: "", look: "Ogre à la peau verte, vu en gros plan à la fin de l'épisode", mood: "", quote: "" },
+  ogre4:   { name: "Ogre 4", fac: "enn", rar: "c", kanji: "鬼", color: "#b0956a", icon: "mono", tag: "Ogre beige",
+             power: "", look: "Ogre massif à la peau beige, crâne rasé", mood: "", quote: "" },
   soldat1: { name: "Soldat 1", fac: "enn", rar: "c", kanji: "兵", color: "#a8323c", icon: "spear", tag: "Cape rouge",
              power: "Lance", look: "Soldat à cape rouge armé d'une lance", mood: "", quote: "" },
-  soldat2: { name: "Soldat 2", fac: "enn", rar: "r", kanji: "兵", color: "#8a8f99", icon: "spear", tag: "Casque à plumet",
-             power: "", look: "Soldat en armure, casque fermé à plumet rouge", mood: "", quote: "" },
+  soldat2: { name: "Soldat 2", fac: "enn", rar: "r", kanji: "兵", color: "#8a8f99", icon: "spear", tag: "Casque et capuche rouge",
+             power: "", look: "Soldat en armure, casque fermé, capuche rouge, plastron percé", mood: "", quote: "" },
   goldor:  { name: "Goldor", fac: "neu", rar: "e", kanji: "岩", color: "#b8962e", icon: "orb", tag: "Pierre et nature",
              power: "Pierre et nature, un orbe central lui sert de source d’énergie", look: "Golem de pierre géant, armure dorée, un arbre rouge pousse sur lui", mood: "", quote: "Les racines ne plient jamais." },
   carukan: { name: "Carukan", fac: "neu", rar: "r", kanji: "煙", color: "#c04a6e", icon: "claw", tag: "Seigneur",
@@ -57,11 +59,11 @@ const PEOPLE = {
   siflar:  { name: "Siflar", fac: "neu", rar: "c", kanji: "蛇", color: "#c8553a", icon: "cobra", tag: "Marchand",
              power: "Aucun : c’est un marchand", look: "Homme-cobra aux écailles rouges et beiges, écharpe et robes rouges, bibelots", mood: "Fourbe, charmeur, beau parleur, pas digne de confiance, vend parfois du toc", quote: "Des objets, des histoires, des opportunités." },
   sanglier: { name: "Homme-sanglier", fac: "neu", rar: "r", kanji: "猪", color: "#b08a6a", icon: "mono", tag: "Cuisinier",
-             power: "", look: "Homme-sanglier massif qui sert des pâtes au marché", mood: "", quote: "" },
-  ecureuil: { name: "Écureuil", fac: "neu", rar: "c", kanji: "栗", color: "#9a9a8a", icon: "mono", tag: "Taverne de l'arbre",
-             power: "", look: "Écureuil de la taverne dans l'arbre", mood: "", quote: "" },
-  castor:  { name: "Castor", fac: "neu", rar: "pc", kanji: "木", color: "#7a5a3a", icon: "mono", tag: "Taverne de l'arbre",
-             power: "", look: "Grand castor qui porte des caisses à la taverne dans l'arbre", mood: "", quote: "" },
+             power: "", look: "Homme-sanglier cornu, massif et tatoué, qui sert des pâtes au marché", mood: "", quote: "Des bonnes nouilles en sauce aux boules draconiques." },
+  ecureuil: { name: "Écureuil", fac: "neu", rar: "c", kanji: "栗", color: "#c8642a", icon: "hammer", tag: "Forgeron",
+             power: "", look: "Écureuil roux forgeron, foulard violet, travaille à l'enclume avec le porc-épic", mood: "", quote: "" },
+  porcepic: { name: "Porc-épic", fac: "neu", rar: "pc", kanji: "鍛", color: "#7a6a5a", icon: "hammer", tag: "Forgeron",
+             power: "", look: "Porc-épic forgeron en armure de cuir, marteau à la main devant l'enclume", mood: "", quote: "" },
   nestor:  { name: "Nestor", fac: "all", rar: "c", kanji: "工", color: "#b07a3c", icon: "goggles", tag: "Bricoleur",
              power: "Aucun : il bricole et invente", look: "Marmotte avec lunettes d’aviateur, écharpe et sacoche", mood: "Curieux, malin, débrouillard, rêveur, un peu filou", quote: "Petit par la taille, grand par les idées." },
   sultran: { name: "Sultran’Zahar", fac: "all", rar: "m", kanji: "無", color: "#5b2a9e", icon: "void", tag: "Néant",
@@ -171,7 +173,7 @@ const MISSIONS = [
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
 const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "sultran", "shiro", "mahed", "reichi", "sasori", "iouaf", "sakuto", "rayzo", "teo",
-  "inconnu", "ogre1", "ogre2", "ogre3", "soldat1", "soldat2", "sanglier", "ecureuil", "castor"];
+  "inconnu", "ogre1", "ogre2", "ogre3", "ogre4", "soldat1", "soldat2", "sanglier", "ecureuil", "porcepic"];
 const EP_MAX = 12;
 const HIDDEN = 99;
 const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });

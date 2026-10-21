@@ -219,6 +219,42 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 .acct-who span { font: 600 .72rem var(--font-mono); color: var(--muted); letter-spacing: .04em; }
 .acct-menu .btn { text-decoration: none; }
 @media (max-width: 420px) { .wallet { padding: 6px 8px; gap: 6px; } .wallet .gauge { display: none; } .acct-login span { display: none; } .brand small { display: none; } }
+/* --- Skins des persos IRL : une gamme par rareté, façon LoL --- */
+.art.skin { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; background: #05070d; }
+.art.skin .photo, .art.skin .layer { position: absolute; inset: 0; background-size: cover; background-position: var(--pos, 50% 25%); }
+.art.skin .fx, .art.skin .fx2 { position: absolute; inset: 0; pointer-events: none; }
+.sk-chroma .photo, .sk-chroma .layer { filter: hue-rotate(var(--hue)) saturate(1.5); }
+.sk-chroma .fx { background: linear-gradient(160deg, hsl(var(--h) 90% 60% / .35), transparent 45%, hsl(var(--h) 90% 45% / .45)); mix-blend-mode: overlay; }
+.sk-arcade .photo, .sk-arcade .layer { filter: saturate(1.8) contrast(1.25); }
+.sk-arcade .fx { background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px), linear-gradient(180deg, rgba(255,60,200,.35), rgba(60,220,255,.35)); mix-blend-mode: hard-light; }
+.sk-arcade .fx2 { background: linear-gradient(90deg, rgba(255,0,170,.25), transparent 30%, transparent 70%, rgba(0,230,255,.25)); box-shadow: inset 0 0 0 .35em rgba(255,0,170,.55), inset 0 0 0 .55em rgba(0,230,255,.45); }
+.sk-arcade .fx2::after { content: "1UP · INSERT COIN"; position: absolute; top: 22%; left: 0; right: 0; text-align: center; font: 700 .55em var(--font-mono); letter-spacing: .25em; color: #ffe94d; text-shadow: 0 0 6px #ff00aa; animation: blinkc 1.2s steps(2) infinite; }
+.sk-neon .photo, .sk-neon .layer { filter: grayscale(1) contrast(1.5) brightness(.75); }
+.sk-neon .fx { background: linear-gradient(135deg, #ff2bd6 0%, #7a2bff 45%, #00e5ff 100%); mix-blend-mode: color; }
+.sk-neon .fx2 { background: radial-gradient(circle at 20% 80%, rgba(0,229,255,.45), transparent 35%), radial-gradient(circle at 85% 15%, rgba(255,43,214,.5), transparent 35%); mix-blend-mode: screen; box-shadow: inset 0 0 1.4em rgba(0,229,255,.7); animation: neonp 2.4s ease-in-out infinite; }
+.sk-lune .photo, .sk-lune .layer { filter: grayscale(1) contrast(1.25) brightness(1.05); }
+.sk-lune .fx { background: linear-gradient(180deg, #6a0014 0%, #ff1e3c 50%, #4a000c 100%); mix-blend-mode: color; }
+.sk-lune .fx2 { background: radial-gradient(circle at 76% 18%, #ff3b3b 0 13%, rgba(255,40,40,.55) 15%, transparent 30%); mix-blend-mode: screen; }
+.sk-lune .fx2::before, .sk-lune .fx2::after { content: ""; position: absolute; width: .6em; height: .35em; border-radius: 60% 0; background: #ff2a4a; top: -10%; left: 20%; box-shadow: 4em 2em 0 #ff5a6e, 1.5em 5em 0 #ff2a4a, 6em 7em 0 #ff7a8a; animation: petals 6s linear infinite; }
+.sk-lune .fx2::after { left: 60%; animation-delay: -3s; }
+.sk-astral .photo, .sk-astral .layer { filter: grayscale(.6) contrast(1.15) brightness(.9); }
+.sk-astral .fx { background: linear-gradient(170deg, #1b0b5e 0%, #4b2bd6 45%, #00b3d6 100%); mix-blend-mode: color; }
+.sk-astral .fx2 { background-image: radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1.5px 1.5px at 72% 12%, #fff, transparent), radial-gradient(1px 1px at 38% 62%, #fff, transparent), radial-gradient(2px 2px at 86% 48%, #cfe9ff, transparent), radial-gradient(1px 1px at 22% 84%, #fff, transparent), radial-gradient(1.5px 1.5px at 60% 34%, #fff, transparent), radial-gradient(60% 40% at 70% 20%, rgba(150,110,255,.45), transparent); mix-blend-mode: screen; animation: twinkle 3s ease-in-out infinite; }
+.sk-prestige .photo, .sk-prestige .layer { filter: sepia(1) saturate(2.2) hue-rotate(-12deg) contrast(1.15) brightness(1.05); }
+.sk-prestige .fx { background: linear-gradient(115deg, transparent 30%, rgba(255,240,190,.75) 46%, rgba(255,255,255,.9) 50%, rgba(255,230,160,.7) 54%, transparent 70%); mix-blend-mode: screen; animation: sheen 3.2s linear infinite; }
+.sk-prestige .fx2 { box-shadow: inset 0 0 0 .3em #c8aa6e, inset 0 0 0 .45em #010a13, inset 0 0 0 .6em #f0d38a, inset 0 0 2em rgba(240,211,138,.6); }
+.kc.is-skin .rar::before { content: "Skin · "; }
+.kc.sk-l-prestige { border-color: #f0d38a; }
+@keyframes blinkc { 50% { opacity: 0; } }
+@keyframes neonp { 50% { opacity: .65; } }
+@keyframes petals { from { transform: translateY(0) rotate(0); } to { transform: translateY(260%) rotate(220deg); } }
+@keyframes twinkle { 50% { opacity: .55; } }
+.skin-person { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
+.skin-person h4 { margin: 0; font: 700 .95rem var(--font-display); color: var(--gold-l); display: flex; justify-content: space-between; align-items: baseline; }
+.skin-person h4 span { font: 600 .75rem var(--font-mono); color: var(--muted); }
+.skin-row { display: grid; grid-auto-flow: column; grid-auto-columns: 96px; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; }
+.skin-row .kc { --w: 96px; }
+.craft-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .lore { display: flex; flex-direction: column; gap: 10px; }
 .lore .btn { align-self: flex-start; text-decoration: none; }
 .facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
@@ -691,7 +727,15 @@ function toClaim() { return missionsToday().filter((m) => m.prog >= m.goal && !m
 
 // ===== Carte =====
 const RINGS = `<svg class="rings" viewBox="0 0 100 140" aria-hidden="true" fill="none" stroke="#9fe8ff" stroke-width="1.4"><ellipse cx="50" cy="70" rx="44" ry="58" stroke-dasharray="6 5"/><ellipse cx="50" cy="70" rx="34" ry="46" stroke-dasharray="3 6" stroke="#c7a6ff"/><path d="M8 30l6 4M92 110l-6-4M90 26l-6 5M10 116l6-5" stroke-linecap="round"/></svg>`;
+const hueOf = (who) => [...who].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
+function skinArtHTML(c, locked) {
+  const img = ART[c.who] ? '<div class="layer"></div>' : '<div class="photo"></div>';
+  if (locked) return `<div class="art who-${c.who}"><div class="emblem" style="--cc:#2a2633"><span class="mono">?</span></div></div>`;
+  const h = hueOf(c.who);
+  return `<div class="art skin sk-${c.skin} who-${c.who}" style="--hue:${h}deg;--h:${(h + 200) % 360}">${img}<div class="fx"></div><div class="fx2"></div></div>`;
+}
 function artHTML(c, locked) {
+  if (c.skin) return skinArtHTML(c, locked);
   const p = PEOPLE[c.who], fx = c.fx || [];
   if (ART[c.who] || ART[c.img]) return `<div class="art who-${c.img || c.who}" style="--pos:${c.pos};--zoom:${c.zoom}">
       <div class="layer base"></div>
@@ -708,7 +752,7 @@ function artHTML(c, locked) {
 function cardHTML(c, o = {}) {
   const p = PEOPLE[c.who], R = RAR[c.rar];
   const locked = !!o.locked;
-  return `<div class="kc r-${c.rar} kc-${c.who} ${c.fa ? "fa" : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""}
+  return `<div class="kc r-${c.rar} kc-${c.who} ${c.fa ? "fa" : ""} ${c.skin ? `is-skin sk-l-${c.skin}` : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""}
     aria-label="${locked ? "Carte manquante, " + R.label : `${p.name}, ${c.title}, ${R.label}${o.gold ? ", dorée" : ""}`}">
     ${artHTML(c, locked)}
     <div class="shade"></div>
@@ -860,7 +904,21 @@ function viewAlbum() {
       <button class="btn ghost" type="button" data-act="recycle" ${dv ? "" : "disabled"}>Recycler les doublons · +${dv} ◆</button>
     </div>
   </section>
-  ${sections}`;
+  ${sections}
+  ${viewSkins()}`;
+}
+function viewSkins() {
+  const got = SKINS.filter((c) => has(c.id)).length, dupes = craftableDupes(save).length;
+  return `<div class="section-head" style="--fc:#b04ce0"><h3>Skins du QG · Coffre hextech</h3><span>${got}/${SKINS.length}</span></div>
+  <section class="panel craft-box">
+    <div><h3>Combiner des doublons</h3><p class="note">Comme dans LoL : ${CRAFT_COST} doublons (les moins rares d'abord) donnent 1 skin au hasard. Tu as ${dupes} doublon${dupes > 1 ? "s" : ""}.</p></div>
+    <button class="btn" type="button" data-act="craft" ${dupes >= CRAFT_COST ? "" : "disabled"}>Combiner ${CRAFT_COST} → 1 skin</button>
+  </section>
+  ${SKINNED.filter((who) => unlockedChar(who) || SKINS.some((c) => c.who === who && has(c.id))).map((who) => {
+    const list = SKINS.filter((c) => c.who === who), n = list.filter((c) => has(c.id)).length;
+    return `<div class="skin-person"><h4>${PEOPLE[who].name}<span>${n}/${list.length}</span></h4>
+      <div class="skin-row">${list.map((c) => cardHTML(c, { locked: !has(c.id), count: own(c.id).n + own(c.id).gold, click: true })).join("")}</div></div>`;
+  }).join("")}`;
 }
 
 function viewMarket() {
@@ -1021,6 +1079,7 @@ function openSheet(id) {
     <div class="row" style="justify-content:center">
       ${DB && canShare ? `<button class="btn" type="button" data-sell="${id}">Vendre au marché</button>` : ""}
       <button class="btn ghost" type="button" data-share="${id}" data-gold="${!o.n && o.gold ? 1 : ""}">Partager</button>
+      ${o.n + o.gold > 1 ? `<button class="btn ghost" type="button" data-dis="${id}" data-gold="${o.n > 1 ? "" : 1}">Désenchanter un doublon · +${cardValue(id, !(o.n > 1))} ◆</button>` : ""}
     </div>` : `<p class="note" style="text-align:center">Carte ${RAR[c.rar].label.toLowerCase()} pas encore obtenue. Ouvre des boosters pour débloquer sa fiche${cv ? `, ou achète-la au marché (cote ~${cv} ◆)` : ""}.</p>`}
     <button class="btn ghost" type="button" data-act="close">Fermer</button>
   </div>`;
@@ -1127,6 +1186,34 @@ async function claim(kind, id) {
   } catch (e) { toast(e.message); }
 }
 
+async function craft() {
+  try {
+    const r = SRV ? await srv("craft") : craftS(save, CONFIG, ME, Math.random);
+    if (r.error) throw new Error(r.error);
+    persist();
+    unlocked(r.card);
+  } catch (e) { toast(e.message); }
+}
+async function disenchant(id, gold) {
+  try {
+    const v = SRV ? (await srv("disenchant", { id, gold, keepLast: true })).value : (own(id)[gold ? "gold" : "n"] > 1 ? disenchantS(save, id, gold) : 0);
+    if (!v) return;
+    persist(); $("overlay").hidden = true; draw(); toast(`Désenchanté : +${v} ◆`);
+  } catch (e) { toast(e.message); }
+}
+// fenêtre « Objet déverrouillé ! » façon LoL
+function unlocked(x) {
+  const c = byId[x.id];
+  $("overlay").innerHTML = `<div class="sheet unlock" role="dialog" aria-modal="true" aria-label="Objet déverrouillé">
+    <div class="eyebrow">Objet déverrouillé !</div>
+    ${cardHTML(c, { gold: x.gold, isNew: x.isNew })}
+    <h2 style="font-size:1.3rem;text-align:center">${PEOPLE[c.who].name} · ${c.title}</h2>
+    <p class="note" style="text-align:center">${RAR[c.rar].label}${x.isNew ? " · nouveau dans ta collection" : " · doublon"}</p>
+    <button class="btn" type="button" data-act="close">Super</button></div>`;
+  $("overlay").hidden = false;
+  draw();
+}
+
 let toastT;
 function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
 
@@ -1150,6 +1237,7 @@ document.addEventListener("click", (e) => {
     return adminPred(a, qid);
   }
   const bonusBtn = t.closest("[data-bonus]"); if (bonusBtn) return openBonus(bonusBtn.dataset.bonus);
+  const disBtn = t.closest("[data-dis]"); if (disBtn) return disenchant(disBtn.dataset.dis, !!disBtn.dataset.gold);
   const shareBtn = t.closest("[data-share]"); if (shareBtn) return share(shareBtn.dataset.share, !!shareBtn.dataset.gold);
   const sellBtn = t.closest("[data-sell]"); if (sellBtn) return openSell(sellBtn.dataset.sell);
   const buyBtn = t.closest("[data-buy]"); if (buyBtn) { buyBtn.disabled = true; return buy(buyBtn.dataset.buy); }
@@ -1160,6 +1248,7 @@ document.addEventListener("click", (e) => {
   if (act === "skip") { opening.phase = "done"; return draw(); }
   if (act === "to-album") { opening = null; view = "album"; return draw(); }
   if (act === "recycle") return recycle();
+  if (act === "craft") return craft();
   if (act === "streak") return claim("streak");
   if (act === "close" || t.id === "overlay") { $("overlay").hidden = true; return; }
   if (t.closest("#pack")) return tearPack();

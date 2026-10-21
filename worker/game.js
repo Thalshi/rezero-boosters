@@ -20,6 +20,9 @@ const PEOPLE = {
              power: "Il évolue : bras-lames, queue à crochet, lance", look: "Humanoïde gris pâle très musclé, crête, barbe, marques et lames cramoisies", mood: "Violence, discipline, évolution, toujours plus loin", quote: "Chaque blessure est une promesse." },
   braxx:   { name: "Braxx", fac: "anta", rar: "l", kanji: "影", color: "#7a2d8f", icon: "mask", tag: "Ombre",
              power: "Ombre : il se fond dans le décor et disparaît, lames d’ombre courbes, bombe fumigène", look: "Capuche pourpre, masque à bec aux yeux rouges, cape d’où sortent des volutes d’ombre", mood: "Mystérieux, calculateur, agile, manipulateur, il frappe avant d’être vu", quote: "Les masques tombent toujours. Pas les miens." },
+  // ===== Persos secondaires vus dans l'épisode 1 (noms à confirmer par Billy, images provisoires tirées de l'épisode)
+  inconnu: { name: "???", fac: "anta", rar: "e", kanji: "謎", color: "#c9c3d8", icon: "arcane", tag: "Le méchant de l'épisode 1",
+             power: "Donne de nouveaux pouvoirs à Mahed (aura violette)", look: "Cheveux blancs avec une mèche noire, yeux cernés de noir, manteau blanc à col sombre", mood: "", quote: "" },
   dispawn: { name: "Dispawn", fac: "enn", rar: "e", kanji: "劇", color: "#b8323c", icon: "tophat", tag: "Maître de l’arène",
              power: "Canne de combat à tête de serpent, maître de l’arène", look: "Colosse à la peau grise, sourire plein de crocs, haut-de-forme, manteau noir et rouge, boucle dorée", mood: "Imposant, théâtral, charismatique, impitoyable, un gentleman… à sa manière", quote: "Le spectacle est une religion." },
   unbeaten:{ name: "The Unbeaten", fac: "enn", rar: "l", kanji: "不", color: "#8a5a3a", icon: "axe", tag: "Invaincu",
@@ -32,6 +35,16 @@ const PEOPLE = {
              power: "Explosifs, canon au bras orné d’un crâne, bombes", look: "Petite créature ronde, cheveux en pics orange, lunettes vertes, tenue rouge blindée", mood: "", quote: "" },
   valcer:  { name: "Valcer", fac: "enn", rar: "r", kanji: "剣", color: "#6c5a9e", icon: "rapier", tag: "Duelliste",
              power: "Rapière, c’est un duelliste", look: "Cheveux longs gris, yeux pâles, cape sombre et violette, un seul bras", mood: "Précis, calculateur, aristocrate, dangereux, toujours maître de lui", quote: "La perfection n’a pas besoin d’être complète." },
+  ogre1:   { name: "Ogre 1", fac: "enn", rar: "c", kanji: "鬼", color: "#5f7d3a", icon: "mono", tag: "Ogre vert",
+             power: "", look: "Ogre à la peau verte, tenue de cuir", mood: "", quote: "" },
+  ogre2:   { name: "Ogre 2", fac: "enn", rar: "c", kanji: "鬼", color: "#3a6f9e", icon: "mono", tag: "Ogre bleu",
+             power: "", look: "Ogre massif à la peau bleue", mood: "", quote: "" },
+  ogre3:   { name: "Ogre 3", fac: "enn", rar: "pc", kanji: "鬼", color: "#4f6a33", icon: "mono", tag: "Ogre vert",
+             power: "", look: "Ogre à la peau verte, vu en gros plan à la fin de l'épisode", mood: "", quote: "" },
+  soldat1: { name: "Soldat 1", fac: "enn", rar: "c", kanji: "兵", color: "#a8323c", icon: "spear", tag: "Cape rouge",
+             power: "Lance", look: "Soldat à cape rouge armé d'une lance", mood: "", quote: "" },
+  soldat2: { name: "Soldat 2", fac: "enn", rar: "r", kanji: "兵", color: "#8a8f99", icon: "spear", tag: "Casque à plumet",
+             power: "", look: "Soldat en armure, casque fermé à plumet rouge", mood: "", quote: "" },
   goldor:  { name: "Goldor", fac: "neu", rar: "e", kanji: "岩", color: "#b8962e", icon: "orb", tag: "Pierre et nature",
              power: "Pierre et nature, un orbe central lui sert de source d’énergie", look: "Golem de pierre géant, armure dorée, un arbre rouge pousse sur lui", mood: "", quote: "Les racines ne plient jamais." },
   carukan: { name: "Carukan", fac: "neu", rar: "r", kanji: "煙", color: "#c04a6e", icon: "claw", tag: "Seigneur",
@@ -44,6 +57,12 @@ const PEOPLE = {
              power: "Bâton et lien avec son hibou", look: "Singe au visage rouge, manteau de fourrure", mood: "Observateur, énigmatique, pacifique mais redoutable, en harmonie avec la nature", quote: "Chaque silence a sa réponse." },
   siflar:  { name: "Siflar", fac: "neu", rar: "c", kanji: "蛇", color: "#c8553a", icon: "cobra", tag: "Marchand",
              power: "Aucun : c’est un marchand", look: "Homme-cobra aux écailles rouges et beiges, écharpe et robes rouges, bibelots", mood: "Fourbe, charmeur, beau parleur, pas digne de confiance, vend parfois du toc", quote: "Des objets, des histoires, des opportunités." },
+  sanglier: { name: "Homme-sanglier", fac: "neu", rar: "r", kanji: "猪", color: "#b08a6a", icon: "mono", tag: "Cuisinier",
+             power: "", look: "Homme-sanglier massif qui sert des pâtes au marché", mood: "", quote: "" },
+  ecureuil: { name: "Écureuil", fac: "neu", rar: "c", kanji: "栗", color: "#9a9a8a", icon: "mono", tag: "Taverne de l'arbre",
+             power: "", look: "Écureuil de la taverne dans l'arbre", mood: "", quote: "" },
+  castor:  { name: "Castor", fac: "neu", rar: "pc", kanji: "木", color: "#7a5a3a", icon: "mono", tag: "Taverne de l'arbre",
+             power: "", look: "Grand castor qui porte des caisses à la taverne dans l'arbre", mood: "", quote: "" },
   nestor:  { name: "Nestor", fac: "all", rar: "c", kanji: "工", color: "#b07a3c", icon: "goggles", tag: "Bricoleur",
              power: "Aucun : il bricole et invente", look: "Marmotte avec lunettes d’aviateur, écharpe et sacoche", mood: "Curieux, malin, débrouillard, rêveur, un peu filou", quote: "Petit par la taille, grand par les idées." },
   sultran: { name: "Sultran’Zahar", fac: "all", rar: "m", kanji: "無", color: "#5b2a9e", icon: "void", tag: "Néant",
@@ -133,7 +152,8 @@ const PRICE = 100;                     // prix d'un booster en boutique (◆)
 const GOLD_EVERY = 10;
 const MYTHIC_PITY = 120;
 const GOLD_CHANCE = 0.02;
-const THEME_MIN = 8;                   // persos débloqués avant qu'un booster thématique s'ouvre
+const THEME_MIN = 5;                   // persos débloqués avant qu'un booster thématique s'ouvre (provisoire)
+const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
 const DAILY_LAST = { e: 85, l: 12, m: 3 }; // 5e carte du pack du jour : Épique ou mieux
 const STREAK = [{ boosters: 1 }, { chakra: 50 }, { boosters: 1 }, { chakra: 100 }, { boosters: 2 }, { chakra: 150 }, { boosters: 3, chakra: 300 }];
 const MISSIONS = [
@@ -151,7 +171,8 @@ const MISSIONS = [
 ];
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
-const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "sultran", "shiro", "mahed", "reichi", "sasori", "iouaf", "sakuto", "rayzo", "teo"];
+const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "sultran", "shiro", "mahed", "reichi", "sasori", "iouaf", "sakuto", "rayzo", "teo",
+  "inconnu", "ogre1", "ogre2", "ogre3", "soldat1", "soldat2", "sanglier", "ecureuil", "castor"];
 const EP_MAX = 12;
 const HIDDEN = 99;
 const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });
@@ -414,11 +435,12 @@ const poolFor = (pk, cfg, uid) => (pk.skins ? SKINS : CARDS).filter((c) => (!pk.
 const mixPoolFor = (pk, cfg, uid) => (pk.skins ? SKINS : CARDS).filter((c) => canPackFor(cfg, c, uid));
 const themeSize = (pool) => new Set(pool.map((c) => c.who)).size;
 // Un booster s'ouvre si son Mix a au moins une Commune (aucune carte ne monte donc jamais en rareté)
-// et, pour un booster thématique, si son thème a au moins THEME_MIN persos débloqués.
+// et, pour un booster thématique, si son thème a au moins THEME_MIN persos débloqués et des cartes
+// Communes, Peu communes et Rares : environ 90 % des cartes du booster viennent alors du thème.
 function packOpenFor(pk, cfg, uid) {
   const pool = poolFor(pk, cfg, uid);
   if (!pool.length || !mixPoolFor(pk, cfg, uid).some((c) => c.rar === "c")) return false;
-  return !pk.fac || themeSize(pool) >= THEME_MIN;
+  return !pk.fac || (themeSize(pool) >= THEME_MIN && THEME_RARITIES.every((r) => pool.some((c) => c.rar === r)));
 }
 // le pack du jour doit en plus pouvoir tenir sa promesse : au moins une carte Épique ou mieux
 const dailyOpenFor = (pk, cfg, uid) => packOpenFor(pk, cfg, uid) && mixPoolFor(pk, cfg, uid).some((c) => RANKS.indexOf(c.rar) >= 3);
@@ -616,4 +638,4 @@ function importSaveS(cand, now = Date.now()) {
 // Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
 const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk };

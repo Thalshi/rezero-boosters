@@ -37,7 +37,7 @@ t.section("Boosters vides et seuils d'ouverture");
     for (const pk of allPacks()) {
       const open = G.packOpenFor(pk, cfg, uid), pool = G.poolFor(pk, cfg, uid), mix = G.mixPoolFor(pk, cfg, uid);
       checked++;
-      if (open && (!pool.length || !mix.some((c) => c.rar === "c") || (pk.fac && G.themeSize(pool) < G.THEME_MIN))) bad.push(`${label} · ${pk.id}`);
+      if (open && (!pool.length || !mix.some((c) => c.rar === "c") || (pk.fac && (G.themeSize(pool) < G.THEME_MIN || !G.THEME_RARITIES.every((r) => pool.some((c) => c.rar === r)))))) bad.push(`${label} · ${pk.id}`);
       if (!open) {
         // un booster fermé ne s'ouvre pas et ne consomme rien
         const s = G.freshSave(T0); s.chakra = 1000;
@@ -46,11 +46,18 @@ t.section("Boosters vides et seuils d'ouverture");
       }
     }
   }
-  t.check(`aucun booster ouvrable n'est vide ni sous le seuil de ${G.THEME_MIN} persos (${checked} cas)`, !bad.length, bad.slice(0, 5));
+  t.check(`aucun booster ouvrable n'est vide, sous le seuil de ${G.THEME_MIN} persos ou sans Commune, Peu commune et Rare dans son thème (${checked} cas)`, !bad.length, bad.slice(0, 5));
   t.check("un booster fermé refuse de s'ouvrir sans rien consommer (gratuit ou payant)", closedOk);
   const ep1 = G.configFrom({ def: 1 });
   const st = Object.fromEntries(PACKS.map((p) => [p.id, G.packOpenFor(p, ep1, null) ? "ouvert" : `épisode ${G.packOpensAt(p, ep1, null)}`]));
-  t.check("épisode 1 : Vilains et Le Monde fermés jusqu'à l'épisode 2, les autres ouverts", st.vilains === "épisode 2" && st.monde === "épisode 2" && ["saison1", "mix", "bande", "coffre"].every((k) => st[k] === "ouvert"), st);
+  t.check("épisode 1 : tous les boosters ouverts, Vilains et Le Monde compris (persos secondaires de l'épisode 1)", Object.values(st).every((v) => v === "ouvert"), st);
+  // identité des thèmes à l'épisode 1 : part des cartes qui viennent du thème et non du Mix
+  for (const id of ["vilains", "monde"]) {
+    const pk = PACKS.find((p) => p.id === id), pool = G.poolFor(pk, ep1, null);
+    const slot = Object.entries(G.SLOT), last = Object.entries(G.LAST), sum = (t) => t.reduce((a, [, p]) => a + p, 0);
+    const share = (4 * slot.filter(([r]) => pool.some((c) => c.rar === r)).reduce((a, [, p]) => a + p, 0) / sum(slot) + last.filter(([r]) => pool.some((c) => c.rar === r)).reduce((a, [, p]) => a + p, 0) / sum(last)) / 5;
+    t.check(`épisode 1 : ${pk.name} garde son identité (${Math.round(100 * share)} % de cartes du thème, ${G.themeSize(pool)} persos)`, share >= 0.85);
+  }
 }
 
 t.section("Raretés : jamais au-dessus de la rareté tirée");

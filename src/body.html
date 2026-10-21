@@ -741,7 +741,7 @@ function subscribeShared() {
 let sharedT;
 function sharedChanged() {
   clearTimeout(sharedT);
-  sharedT = setTimeout(() => { if (!opening && $("overlay").hidden && ["boosters", "market", "community", "pred"].includes(view) && !document.activeElement?.closest?.("#pqForm")) draw(); }, 150);
+  sharedT = setTimeout(() => { if (!opening && $("overlay").hidden && ["boosters", "album", "market", "community", "pred"].includes(view) && !document.activeElement?.closest?.("#pqForm")) draw(); }, 150);
 }
 let lastPlayer = "", playerT;
 function stats() {

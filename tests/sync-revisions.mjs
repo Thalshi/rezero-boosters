@@ -20,7 +20,7 @@ try {
   const before = (await O.api("state")).state;
   t.check("ancienne version : pas de table sync_rev", old.rows("SELECT name FROM sqlite_master WHERE name = 'sync_rev'").length === 0);
   const persist = old.persist; await old.stop();
-  srv = await startServer({ port, persist });
+  srv = await startServer({ port, persist, keep: true });
   const N = await player(srv.base, IDS.p1, "Ancien");
   const after = (await N.api("state")).state;
   t.check("nouvelle version : table sync_rev et index créés au premier appel", srv.rows("SELECT name FROM sqlite_master WHERE name IN ('sync_rev', 'docs_coll_updated')").length === 2);
@@ -72,10 +72,34 @@ try {
   const rv = await T.api("vote", { qid: "nexistepas", idx: 0 });
   t.check("vote sur une question inexistante : votes inchangé", rv.status === 404 && revs().votes === v.votes);
   t.check("chaque compteur a une date de mise à jour", srv.rows("SELECT COUNT(*) AS n FROM sync_rev WHERE t > 0")[0].n === srv.rows("SELECT COUNT(*) AS n FROM sync_rev")[0].n);
+
+  t.section("Retour arrière : l'ancien Worker (main) sur une base déjà migrée");
+  const snap = (await R.api("state")).state, revBefore = revs();
+  await srv.stop(); srv = null;
+  old = await startServer({ port, root: worktree, persist, keep: true });
+  const R2 = await player(old.base, IDS.dev, "Reichi"), A2 = await player(old.base, IDS.admin, "Billy"), T2 = await player(old.base, IDS.p2, "Teo");
+  const st2 = (await R2.api("state")).state;
+  t.check("ancien Worker : données du joueur intactes", st2.opened === snap.opened && st2.chakra === snap.chakra && JSON.stringify(st2.owned) === JSON.stringify(snap.owned));
+  const steps = {};
+  steps.booster = (await T2.api("open", { pack: "mix", paid: true })).status;
+  const c3 = Object.entries(st2.owned).find(([, o]) => o.n > 0)[0];
+  const l3 = await R2.api("market/sell", { id: c3, price: 10 }); steps.vente = l3.status;
+  steps.achat = (await A2.api("market/buy", { lid: l3.lid })).status;
+  steps.comptoir = (await T2.api("chat/send", { text: "retour arrière" })).status;
+  steps.config = (await A2.doc("PUT", "config/game", {})).status;
+  steps.pulse = (await A2.api("pulse", { after: null })).status;
+  t.check("ancien Worker : booster, vente, achat, comptoir, config, notifications marchent", Object.values(steps).every((x) => x === 200), steps);
+  t.check("ancien Worker : la table sync_rev reste en place sans gêner", old.rows("SELECT COUNT(*) AS n FROM sync_rev")[0].n > 0);
+  await old.stop(); old = null;
+  srv = await startServer({ port, persist, keep: true });
+  const R3 = await player(srv.base, IDS.dev, "Reichi");
+  const st3 = (await R3.api("state")).state;
+  t.check("retour à la nouvelle version : données conservées, compteurs repartent", st3.opened === snap.opened && revs().players > revBefore.players);
 } catch (e) { t.check("exécution sans erreur", false, String(e.stack || e)); }
 finally {
   t.done();
   if (srv) await srv.stop();
-  if (old) try { rmSync(old.persist, { recursive: true, force: true }); } catch (e) {}
+  if (old) await old.stop();
+  for (const p of [srv?.persist, old?.persist]) if (p) try { rmSync(p, { recursive: true, force: true }); } catch (e) {}
   if (worktree) try { execFileSync("git", ["worktree", "remove", "--force", worktree], { cwd: ROOT, stdio: "pipe" }); } catch (e) {}
 }

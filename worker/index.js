@@ -17,9 +17,10 @@ async function ensureSchema(db) {
     db.prepare("CREATE INDEX IF NOT EXISTS docs_coll ON docs (coll)"),
     db.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, member INTEGER, updated INTEGER)"),
     db.prepare("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires INTEGER NOT NULL)"),
-    ...SYNC_SCHEMA.map((sql) => db.prepare(sql)),
   ]);
   await ensureGameSchema(db);
+  // compteurs de synchro (ajouts seulement) : un échec ici ne doit jamais bloquer le site
+  try { await db.batch(SYNC_SCHEMA.map((sql) => db.prepare(sql))); } catch (e) { console.error("sync_rev : schéma non créé", e?.message); }
   schemaReady = true;
 }
 

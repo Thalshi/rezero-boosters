@@ -9,9 +9,10 @@
     "run_worker_first": ["/api/*", "/auth/*"]
   },
   "d1_databases": [
-    { "binding": "DB", "database_name": "rezero-boosters", "database_id": "REMPLACER_PAR_ID_D1" }
+    { "binding": "DB", "database_name": "rezero-boosters", "database_id": "0e746ba7-5dbf-4f10-9bc8-4ba60b3057d8" }
   ],
-  // Les variables (DISCORD_CLIENT_ID, GUILD_ID, ADMIN_IDS) et le secret DISCORD_CLIENT_SECRET
-  // se règlent dans le tableau de bord Cloudflare ; ne pas les écraser au déploiement.
+  // Identifiant public de l'application Discord. GUILD_ID, ADMIN_IDS et le secret
+  // DISCORD_CLIENT_SECRET se règlent dans le tableau de bord ; ne pas les écraser au déploiement.
+  "vars": { "DISCORD_CLIENT_ID": "1562448304791359599" },
   "keep_vars": true
 }

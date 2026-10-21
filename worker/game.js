@@ -44,7 +44,7 @@ const PEOPLE = {
   ogre4:   { name: "Ogre 4", fac: "enn", rar: "c", kanji: "鬼", color: "#b0956a", icon: "mono", tag: "Ogre beige",
              power: "", look: "Ogre massif à la peau beige, crâne rasé", mood: "", quote: "" },
   soldat1: { name: "Soldat 1", fac: "enn", rar: "c", kanji: "兵", color: "#a8323c", icon: "spear", tag: "Cape rouge",
-             power: "Lance", look: "Soldat à cape rouge armé d'une lance", mood: "", quote: "" },
+             power: "Lance", look: "Soldat en armure, casque fermé, capuche et écharpe rouges, longue lance", mood: "", quote: "" },
   soldat2: { name: "Soldat 2", fac: "enn", rar: "r", kanji: "兵", color: "#8a8f99", icon: "spear", tag: "Casque et capuche rouge",
              power: "", look: "Soldat en armure, casque fermé, capuche rouge, plastron percé", mood: "", quote: "" },
   goldor:  { name: "Goldor", fac: "neu", rar: "e", kanji: "岩", color: "#b8962e", icon: "orb", tag: "Pierre et nature",

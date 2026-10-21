@@ -13,7 +13,7 @@ const skinIds = G.SKINS.map((c) => c.id);
 const T0 = Date.parse("2026-11-02T07:00:00+01:00"); // un lundi
 const PROFILES = [
   // jours joués par semaine, heures de visite, fait les missions sociales (chat, fiches, prédictions)
-  { id: "occasionnel", label: "Occasionnel", days: [1, 3, 5, 6], hours: [12, 20], social: 0.5, recycleEvery: 7 }  // recycle une fois par semaine, le dernier jour joué,
+  { id: "occasionnel", label: "Occasionnel", days: [1, 3, 5, 6], hours: [12, 20], social: 0.5, recycleEvery: 7 }, // recycle une fois par semaine, le dernier jour joué
   { id: "regulier", label: "Régulier", days: [0, 1, 2, 3, 4, 5, 6], hours: [8, 13, 21], social: 0.9, recycleEvery: 1 },
   { id: "actif", label: "Très actif", days: [0, 1, 2, 3, 4, 5, 6], hours: [8, 10, 12, 14, 16, 18, 20, 22], social: 1, recycleEvery: 1 },
 ];

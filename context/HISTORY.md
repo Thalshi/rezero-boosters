@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-10-21 — Audit, sécurité et rôles
+- Audit complet du projet : deux failles critiques trouvées (import de sauvegarde falsifiée, votes modifiables après la réponse).
+- Corrigé et déployé : import limité à 50 cartes Communes ou Peu communes, votes validés par le serveur, paiement unique et seulement pour les votes faits à temps.
+- Contrôle des comptes en lecture seule et vue Dev : état du serveur, comptes suspects, bugs signalés.
+- Rôles séparés : Billy admin (contenu du jeu), Reichi dev (outils techniques et droits d'admin).
+- « Choisis ton booster » : boosters en grille sur ordi.
+- Ajout de CLAUDE.md, du kit /update et /prime, et des fichiers de contexte.
+
 ## 2026-10-21 — Interface Kyara, missions, comptoir
 - Missions de la semaine, premiers pas, succès, pack du jour et booster divin.
 - Comptoir (chat du QG) et notifications : ventes, échanges, mentions, nouvel épisode, prédictions, annonces de Billy.

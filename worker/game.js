@@ -22,7 +22,7 @@ const PEOPLE = {
              power: "Ombre : il se fond dans le décor et disparaît, lames d’ombre courbes, bombe fumigène", look: "Capuche pourpre, masque à bec aux yeux rouges, cape d’où sortent des volutes d’ombre", mood: "Mystérieux, calculateur, agile, manipulateur, il frappe avant d’être vu", quote: "Les masques tombent toujours. Pas les miens." },
   // ===== Persos secondaires vus dans l'épisode 1 (noms à confirmer par Billy, images provisoires tirées de l'épisode)
   inconnu: { name: "???", fac: "anta", rar: "e", kanji: "謎", color: "#c9c3d8", icon: "arcane", tag: "Le méchant de l'épisode 1",
-             power: "Donne de nouveaux pouvoirs à Mahed (aura violette)", look: "Cheveux blancs avec une mèche noire, yeux cernés de noir, manteau blanc à col sombre", mood: "", quote: "" },
+             power: "Donne de nouveaux pouvoirs à Mahed (aura violette)", look: "Cheveux blancs avec une mèche noire, yeux cernés de noir, manteau blanc à capuche, sangles et chaînes dorées, bras bandé", mood: "", quote: "" },
   dispawn: { name: "Dispawn", fac: "enn", rar: "e", kanji: "劇", color: "#b8323c", icon: "tophat", tag: "Maître de l’arène",
              power: "Canne de combat à tête de serpent, maître de l’arène", look: "Colosse à la peau grise, sourire plein de crocs, haut-de-forme, manteau noir et rouge, boucle dorée", mood: "Imposant, théâtral, charismatique, impitoyable, un gentleman… à sa manière", quote: "Le spectacle est une religion." },
   unbeaten:{ name: "The Unbeaten", fac: "enn", rar: "l", kanji: "不", color: "#8a5a3a", icon: "axe", tag: "Invaincu",
@@ -72,7 +72,23 @@ const PEOPLE = {
   castor2: { name: "Castor 2", fac: "neu", rar: "c", kanji: "厨", color: "#7a6a5a", icon: "mono", tag: "Cuisinier",
              power: "", look: "Castor cuisinier qui coupe des carottes, foulard sur les épaules", mood: "", quote: "" },
   castorgeant: { name: "Castor géant", fac: "neu", rar: "r", kanji: "巨", color: "#6a4a32", icon: "mono", tag: "Balafré",
-             power: "", look: "Castor géant balafré à l'œil, harnais et sacoches sur le dos", mood: "", quote: "" },
+             power: "", look: "Castor géant balafré à l'œil, harnais et chargement de bagages sur le dos", mood: "", quote: "" },
+  lion: { name: "Homme-lion", fac: "neu", rar: "pc", kanji: "獅", color: "#c8902a", icon: "mono", tag: "Noble du marché",
+             power: "", look: "Homme-lion en robe violette et or, broche turquoise, sur la place du marché", mood: "", quote: "" },
+  cerf: { name: "Homme-cerf", fac: "neu", rar: "c", kanji: "鹿", color: "#3a7a6a", icon: "mono", tag: "Place du marché",
+             power: "", look: "Homme-cerf aux bois, tenue verte et or, sur la place du marché", mood: "", quote: "" },
+  felin: { name: "Homme-félin", fac: "neu", rar: "c", kanji: "猫", color: "#b8862a", icon: "mono", tag: "Col de fourrure",
+             power: "", look: "Homme-félin en manteau rouge et or à col de fourrure blanche, coupe à la main", mood: "", quote: "" },
+  oiseau: { name: "Grand oiseau", fac: "neu", rar: "pc", kanji: "鳥", color: "#7a2a8a", icon: "mono", tag: "Plumes turquoise",
+             power: "", look: "Grand oiseau violet et rouge à crête turquoise, perché au-dessus du marché", mood: "", quote: "" },
+  elfe1: { name: "Elfe 1", fac: "neu", rar: "c", kanji: "妖", color: "#7a4a9a", icon: "mono", tag: "Peau violette",
+             power: "", look: "Elfe à la peau violette et aux cheveux verts, à la taverne du soir", mood: "", quote: "" },
+  elfe2: { name: "Elfe 2", fac: "neu", rar: "c", kanji: "妖", color: "#c8b04a", icon: "mono", tag: "Cheveux blonds",
+             power: "", look: "Elfe aux cheveux blonds, chope à la main, à la taverne du soir", mood: "", quote: "" },
+  belier: { name: "Homme-bélier", fac: "neu", rar: "pc", kanji: "羊", color: "#8a7a4a", icon: "mono", tag: "Barbe blanche",
+             power: "", look: "Colosse à cornes de bélier et longue barbe blanche, attablé à la taverne du soir", mood: "", quote: "" },
+  gobelin: { name: "Gobelin", fac: "neu", rar: "c", kanji: "鬼", color: "#a89a7a", icon: "mono", tag: "Grandes oreilles",
+             power: "", look: "Petit gobelin souriant aux cheveux blancs et aux grandes oreilles", mood: "", quote: "" },
   nestor:  { name: "Nestor", fac: "all", rar: "c", kanji: "工", color: "#b07a3c", icon: "goggles", tag: "Bricoleur",
              power: "Aucun : il bricole et invente", look: "Marmotte avec lunettes d’aviateur, écharpe et sacoche", mood: "Curieux, malin, débrouillard, rêveur, un peu filou", quote: "Petit par la taille, grand par les idées." },
   sultran: { name: "Sultran’Zahar", fac: "all", rar: "m", kanji: "無", color: "#5b2a9e", icon: "void", tag: "Néant",
@@ -182,7 +198,8 @@ const MISSIONS = [
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
 const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "sultran", "shiro", "mahed", "reichi", "sasori", "iouaf", "sakuto", "rayzo", "teo",
-  "inconnu", "ogre1", "ogre2", "ogre3", "ogre4", "soldat1", "soldat2", "sanglier", "ecureuil", "porcepic", "ecureuil2", "castor1", "castor2", "castorgeant"];
+  "inconnu", "ogre1", "ogre2", "ogre3", "ogre4", "soldat1", "soldat2", "sanglier", "ecureuil", "porcepic", "ecureuil2", "castor1", "castor2", "castorgeant",
+  "lion", "cerf", "felin", "oiseau", "elfe1", "elfe2", "belier", "gobelin"];
 const EP_MAX = 12;
 const HIDDEN = 99;
 const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });

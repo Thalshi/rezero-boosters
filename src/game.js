@@ -60,10 +60,18 @@ const PEOPLE = {
              power: "Aucun : c’est un marchand", look: "Homme-cobra aux écailles rouges et beiges, écharpe et robes rouges, bibelots", mood: "Fourbe, charmeur, beau parleur, pas digne de confiance, vend parfois du toc", quote: "Des objets, des histoires, des opportunités." },
   sanglier: { name: "Homme-sanglier", fac: "neu", rar: "r", kanji: "猪", color: "#b08a6a", icon: "mono", tag: "Cuisinier",
              power: "", look: "Homme-sanglier cornu, massif et tatoué, qui sert des pâtes au marché", mood: "", quote: "Des bonnes nouilles en sauce aux boules draconiques." },
-  ecureuil: { name: "Écureuil", fac: "neu", rar: "c", kanji: "栗", color: "#c8642a", icon: "hammer", tag: "Forgeron",
+  ecureuil: { name: "Écureuil 1", fac: "neu", rar: "c", kanji: "栗", color: "#c8642a", icon: "hammer", tag: "Forgeron",
              power: "", look: "Écureuil roux forgeron, foulard violet, travaille à l'enclume avec le porc-épic", mood: "", quote: "" },
   porcepic: { name: "Porc-épic", fac: "neu", rar: "pc", kanji: "鍛", color: "#7a6a5a", icon: "hammer", tag: "Forgeron",
              power: "", look: "Porc-épic forgeron en armure de cuir, marteau à la main devant l'enclume", mood: "", quote: "" },
+  ecureuil2: { name: "Écureuil 2", fac: "neu", rar: "c", kanji: "鼠", color: "#9a9aa8", icon: "mono", tag: "Écureuil gris",
+             power: "", look: "Écureuil gris en manteau, sac à dos et gourdes, près des caisses de tomates", mood: "", quote: "" },
+  castor1: { name: "Castor 1", fac: "neu", rar: "c", kanji: "厨", color: "#8a6a4a", icon: "mono", tag: "Cuisinier",
+             power: "", look: "Castor cuisinier rieur, couperet à la main, dans la cuisine", mood: "", quote: "" },
+  castor2: { name: "Castor 2", fac: "neu", rar: "c", kanji: "厨", color: "#7a6a5a", icon: "mono", tag: "Cuisinier",
+             power: "", look: "Castor cuisinier qui coupe des carottes, foulard sur les épaules", mood: "", quote: "" },
+  castorgeant: { name: "Castor géant", fac: "neu", rar: "r", kanji: "巨", color: "#6a4a32", icon: "mono", tag: "Balafré",
+             power: "", look: "Castor géant balafré à l'œil, harnais et sacoches sur le dos", mood: "", quote: "" },
   nestor:  { name: "Nestor", fac: "all", rar: "c", kanji: "工", color: "#b07a3c", icon: "goggles", tag: "Bricoleur",
              power: "Aucun : il bricole et invente", look: "Marmotte avec lunettes d’aviateur, écharpe et sacoche", mood: "Curieux, malin, débrouillard, rêveur, un peu filou", quote: "Petit par la taille, grand par les idées." },
   sultran: { name: "Sultran’Zahar", fac: "all", rar: "m", kanji: "無", color: "#5b2a9e", icon: "void", tag: "Néant",
@@ -173,7 +181,7 @@ const MISSIONS = [
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
 const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "sultran", "shiro", "mahed", "reichi", "sasori", "iouaf", "sakuto", "rayzo", "teo",
-  "inconnu", "ogre1", "ogre2", "ogre3", "ogre4", "soldat1", "soldat2", "sanglier", "ecureuil", "porcepic"];
+  "inconnu", "ogre1", "ogre2", "ogre3", "ogre4", "soldat1", "soldat2", "sanglier", "ecureuil", "porcepic", "ecureuil2", "castor1", "castor2", "castorgeant"];
 const EP_MAX = 12;
 const HIDDEN = 99;
 const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });

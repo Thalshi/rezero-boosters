@@ -11,8 +11,10 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "rezero-boosters", "database_id": "0e746ba7-5dbf-4f10-9bc8-4ba60b3057d8" }
   ],
-  // Identifiants publics : application Discord et serveur QG de Shinjuku. ADMIN_IDS et le secret
+  // Identifiants publics : application Discord et serveur QG de Shinjuku. Le secret
   // DISCORD_CLIENT_SECRET se règlent dans le tableau de bord ; ne pas les écraser au déploiement.
-  "vars": { "DISCORD_CLIENT_ID": "1562448304791359599", "GUILD_ID": "1422236490624143481" },
+  "vars": { "DISCORD_CLIENT_ID": "1562448304791359599", "GUILD_ID": "1422236490624143481",
+            // admins (onglet Admin) : identifiants Discord séparés par des virgules
+            "ADMIN_IDS": "318510456459362306" },
   "keep_vars": true
 }

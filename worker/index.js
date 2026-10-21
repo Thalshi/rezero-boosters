@@ -1,5 +1,7 @@
 // Serveur de l'app sur Cloudflare : connexion Discord + petite base de documents (D1)
 // qui reproduit ce que la version claude.ai fait avec ses capacités `db` et `user`.
+// Le jeu lui-même (tirages, essence, marché, échanges) est décidé par game-api.js.
+import { ensureGameSchema, gameRoute } from "./game-api.js";
 
 const SESSION_DAYS = 30;
 const json = (data, status = 200, headers = {}) =>
@@ -15,6 +17,7 @@ async function ensureSchema(db) {
     db.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, member INTEGER, updated INTEGER)"),
     db.prepare("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires INTEGER NOT NULL)"),
   ]);
+  await ensureGameSchema(db);
   schemaReady = true;
 }
 
@@ -31,10 +34,13 @@ function parsePath(path, wantDoc) {
 // lecture : tout joueur connecté ; écriture : membre du serveur Discord ; admin : ADMIN_IDS.
 // data/users/<id>/… : privé à ce joueur. votes : chacun le sien, l'admin lit tout.
 // config, predq, pred : écriture réservée à l'admin.
+// feed, players, market, trades : écrits seulement par le serveur du jeu (game-api.js).
+const SERVER_ONLY = ["feed", "players", "market", "trades"];
 function allowed(user, segs, op) {
   if (!user) return false;
   const write = op !== "read" && op !== "list";
   const top = segs[0];
+  if (SERVER_ONLY.includes(top)) return !write;
   if (top === "data" && segs[1] === "users") return segs.length >= 3 && segs[2] === user.id && (!write || user.member || user.admin);
   if (top === "votes") {
     if (segs.length === 1) return op === "list" && user.admin;
@@ -127,6 +133,7 @@ async function docRoute(req, env, user) {
   if (!allowed(user, segs, op)) return op === "read" ? json({ id, exists: false }) : fail(403, "invalid_argument", "Écriture refusée.");
   if (method === "GET") {
     const r = await env.DB.prepare("SELECT id, data, version FROM docs WHERE path = ?").bind(path).first();
+    if (r && segs[0] === "trades") { const t = JSON.parse(r.data); if (t.from !== user.id && t.to !== user.id) return json({ id, exists: false }); }
     return json(r ? rowOut(r) : { id, exists: false });
   }
   if (method === "DELETE") { await env.DB.prepare("DELETE FROM docs WHERE path = ?").bind(path).run(); return json({ ok: true }); }
@@ -185,7 +192,7 @@ async function collRoute(req, env, user) {
   else sql += " ORDER BY id ASC";
   sql += " LIMIT ?";
   const { results } = await env.DB.prepare(sql).bind(coll, limit).all();
-  const docs = results.map(rowOut).filter((d) => allowed(user, [...segs, d.id], "read"));
+  const docs = results.map(rowOut).filter((d) => allowed(user, [...segs, d.id], "read") && (coll !== "trades" || d.data.from === user.id || d.data.to === user.id));
   return json({ docs });
 }
 
@@ -224,6 +231,7 @@ export default {
     if (p === "/api/acquire" && req.method === "POST") return acquireRoute(req, env, user);
     if (p === "/api/coll") return collRoute(req, env, user);
     if (p === "/api/profiles") return profilesRoute(req, env, user);
+    if (p.startsWith("/api/game/")) return gameRoute(req, env, user, p);
     return fail(404, "not_found", "Route inconnue.");
   },
 };

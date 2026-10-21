@@ -1,5 +1,5 @@
 """Assemble index.html (un seul fichier, images incluses) à partir de src/ et art/."""
-import base64, pathlib
+import base64, pathlib, re
 
 ROOT = pathlib.Path(__file__).parent
 FONTS_OLD = "family=Unbounded:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700&family=JetBrains+Mono:wght@500"
@@ -20,6 +20,11 @@ def main():
     body = (ROOT / "src/body.html").read_text(encoding="utf8")
     art = (ROOT / "src/art.js").read_text(encoding="utf8").replace(
         "};\n", f'  rayzoS: "{uri("rayzoS")}",\n  rayzoH: "{uri("rayzoH")}",\n  billyFA: "{uri("billyFA")}",\n  reichiFA: "{uri("reichiFA")}",\n}};\n', 1)
+    game = (ROOT / "src/game.js").read_text(encoding="utf8")
+    # le serveur importe les mêmes règles que le navigateur
+    names = re.findall(r"^(?:const|function|let) (\w+)", game, re.M)
+    (ROOT / "worker/game.js").write_text("// Généré par build.py à partir de src/game.js : ne pas modifier ici.\n" + game + "\nexport { " + ", ".join(names) + " };\n", encoding="utf8")
+    body = body.replace("<script>\n/*ART*/", "<script>\n" + game + "\n/*ART*/", 1)
     page = (head + body).replace("/*ART*/", art)
     # claude.ai : la page telle quelle (le site l'enveloppe lui-même)
     (ROOT / "artifact.html").write_text(page, encoding="utf8")

@@ -1,0 +1,102 @@
+// Outils communs des tests : serveur local isolé, joueurs factices, assertions, rapport.
+// Les tests ne touchent jamais la base de production : chaque fichier démarre son propre
+// `wrangler dev --local` avec une base D1 temporaire, puis l'efface.
+import { spawn, execFileSync } from "node:child_process";
+import { mkdtempSync, rmSync, existsSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+
+export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const TESTS = join(ROOT, "tests");
+
+// wrangler : celui de tests/node_modules (npm install dans tests/), ou WRANGLER=/chemin/vers/wrangler
+export function wranglerBin() {
+  if (process.env.WRANGLER) return process.env.WRANGLER;
+  const local = join(TESTS, "node_modules/.bin/wrangler");
+  if (existsSync(local)) return local;
+  throw new Error("wrangler introuvable : lance `npm install` dans tests/ ou définis WRANGLER=/chemin/vers/wrangler");
+}
+
+// playwright : celui de tests/node_modules, sinon l'installation globale
+export async function playwright() {
+  try { return await import("playwright"); } catch (e) {}
+  const root = execFileSync("npm", ["root", "-g"]).toString().trim();
+  return createRequire(import.meta.url)(join(root, "playwright"));
+}
+
+// Les identifiants Discord factices des tests (aucun n'est réel)
+export const IDS = {
+  admin: "100000000000000001",   // joue le rôle de Billy
+  dev: "200000000000000002",     // joue le rôle de Reichi
+  p1: "300000000000000003",
+  p2: "400000000000000004",
+  p3: "500000000000000005",
+};
+
+/**
+ * Démarre un serveur local isolé. `script` permet de lancer une variante du Worker
+ * (ex. tests/instrumented-worker.mjs pour la mesure) sans modifier le code du jeu.
+ */
+export async function startServer({ port, script = null } = {}) {
+  const persist = mkdtempSync(join(tmpdir(), "rezero-test-"));
+  const args = ["dev", ...(script ? [script] : []), "--local", "--port", String(port), "--persist-to", persist,
+    "--var", "DEV_LOGIN:1", "--var", `ADMIN_IDS:${IDS.admin}`, "--var", `DEV_IDS:${IDS.dev}`];
+  const proc = spawn(wranglerBin(), args, { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, WRANGLER_SEND_METRICS: "false" } });
+  let log = "";
+  proc.stdout.on("data", (d) => (log += d)); proc.stderr.on("data", (d) => (log += d));
+  const base = `http://localhost:${port}`;
+  for (let i = 0; i < 90; i++) {
+    try { const r = await fetch(base + "/"); if (r.ok) break; } catch (e) {}
+    await new Promise((r) => setTimeout(r, 1000));
+    if (i === 89) { proc.kill(); throw new Error("Le serveur local n'a pas démarré :\n" + log.slice(-2000)); }
+  }
+  const sql = (command) => execFileSync(wranglerBin(), ["d1", "execute", "rezero-boosters", "--local", "--persist-to", persist, "--command", command], { cwd: ROOT, stdio: "pipe" }).toString();
+  const sqlFile = (file) => execFileSync(wranglerBin(), ["d1", "execute", "rezero-boosters", "--local", "--persist-to", persist, "--file", file], { cwd: ROOT, stdio: "pipe" }).toString();
+  const stop = () => { proc.kill(); try { rmSync(persist, { recursive: true, force: true }); } catch (e) {} };
+  return { base, sql, sqlFile, stop, log: () => log };
+}
+
+// Un joueur connecté via /auth/dev (connexion factice, active seulement en local)
+export async function player(base, id, name) {
+  const r = await fetch(`${base}/auth/dev?id=${id}&name=${encodeURIComponent(name)}`, { redirect: "manual" });
+  const cookie = r.headers.get("set-cookie").split(";")[0];
+  const call = async (method, url, body) => {
+    const res = await fetch(base + url, { method, headers: { cookie, "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body) });
+    const json = await res.json().catch(() => null);
+    return { status: res.status, ...(json && typeof json === "object" ? json : {}), body: json };
+  };
+  return {
+    id: "d" + id, cookie,
+    api: (a, body = {}) => call("POST", "/api/game/" + a, body),
+    get: (a) => call("GET", "/api/game/" + a),
+    doc: (method, path, body) => call(method, "/api/doc?path=" + encodeURIComponent(path), body),
+    coll: (method, path, body) => call(method, "/api/coll?path=" + encodeURIComponent(path), body),
+    me: () => call("GET", "/api/me"),
+  };
+}
+
+// Assertions et rapport
+export function reporter(title) {
+  const results = [];
+  const out = {
+    section(name) { console.log(`\n--- ${name}`); results.push({ section: name }); },
+    check(name, ok, info) {
+      results.push({ name, ok: !!ok, info });
+      console.log(`${ok ? "✅" : "❌"} ${name}${info === undefined ? "" : "  " + JSON.stringify(info)}`);
+    },
+    note(text) { console.log(`ℹ️  ${text}`); results.push({ note: text }); },
+    done() {
+      const checks = results.filter((r) => "ok" in r), failed = checks.filter((r) => !r.ok);
+      console.log(`\n${title} : ${checks.length - failed.length} réussis, ${failed.length} échoués`);
+      if (process.env.REPORT_DIR) writeFileSync(join(process.env.REPORT_DIR, title.replace(/\W+/g, "-") + ".json"), JSON.stringify({ title, results }, null, 1));
+      process.exitCode = failed.length ? 1 : 0;
+      return failed.length;
+    },
+  };
+  console.log(`\n===== ${title}`);
+  return out;
+}
+export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+export const total = (s) => Object.values(s.owned || {}).reduce((a, o) => a + o.n + o.gold, 0);

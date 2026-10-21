@@ -200,6 +200,12 @@ h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); let
 .pq-admin select { font: 600 .85rem var(--font-mono); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 8px; border-radius: 0; max-width: 100%; }
 .field textarea { font: 600 1rem var(--font-body); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 10px 12px; border-radius: 0; resize: vertical; }
 .field input[type="text"] { font: 600 1rem var(--font-body); }
+/* Full Art : l'illustration prend toute la carte */
+.kc.fa .layer { transform: none; background-position: var(--pos, 50% 25%); }
+.kc.fa .shade { background: linear-gradient(180deg, rgba(1,10,19,.35) 0%, transparent 16%, transparent 64%, rgba(1,10,19,.92) 100%); }
+.kc.fa .rar::after { content: " · Full Art"; }
+.kc.fa .foot b { font-size: 1.4em; text-shadow: 0 2px 10px #000, 0 0 18px rgba(255,40,40,.45); }
+.note a, .empty a { color: var(--accent); }
 .lore { display: flex; flex-direction: column; gap: 10px; }
 .lore .btn { align-self: flex-start; text-decoration: none; }
 .facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
@@ -369,6 +375,8 @@ const VARIANTS = [
   { id: "rayzo-5", who: "rayzo", title: "Téléportation",      rar: "l",  pos: "50% 30%", zoom: 1.1, fx: ["ghost", "blink"] },
   { id: "teo-5",   who: "teo",   title: "Regard perçant",     rar: "l",  pos: "72% 33%", zoom: 2.4, glint: [50, 45], tint: "#2ec7ff" },
   { id: "rayzo-6", who: "rayzo", title: "Partout à la fois",  rar: "m",  pos: "50% 30%", zoom: 1.1, fx: ["ghost", "blink"], tint: "#ff4d8d" },
+  { id: "billy-fa",  who: "billy",  img: "billyFA",  fa: true, title: "Le Créateur",   rar: "m", pos: "50% 30%", zoom: 1 },
+  { id: "reichi-fa", who: "reichi", img: "reichiFA", fa: true, title: "Lame écarlate", rar: "m", pos: "50% 20%", zoom: 1 },
   { id: "teo-6",   who: "teo",   title: "Voit tout",          rar: "m",  pos: "62% 40%", zoom: 1.5, glint: [60, 30], tint: "#b26bff" },
 ];
 const CARDS = [
@@ -427,6 +435,10 @@ const ICONS = {
 const svg = (i) => `<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[i] || ""}</svg>`;
 
 const $ = (id) => document.getElementById(id);
+const ONLINE = "https://bit.ly/rezero-boosters";
+const offlineMsg = (what) => window.claude?.use
+  ? `Connecte-toi à claude.ai pour ${what}.`
+  : `Ici, l'app est en mode solo. Pour ${what} avec le QG, joue sur la version en ligne : <a href="${ONLINE}" target="_blank" rel="noopener">${ONLINE.replace("https://", "")}</a>`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const byId = Object.fromEntries(CARDS.map((c) => [c.id, c]));
 const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -545,7 +557,7 @@ async function addQuestion(form) {
 }
 
 function viewPred() {
-  if (!DB) return `<div class="empty panel">Connecte-toi à claude.ai pour faire tes prédictions.</div>`;
+  if (!DB) return `<div class="empty panel">${offlineMsg("faire tes prédictions")}</div>`;
   const qs = pred.questions;
   const eps = [...new Set(qs.map((q) => q.ep))].sort((a, b) => b - a);
   const counts = (q) => { const c = q.options.map(() => 0); for (const v of pred.all) { const a = v.answers?.[q.id]; if (a != null && c[a] != null) c[a]++; } return c; };
@@ -811,7 +823,7 @@ function toClaim() { return missionsToday().filter((m) => m.prog >= m.goal && !m
 const RINGS = `<svg class="rings" viewBox="0 0 100 140" aria-hidden="true" fill="none" stroke="#9fe8ff" stroke-width="1.4"><ellipse cx="50" cy="70" rx="44" ry="58" stroke-dasharray="6 5"/><ellipse cx="50" cy="70" rx="34" ry="46" stroke-dasharray="3 6" stroke="#c7a6ff"/><path d="M8 30l6 4M92 110l-6-4M90 26l-6 5M10 116l6-5" stroke-linecap="round"/></svg>`;
 function artHTML(c, locked) {
   const p = PEOPLE[c.who], fx = c.fx || [];
-  if (ART[c.who]) return `<div class="art who-${c.img || c.who}" style="--pos:${c.pos};--zoom:${c.zoom}">
+  if (ART[c.who] || ART[c.img]) return `<div class="art who-${c.img || c.who}" style="--pos:${c.pos};--zoom:${c.zoom}">
       <div class="layer base"></div>
       ${!locked && fx.includes("ghost") ? '<div class="layer ghost"></div><div class="layer ghost g2"></div>' : ""}
       ${!locked && c.tint ? `<div class="tint" style="background:${c.tint}"></div>` : ""}
@@ -826,7 +838,7 @@ function artHTML(c, locked) {
 function cardHTML(c, o = {}) {
   const p = PEOPLE[c.who], R = RAR[c.rar];
   const locked = !!o.locked;
-  return `<div class="kc r-${c.rar} kc-${c.who} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""}
+  return `<div class="kc r-${c.rar} kc-${c.who} ${c.fa ? "fa" : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""}
     aria-label="${locked ? "Carte manquante, " + R.label : `${p.name}, ${c.title}, ${R.label}${o.gold ? ", dorée" : ""}`}">
     ${artHTML(c, locked)}
     <div class="shade"></div>
@@ -916,7 +928,7 @@ function openButtons() {
     : `<button class="btn" type="button" data-act="open-buy" ${save.chakra < PRICE ? "disabled" : ""}>Acheter un booster · ${PRICE} ◆</button>`;
 }
 function sharedNote() {
-  if (!DB) return `<p class="note">Connecte-toi à claude.ai pour voir les autres joueurs.</p>`;
+  if (!DB) return `<p class="note">${offlineMsg("voir les autres joueurs")}</p>`;
   if (!canShare) return `<p class="note">Tu peux regarder, mais pour apparaître ici et utiliser le marché, demande au propriétaire de l'app l'accès « Contributeur ».</p>`;
   return "";
 }

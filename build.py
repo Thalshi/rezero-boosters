@@ -19,7 +19,7 @@ def main():
     head = head[: -len("</style>")].replace(FONTS_OLD, FONTS_NEW)
     body = (ROOT / "src/body.html").read_text(encoding="utf8")
     art = (ROOT / "src/art.js").read_text(encoding="utf8").replace(
-        "};\n", f'  rayzoS: "{uri("rayzoS")}",\n  rayzoH: "{uri("rayzoH")}",\n}};\n', 1)
+        "};\n", f'  rayzoS: "{uri("rayzoS")}",\n  rayzoH: "{uri("rayzoH")}",\n  billyFA: "{uri("billyFA")}",\n  reichiFA: "{uri("reichiFA")}",\n}};\n', 1)
     page = (head + body).replace("/*ART*/", art)
     (ROOT / "index.html").write_text(SKELETON + page + "\n</body>\n</html>\n", encoding="utf8")
     print("index.html", len(page))

@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const dir = dirname(fileURLToPath(import.meta.url));
 const reports = join(dir, "reports", new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-"));
 mkdirSync(reports, { recursive: true });
-const files = ["api-securite.mjs", "api-economie.mjs", "api-confidentialite.mjs", "ui-invite.mjs", "ui-multijoueur.mjs", ...(process.argv.includes("--sans-mesure") ? [] : ["mesure.mjs"])];
+const files = ["api-securite.mjs", "api-economie.mjs", "api-confidentialite.mjs", "ui-invite.mjs", "ui-multijoueur.mjs", "sync-revisions.mjs", ...(process.argv.includes("--sans-mesure") ? [] : ["mesure.mjs"])];
 const bilan = [];
 for (const [i, f] of files.entries()) {
   const r = spawnSync(process.execPath, [join(dir, f)], { stdio: "inherit", env: { ...process.env, REPORT_DIR: reports, PORT: String(8811 + i) } });

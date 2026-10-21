@@ -2,6 +2,7 @@
 // qui reproduit ce que la version claude.ai fait avec ses capacités `db` et `user`.
 // Le jeu lui-même (tirages, essence, marché, échanges) est décidé par game-api.js.
 import { ensureGameSchema, gameRoute, afterAdminWrite, stampPredq } from "./game-api.js";
+import { SYNC_SCHEMA, bumpRev, revKeyOf } from "./sync.js";
 
 const SESSION_DAYS = 30;
 const json = (data, status = 200, headers = {}) =>
@@ -16,6 +17,7 @@ async function ensureSchema(db) {
     db.prepare("CREATE INDEX IF NOT EXISTS docs_coll ON docs (coll)"),
     db.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, name TEXT, avatar TEXT, member INTEGER, updated INTEGER)"),
     db.prepare("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires INTEGER NOT NULL)"),
+    ...SYNC_SCHEMA.map((sql) => db.prepare(sql)),
   ]);
   await ensureGameSchema(db);
   schemaReady = true;
@@ -112,6 +114,7 @@ async function callback(req, env) {
     env.DB.prepare("INSERT INTO sessions (token, uid, expires) VALUES (?, ?, ?)").bind(token, uid, Date.now() + SESSION_DAYS * 86400e3),
     env.DB.prepare("DELETE FROM sessions WHERE expires < ?").bind(Date.now()),
   ]);
+  await bumpRev(env, "users");
   const headers = new Headers({ location: origin(req) + "/" });
   headers.append("set-cookie", `rz_session=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`);
   headers.append("set-cookie", "rz_state=; Path=/; Max-Age=0");
@@ -146,7 +149,7 @@ async function docRoute(req, env, user) {
     if (r && segs[0] === "trades") { const t = JSON.parse(r.data); if (t.from !== user.id && t.to !== user.id) return json({ id, exists: false }); }
     return json(r ? rowOut(r) : { id, exists: false });
   }
-  if (method === "DELETE") { await env.DB.prepare("DELETE FROM docs WHERE path = ?").bind(path).run(); return json({ ok: true }); }
+  if (method === "DELETE") { await env.DB.prepare("DELETE FROM docs WHERE path = ?").bind(path).run(); await bumpRev(env, revKeyOf(path)); return json({ ok: true }); }
   const body = await req.json().catch(() => null);
   if (!isObj(body)) return fail(400, "invalid_argument", "Le document doit être un objet JSON.");
   const text = JSON.stringify(body);
@@ -159,6 +162,7 @@ async function docRoute(req, env, user) {
     const text = JSON.stringify(body);
     await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, ?, ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
       .bind(path, coll, id, text, Date.now()).run();
+    await bumpRev(env, revKeyOf(path));
     if (watched) await afterAdminWrite(env, path, before, body);
     return json({ ok: true });
   }
@@ -170,6 +174,7 @@ async function docRoute(req, env, user) {
     const next = JSON.stringify(merged);
     const res = await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ?").bind(next, Date.now(), path, r.version).run();
     if (!res.meta.changes) return fail(409, "conflict", "Le document a changé entre-temps.");
+    await bumpRev(env, revKeyOf(path));
     if (watched) await afterAdminWrite(env, path, before, JSON.parse(next));
     return json({ ok: true });
   }
@@ -198,6 +203,7 @@ async function collRoute(req, env, user) {
     const body = await req.json().catch(() => null);
     if (!isObj(body)) return fail(400, "invalid_argument", "Le document doit être un objet JSON.");
     await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, ?, ?, ?, 1, ?)").bind(coll + "/" + id, coll, id, JSON.stringify(body), Date.now()).run();
+    await bumpRev(env, revKeyOf(coll));
     if (coll === "predq") {
       // une question créée déjà fermée reçoit tout de suite son heure de fermeture
       if (body.status !== "open") { stampPredq(null, body); await env.DB.prepare("UPDATE docs SET data = ? WHERE path = ?").bind(JSON.stringify(body), coll + "/" + id).run(); }
@@ -246,6 +252,7 @@ export default {
         env.DB.prepare("INSERT OR REPLACE INTO users (id, name, avatar, member, updated) VALUES (?, ?, ?, 1, ?)").bind(uid, url.searchParams.get("name") || "Testeur", "https://cdn.discordapp.com/embed/avatars/0.png", Date.now()),
         env.DB.prepare("INSERT INTO sessions (token, uid, expires) VALUES (?, ?, ?)").bind(token, uid, Date.now() + 86400e3),
       ]);
+      await bumpRev(env, "users");
       return new Response(null, { status: 302, headers: { location: "/", "set-cookie": `rz_session=${token}; Path=/; HttpOnly; SameSite=Lax` } });
     }
     const user = await currentUser(req, env);

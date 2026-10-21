@@ -39,11 +39,11 @@ export const IDS = {
  * Démarre un serveur local isolé. `script` permet de lancer une variante du Worker
  * (ex. tests/instrumented-worker.mjs pour la mesure) sans modifier le code du jeu.
  */
-export async function startServer({ port, script = null } = {}) {
-  const persist = mkdtempSync(join(tmpdir(), "rezero-test-"));
+export async function startServer({ port, script = null, root = ROOT, persist = null, keep = false } = {}) {
+  persist = persist || mkdtempSync(join(tmpdir(), "rezero-test-"));
   const args = ["dev", ...(script ? [script] : []), "--local", "--port", String(port), "--persist-to", persist,
     "--var", "DEV_LOGIN:1", "--var", `ADMIN_IDS:${IDS.admin}`, "--var", `DEV_IDS:${IDS.dev}`];
-  const proc = spawn(wranglerBin(), args, { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, WRANGLER_SEND_METRICS: "false" } });
+  const proc = spawn(wranglerBin(), args, { cwd: root, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, WRANGLER_SEND_METRICS: "false" } });
   let log = "";
   proc.stdout.on("data", (d) => (log += d)); proc.stderr.on("data", (d) => (log += d));
   const base = `http://localhost:${port}`;
@@ -52,10 +52,12 @@ export async function startServer({ port, script = null } = {}) {
     await new Promise((r) => setTimeout(r, 1000));
     if (i === 89) { proc.kill(); throw new Error("Le serveur local n'a pas démarré :\n" + log.slice(-2000)); }
   }
-  const sql = (command) => execFileSync(wranglerBin(), ["d1", "execute", "rezero-boosters", "--local", "--persist-to", persist, "--command", command], { cwd: ROOT, stdio: "pipe" }).toString();
-  const sqlFile = (file) => execFileSync(wranglerBin(), ["d1", "execute", "rezero-boosters", "--local", "--persist-to", persist, "--file", file], { cwd: ROOT, stdio: "pipe" }).toString();
-  const stop = () => { proc.kill(); try { rmSync(persist, { recursive: true, force: true }); } catch (e) {} };
-  return { base, sql, sqlFile, stop, log: () => log };
+  const sql = (command) => execFileSync(wranglerBin(), ["d1", "execute", "rezero-boosters", "--local", "--persist-to", persist, "--command", command], { cwd: root, stdio: "pipe" }).toString();
+  const sqlFile = (file) => execFileSync(wranglerBin(), ["d1", "execute", "rezero-boosters", "--local", "--persist-to", persist, "--file", file], { cwd: root, stdio: "pipe" }).toString();
+  // résultat d'une requête SQL en tableau d'objets
+  const rows = (command) => { const out = sql(command); const i = out.indexOf("["); return i < 0 ? [] : JSON.parse(out.slice(i))[0]?.results || []; };
+  const stop = async () => { proc.kill(); await new Promise((r) => setTimeout(r, 800)); if (!keep) try { rmSync(persist, { recursive: true, force: true }); } catch (e) {} };
+  return { base, sql, sqlFile, rows, stop, persist, log: () => log };
 }
 
 // Un joueur connecté via /auth/dev (connexion factice, active seulement en local)

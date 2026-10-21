@@ -1,6 +1,7 @@
 // Le jeu côté serveur : chaque action passe ici, et c'est le serveur qui tire les cartes,
 // tient la collection et l'essence, et règle les ventes et les échanges. Le navigateur ne fait qu'afficher.
 import * as G from "./game.js";
+import { bumpRev } from "./sync.js";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, message, extra = {}) => json({ error: message, ...extra }, status);
@@ -41,6 +42,7 @@ async function publishStats(env, uid, s) {
   const st = G.statsS(s);
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'players', ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
     .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, t: Date.now() }), Date.now()).run();
+  await bumpRev(env, "players");
 }
 async function getConfig(env) {
   const r = await env.DB.prepare("SELECT data FROM docs WHERE path = 'config/game'").first();
@@ -53,6 +55,7 @@ async function readDoc(env, path) {
 async function writeDoc(env, coll, id, data) {
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, ?, ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
     .bind(coll + "/" + id, coll, id, JSON.stringify(data), Date.now()).run();
+  await bumpRev(env, coll);
 }
 async function postFeed(env, uid, cards) {
   const big = cards.filter((x) => G.RANKS.indexOf(G.CARD_BY_ID[x.id].rar) >= 4 || x.gold);
@@ -71,7 +74,7 @@ async function writeVote(env, uid, qid, idx, now) {
     const res = row
       ? await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ?").bind(JSON.stringify(v), now, path, row.version).run()
       : await env.DB.prepare("INSERT OR IGNORE INTO docs (path, coll, id, data, version, updated) VALUES (?, 'votes', ?, ?, 1, ?)").bind(path, uid, JSON.stringify(v), now).run();
-    if (res.meta.changes) return { ok: true, answers: v.answers };
+    if (res.meta.changes) { await bumpRev(env, "votes"); return { ok: true, answers: v.answers }; }
   }
   throw new Error("busy");
 }
@@ -129,10 +132,12 @@ async function devStats(env) {
 const cardName = (id) => { const c = G.CARD_BY_ID[id]; return c ? `${G.PEOPLE[c.who].name} · ${c.title}` : "une carte"; };
 async function sayChat(env, uid, kind, text, card = null, gold = false) {
   await env.DB.prepare("INSERT INTO chat (uid, kind, text, card, gold, ts) VALUES (?, ?, ?, ?, ?, ?)").bind(uid, kind, text, card, gold ? 1 : 0, Date.now()).run();
+  await bumpRev(env, "chat");
 }
 // uid "*" : notification pour tout le monde (annonce, nouvel épisode, prédictions)
 export async function notify(env, uid, kind, text, data = null) {
   await env.DB.prepare("INSERT INTO notifs (uid, kind, text, data, ts) VALUES (?, ?, ?, ?, ?)").bind(uid, kind, text.slice(0, 300), data ? JSON.stringify(data) : null, Date.now()).run();
+  await bumpRev(env, "notifs");
 }
 // Appelé par le serveur de documents après une écriture de Billy : nouvel épisode, nouvelle prédiction, résultat.
 export async function afterAdminWrite(env, path, before, after) {
@@ -194,6 +199,7 @@ async function chatRoute(env, user, path, body) {
     if (!m) return fail(404, "Message introuvable.");
     if (m.uid !== user.id && !user.admin) return fail(403, "Tu ne peux effacer que tes messages.");
     await env.DB.prepare("UPDATE chat SET deleted = 1 WHERE id = ?").bind(+body.id).run();
+    await bumpRev(env, "chat");
     return json({ ok: true });
   }
   if (path === "/api/game/announce") {
@@ -355,6 +361,7 @@ export async function gameRoute(req, env, user, path) {
       const res = await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ? AND json_extract(data, '$.status') = 'open'")
         .bind(JSON.stringify(sold), Date.now(), "market/" + body.lid, doc.version).run();
       if (!res.meta.changes) return fail(409, "Cette carte vient d'être vendue.");
+      await bumpRev(env, "market");
       const r = await mutate(env, user.id, (s, now) => {
         if (s.chakra < l.price) return { abort: true, error: "Plus assez d'essence." };
         s.chakra -= l.price; G.addCardS(s, l.card, l.gold, now);
@@ -372,6 +379,7 @@ export async function gameRoute(req, env, user, path) {
       const res = await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ? AND json_extract(data, '$.status') = 'open'")
         .bind(JSON.stringify({ ...l, status: "cancelled" }), Date.now(), "market/" + body.lid, doc.version).run();
       if (!res.meta.changes) return fail(409, "Cette carte vient d'être vendue.");
+      await bumpRev(env, "market");
       const r = await mutate(env, user.id, (s, now) => { G.addCardS(s, l.card, l.gold, now); return {}; });
       return json(r);
     }
@@ -410,6 +418,7 @@ export async function gameRoute(req, env, user, path) {
       const res = await env.DB.prepare("UPDATE docs SET data = ?, version = version + 1, updated = ? WHERE path = ? AND version = ? AND json_extract(data, '$.status') = 'open'")
         .bind(JSON.stringify({ ...t, status, closedAt: Date.now() }), Date.now(), "trades/" + body.tid, doc.version).run();
       if (!res.meta.changes) return fail(409, "Cet échange vient de changer.");
+      await bumpRev(env, "trades");
       if (!accept) {
         await mutate(env, t.from, (s, now) => { for (const it of t.give) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.chakra += t.chakra; return {}; });
         const r = await mutate(env, user.id, () => ({}));

@@ -1,429 +1,3 @@
-/* --- v4 : persos du tableau, factions, boosters à thème --- */
-.kc .emblem { position: absolute; inset: 0; display: grid; place-items: center; background: radial-gradient(90% 65% at 50% 36%, color-mix(in srgb, var(--cc) 80%, #fff 8%), color-mix(in srgb, var(--cc) 32%, #0b0a10) 68%, #0b0a10); }
-.kc .emblem .wm { position: absolute; top: 9%; left: 50%; transform: translateX(-50%); font: 900 3.4em/1 var(--font-body); color: rgba(255,255,255,.14); white-space: nowrap; }
-.kc .emblem svg { position: relative; width: 50%; height: auto; margin-bottom: 24%; filter: drop-shadow(0 .25em .5em rgba(0,0,0,.5)); }
-.kc .emblem .mono { position: relative; margin-bottom: 24%; font: 900 2.3em/1 var(--font-display); color: #fff; text-shadow: 0 .1em .4em rgba(0,0,0,.5); letter-spacing: -.02em; }
-.kc .emblem .photo { position: absolute; inset: 0; background-size: cover; background-position: 50% 25%; }
-.kc.r-l .emblem svg, .kc.r-m .emblem svg { animation: float 3.2s ease-in-out infinite; }
-.kc .foot span.tagline { color: var(--cc2, rgba(255,255,255,.75)); }
-.packs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-@media (max-width: 480px) { .packs { grid-template-columns: repeat(2, 1fr); } }
-.pk { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 3px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; cursor: pointer; min-width: 0; }
-.pk[aria-pressed="true"] { border-color: var(--pc); box-shadow: inset 0 0 0 1px var(--pc), 0 0 18px color-mix(in srgb, var(--pc) 30%, transparent); }
-.pk .kk { font: 900 1.5rem/1 var(--font-body); color: var(--pc); }
-.pk b { font: 700 .82rem var(--font-display); }
-.pk span { font-size: .72rem; color: var(--muted); font-weight: 700; line-height: 1.25; }
-.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-top: 6px; border-top: 1px solid var(--line); }
-.section-head h3 { color: var(--fc); }
-.section-head span { font: 500 .75rem var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
-.facts dd q { quotes: "« " " »"; font-style: italic; color: var(--sand); }
-.fac-chip { font: 500 .66rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--fc); border: 1px solid var(--fc); border-radius: 99px; padding: 2px 9px; }
-.kc.locked .emblem svg, .kc.locked .emblem .mono { opacity: .15; }
-.kc.locked .emblem .wm { color: rgba(255,255,255,.05); }
-@keyframes float { 50% { transform: translateY(-5%); } }
-/* --- Univers Runeterra : nuit hextech, or, turquoise ; raretés aux couleurs TFT --- */
-:root {
-  --bg: #010a13; --panel: #0a1428; --panel-2: #0b1a2e; --line: #463714; --gold: #c8aa6e; --gold-d: #785a28; --gold-l: #f0e6d2;
-  --ink: #f0e6d2; --muted: #a09b8c; --accent: #0ac8b9; --sand: #c8aa6e;
-  --r-c: #a09b8c; --r-pc: #1fb36b; --r-r: #2a8fe0; --r-e: #b04ce0; --r-l: #e8b84a; --r-m: #ff6ad5;
-  --font-display: "Cinzel", "Trajan Pro", Georgia, serif;
-  --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
-  --font-mono: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
-}
-body { background: radial-gradient(120% 55% at 50% 0%, #0c2f3d 0%, #04121f 45%, #010a13 75%) fixed, #010a13; }
-.logo { background: none; box-shadow: none; transform: none; border-radius: 0; width: 40px; height: 40px; }
-.logo svg { width: 100%; height: 100%; display: block; }
-.brand { font: 700 1rem var(--font-display); letter-spacing: .04em; color: var(--gold-l); }
-.brand small { font: 600 .68rem var(--font-mono); letter-spacing: .24em; color: var(--gold); }
-.wallet { border-radius: 0; border: 1px solid var(--gold-d); background: rgba(1,10,19,.85); font: 600 .9rem var(--font-mono); letter-spacing: .04em; color: var(--gold-l); }
-.wallet .gauge { border-radius: 0; background: #1e2328; }
-.wallet .gauge i { background: linear-gradient(90deg, #0397ab, #0ac8b9); }
-.wallet .chakra { color: #5bc0de; }
-.tabs { background: none; border: 0; border-bottom: 1px solid var(--gold-d); border-radius: 0; padding: 0; gap: 0; }
-.tab { border-radius: 0; font: 700 .85rem var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); padding: 12px 4px 10px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-.tab:hover { color: var(--gold-l); }
-.tab[aria-selected="true"] { background: none; color: var(--gold-l); border-bottom-color: var(--gold); text-shadow: 0 0 14px rgba(200,170,110,.7); }
-.eyebrow { font: 600 .78rem var(--font-mono); letter-spacing: .22em; color: var(--gold); }
-.eyebrow span { color: var(--muted); }
-h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: .01em; color: var(--gold-l); }
-h3 { font-family: var(--font-display); font-weight: 700; color: var(--gold); letter-spacing: .03em; }
-.note { font-weight: 500; }
-.panel { position: relative; border-radius: 0; border: 1px solid var(--gold-d); background: linear-gradient(180deg, rgba(10,20,40,.94), rgba(1,10,19,.94)); box-shadow: inset 0 0 0 3px rgba(1,10,19,.9), inset 0 0 0 4px rgba(120,90,40,.35); }
-.panel::before, .panel::after { content: ""; position: absolute; left: 50%; width: 9px; height: 9px; background: var(--bg); border: 1px solid var(--gold); transform: translateX(-50%) rotate(45deg); }
-.panel::before { top: -6px; } .panel::after { bottom: -6px; }
-.hero { border-color: var(--gold); background: radial-gradient(80% 60% at 50% 22%, rgba(10,200,185,.20), transparent 62%), linear-gradient(180deg, #0a1428, #010a13); overflow: visible; }
-.fan { overflow: hidden; }
-.btn { border-radius: 0; font: 700 .95rem var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: #cdfafa;
-  background: linear-gradient(180deg, #0a3a44 0%, #0b1e2a 100%); border: 2px solid #0ac8b9;
-  box-shadow: 0 0 16px rgba(10,200,185,.35), inset 0 0 14px rgba(10,200,185,.25); }
-.btn:hover:not(:disabled) { filter: brightness(1.15); box-shadow: 0 0 24px rgba(10,200,185,.55), inset 0 0 16px rgba(10,200,185,.35); }
-.btn .n { border-radius: 0; background: #010a13; border: 1px solid #0ac8b9; color: #cdfafa; font: 600 .85rem var(--font-mono); }
-.btn.ghost { background: linear-gradient(180deg, #1e2328, #0f1418); border: 2px solid var(--gold-d); color: #cdbe91; box-shadow: none; }
-.btn.ghost:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-l); }
-.btn:disabled { background: #1e2328; border-color: #3c3c41; color: #5b5a56; box-shadow: none; }
-.next, .hint { font: 500 .85rem var(--font-mono); letter-spacing: .04em; }
-.tile { border-radius: 0; border: 1px solid var(--gold-d); background: linear-gradient(180deg, rgba(10,20,40,.9), rgba(1,10,19,.9)); }
-.tile .k { font-size: 0; width: 16px; height: 16px; border-radius: 0; transform: rotate(45deg); border: 2px solid currentColor; background: color-mix(in srgb, currentColor 25%, transparent); margin: 4px 0 6px; box-shadow: 0 0 10px color-mix(in srgb, currentColor 50%, transparent); }
-.tile b { font-family: var(--font-display); color: var(--gold-l); }
-.tile span { font: 600 .72rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
-.odds .meter, .odds .meter i, .progress, .progress i { border-radius: 0; }
-.odds .pct { font: 600 .85rem var(--font-mono); }
-.progress i { background: linear-gradient(90deg, #0397ab, #0ac8b9 50%, var(--gold)); }
-.pk { border-radius: 0; border: 1px solid var(--gold-d); background: linear-gradient(180deg, #0a1428, #010a13); }
-.pk .kk { font-size: 0; width: 16px; height: 16px; transform: rotate(45deg); border: 2px solid var(--pc); background: color-mix(in srgb, var(--pc) 30%, transparent); margin: 4px 0 8px 3px; box-shadow: 0 0 10px var(--pc); }
-.pk b { font: 700 .9rem var(--font-display); color: var(--gold-l); }
-.pk[aria-pressed="true"] { border-color: var(--pc); background: linear-gradient(180deg, color-mix(in srgb, var(--pc) 18%, #0a1428), #010a13); }
-.section-head { border-top-color: var(--gold-d); }
-.section-head h3 { font-family: var(--font-display); }
-.chip, .fac-chip { border-radius: 0; font-family: var(--font-mono); font-weight: 600; }
-.pull { border-radius: 0; border-color: var(--gold-d); background: linear-gradient(90deg, #0a1428, #010a13); }
-.pull .who b { font-family: var(--font-display); }
-.sheet { border-radius: 0; border: 1px solid var(--gold); background: linear-gradient(180deg, #0a1428, #010a13); box-shadow: 0 0 40px rgba(10,200,185,.15); }
-.facts dt { font-family: var(--font-mono); font-weight: 600; color: var(--gold); }
-.facts dd q { color: #cdbe91; }
-.toast { border-radius: 0; background: #010a13; color: var(--gold-l); border: 1px solid var(--gold); font-family: var(--font-mono); letter-spacing: .06em; }
-.dots i { border-radius: 0; transform: rotate(45deg); background: #1e2328; border: 1px solid var(--gold-d); }
-.dots i.on { background: var(--gold); }
-
-/* Cartes : cadre or hextech, barre de rareté façon TFT */
-.kc { border-radius: 4px; border: 2px solid color-mix(in srgb, var(--rc) 80%, #000); box-shadow: 0 0 0 1px #010a13, 0 0 0 2px var(--gold-d), 0 12px 26px rgba(0,0,0,.55); }
-.kc::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4.5%; z-index: 3; background: linear-gradient(90deg, color-mix(in srgb, var(--rc) 60%, #000), var(--rc), color-mix(in srgb, var(--rc) 60%, #000)); }
-.kc.r-e { box-shadow: 0 0 0 1px #010a13, 0 0 0 2px var(--gold-d), 0 12px 26px rgba(0,0,0,.55), 0 0 18px rgba(176,76,224,.4); }
-.kc.r-l { box-shadow: 0 0 0 1px #010a13, 0 0 0 2px var(--gold), 0 12px 26px rgba(0,0,0,.55), 0 0 24px rgba(232,184,74,.5); }
-.kc.r-m { box-shadow: 0 0 0 1px #010a13, 0 0 0 2px var(--gold), 0 12px 26px rgba(0,0,0,.55), 0 0 30px rgba(255,106,213,.5); }
-.kc.r-m::before { background: conic-gradient(#ff6ad5, #e8b84a, #1fb36b, #0ac8b9, #2a8fe0, #b04ce0, #ff6ad5); }
-.kc.r-m::after { background: linear-gradient(90deg, #ff6ad5, #e8b84a, #1fb36b, #0ac8b9, #2a8fe0, #b04ce0); }
-.kc .shade { background: linear-gradient(180deg, rgba(1,10,19,.6) 0%, transparent 20%, transparent 52%, rgba(1,10,19,.95) 92%); }
-.kc .rar { border-radius: 0; font: 600 .62em var(--font-mono); letter-spacing: .12em; background: rgba(1,10,19,.8); color: var(--rc); border: 1px solid var(--rc); }
-.kc .kanji { font-size: 0; width: .75em; height: .75em; transform: rotate(45deg); border: 1px solid var(--gold); background: rgba(1,10,19,.7); box-shadow: 0 0 6px rgba(200,170,110,.6); }
-.kc .foot { bottom: 8%; }
-.kc .foot b { font-family: var(--font-display); font-weight: 700; letter-spacing: .01em; color: var(--gold-l); text-shadow: 0 2px 6px #000; }
-.kc .foot span { font-family: var(--font-mono); font-weight: 600; letter-spacing: .05em; color: #cdbe91; }
-.kc.gold { border-color: #f0d38a; box-shadow: 0 0 0 1px #010a13, 0 0 0 2px #f0d38a, 0 0 28px rgba(240,211,138,.6); }
-.kc.gold .rar { background: linear-gradient(90deg, #785a28, #c8aa6e); color: #010a13; border-color: #f0d38a; }
-.kc.locked { background: #0a1428; border: 2px dashed color-mix(in srgb, var(--rc) 50%, transparent); box-shadow: none; }
-.kc.locked::after { opacity: .35; }
-.badge { border-radius: 0; font: 600 .62em var(--font-mono); letter-spacing: .08em; background: var(--gold-l); color: #010a13; }
-.badge.new { background: #0ac8b9; color: #010a13; }
-.summary .kc, .grid .kc { border-radius: 4px; }
-.kc .emblem .wm { display: none; }
-.hero + section { margin-top: 10px; }
-
-/* Booster : capsule hextech */
-.pack { border-radius: 0; border: 0; clip-path: polygon(50% 0, 100% 11%, 100% 89%, 50% 100%, 0 89%, 0 11%);
-  background: radial-gradient(70% 50% at 50% 38%, color-mix(in srgb, var(--pcol) 55%, #0a1428), #010a13 78%), #010a13;
-  box-shadow: none; filter: drop-shadow(0 0 22px color-mix(in srgb, var(--pcol) 50%, transparent)); align-items: center; text-align: center; padding-bottom: 34px; }
-.pack::before { inset: 3px; height: auto; background: none; clip-path: polygon(50% 0, 100% 11%, 100% 89%, 50% 100%, 0 89%, 0 11%); box-shadow: inset 0 0 0 2px var(--gold); border-radius: 0; }
-.pack .pk-k { display: none; }
-.pack .pk-faces { inset: 40px 30px 96px 30px; }
-.pack .pk-faces i { border-radius: 0; box-shadow: 0 0 0 1px var(--gold), 0 8px 16px rgba(0,0,0,.6); }
-.pack b { font: 700 1.35rem var(--font-display); color: var(--gold-l); text-shadow: 0 0 12px color-mix(in srgb, var(--pcol) 80%, transparent); }
-.pack small { font: 600 .72rem var(--font-mono); letter-spacing: .2em; color: var(--gold); }
-.cardback { border-radius: 4px; background: radial-gradient(circle at 50% 45%, #0a3a44, #010a13 70%); font-size: 0; box-shadow: 0 0 0 1px #010a13, 0 0 0 2px var(--gold-d), 0 0 var(--glow, 0px) var(--rc, transparent); }
-.cardback::after { content: ""; width: 34%; aspect-ratio: 1; transform: rotate(45deg); border: 3px solid var(--gold); box-shadow: 0 0 22px rgba(200,170,110,.5), inset 0 0 22px rgba(10,200,185,.45); }
-/* --- Fonctions façon Kyara : série, missions, marché, communauté --- */
-.tiles.six { grid-template-columns: repeat(3, 1fr); }
-.daily { display: flex; flex-direction: column; gap: 12px; }
-.streak { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-.day { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border: 1px solid var(--gold-d); background: rgba(1,10,19,.6); text-align: center; min-width: 0; }
-.day i { width: 12px; height: 12px; transform: rotate(45deg); border: 2px solid var(--gold-d); }
-.day b { font: 700 .8rem var(--font-display); color: var(--gold-l); }
-.day span { font: 600 .62rem/1.15 var(--font-mono); color: var(--muted); }
-.day.done i { background: var(--gold); border-color: var(--gold); }
-.day.done { border-color: var(--gold); }
-.day.now { border-color: var(--accent); box-shadow: 0 0 14px rgba(10,200,185,.4); }
-.day.now i { border-color: var(--accent); background: rgba(10,200,185,.4); }
-.missions { display: flex; flex-direction: column; gap: 8px; }
-.mission { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid var(--gold-d); background: rgba(1,10,19,.6); }
-.mission.claimed { opacity: .55; }
-.m-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.m-txt b { font: 600 .9rem var(--font-body); color: var(--gold-l); }
-.m-txt span { font: 600 .75rem var(--font-mono); color: #5bc0de; letter-spacing: .04em; }
-.m-bar { height: 4px; background: #1e2328; }
-.m-bar i { display: block; height: 100%; background: linear-gradient(90deg, #0397ab, #0ac8b9); }
-.m-ok { font: 700 .75rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); white-space: nowrap; }
-.btn.sm { padding: 8px 12px; font-size: .75rem; letter-spacing: .1em; }
-.price { font: 700 1rem var(--font-display); color: #5bc0de; white-space: nowrap; }
-.by { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.by b { font: 600 .8rem var(--font-body) !important; color: var(--muted) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.av { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--gold-d); flex: none; object-fit: cover; }
-.pull .who span { display: block; }
-.board-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.board-list li { display: grid; grid-template-columns: 28px auto 1fr; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid var(--gold-d); background: rgba(1,10,19,.6); }
-.board-list li.me { border-color: var(--accent); }
-.board-list li:nth-child(-n+3) .rank { color: var(--r-l); }
-.board-list .rank { font: 700 1rem var(--font-display); color: var(--muted); text-align: center; }
-.board-list .by b { font-size: .9rem !important; color: var(--gold-l) !important; }
-.board-list .av { width: 24px; height: 24px; }
-.pl-stat { font: 600 .75rem var(--font-mono); color: var(--muted); text-align: right; letter-spacing: .03em; }
-.field { display: flex; flex-direction: column; gap: 6px; width: 100%; font: 600 .78rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
-.field input { font: 700 1.3rem var(--font-display); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 10px 12px; border-radius: 0; }
-.field input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
-.pk.lim { border-color: var(--r-l); }
-.pk.lim::after { content: "Limité"; position: absolute; top: 8px; right: 8px; font: 700 .6rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: #010a13; background: var(--r-l); padding: 2px 6px; }
-.admin { display: flex; flex-direction: column; gap: 12px; }
-.adm-list { display: flex; flex-direction: column; gap: 6px; }
-.adm-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border: 1px solid var(--gold-d); background: rgba(1,10,19,.6); }
-.adm-row > .by, .adm-name { flex: 1; min-width: 140px; }
-.adm-name { display: flex; flex-direction: column; }
-.adm-name b { font: 700 .95rem var(--font-display); color: var(--gold-l); }
-.adm-name span { font: 600 .72rem var(--font-mono); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
-.admin select, .field select { font: 600 .9rem var(--font-mono); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 8px 10px; border-radius: 0; }
-.admin select:focus { outline: 2px solid var(--accent); }
-.adm-checks { width: 100%; display: flex; flex-direction: column; gap: 6px; max-height: 50vh; overflow-y: auto; }
-.adm-checks label { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--gold-d); font: 600 .9rem var(--font-body); color: var(--gold-l); }
-.adm-checks label span { margin-left: auto; font: 600 .72rem var(--font-mono); color: var(--muted); }
-.adm-checks input { accent-color: #0ac8b9; width: 18px; height: 18px; }
-.soon-tag { font: 600 .72rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
-.tabs { overflow-x: auto; scrollbar-width: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tab { flex: 1 0 auto; padding-left: 8px; padding-right: 8px; }
-.pq { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--gold-d); background: linear-gradient(180deg, rgba(10,20,40,.94), rgba(1,10,19,.94)); }
-.pq.resolved { border-color: var(--gold); }
-.pq-head { display: flex; justify-content: space-between; gap: 10px; font: 600 .72rem var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
-.pq-pts { color: var(--gold); }
-.pq-st { color: var(--accent); }
-.pq.closed .pq-st { color: var(--muted); }
-.pq h3 { color: var(--gold-l); font-size: 1.05rem; line-height: 1.3; }
-.pq-opts { display: flex; flex-direction: column; gap: 6px; }
-.pq-opt { display: flex; align-items: center; gap: 10px; text-align: left; padding: 10px 12px; border: 1px solid var(--gold-d); background: #010a13; color: var(--gold-l); font: 600 .95rem var(--font-body); cursor: pointer; }
-.pq-opt span { flex: 1; min-width: 0; }
-.pq-opt em { font: 600 .75rem var(--font-mono); font-style: normal; color: var(--muted); white-space: nowrap; }
-.pq-opt b { color: var(--r-pc); }
-.pq-opt:hover:not(:disabled) { border-color: var(--gold); }
-.pq-opt.mine { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent), 0 0 12px rgba(10,200,185,.25); }
-.pq-opt.good { border-color: var(--r-pc); background: rgba(31,179,107,.12); }
-.pq-opt.bad { border-color: var(--r-m); opacity: .8; }
-.pq-opt:disabled { cursor: default; }
-.pq-res { margin: 0; font: 600 .85rem var(--font-mono); color: var(--gold); letter-spacing: .03em; }
-.pq-admin { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding-top: 8px; border-top: 1px dashed var(--gold-d); }
-.pq-admin select { font: 600 .85rem var(--font-mono); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 8px; border-radius: 0; max-width: 100%; }
-.field textarea { font: 600 1rem var(--font-body); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 10px 12px; border-radius: 0; resize: vertical; }
-.field input[type="text"] { font: 600 1rem var(--font-body); }
-/* Full Art : l'illustration prend toute la carte */
-.kc.fa .layer { transform: none; background-position: var(--pos, 50% 25%); }
-.kc.fa .shade { background: linear-gradient(180deg, rgba(1,10,19,.35) 0%, transparent 16%, transparent 64%, rgba(1,10,19,.92) 100%); }
-.kc.fa .rar::after { content: " · Full Art"; }
-.kc.fa .foot b { font-size: 1.4em; text-shadow: 0 2px 10px #000, 0 0 18px rgba(255,40,40,.45); }
-.note a, .empty a { color: var(--accent); }
-.bar { position: relative; }
-.acct { flex: none; position: relative; }
-.acct-btn { width: 40px; height: 40px; border-radius: 50%; padding: 0; border: 2px solid var(--gold); background: #010a13; cursor: pointer; overflow: hidden; }
-.acct-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.acct-login { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #5865f2; color: #fff; font: 700 .8rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
-.acct-login svg { width: 18px; height: 18px; }
-.acct-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 25; width: 240px; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: #0a1428; border: 1px solid var(--gold); box-shadow: 0 12px 30px rgba(0,0,0,.6); }
-.acct-who { display: flex; align-items: center; gap: 10px; }
-.acct-who img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold-d); }
-.acct-who b { display: block; font: 700 .95rem var(--font-display); color: var(--gold-l); }
-.acct-who span { font: 600 .72rem var(--font-mono); color: var(--muted); letter-spacing: .04em; }
-.acct-menu .btn { text-decoration: none; }
-@media (max-width: 420px) { .wallet { padding: 6px 8px; gap: 6px; } .wallet .gauge { display: none; } .acct-login span { display: none; } .brand small { display: none; } }
-/* --- Skins des persos IRL : une gamme par rareté, façon LoL --- */
-.art.skin { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; background: #05070d; }
-.art.skin .photo, .art.skin .layer { position: absolute; inset: 0; background-size: cover; background-position: var(--pos, 50% 25%); }
-.art.skin .fx, .art.skin .fx2 { position: absolute; inset: 0; pointer-events: none; }
-.sk-chroma .photo, .sk-chroma .layer { filter: hue-rotate(var(--hue)) saturate(1.5); }
-.sk-chroma .fx { background: linear-gradient(160deg, hsl(var(--h) 90% 60% / .35), transparent 45%, hsl(var(--h) 90% 45% / .45)); mix-blend-mode: overlay; }
-.sk-arcade .photo, .sk-arcade .layer { filter: saturate(1.8) contrast(1.25); }
-.sk-arcade .fx { background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 4px), linear-gradient(180deg, rgba(255,60,200,.35), rgba(60,220,255,.35)); mix-blend-mode: hard-light; }
-.sk-arcade .fx2 { background: linear-gradient(90deg, rgba(255,0,170,.25), transparent 30%, transparent 70%, rgba(0,230,255,.25)); box-shadow: inset 0 0 0 .35em rgba(255,0,170,.55), inset 0 0 0 .55em rgba(0,230,255,.45); }
-.sk-arcade .fx2::after { content: "1UP · INSERT COIN"; position: absolute; top: 22%; left: 0; right: 0; text-align: center; font: 700 .55em var(--font-mono); letter-spacing: .25em; color: #ffe94d; text-shadow: 0 0 6px #ff00aa; animation: blinkc 1.2s steps(2) infinite; }
-.sk-neon .photo, .sk-neon .layer { filter: grayscale(1) contrast(1.5) brightness(.75); }
-.sk-neon .fx { background: linear-gradient(135deg, #ff2bd6 0%, #7a2bff 45%, #00e5ff 100%); mix-blend-mode: color; }
-.sk-neon .fx2 { background: radial-gradient(circle at 20% 80%, rgba(0,229,255,.45), transparent 35%), radial-gradient(circle at 85% 15%, rgba(255,43,214,.5), transparent 35%); mix-blend-mode: screen; box-shadow: inset 0 0 1.4em rgba(0,229,255,.7); animation: neonp 2.4s ease-in-out infinite; }
-.sk-lune .photo, .sk-lune .layer { filter: grayscale(1) contrast(1.25) brightness(1.05); }
-.sk-lune .fx { background: linear-gradient(180deg, #6a0014 0%, #ff1e3c 50%, #4a000c 100%); mix-blend-mode: color; }
-.sk-lune .fx2 { background: radial-gradient(circle at 76% 18%, #ff3b3b 0 13%, rgba(255,40,40,.55) 15%, transparent 30%); mix-blend-mode: screen; }
-.sk-lune .fx2::before, .sk-lune .fx2::after { content: ""; position: absolute; width: .6em; height: .35em; border-radius: 60% 0; background: #ff2a4a; top: -10%; left: 20%; box-shadow: 4em 2em 0 #ff5a6e, 1.5em 5em 0 #ff2a4a, 6em 7em 0 #ff7a8a; animation: petals 6s linear infinite; }
-.sk-lune .fx2::after { left: 60%; animation-delay: -3s; }
-.sk-astral .photo, .sk-astral .layer { filter: grayscale(.6) contrast(1.15) brightness(.9); }
-.sk-astral .fx { background: linear-gradient(170deg, #1b0b5e 0%, #4b2bd6 45%, #00b3d6 100%); mix-blend-mode: color; }
-.sk-astral .fx2 { background-image: radial-gradient(1px 1px at 12% 18%, #fff, transparent), radial-gradient(1.5px 1.5px at 72% 12%, #fff, transparent), radial-gradient(1px 1px at 38% 62%, #fff, transparent), radial-gradient(2px 2px at 86% 48%, #cfe9ff, transparent), radial-gradient(1px 1px at 22% 84%, #fff, transparent), radial-gradient(1.5px 1.5px at 60% 34%, #fff, transparent), radial-gradient(60% 40% at 70% 20%, rgba(150,110,255,.45), transparent); mix-blend-mode: screen; animation: twinkle 3s ease-in-out infinite; }
-.sk-prestige .photo, .sk-prestige .layer { filter: sepia(1) saturate(2.2) hue-rotate(-12deg) contrast(1.15) brightness(1.05); }
-.sk-prestige .fx { background: linear-gradient(115deg, transparent 30%, rgba(255,240,190,.75) 46%, rgba(255,255,255,.9) 50%, rgba(255,230,160,.7) 54%, transparent 70%); mix-blend-mode: screen; animation: sheen 3.2s linear infinite; }
-.sk-prestige .fx2 { box-shadow: inset 0 0 0 .3em #c8aa6e, inset 0 0 0 .45em #010a13, inset 0 0 0 .6em #f0d38a, inset 0 0 2em rgba(240,211,138,.6); }
-.kc.is-skin .rar::before { content: "Skin · "; }
-.kc.sk-l-prestige { border-color: #f0d38a; }
-@keyframes blinkc { 50% { opacity: 0; } }
-@keyframes neonp { 50% { opacity: .65; } }
-@keyframes petals { from { transform: translateY(0) rotate(0); } to { transform: translateY(260%) rotate(220deg); } }
-@keyframes twinkle { 50% { opacity: .55; } }
-.skin-person { display: flex; flex-direction: column; gap: 10px; padding-top: 6px; }
-.skin-person h4 { margin: 0; font: 700 .95rem var(--font-display); color: var(--gold-l); display: flex; justify-content: space-between; align-items: baseline; }
-.skin-person h4 span { font: 600 .75rem var(--font-mono); color: var(--muted); }
-.skin-row { display: grid; grid-auto-flow: column; grid-auto-columns: 96px; gap: 10px; overflow-x: auto; padding: 4px 2px 12px; }
-.skin-row .kc { --w: 96px; }
-.craft-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-/* --- Ouverture façon LoL : coffre hextech --- */
-.chest-stage { position: relative; display: grid; place-items: center; min-height: 360px; width: 100%; overflow: hidden; }
-.chest-stage::before { content: ""; position: absolute; inset: 0; background: radial-gradient(45% 40% at 50% 52%, color-mix(in srgb, var(--glow) 35%, transparent), transparent 70%); animation: halo 2.4s ease-in-out infinite; }
-.chest { position: relative; transform-origin: 50% 50%; width: 210px; aspect-ratio: 1 / 1.08; border: 0; background: none; padding: 0; cursor: pointer; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 18px 30px rgba(0,0,0,.6)) drop-shadow(0 0 22px color-mix(in srgb, var(--glow) 55%, transparent)); }
-.chest .hex { position: absolute; inset: 0; clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%); }
-.chest .h1 { background: linear-gradient(160deg, #f0e6d2, #c8aa6e 30%, #785a28 60%, #3c2a10); }
-.chest .h2 { inset: 7%; background: linear-gradient(180deg, #0b2a36, #010a13 70%); }
-.chest .h3 { inset: 12%; background: repeating-conic-gradient(from 0deg, rgba(10,200,185,.12) 0 10deg, transparent 10deg 30deg), radial-gradient(circle at 50% 50%, #0a3a44, #010a13 70%); }
-.chest .gem { position: absolute; left: 50%; top: 50%; width: 34%; aspect-ratio: 1; transform: translate(-50%, -50%) rotate(45deg); background: linear-gradient(135deg, #fff 0%, var(--glow) 35%, color-mix(in srgb, var(--glow) 50%, #000) 100%); box-shadow: 0 0 20px var(--glow), 0 0 50px var(--glow), inset 0 0 12px #fff; border: 3px solid #f0e6d2; animation: gem 1.6s ease-in-out infinite; }
-.chest .ring { position: absolute; inset: 17% 17%; border-radius: 50%; border: 2px dashed color-mix(in srgb, var(--glow) 80%, #fff); animation: spin 9s linear infinite; opacity: .8; }
-.chest .ring.r2 { inset: 10% 10%; border-style: dotted; animation-direction: reverse; animation-duration: 14s; opacity: .5; }
-.chest .bolt { position: absolute; top: 4%; bottom: 4%; left: 50%; width: 3px; transform: translateX(-50%); background: linear-gradient(180deg, transparent, #f0e6d2, transparent); opacity: .7; }
-.chest.shake { animation: shake .55s ease-in-out; }
-.chest.chest-out { animation: chestout .7s ease-in forwards; }
-.flash { position: fixed; inset: 0; z-index: 40; pointer-events: none; background: radial-gradient(circle at 50% 45%, #fff, color-mix(in srgb, var(--glow) 70%, #fff) 30%, transparent 70%); animation: flash .9s ease-out forwards; }
-.shard { position: absolute; left: 50%; top: 50%; width: 10px; height: 22px; background: linear-gradient(180deg, #fff, var(--glow)); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); animation: shard .9s ease-out forwards; }
-.rays { position: absolute; left: 50%; top: 50%; width: 170%; aspect-ratio: 1; margin-left: -85%; margin-top: -85%; background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--rc) 55%, transparent) 0 8deg, transparent 8deg 24deg); mask: radial-gradient(circle, #000 20%, transparent 62%); -webkit-mask: radial-gradient(circle, #000 20%, transparent 62%); animation: spin 12s linear infinite; opacity: 0; transition: opacity .4s; pointer-events: none; }
-.reveal-wrap { position: relative; display: grid; place-items: center; padding: 30px 0; width: 100%; }
-.reveal-wrap.on .rays { opacity: 1; }
-.reveal-wrap.on.big .rays { animation-duration: 6s; }
-.divine-banner { font: 700 1.1rem var(--font-display); color: #fff; text-shadow: 0 0 12px #ff6ad5, 0 0 24px #e8b84a; letter-spacing: .06em; }
-@keyframes float { 50% { transform: translateY(-10px); } }
-@keyframes halo { 50% { opacity: .6; } }
-@keyframes gem { 50% { box-shadow: 0 0 30px var(--glow), 0 0 80px var(--glow), inset 0 0 18px #fff; } }
-@keyframes shake { 15% { transform: translateX(-6px) rotate(-2deg); } 30% { transform: translateX(6px) rotate(2deg); } 45% { transform: translateX(-8px) rotate(-3deg); } 60% { transform: translateX(8px) rotate(3deg); } 80% { transform: scale(1.06); } }
-@keyframes chestout { from { transform: scale(1); } to { transform: scale(1.5); opacity: 0; filter: brightness(3); } }
-@keyframes flash { from { opacity: 1; } to { opacity: 0; } }
-@keyframes shard { from { transform: translate(-50%, -50%) rotate(var(--a)) translateY(0); opacity: 1; } to { transform: translate(-50%, -50%) rotate(var(--a)) translateY(-190px); opacity: 0; } }
-.subtabs { display: flex; gap: 0; border-bottom: 1px solid var(--gold-d); overflow-x: auto; scrollbar-width: none; }
-.subtab { flex: 1 0 auto; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 8px 10px; font: 700 .75rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); cursor: pointer; }
-.subtab[aria-selected="true"] { color: var(--gold-l); border-bottom-color: var(--accent); }
-.filters { display: flex; gap: 10px; flex-wrap: wrap; }
-.field.inline { flex: 1; min-width: 140px; }
-.field input[type="search"], .field select { font: 600 .95rem var(--font-body); color: var(--gold-l); background: #010a13; border: 1px solid var(--gold-d); padding: 9px 10px; border-radius: 0; }
-.pull.wished { border-color: #ff6ad5; box-shadow: inset 3px 0 0 #ff6ad5; }
-.gate { color: var(--r-l) !important; }
-.trade { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--gold-d); background: rgba(1,10,19,.6); }
-.trade-who { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
-.trade-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.trade-sides > div { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; }
-.trade-sides small { width: 100%; font: 600 .7rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
-.ti { font: 600 .75rem var(--font-body); padding: 2px 7px; border: 1px solid var(--rc, var(--gold-d)); color: var(--gold-l); background: rgba(10,20,40,.8); }
-.ti.r-c { --rc: var(--r-c); } .ti.r-pc { --rc: var(--r-pc); } .ti.r-r { --rc: var(--r-r); } .ti.r-e { --rc: var(--r-e); } .ti.r-l { --rc: var(--r-l); } .ti.r-m { --rc: var(--r-m); }
-.chips { display: flex; flex-wrap: wrap; gap: 4px; width: 100%; }
-.profile .pf-head { display: flex; align-items: center; gap: 12px; width: 100%; }
-.av.big { width: 56px; height: 56px; }
-.profile h2 { font-size: 1.3rem; margin: 0; }
-.rar-bars { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 600 .78rem var(--font-mono); width: 100%; justify-content: center; }
-.trade-form { max-width: 620px; }
-.trade-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-@media (max-width: 520px) { .trade-cols { grid-template-columns: 1fr; } }
-.trade-cols fieldset { border: 1px solid var(--gold-d); padding: 8px; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
-.trade-cols legend { font: 700 .75rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); padding: 0 6px; }
-.pick-list { display: flex; flex-direction: column; gap: 4px; max-height: 38vh; overflow-y: auto; }
-.pick { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--gold-d); border-left: 3px solid var(--rc, var(--gold-d)); font: 600 .85rem var(--font-body); color: var(--gold-l); cursor: pointer; }
-.pick.r-c { --rc: var(--r-c); } .pick.r-pc { --rc: var(--r-pc); } .pick.r-r { --rc: var(--r-r); } .pick.r-e { --rc: var(--r-e); } .pick.r-l { --rc: var(--r-l); } .pick.r-m { --rc: var(--r-m); }
-.pick span { margin-left: auto; font: 600 .7rem var(--font-mono); color: var(--muted); white-space: nowrap; }
-.pick input { accent-color: #0ac8b9; }
-.by { cursor: pointer; }
-.daypack { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border-color: var(--r-e); background: linear-gradient(120deg, rgba(176,76,224,.18), rgba(10,20,40,.94) 55%); }
-.tile-btn { cursor: pointer; font: inherit; color: inherit; }
-.tile-btn:hover { border-color: var(--gold); }
-.m-txt small { font: 500 .78rem var(--font-body); color: var(--muted); }
-.bonus { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 12px; border: 1px dashed var(--gold-d); font: 600 .85rem var(--font-body); color: var(--gold-l); }
-.bonus b { color: #5bc0de; }
-.bonus.claimed { opacity: .55; }
-.tab { position: relative; }
-.tab-dot { position: absolute; top: 8px; right: 2px; width: 7px; height: 7px; border-radius: 50%; background: #ff6ad5; box-shadow: 0 0 6px #ff6ad5; }
-.lore { display: flex; flex-direction: column; gap: 10px; }
-.lore .btn { align-self: flex-start; text-decoration: none; }
-.facts dd.quotes { display: flex; flex-direction: column; gap: 6px; }
-.empty.panel { padding: 22px; }
-.tab { letter-spacing: .1em; font-size: .78rem; }
-@media (max-width: 420px) { .tab { letter-spacing: .04em; font-size: .72rem; } .day span { font-size: .56rem; } .board-list li { grid-template-columns: 24px 1fr; } .pl-stat { grid-column: 2; text-align: left; } }
-/* ===== Notifications (cloche) et chat du QG ===== */
-.bell { flex: none; position: relative; width: 40px; height: 40px; padding: 0; display: grid; place-items: center; background: #010a13; border: 1px solid var(--gold-d); color: var(--gold-l); cursor: pointer; }
-.bell:hover, .bell[aria-expanded="true"] { border-color: var(--gold); color: #f0e6d2; }
-.bell svg { width: 20px; height: 20px; }
-.badge { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; display: grid; place-items: center; background: #0ac8b9; color: #010a13; font: 800 .68rem/1 var(--font-mono); border: 2px solid #010a13; border-radius: 9px; box-shadow: 0 0 10px rgba(10,200,185,.7); }
-.badge[hidden] { display: none; }
-.np { position: fixed; z-index: 35; top: 64px; right: 12px; width: min(380px, calc(100vw - 24px)); max-height: min(70vh, 560px); overflow: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(180deg, #0a1428, #010a13); border: 1px solid var(--gold); box-shadow: 0 18px 40px rgba(0,0,0,.7); }
-.np[hidden] { display: none; }
-.np-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.np-head b { font: 700 1.05rem var(--font-display); color: var(--gold-l); letter-spacing: .04em; }
-.linkbtn { background: none; border: 0; padding: 4px 0; color: #0ac8b9; font: 600 .74rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
-.np-sec { margin-top: 6px; font: 700 .68rem var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-.np-item { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 10px; text-align: left; background: rgba(30,35,40,.55); border: 1px solid #1e2328; color: var(--ink, #f0e6d2); font: 500 .86rem/1.35 var(--font-body, inherit); cursor: pointer; }
-.np-item:hover { border-color: var(--gold-d); }
-.np-item.unread { border-color: #0ac8b9; background: rgba(10,200,185,.08); }
-.np-item small { display: block; margin-top: 3px; color: var(--muted); font: 600 .7rem var(--font-mono); }
-.np-ic { flex: none; width: 26px; height: 26px; display: grid; place-items: center; font-style: normal; font-weight: 800; color: #010a13; background: var(--gold); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
-.np-ic.k-sold { background: #5bc0de; } .np-ic.k-trade { background: #0ac8b9; } .np-ic.k-mention { background: #c7a6ff; } .np-ic.k-episode, .np-ic.k-announce { background: #f0d38a; } .np-ic.todo { background: #e84057; color: #fff; }
-.chat-fab { position: fixed; z-index: 26; right: 16px; bottom: 16px; width: 58px; height: 58px; padding: 0; display: grid; place-items: center; cursor: pointer; color: #f0e6d2; background: radial-gradient(circle at 50% 35%, #0a323c, #010a13 70%); border: 2px solid var(--gold); border-radius: 50%; box-shadow: 0 0 0 3px #010a13, 0 0 18px rgba(10,200,185,.45); }
-.chat-fab svg { width: 26px; height: 26px; }
-.chat-fab:hover { box-shadow: 0 0 0 3px #010a13, 0 0 26px rgba(10,200,185,.8); }
-.chat-fab .badge { top: -2px; right: -2px; }
-.chat { position: fixed; z-index: 28; right: 0; bottom: 0; top: 0; width: min(420px, 100vw); display: flex; flex-direction: column; background: linear-gradient(180deg, #0a1428, #010a13 40%); border-left: 1px solid var(--gold); box-shadow: -18px 0 40px rgba(0,0,0,.6); }
-.chat[hidden] { display: none; }
-.chat-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--gold-d); }
-.chat-head h2 { margin: 0; font-size: 1.2rem; flex: 1; }
-.chat-head h2 small { display: block; font: 600 .68rem var(--font-mono); letter-spacing: .12em; color: #0ac8b9; text-transform: uppercase; }
-.chat-x { width: 36px; height: 36px; padding: 0; background: none; border: 1px solid var(--gold-d); color: var(--gold-l); font-size: 1.2rem; cursor: pointer; }
-.chat-list { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-.cm { display: flex; gap: 10px; align-items: flex-start; }
-.cm .av { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold-d); flex: none; object-fit: cover; }
-.cm-b { min-width: 0; flex: 1; }
-.cm-h { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.cm-h b { font: 700 .86rem var(--font-body, inherit); color: var(--gold-l); cursor: pointer; }
-.cm.me .cm-h b { color: #0ac8b9; }
-.cm-h time { font: 600 .66rem var(--font-mono); color: var(--muted); }
-.tagadm { font: 800 .6rem var(--font-mono); letter-spacing: .1em; text-transform: uppercase; font-style: normal; color: #010a13; background: var(--gold); padding: 1px 5px; }
-.cm-del { margin-left: auto; background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 4px; opacity: .5; }
-.cm-del:hover { opacity: 1; color: #e84057; }
-.cm p { margin: 2px 0 0; font-size: .92rem; line-height: 1.4; color: #f0e6d2; overflow-wrap: anywhere; }
-.cm p mark { background: rgba(199,166,255,.18); color: #c7a6ff; padding: 0 2px; }
-.cm.ping .cm-b { border-left: 2px solid #c7a6ff; padding-left: 8px; }
-.cm.sys { gap: 4px 6px; justify-content: center; text-align: center; flex-wrap: wrap; align-items: center; padding: 8px 10px; font: 600 .78rem var(--font-mono); color: var(--muted); border: 1px solid #1e2328; background: rgba(1,10,19,.6); }
-.cm.sys.ann { color: #f0e6d2; border-color: var(--gold); background: linear-gradient(90deg, rgba(200,170,110,.12), rgba(1,10,19,.6)); font: 500 .9rem var(--font-body, inherit); text-align: left; justify-content: flex-start; }
-.cm.sys.ann b { color: var(--gold); font: 800 .66rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; margin-right: 6px; }
-.cm.sys.pull { border-color: var(--r-m, #e84057); }
-.cchip { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 4px 10px 4px 4px; max-width: 100%; background: #010a13; border: 1px solid var(--cc, var(--gold-d)); color: #f0e6d2; font: 600 .8rem var(--font-body, inherit); cursor: pointer; text-align: left; }
-.cchip .th { width: 30px; height: 40px; flex: none; background: var(--cc, #1e2328) center/cover; border: 1px solid rgba(0,0,0,.5); }
-.cchip em { display: block; font: 700 .62rem var(--font-mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--cc); }
-.chat-foot { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--gold-d); display: flex; flex-direction: column; gap: 8px; }
-.chat-form { display: flex; gap: 6px; }
-.chat-form input { flex: 1; min-width: 0; padding: 10px 12px; background: #010a13; border: 1px solid var(--gold-d); color: #f0e6d2; font: 500 .92rem var(--font-body, inherit); }
-.chat-form input:focus { outline: none; border-color: #0ac8b9; }
-.chat-form .btn { padding: 8px 12px; }
-.chat-att { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--muted); }
-.chat-att[hidden] { display: none; }
-.chat-empty { margin: auto; text-align: center; color: var(--muted); font-size: .9rem; max-width: 280px; }
-@media (max-width: 520px) { .chat { width: 100vw; border-left: 0; } .chat-fab { width: 52px; height: 52px; right: 12px; bottom: 12px; } }
-.cchip .th { position: relative; overflow: hidden; display: grid; place-items: center; font: 700 .9rem var(--font-display); color: #010a13; }
-.cchip .th .layer, .cchip .th .photo { position: absolute; inset: 0; background-size: cover; background-position: 50% 25%; }
-</style>
-
-<div class="app">
-  <header class="bar">
-    <div class="logo" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="M20 2l16 18-16 18L4 20z" fill="#010a13" stroke="#c8aa6e" stroke-width="2"/><path d="M20 9l9 11-9 11-9-11z" stroke="#0ac8b9" stroke-width="1.5"/><circle cx="20" cy="20" r="3" fill="#0ac8b9"/></svg></div>
-    <div class="brand">Re Zéro : LoL<small>BOOSTERS DE CARTES</small></div>
-    <div class="wallet" aria-label="Ton stock">
-      <span class="gauge"><i id="wGauge"></i></span><span id="wFree">10/10</span>
-      <span class="chakra">◆ <span id="wChakra">0</span></span>
-    </div>
-    <button class="bell" id="bellBtn" type="button" aria-label="Notifications" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><i class="badge" id="bellN" hidden></i></button>
-    <div class="acct" id="acct" hidden></div>
-  </header>
-
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" type="button" data-view="boosters" aria-selected="true">Boosters</button>
-    <button class="tab" role="tab" type="button" data-view="album" aria-selected="false">Album</button>
-    <button class="tab" role="tab" type="button" data-view="missions" aria-selected="false">Missions<i class="tab-dot" id="claimDot" hidden></i></button>
-    <button class="tab" role="tab" type="button" data-view="market" aria-selected="false">Marché</button>
-    <button class="tab" role="tab" type="button" data-view="pred" aria-selected="false">Prédictions</button>
-    <button class="tab" role="tab" type="button" data-view="community" aria-selected="false">Communauté</button>
-    <button class="tab" role="tab" type="button" data-view="admin" aria-selected="false" id="adminTab" hidden>Admin</button>
-  </nav>
-
-  <main id="view"></main>
-</div>
-
-<div class="overlay" id="overlay" hidden></div>
-<div class="toast" id="toast" hidden></div>
-<div class="np" id="notifPanel" role="dialog" aria-label="Notifications" hidden></div>
-<button class="chat-fab" id="chatFab" type="button" aria-label="Ouvrir le chat du QG"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg><i class="badge" id="chatN" hidden></i></button>
-<aside class="chat" id="chatPanel" aria-label="Chat du QG" hidden></aside>
-
-<script>
-/*ART*/
 // Images des persos : ajoute une entrée ART.<id> (data:image/...) et la carte l'utilise à la place de l'emblème.
 const PHOTO = {
   sasori: "data:image/jpeg;base64,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",
@@ -463,36 +37,6 @@ const PHOTO = {
 };
 
 
-const ICONS = {
-  shuriken: '<path d="M24 4l5 15 15 5-15 5-5 15-5-15-15-5 15-5z"/><circle cx="24" cy="24" r="4"/>',
-  book: '<path d="M6 10h14a4 4 0 0 1 4 4v26a3 3 0 0 0-3-3H6zM42 10H28a4 4 0 0 0-4 4v26a3 3 0 0 1 3-3h15z"/>',
-  blades: '<path d="M8 42L34 6l3 8L14 42zM40 42L26 24M30 40l10-4"/>',
-  mask: '<path d="M8 15c5-7 27-7 32 0v8c0 5-7 7-16 20C15 30 8 28 8 23z"/><circle cx="17" cy="20" r="3"/><circle cx="31" cy="20" r="3"/>',
-  tophat: '<path d="M14 30V8h20v22M7 30h34M14 23h20"/><path d="M17 38c4 4 10 4 14 0"/>',
-  axe: '<path d="M22 4v40M22 9c11 0 18 7 18 16-7-3-13-3-18 0z"/>',
-  storm: '<path d="M27 4L13 27h11l-4 17 15-25H24z"/><path d="M6 14l4 2M42 32l-4-2"/>',
-  arcane: '<circle cx="24" cy="24" r="17"/><path d="M24 7l15 26H9zM24 41L9 15h30z"/>',
-  bomb: '<circle cx="21" cy="29" r="13"/><path d="M30 19l5-5"/><path d="M37 9l1 3M41 12l-3 1M40 6l-1 2"/>',
-  rapier: '<path d="M8 40L38 10M33 5l10 10M15 29l4 4"/><circle cx="10" cy="38" r="3"/>',
-  orb: '<path d="M10 40L14 12l10-6 10 6 4 28z"/><circle cx="24" cy="24" r="6"/>',
-  claw: '<path d="M12 6c4 14 2 26-4 36M23 5c3 15 2 27-3 38M34 7c3 13 2 24-2 34"/>',
-  watch: '<circle cx="24" cy="28" r="14"/><path d="M24 20v8l6 4M19 7h10M24 7v7"/>',
-  owl: '<path d="M24 45V22"/><circle cx="17" cy="12" r="6"/><circle cx="31" cy="12" r="6"/><path d="M11 22h26M22 16l2 3 2-3"/>',
-  cobra: '<path d="M31 7c-9-4-17 3-11 9s15 6 9 14-15 9-17 2"/><circle cx="31" cy="8" r="1.6"/>',
-  goggles: '<circle cx="15" cy="24" r="7"/><circle cx="33" cy="24" r="7"/><path d="M22 24h4M8 22l-4-2M40 22l4-2"/>',
-  void: '<circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="10" stroke-dasharray="3 4"/><circle cx="24" cy="24" r="2.5"/>',
-  gun: '<path d="M5 18h32v9H21l-4 13h-7l3-13H5zM37 21h6"/>',
-  hammer: '<path d="M9 10h22v13H9zM20 23v21M31 15h8"/>',
-  bulb: '<path d="M17 31a11 11 0 1 1 14 0v6H17zM20 43h8"/>',
-  spear: '<path d="M8 41L35 14M35 14l7-9-3 12zM28 11l9 9"/>',
-  cross: '<path d="M24 6v36M14 17h20"/><circle cx="24" cy="17" r="2"/>',
-  glasses: '<circle cx="14" cy="26" r="8"/><circle cx="34" cy="26" r="8"/><path d="M22 26q2-3 4 0M6 24L3 17M42 24l3-7"/>',
-  moon: '<path d="M33 6a12 12 0 1 0 9 16 10 10 0 0 1-9-16z"/><path d="M6 42l9-15 6 6 6-10 9 19z"/>',
-  ball: '<circle cx="24" cy="24" r="17"/><path d="M7 24h34M24 7v34M12 12c6 6 6 18 0 24M36 12c-6 6-6 18 0 24"/>',
-  crown: '<path d="M8 36h32M9 31L7 14l10 8 7-12 7 12 10-8-2 17z"/>',
-  cannon: '<path d="M5 21h27l6-5v16l-6-5H5zM13 27v11h7V27"/>',
-};
-const svg = (i) => `<svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[i] || ""}</svg>`;
 
 const $ = (id) => document.getElementById(id);
 const ONLINE = "https://bit.ly/rezero-boosters";
@@ -556,7 +100,6 @@ let DB = null, USER = null, ME = null, canShare = false;
 const shared = { feed: [], players: [], market: [], trades: [] };
 // ===== Prédictions (comme sur le Discord de Billy) =====
 // Billy (éditeur) crée les questions et valide les bonnes réponses ; chaque joueur vote une fois par question.
-const PRED_REWARD = 50;
 const pred = { questions: [], mine: {}, all: [], scores: {} };
 function subscribePred() {
   const map = (s) => s.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -581,8 +124,9 @@ function creditPredictions() {
   const won = pred.questions.filter((q) => q.status === "resolved" && pred.mine[q.id] === q.answer && !save.predPaid.includes(q.id));
   if (!won.length) return;
   for (const q of won) save.predPaid.push(q.id);
-  save.chakra += won.length * PRED_REWARD; persist(); header();
-  toast(`Bonne prédiction${won.length > 1 ? "s" : ""} ! +${won.length * PRED_REWARD} ◆`);
+  const value = won.reduce((t, q) => t + predRewardOf(q), 0);
+  save.chakra += value; trackS(save, "predwin", won.length); persist(); header();
+  toast(`Bonne prédiction${won.length > 1 ? "s" : ""} ! +${value} ◆`);
 }
 async function vote(qid, idx) {
   const q = pred.questions.find((x) => x.id === qid);
@@ -593,6 +137,7 @@ async function vote(qid, idx) {
     await DB.doc("votes/" + ME).set({ uid: ME, answers: pred.mine, t: Date.now() });
     if (SRV) creditPredictions();
     else if (first) { track("predict"); persist(); }
+    if (first) toast("Vote enregistré. Tu peux le changer tant que les votes sont ouverts.");
   } catch (e) { toast("Ton vote n'est pas passé. Il faut l'accès « Contributeur »."); }
 }
 async function recomputeScores() {
@@ -611,69 +156,20 @@ async function adminPred(action, qid, value) {
     if (action === "close") await ref.update({ status: "closed" });
     if (action === "open") await ref.update({ status: "open", answer: null });
     if (action === "resolve") { await ref.update({ status: "resolved", answer: value }); pred.questions = pred.questions.map((q) => (q.id === qid ? { ...q, status: "resolved", answer: value } : q)); await recomputeScores(); toast("Bonne réponse validée, points mis à jour."); }
+    if (action === "reward") { await ref.update({ reward: predRewardOf({ reward: value }) }); toast("Récompense mise à jour."); }
     if (action === "delete") { await ref.delete(); pred.questions = pred.questions.filter((q) => q.id !== qid); await recomputeScores(); toast("Question supprimée."); }
   } catch (e) { toast("Action refusée : il faut être éditeur de l'app."); }
 }
 async function addQuestion(form) {
   const text = $("pqText").value.trim(), options = $("pqOptions").value.split("\n").map((s) => s.trim()).filter(Boolean);
-  const ep = +$("pqEp").value || 2, points = Math.max(1, Math.min(10, +$("pqPoints").value || 1));
+  const ep = +$("pqEp").value || 2, points = Math.max(1, Math.min(10, +$("pqPoints").value || 1)), reward = predRewardOf({ reward: $("pqReward").value });
   if (!text || options.length < 2) return toast("Écris une question et au moins 2 réponses (une par ligne).");
   try {
-    await DB.collection("predq").add({ ep, text, options: options.slice(0, 6), points, status: "open", answer: null, t: Date.now() });
-    form.reset(); $("pqEp").value = ep; toast("Question publiée.");
+    await DB.collection("predq").add({ ep, text, options: options.slice(0, 6), points, reward, status: "open", answer: null, t: Date.now() });
+    form.reset(); document.activeElement?.blur(); toast("Question publiée."); draw();
   } catch (e) { toast("Publication refusée : il faut être éditeur de l'app."); }
 }
 
-function viewPred() {
-  if (!DB) return `<div class="empty panel">${offlineMsg("faire tes prédictions")}</div>`;
-  const qs = pred.questions;
-  const eps = [...new Set(qs.map((q) => q.ep))].sort((a, b) => b - a);
-  const counts = (q) => { const c = q.options.map(() => 0); for (const v of pred.all) { const a = v.answers?.[q.id]; if (a != null && c[a] != null) c[a]++; } return c; };
-  const board = Object.entries(pred.scores).sort((a, b) => b[1] - a[1]);
-  const myPts = pred.scores[ME] || 0;
-  const qHTML = (q) => {
-    const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0;
-    const res = q.status === "resolved";
-    return `<article class="pq ${q.status}">
-      <div class="pq-head"><span class="pq-pts">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pq-st">${res ? "Résultat" : q.status === "closed" ? "Votes fermés" : "Votes ouverts"}</span></div>
-      <h3>${q.text}</h3>
-      <div class="pq-opts">${q.options.map((o, i) => {
-        const cls = [mine === i ? "mine" : "", res && q.answer === i ? "good" : "", res && mine === i && q.answer !== i ? "bad" : ""].join(" ");
-        return `<button class="pq-opt ${cls}" type="button" data-vote="${q.id}" data-idx="${i}" ${q.status !== "open" || !canShare ? "disabled" : ""} aria-pressed="${mine === i}">
-          <span>${o}</span>${c ? `<em>${c[i]} vote${c[i] > 1 ? "s" : ""}${tot ? ` · ${Math.round(c[i] / tot * 100)} %` : ""}</em>` : ""}${res && q.answer === i ? "<b>✓</b>" : ""}</button>`; }).join("")}</div>
-      ${res ? `<p class="pq-res">${mine == null ? "Tu n'avais pas voté." : mine === q.answer ? `Bien vu ! +${q.points || 1} pt et +${PRED_REWARD} ◆` : "Raté cette fois."}</p>` : mine != null ? `<p class="pq-res">Ton choix est enregistré. Tu peux le changer tant que les votes sont ouverts.</p>` : ""}
-      ${IS_ADMIN ? `<div class="pq-admin">
-        ${q.status === "open" ? `<button class="btn ghost sm" type="button" data-pq="close" data-q="${q.id}">Fermer les votes</button>` : `<button class="btn ghost sm" type="button" data-pq="open" data-q="${q.id}">Rouvrir</button>`}
-        <select aria-label="Bonne réponse" data-pq-answer="${q.id}"><option value="">Bonne réponse…</option>${q.options.map((o, i) => `<option value="${i}" ${q.answer === i ? "selected" : ""}>${o}</option>`).join("")}</select>
-        <button class="btn sm" type="button" data-pq="resolve" data-q="${q.id}">Valider</button>
-        <button class="btn ghost sm" type="button" data-pq="delete" data-q="${q.id}">Supprimer</button></div>` : ""}
-    </article>`;
-  };
-  return `
-  <section class="panel" style="display:flex;flex-direction:column;gap:10px">
-    <div class="eyebrow">Prédictions · <span>prédis la suite de l'anime</span></div>
-    <h2 style="font-size:1.5rem">Épisode ${eps[0] || 2}</h2>
-    <p class="note">Événements, trahisons, combats, alliances : vote pour ce que tu crois qu'il va se passer. Chaque bonne prédiction rapporte des points et ${PRED_REWARD} ◆. À chaque épisode, ceux qui ont le plus de points gagnent des bonus dans l'anime, décidés par Billy.</p>
-    <div class="next">Tes points : ${myPts}</div>
-    ${sharedNote()}
-  </section>
-  ${qs.length ? eps.map((ep) => `<div class="section-head" style="--fc:var(--gold)"><h3>Épisode ${ep}</h3><span>${qs.filter((q) => q.ep === ep).length} question${qs.filter((q) => q.ep === ep).length > 1 ? "s" : ""}</span></div>
-    ${qs.filter((q) => q.ep === ep).map(qHTML).join("")}`).join("")
-    : `<div class="empty panel">Pas encore de prédiction. Billy les publie après chaque épisode.</div>`}
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Classement des prédictions</div>
-    ${board.length ? `<ol class="board-list">${board.map(([uid, pts], i) => `<li class="${uid === ME ? "me" : ""}"><span class="rank">${i + 1}</span><span class="by">${who(uid)}</span><span class="pl-stat">${pts} pt${pts > 1 ? "s" : ""}</span></li>`).join("")}</ol>`
-      : `<div class="empty">Le classement apparaît dès que Billy valide une première bonne réponse.</div>`}
-  </section>
-  ${IS_ADMIN ? `<form class="panel admin" id="pqForm">
-    <div class="eyebrow">Admin · <span>nouvelle question</span></div>
-    <label class="field" for="pqText">Question<input id="pqText" type="text" maxlength="160" placeholder="Qui va retrouver Byakko en premier ?"></label>
-    <label class="field" for="pqOptions">Réponses possibles (une par ligne, 6 max)<textarea id="pqOptions" rows="4" placeholder="Kuradai&#10;Stalk&#10;Personne"></textarea></label>
-    <div class="row"><label class="field" for="pqEp" style="flex:1">Épisode<input id="pqEp" type="number" min="1" max="50" value="${eps[0] || 2}"></label>
-      <label class="field" for="pqPoints" style="flex:1">Points<input id="pqPoints" type="number" min="1" max="10" value="1"></label></div>
-    <button class="btn" type="submit">Publier la question</button>
-  </form>` : ""}`;
-}
 
 // ===== Épisodes et rôles : Billy (éditeur de l'app) décide qui peut packer quoi =====
 let CONFIG = configFrom(null), IS_ADMIN = false, configT = null;
@@ -691,51 +187,6 @@ function saveConfig() {
 const epLabel = (n) => (n >= HIDDEN ? "Caché" : `Épisode ${n}`);
 const epOptions = (sel, hidden) => [...Array(EP_MAX)].map((_, i) => `<option value="${i + 1}" ${sel === i + 1 ? "selected" : ""}>Épisode ${i + 1}</option>`).join("") + (hidden ? `<option value="${HIDDEN}" ${sel >= HIDDEN ? "selected" : ""}>Caché</option>` : "");
 
-function viewAdmin() {
-  if (!IS_ADMIN) return `<div class="empty panel">Cet onglet est réservé aux éditeurs de l'app.</div>`;
-  const ids = [...new Set([...shared.players.map((p) => p.uid), ...Object.keys(CONFIG.progress), ...Object.keys(CONFIG.extra)])];
-  const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
-  return `
-  <section class="panel admin">
-    <div class="eyebrow">Admin · <span>visible seulement par les éditeurs</span></div>
-    <h2 style="font-size:1.4rem">Qui peut packer quoi</h2>
-    <p class="note">Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés dans son album, sans nom ni image. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.</p>
-    <label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label>
-    <p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p>
-  </section>
-  ${SRV ? `<section class="panel admin">
-    <div class="eyebrow">Annonce · <span>chat + notification pour tout le QG</span></div>
-    <form id="annForm" class="pq-form"><label class="field" for="annText">Message<textarea id="annText" rows="2" maxlength="300" placeholder="Ex. : l'épisode 2 sort samedi à 18 h !"></textarea></label>
-    <button class="btn" type="submit">Envoyer l'annonce</button></form>
-  </section>` : ""}
-  <section class="panel admin">
-    <div class="eyebrow">Joueurs · <span>${ids.length}</span></div>
-    ${ids.length ? `<div class="adm-list">${ids.map((uid) => `
-      <div class="adm-row"><span class="by">${who(uid)}</span>
-        <select aria-label="Épisode atteint" data-prog="${uid}"><option value="" ${CONFIG.progress[uid] == null ? "selected" : ""}>Par défaut (${epLabel(CONFIG.def)})</option>${epOptions(CONFIG.progress[uid])}</select>
-        <button class="btn ghost sm" type="button" data-bonus="${uid}">Bonus · ${(CONFIG.extra[uid] || []).length}</button></div>`).join("")}</div>`
-      : `<p class="note">Les joueurs apparaissent ici dès qu'ils ouvrent l'app.</p>`}
-  </section>
-  <section class="panel admin">
-    <div class="eyebrow">Persos par épisode</div>
-    <div class="adm-list">${chars.map(([k, p]) => `
-      <div class="adm-row"><span class="adm-name"><b>${p.name}${k === "monoco2" ? " (singe)" : ""}</b><span>${FACTIONS[p.fac].label}</span></span>
-        <select aria-label="Épisode de ${p.name}" data-ep="${k}">${epOptions(epOf(k), true)}</select></div>`).join("")}</div>
-  </section>`;
-}
-function openBonus(uid) {
-  const locked = Object.entries(PEOPLE).filter(([k]) => epOf(k) > progressOf(uid));
-  const mine = CONFIG.extra[uid] || [];
-  $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Persos offerts">
-    <h2 style="font-size:1.3rem;text-align:center">Persos offerts à <span data-uid="${uid}">…</span></h2>
-    <p class="note" style="text-align:center">Coche les persos que ce joueur peut packer avant d'avoir atteint leur épisode.</p>
-    ${locked.length ? `<div class="adm-checks">${locked.map(([k, p]) => `<label><input type="checkbox" data-extra="${k}" data-uid-for="${uid}" ${mine.includes(k) ? "checked" : ""}> ${p.name}${k === "monoco2" ? " (singe)" : ""} <span>${epLabel(epOf(k))}</span></label>`).join("")}</div>`
-      : `<p class="note">Ce joueur a déjà accès à tous les persos.</p>`}
-    <button class="btn ghost" type="button" data-act="close">Fermer</button>
-  </div>`;
-  $("overlay").hidden = false;
-  fillNames();
-}
 document.addEventListener("change", (e) => {
   const t = e.target;
   if (!IS_ADMIN) return;
@@ -775,7 +226,8 @@ async function connect() {
       subscribePred();
       MYNAME = (await window.discordMe())?.name || "";
       pulse();
-      $("adminTab").hidden = !IS_ADMIN;
+      MYNAME = (await window.discordMe())?.name || MYNAME;
+      subscribeExtra(); loadAccount();
       if (!opening) draw();
       return;
     }
@@ -791,7 +243,7 @@ async function connect() {
     subscribePred();
     MYNAME = (await user.me?.())?.name || "";
     if (chat.open) subscribeChat();
-    $("adminTab").hidden = !IS_ADMIN;
+    subscribeExtra(); loadAccount();
     publishPlayer();
     if (!opening) draw();
   } catch (e) { remote = null; }
@@ -813,7 +265,7 @@ function subscribeShared() {
 let sharedT;
 function sharedChanged() {
   clearTimeout(sharedT);
-  sharedT = setTimeout(() => { if (!opening && $("overlay").hidden && ["boosters", "album", "market", "community", "pred"].includes(view) && !document.activeElement?.closest?.("#pqForm")) draw(); }, 150);
+  sharedT = setTimeout(() => { if (!opening && $("overlay").hidden && ["boosters", "collection", "market", "classement", "pred", "carte", "profil", "avis", "wiki", "admin"].includes(view) && !document.activeElement?.closest?.("#pqForm")) draw(); }, 150);
 }
 let lastPlayer = "", playerT;
 const stats = () => statsS(save);
@@ -870,41 +322,7 @@ const rewardText = (r) => [r.boosters ? `${r.boosters} booster${r.boosters > 1 ?
 const toClaim = () => claimableCountS(save);
 
 // ===== Carte =====
-const RINGS = `<svg class="rings" viewBox="0 0 100 140" aria-hidden="true" fill="none" stroke="#9fe8ff" stroke-width="1.4"><ellipse cx="50" cy="70" rx="44" ry="58" stroke-dasharray="6 5"/><ellipse cx="50" cy="70" rx="34" ry="46" stroke-dasharray="3 6" stroke="#c7a6ff"/><path d="M8 30l6 4M92 110l-6-4M90 26l-6 5M10 116l6-5" stroke-linecap="round"/></svg>`;
-const hueOf = (who) => [...who].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
-function skinArtHTML(c, locked) {
-  const img = ART[c.who] ? '<div class="layer"></div>' : '<div class="photo"></div>';
-  if (locked) return `<div class="art who-${c.who}"><div class="emblem" style="--cc:#2a2633"><span class="mono">?</span></div></div>`;
-  const h = hueOf(c.who);
-  return `<div class="art skin sk-${c.skin} who-${c.who}" style="--hue:${h}deg;--h:${(h + 200) % 360}">${img}<div class="fx"></div><div class="fx2"></div></div>`;
-}
-function artHTML(c, locked) {
-  if (c.skin) return skinArtHTML(c, locked);
-  const p = PEOPLE[c.who], fx = c.fx || [];
-  if (ART[c.who] || ART[c.img]) return `<div class="art who-${c.img || c.who}" style="--pos:${c.pos};--zoom:${c.zoom}">
-      <div class="layer base"></div>
-      ${!locked && fx.includes("ghost") ? '<div class="layer ghost"></div><div class="layer ghost g2"></div>' : ""}
-      ${!locked && c.tint ? `<div class="tint" style="background:${c.tint}"></div>` : ""}
-      ${!locked && fx.includes("blink") ? RINGS : ""}
-      ${!locked && c.glint ? `<i class="glint" style="left:${c.glint[0]}%;top:${c.glint[1]}%"></i>` : ""}
-    </div>`;
-  const cc = locked ? "#2a2633" : p.color;
-  return `<div class="art who-${c.who}"><div class="emblem" style="--cc:${cc}">
-      ${PHOTO[c.who] && !locked ? '<div class="photo"></div>' : `<span class="wm">${p.kanji}</span>${p.icon === "mono" ? `<span class="mono">${initials(p.name)}</span>` : svg(p.icon)}`}
-    </div></div>`;
-}
-function cardHTML(c, o = {}) {
-  const p = PEOPLE[c.who], R = RAR[c.rar];
-  const locked = !!o.locked;
-  return `<div class="kc r-${c.rar} kc-${c.who} ${c.fa ? "fa" : ""} ${c.skin ? `is-skin sk-l-${c.skin}` : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""}
-    aria-label="${locked ? "Carte manquante, " + R.label : `${p.name}, ${c.title}, ${R.label}${o.gold ? ", dorée" : ""}`}">
-    ${artHTML(c, locked)}
-    <div class="shade"></div>
-    <div class="top"><span class="rar">${o.gold ? "Dorée" : R.label}</span><span class="kanji"></span></div>
-    <div class="foot"><b>${locked ? "???" : p.name}</b><span>${locked ? (o.soon ? "Bientôt dans l'anime" : FACTIONS[p.fac].label) : c.title}</span></div>
-    ${o.isNew ? '<span class="badge new">NOUVEAU</span>' : o.count > 1 ? `<span class="badge">×${o.count}</span>` : ""}
-  </div>`;
-}
+// carte pas encore obtenue : un emblème hextech commun, aux couleurs de la rareté (plus d'icônes génériques)
 
 // ===== Tirage (règles dans game.js) =====
 const limitedOn = () => limitedOnAt(Date.now());
@@ -916,7 +334,6 @@ const poolOf = (pk) => poolFor(pk, CONFIG, ME);
 // ===== Multijoueur : marché, échanges, profils, envies, classement =====
 let marketTab = "buy", boardTab = "collection", marketQuery = "", marketRar = "";
 const wishSet = () => new Set(save.wish || []);
-const myName = (uid) => `<span class="by">${who(uid)}</span>`;
 function marketGate() {
   if (!SRV) return "";
   if (save.opened < MARKET_MIN_OPENED) return `<p class="note gate">Le marché et les échanges s'ouvrent après ${MARKET_MIN_OPENED} boosters ouverts (tu en es à ${save.opened}). Ça évite les comptes jetables.</p>`;
@@ -928,61 +345,9 @@ function cote(id) {
   const sold = shared.market.filter((l) => l.card === id && l.status === "sold" && !l.gold && (l.soldAt || l.t) > since).map((l) => l.price);
   return median(sold);
 }
-function listingRow(l, actions) {
-  const c = byId[l.card]; if (!c) return "";
-  const vis = visible(c), wished = wishSet().has(l.card) && !has(l.card);
-  return `<div class="pull ${wished ? "wished" : ""}">${vis ? cardHTML(c, { gold: l.gold, click: true }) : cardHTML(c, { locked: true, soon: true })}
-    <div class="who"><b>${vis ? PEOPLE[c.who].name : "???"}${l.gold ? " · dorée" : ""}</b><span>${vis ? c.title : ""} · ${RAR[c.rar].label}${wished ? " · dans tes envies" : ""}</span>
-      <span>${l.seller === ME ? ago(l.t) : myName(l.seller)}${cote(l.card) ? ` · cote ~${cote(l.card)} ◆` : ""}</span></div>
-    <span class="price">${l.price} ◆</span>${actions}</div>`;
-}
-function viewMarket() {
-  const tabs = `<div class="subtabs" role="tablist">${[["buy", "Acheter"], ["mine", "Mes ventes"], ["trades", `Échanges${pendingTrades().length ? ` · ${pendingTrades().length}` : ""}`]]
-    .map(([k, l]) => `<button class="subtab" type="button" role="tab" data-mtab="${k}" aria-selected="${marketTab === k}">${l}</button>`).join("")}</div>`;
-  const head = `<section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Hôtel des ventes · <span>entre joueurs du QG</span></div>
-    <h2 style="font-size:1.5rem">Le marché</h2>
-    <p class="note">Achète la carte qui te manque, vends tes doublons, échange directement avec les autres. Pour vendre, ouvre une carte de ton album et touche « Vendre ».</p>
-    ${sharedNote()}${marketGate()}
-    ${tabs}
-  </section>`;
-  if (marketTab === "trades") return head + viewTrades();
-  if (marketTab === "mine") {
-    const mine = shared.market.filter((l) => l.seller === ME && l.status !== "cancelled").slice(0, 40);
-    return head + (mine.length ? `<div class="pulls">${mine.map((l) => listingRow(l, l.status === "open" ? `<button class="btn ghost sm" type="button" data-cancel="${l.id}">Retirer</button>` : `<span class="m-ok">Vendue</span>`)).join("")}</div>`
-      : `<div class="empty panel">Tu n'as rien mis en vente.</div>`);
-  }
-  const q = marketQuery.trim().toLowerCase();
-  const open = shared.market.filter((l) => l.status === "open" && l.seller !== ME && byId[l.card])
-    .filter((l) => !marketRar || byId[l.card].rar === marketRar)
-    .filter((l) => !q || (visible(byId[l.card]) && (PEOPLE[byId[l.card].who].name + " " + byId[l.card].title).toLowerCase().includes(q)))
-    .sort((a, b) => (wishSet().has(b.card) && !has(b.card)) - (wishSet().has(a.card) && !has(a.card)) || a.price - b.price);
-  const locked = !SRV ? !canShare : save.opened < MARKET_MIN_OPENED;
-  return head + `<div class="filters"><label class="field inline" for="mq">Rechercher<input id="mq" type="search" value="${marketQuery.replace(/"/g, "&quot;")}" placeholder="Billy, Kaï…"></label>
-    <label class="field inline" for="mr">Rareté<select id="mr"><option value="">Toutes</option>${RANKS.map((k) => `<option value="${k}" ${marketRar === k ? "selected" : ""}>${RAR[k].label}</option>`).join("")}</select></label></div>
-  ${open.length ? `<div class="pulls">${open.map((l) => listingRow(l, canPack(byId[l.card]) || has(l.card) ? `<button class="btn sm" type="button" data-buy="${l.id}" ${save.chakra < l.price || locked ? "disabled" : ""}>Acheter</button>` : `<span class="soon-tag">Pas encore débloquée</span>`)).join("")}</div>`
-    : `<div class="empty panel">${q || marketRar ? "Aucune carte ne correspond." : "Rien en vente pour l'instant. Sois le premier à mettre un doublon sur le marché."}</div>`}`;
-}
 
 // --- échanges ---
 const pendingTrades = () => (shared.trades || []).filter((t) => t.status === "open" && t.to === ME);
-const itemsHTML = (items, chakra) => [...items.map((it) => { const c = byId[it.id]; return `<span class="ti r-${c.rar}">${PEOPLE[c.who].name}${c.skin ? " · " + c.title.replace("Skin ", "") : c.id.includes("-") ? " · " + c.title : ""}${it.gold ? " ★" : ""}${it.n > 1 ? ` ×${it.n}` : ""}</span>`; }), chakra ? `<span class="ti">${chakra} ◆</span>` : ""].join("") || '<span class="muted">rien</span>';
-function viewTrades() {
-  if (!SRV) return `<div class="empty panel">${offlineMsg("échanger avec les autres joueurs")}</div>`;
-  const list = shared.trades || [];
-  const block = (title, arr, me) => `<section class="panel" style="display:flex;flex-direction:column;gap:10px"><div class="eyebrow">${title}</div>
-    ${arr.length ? arr.map((t) => `<div class="trade">
-      <div class="trade-who">${myName(me ? t.to : t.from)} <span class="muted">${ago(t.t)}</span></div>
-      <div class="trade-sides"><div><small>${me ? "Tu donnes" : "Tu reçois"}</small>${itemsHTML(t.give, t.chakra)}</div><div><small>${me ? "Tu reçois" : "Tu donnes"}</small>${itemsHTML(t.want)}</div></div>
-      ${t.status === "open" ? `<div class="row">${!me ? `<button class="btn sm" type="button" data-trade="${t.id}" data-ta="accept">Accepter</button><button class="btn ghost sm" type="button" data-trade="${t.id}" data-ta="refuse">Refuser</button>`
-        : `<button class="btn ghost sm" type="button" data-trade="${t.id}" data-ta="cancel">Annuler</button>`}</div>`
-        : `<span class="m-ok">${{ done: "Échange fait", refused: "Refusé", cancelled: "Annulé" }[t.status] || t.status}</span>`}
-    </div>`).join("") : `<p class="note">Rien pour l'instant.</p>`}</section>`;
-  return `<p class="note" style="margin:4px 2px">Pour proposer un échange, touche le nom d'un joueur (classement, marché, gros tirages) puis « Proposer un échange ». Les cartes proposées sont mises de côté jusqu'à la réponse.</p>
-    ${block("Reçus", list.filter((t) => t.to === ME && t.status === "open"), false)}
-    ${block("Envoyés", list.filter((t) => t.from === ME && t.status === "open"), true)}
-    ${block("Historique", list.filter((t) => t.status !== "open").slice(0, 15), false)}`;
-}
 async function answerTrade(tid, action) {
   try { await srv("trade/answer", { tid, action }); toast({ accept: "Échange fait !", refuse: "Échange refusé.", cancel: "Échange annulé, tes cartes reviennent." }[action]); }
   catch (e) { toast(e.message); }
@@ -990,36 +355,6 @@ async function answerTrade(tid, action) {
 }
 
 // --- profils publics ---
-async function openProfile(uid) {
-  if (!SRV) return;
-  let p;
-  try { p = await (await fetch("/api/game/profile", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ uid }) })).json(); }
-  catch (e) { return toast("Profil indisponible."); }
-  if (p.error) return toast(p.error);
-  const st = p.stats, isMe = uid === ME;
-  const ownedIds = Object.keys(p.owned);
-  const byRar = RANKS.slice().reverse().map((k) => [k, ownedIds.filter((id) => byId[id]?.rar === k).length]);
-  const dupes = ownedIds.filter((id) => p.owned[id][0] > 1 && visible(byId[id])).sort((a, b) => RAR[byId[b].rar].rank - RAR[byId[a].rar].rank);
-  const show = (p.showcase || []).filter((id) => byId[id]);
-  $("overlay").innerHTML = `<div class="sheet profile" role="dialog" aria-modal="true" aria-label="Profil">
-    <div class="pf-head"><img class="av big" data-uid="${uid}" alt=""><div><h2 data-uid="${uid}">…</h2><span class="muted">${st.unique}/${ALL_CARDS.length} cartes · ${st.opened} boosters</span></div></div>
-    <div class="statline">
-      <div class="tile"><b>${Math.round(st.unique / ALL_CARDS.length * 100)} %</b><span>complétion</span></div>
-      <div class="tile"><b>${st.mythics}</b><span>mythiques</span></div>
-      <div class="tile"><b>${st.skins}</b><span>skins</span></div>
-    </div>
-    <div class="eyebrow">Vitrine</div>
-    ${show.length ? `<div class="summary">${show.map((id) => cardHTML(byId[id], { click: true })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Mettre en vitrine »." : "Pas encore de vitrine."}</p>`}
-    <div class="rar-bars">${byRar.map(([k, n]) => `<span style="color:${RAR[k].color}">${RAR[k].label} <b>${n}</b></span>`).join("")}</div>
-    ${!isMe ? `<div class="eyebrow">Il échange · <span>ses doublons</span></div>
-      ${dupes.length ? `<div class="chips">${dupes.slice(0, 30).map((id) => `<span class="ti r-${byId[id].rar}">${PEOPLE[byId[id].who].name}${byId[id].skin ? " · " + byId[id].title.replace("Skin ", "") : ""} ×${p.owned[id][0] - 1}</span>`).join("")}</div>` : `<p class="note">Pas de doublon pour l'instant.</p>`}
-      <div class="row" style="justify-content:center"><button class="btn" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>Proposer un échange</button></div>` : ""}
-    <button class="btn ghost" type="button" data-act="close">Fermer</button>
-  </div>`;
-  $("overlay").hidden = false;
-  shared.lastProfile = p;
-  fillNames();
-}
 function tradeOptions(owned, keepOne) {
   return Object.entries(owned).flatMap(([id, v]) => {
     const c = byId[id]; if (!c) return [];
@@ -1029,23 +364,6 @@ function tradeOptions(owned, keepOne) {
     if (g - (keepOne && !n ? 1 : 0) > 0) out.push({ id, gold: true, max: g - (keepOne && !n ? 1 : 0) });
     return out;
   }).filter((o) => visible(byId[o.id])).sort((a, b) => RAR[byId[b.id].rar].rank - RAR[byId[a.id].rar].rank);
-}
-function openTradeBuilder(uid) {
-  const p = shared.lastProfile; if (!p || p.uid !== uid) return;
-  const mine = tradeOptions(save.owned, false), theirs = tradeOptions(p.owned, false);
-  const opt = (o, side) => { const c = byId[o.id]; return `<label class="pick r-${c.rar}"><input type="checkbox" data-side="${side}" data-id="${o.id}" data-gold="${o.gold ? 1 : ""}"> ${PEOPLE[c.who].name}${c.skin ? " · " + c.title.replace("Skin ", "") : c.id.includes("-") ? " · " + c.title : ""}${o.gold ? " ★" : ""} <span>${RAR[c.rar].label} · ×${o.max}</span></label>`; };
-  $("overlay").innerHTML = `<form class="sheet trade-form" id="tradeForm" data-to="${uid}" aria-label="Proposer un échange">
-    <h2 style="font-size:1.3rem;text-align:center">Échange avec <span data-uid="${uid}">…</span></h2>
-    <div class="trade-cols">
-      <fieldset><legend>Tu donnes</legend><div class="pick-list">${mine.map((o) => opt(o, "give")).join("") || '<p class="note">Rien à donner.</p>'}</div>
-        <label class="field" for="tradeEss">Essence en plus ◆<input id="tradeEss" type="number" min="0" max="${save.chakra}" value="0"></label></fieldset>
-      <fieldset><legend>Tu reçois</legend><div class="pick-list">${theirs.map((o) => opt(o, "want")).join("") || '<p class="note">Rien à recevoir.</p>'}</div></fieldset>
-    </div>
-    <p class="note" id="tradeFair" style="text-align:center">Choisis des cartes des deux côtés.</p>
-    <div class="row" style="justify-content:center"><button class="btn" type="submit">Envoyer la proposition</button><button class="btn ghost" type="button" data-act="close">Annuler</button></div>
-  </form>`;
-  $("overlay").hidden = false;
-  fillNames();
 }
 function tradeSelection() {
   const f = $("tradeForm"); if (!f) return null;
@@ -1059,7 +377,7 @@ function updateTradeFair() {
 }
 async function sendTrade() {
   const s = tradeSelection();
-  try { await srv("trade/propose", s); $("overlay").hidden = true; toast("Proposition envoyée."); marketTab = "trades"; view = "market"; draw(); }
+  try { await srv("trade/propose", s); $("overlay").hidden = true; toast("Proposition envoyée."); marketTab = "trades"; nav("market"); }
   catch (e) { toast(e.message); }
 }
 
@@ -1092,30 +410,9 @@ function wishAlerts() {
 }
 
 // --- classement ---
-const BOARDS = [
-  ["collection", "Collection", (p) => p.unique ?? p.cards, (p) => `${p.unique ?? p.cards}/${ALL_CARDS.length} cartes${p.mythics ? ` · ${p.mythics} M` : ""}`],
-  ["mythics", "Mythiques", (p) => p.mythics || 0, (p) => `${p.mythics || 0} mythique${p.mythics > 1 ? "s" : ""}`],
-  ["skins", "Skins", (p) => p.skins || 0, (p) => `${p.skins || 0}/${SKINS.length} skins`],
-  ["boosters", "Boosters", (p) => p.opened || 0, (p) => `${p.opened || 0} boosters ouverts`],
-  ["commerce", "Commerce", (p) => (p.sales || 0) + (p.trades || 0), (p) => `${p.sales || 0} ventes · ${p.trades || 0} échanges`],
-];
-function boardHTML() {
-  const [, , score, label] = BOARDS.find((b) => b[0] === boardTab) || BOARDS[0];
-  const list = [...shared.players].sort((a, b) => score(b) - score(a) || (b.mythics || 0) - (a.mythics || 0)).slice(0, 50);
-  return `<div class="subtabs" role="tablist">${BOARDS.map(([k, l]) => `<button class="subtab" type="button" role="tab" data-btab="${k}" aria-selected="${boardTab === k}">${l}</button>`).join("")}</div>
-    ${list.length ? `<ol class="board-list">${list.map((p, i) => `<li class="${p.uid === ME ? "me" : ""}"><span class="rank">${i + 1}</span>${myName(p.uid)}<span class="pl-stat">${label(p)}</span></li>`).join("")}</ol>`
-      : `<div class="empty">Le classement apparaîtra dès que des joueurs auront ouvert des boosters.</div>`}`;
-}
 
 // ===== Vues =====
 let view = "boosters", opening = null;
-function header() {
-  const dot = $("claimDot"); if (dot) dot.hidden = !toClaim();
-  $("wFree").textContent = `${save.free}/${FREE_MAX}`;
-  $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
-  $("wChakra").textContent = save.chakra;
-  badges();
-}
 function fmtWait(ms) { const m = Math.max(1, Math.ceil(ms / 60000)); return m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : `${m} min`; }
 function pct(x) { return (x * 100).toLocaleString("fr-FR", { maximumFractionDigits: x < .01 ? 2 : 1 }) + " %"; }
 function ago(t) {
@@ -1125,270 +422,19 @@ function ago(t) {
   if (s < 86400) return `il y a ${Math.floor(s / 3600)} h`;
   return `il y a ${Math.floor(s / 86400)} j`;
 }
-const who = (uid) => `<img class="av" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="><b data-uid="${uid}">…</b>`;
-function openButtons() {
-  return save.free
-    ? `<button class="btn" type="button" data-act="open-free">Ouvrir un booster gratuit <span class="n">${save.free}</span></button>`
-    : `<button class="btn" type="button" data-act="open-buy" ${save.chakra < PRICE ? "disabled" : ""}>Acheter un booster · ${PRICE} ◆</button>`;
-}
 function sharedNote() {
   if (!DB) return `<p class="note">${offlineMsg("voir les autres joueurs")}</p>`;
   if (!canShare) return `<p class="note">${window.DISCORD_LOGIN ? "Tu peux regarder, mais pour apparaître ici, voter et utiliser le marché, il faut être membre du serveur Discord QG de Shinjuku." : "Tu peux regarder, mais pour apparaître ici et utiliser le marché, demande au propriétaire de l'app l'accès « Contributeur »."}</p>`;
   return "";
 }
 
-function viewBoosters() {
-  const pk = packOf(save.pack);
-  const top = CARDS.filter(canPack).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank), showcase = [top[1], top[0], top[2]].filter(Boolean);
-  const next = save.free < FREE_MAX ? `Prochain booster gratuit dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}` : "Réserve pleine : ouvre-les avant qu'ils ne se perdent.";
-  const st = streakState(), ms = missionsToday();
-  const days = Math.ceil((LIMITED_END - Date.now()) / 86400e3);
-  const feed = shared.feed.slice(0, 6);
-  return `
-  <section class="panel hero">
-    <div class="fan">${showcase.map((c) => cardHTML(c)).join("")}</div>
-    ${limitedOn() ? `<div class="eyebrow">Édition limitée · <span>jusqu'au 31 décembre · plus que ${days} j</span></div>` : `<div class="eyebrow">Série · <span>Re Zéro : LoL</span></div>`}
-    <h2>${limitedOn() && pk.limited ? "Saison 1" : pk.name}</h2>
-    <p class="note">${pk.limited ? "Tous les persos déjà apparus dans Re Zéro : LoL, avec deux fois plus de chances de Légendaire et de Mythique." : `${pk.sub} · ${poolOf(pk).length} cartes.`}</p>
-    <div class="row">${openButtons()}</div>
-    <div class="next">${next}</div>
-    <div class="next">Ta progression dans l'anime : épisode ${progressOf(ME)} · ${ALL_CARDS.filter(canPack).length}/${ALL_CARDS.length} cartes débloquées</div>
-  </section>
-  <div class="tiles six">
-    <div class="tile" style="color:var(--accent)"><div class="k"></div><b>${save.free}/${FREE_MAX}</b><span>gratuits</span></div>
-    <button class="tile tile-btn" type="button" data-go="missions" style="color:#5bc0de"><div class="k"></div><b>${toClaim()}</b><span>à récupérer</span></button>
-    <div class="tile" style="color:var(--r-pc)"><div class="k"></div><b>J${st.n}/7</b><span>série</span></div>
-    <div class="tile" style="color:var(--sand)"><div class="k"></div><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant la dorée</span></div>
-    <div class="tile" style="color:var(--r-m)"><div class="k"></div><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
-    <div class="tile" style="color:#5bc0de"><div class="k"></div><b>${save.chakra}</b><span>essence</span></div>
-  </div>
-  <section class="panel daypack">
-    <div><div class="eyebrow">Pack du jour · <span>gratuit, Épique ou mieux garantie</span></div>
-      <h3>${dailyPackOf().name.replace("Pack du jour · ", "")}</h3><p class="note">${save.dailyPack === dayKey() ? "Déjà ouvert aujourd'hui. Un nouveau thème demain." : "Un booster offert chaque jour, avec un thème différent."}</p></div>
-    <button class="btn" type="button" data-act="open-day" ${save.dailyPack === dayKey() ? "disabled" : ""}>${save.dailyPack === dayKey() ? "Reviens demain" : "Ouvrir le pack du jour"}</button>
-  </section>
-  <section style="display:flex;flex-direction:column;gap:10px">
-    <div class="eyebrow">Choisis ton booster</div>
-    <div class="packs">${packsNow().map((p) => `
-      <button class="pk ${p.limited ? "lim" : ""}" type="button" data-pack="${p.id}" aria-pressed="${p.id === pk.id}" style="--pc:${p.color}">
-        <span class="kk"></span><b>${p.name}</b><span>${p.sub} · ${poolOf(p).length} cartes</span>
-      </button>`).join("")}</div>
-  </section>
-  ${feed.length ? `<section class="panel" style="display:flex;flex-direction:column;gap:10px">
-    <div class="row" style="justify-content:space-between"><div class="eyebrow">En direct · <span>gros tirages</span></div><button class="btn ghost sm" type="button" data-go="community">Tout voir</button></div>
-    <div class="pulls">${feed.map(feedRow).join("")}</div>
-  </section>` : ""}
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Chance par booster · <span>${pk.name}</span></div>
-    <div class="odds">${["pc", "r", "e", "l", "m"].map((k) => { const v = packChance(k, pk.boost || 1); return `
-      <span style="color:${RAR[k].color}">${RAR[k].label}</span>
-      <span class="meter"><i style="width:${Math.max(2, v * 100)}%;background:${RAR[k].color}"></i></span>
-      <span class="pct">${pct(v)}</span>`; }).join("")}</div>
-    <p class="note">5 cartes par booster, une Rare ou mieux garantie. Tous les ${GOLD_EVERY} boosters, ta meilleure carte sort dorée. Mythique garantie au bout de ${MYTHIC_PITY} boosters.</p>
-  </section>
-  <section class="panel lore">
-    <div class="eyebrow">L'histoire · <span>épisode 1 sorti · épisode 2 en préparation</span></div>
-    <h3>Re Zéro : LoL, l'anime de Billy</h3>
-    <p class="note">Les membres du serveur Discord QG de Shinjuku sont mystérieusement téléportés dans un monde inconnu et dispersés aux quatre coins de celui-ci. Certains apparaissent seuls, d'autres, comme Billy et Seb qui jouaient ensemble à ce moment-là, se retrouvent au même endroit.</p>
-    <p class="note">Chacun possède désormais un pouvoir unique qu'il devra apprendre à maîtriser pour survivre. Leur objectif : retrouver tous les membres du QG, se réunir et trouver un moyen de rentrer chez eux sans laisser personne derrière.</p>
-    <p class="note"><strong style="color:var(--gold-l)">Dans l'épisode 1</strong>, Billy et Seb arrivent ensemble dans une grande ville, Mojo se fait courser par les gardes, Byakko et Stalk tombent sur Nestor, qui les sauve sur son destrier volant. Shiro se réveille aux côtés de Sultran'Zahar, Mahed est forcé d'affronter Reichi, et Sasori, Iouaf et Sakuto se retrouvent dans une taverne… jusqu'à ce que la nuit tourne mal pour Sakuto.</p>
-    <a class="btn ghost" href="https://www.youtube.com/watch?v=mFQ4USNq0k8" target="_blank" rel="noopener">Revoir l'épisode 1</a>
-  </section>
-  <section class="panel shop">
-    <div><h3>Boutique</h3><p class="note">1 booster « ${pk.name} » contre ${PRICE} ◆. Gagne de l'essence en recyclant tes doublons ou en vendant au marché.</p></div>
-    <button class="btn ghost" type="button" data-act="open-buy" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>
-  </section>`;
-}
-function feedRow(f) {
-  const c = byId[f.card]; if (!c) return "";
-  const R = RAR[c.rar];
-  if (!visible(c)) return `<div class="pull">${cardHTML(c, { locked: true, soon: true })}
-    <div class="who"><b>??? · pas encore vu</b><span class="by">${who(f.uid)}</span></div>
-    <span class="chip" style="background:${R.color}">${R.label}</span><time>${ago(f.t)}</time></div>`;
-  return `<div class="pull" data-card="${c.id}" tabindex="0" role="button">${cardHTML(c, { gold: f.gold })}
-    <div class="who"><b>${PEOPLE[c.who].name}</b><span class="by">${who(f.uid)}</span></div>
-    <span class="chip" style="background:${f.gold ? "#785a28" : R.color}">${f.gold ? "Dorée" : R.label}</span>
-    <time>${ago(f.t)}</time></div>`;
-}
 
 const dupesValue = () => dupesValueS(save);
-function viewAlbum() {
-  const got = ALL_CARDS.filter((c) => own(c.id).n).length;
-  const gold = ALL_CARDS.filter((c) => own(c.id).gold).length;
-  const dv = dupesValue();
-  const sections = Object.entries(FACTIONS).map(([fk, f]) => {
-    const list = CARDS.filter((c) => PEOPLE[c.who].fac === fk).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank || a.id.localeCompare(b.id));
-    const n = list.filter((c) => has(c.id)).length;
-    return `<div class="section-head" style="--fc:${f.color}"><h3>${f.label}</h3><span>${n}/${list.length}${n === list.length ? " · complet" : ""}</span></div>
-    <div class="grid">${list.map((c) => {
-      const o = own(c.id), ok = o.n + o.gold > 0;
-      return `<div class="cell">${cardHTML(c, { locked: !ok, soon: !ok && !canPack(c), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true })}
-        <div class="meta"><span>${RAR[c.rar].label}</span><span>${ok ? `×${o.n}${o.gold ? ` · ${o.gold}★` : ""}` : "—"}</span></div></div>`;
-    }).join("")}</div>`;
-  }).join("");
-  return `
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="album-head">
-      <div><div class="eyebrow">Album · <span>Re Zéro : LoL</span></div><h2 style="font-size:1.5rem">${got}/${ALL_CARDS.length} cartes</h2></div>
-      <span class="hint">${gold}/${ALL_CARDS.length} dorées</span>
-    </div>
-    <div class="progress"><i style="width:${(got + gold) / (ALL_CARDS.length * 2) * 100}%"></i></div>
-    <div class="row" style="justify-content:space-between">
-      <p class="note">Touche une carte pour ouvrir sa fiche, la vendre ou voir sa cote.</p>
-      <button class="btn ghost" type="button" data-act="recycle" ${dv ? "" : "disabled"}>Recycler les doublons · +${dv} ◆</button>
-      ${SRV ? `<button class="btn ghost" type="button" data-act="wish-all">♡ Toutes les manquantes en envies</button>` : ""}
-    </div>
-  </section>
-  ${sections}
-  ${viewSkins()}`;
-}
-function viewSkins() {
-  const got = SKINS.filter((c) => has(c.id)).length, dupes = craftableDupes(save).length;
-  return `<div class="section-head" style="--fc:#b04ce0"><h3>Skins du QG · Coffre hextech</h3><span>${got}/${SKINS.length}</span></div>
-  <section class="panel craft-box">
-    <div><h3>Combiner des doublons</h3><p class="note">Comme dans LoL : ${CRAFT_COST} doublons (les moins rares d'abord) donnent 1 skin au hasard. Tu as ${dupes} doublon${dupes > 1 ? "s" : ""}.</p></div>
-    <button class="btn" type="button" data-act="craft" ${dupes >= CRAFT_COST ? "" : "disabled"}>Combiner ${CRAFT_COST} → 1 skin</button>
-  </section>
-  ${SKINNED.filter((who) => unlockedChar(who) || SKINS.some((c) => c.who === who && has(c.id))).map((who) => {
-    const list = SKINS.filter((c) => c.who === who), n = list.filter((c) => has(c.id)).length;
-    return `<div class="skin-person"><h4>${PEOPLE[who].name}<span>${n}/${list.length}</span></h4>
-      <div class="skin-row">${list.map((c) => cardHTML(c, { locked: !has(c.id), count: own(c.id).n + own(c.id).gold, click: true })).join("")}</div></div>`;
-  }).join("")}`;
-}
 
-function viewCommunity() {
-  const s = stats();
-  const fmt = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-  return `
-  <div class="statline">
-    <div class="tile"><b>${save.opened}</b><span>boosters ouverts</span></div>
-    <div class="tile"><b>${s.total}</b><span>cartes obtenues</span></div>
-    <div class="tile"><b>${s.cards}/${ALL_CARDS.length}</b><span>cartes débloquées</span></div>
-  </div>
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">En direct · <span>Légendaires, Mythiques et dorées</span></div>
-    ${sharedNote()}
-    ${shared.feed.length ? `<div class="pulls">${shared.feed.map(feedRow).join("")}</div>` : `<div class="empty">Personne n'a encore sorti de Légendaire. À toi de jouer.</div>`}
-  </section>
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Classement · <span>touche un joueur pour voir son profil</span></div>
-    ${boardHTML()}
-  </section>
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Mes gros tirages · <span>Épique et mieux, et les dorées</span></div>
-    ${save.history.length ? `<div class="pulls">${save.history.map((h) => { const c = byId[h.id]; if (!c) return ""; const R = RAR[c.rar]; return `
-      <div class="pull" data-card="${c.id}" tabindex="0" role="button">${cardHTML(c, { gold: h.gold })}
-        <div class="who"><b>${PEOPLE[c.who].name}</b><span>${c.title}</span></div>
-        <span class="chip" style="background:${h.gold ? "#785a28" : R.color}">${h.gold ? "Dorée" : R.label}</span>
-        <time>${fmt.format(h.t)}</time></div>`; }).join("")}</div>`
-      : `<div class="empty">Pas encore de gros tirage. Les Épiques, Légendaires, Mythiques et dorées s'afficheront ici.</div>`}
-  </section>`;
-}
 
-function missionRow(m, kind, id) {
-  const ok = kind === "first" ? m.done : m.prog >= m.goal;
-  return `<div class="mission ${m.claimed ? "claimed" : ""}">
-    <div class="m-txt"><b>${m.label}</b>${m.desc ? `<small>${m.desc}</small>` : ""}<span>${rewardText(m.reward)}</span>${kind === "first" ? "" : `<div class="m-bar"><i style="width:${Math.min(1, m.prog / m.goal) * 100}%"></i></div>`}</div>
-    ${m.claimed ? `<span class="m-ok">Fait</span>` : `<button class="btn ${ok ? "" : "ghost"} sm" type="button" data-claim="${kind}" data-id="${id}" ${ok ? "" : "disabled"}>${ok ? "Réclamer" : kind === "first" ? "À faire" : `${m.prog.toLocaleString("fr-FR")}/${m.goal.toLocaleString("fr-FR")}`}</button>`}
-  </div>`;
-}
-function bonusRow(label, reward, done, claimable, kind) {
-  return `<div class="bonus ${done ? "claimed" : ""}"><span>${label} → <b>${rewardText(reward)}</b></span>${done ? '<span class="m-ok">Fait</span>' : `<button class="btn sm" type="button" data-claim="${kind}" ${claimable ? "" : "disabled"}>Réclamer</button>`}</div>`;
-}
-function viewMissions() {
-  const st = streakState(), ms = missionsToday(), ws = weeklyS(save), fs = firstStepsS(save), as = achievementsS(save);
-  const d = ensureDailyS(save), w = ensureWeeklyS(save), n = toClaim();
-  const nextDay = new Date(dayKey(Date.now() + 86400e3) + "T00:00:00+02:00"), nextWeek = new Date(dayKey(new Date(weekKey() + "T12:00:00Z").getTime() + 7 * 86400e3) + "T00:00:00+02:00");
-  const left = (t) => { const m = Math.max(1, Math.round((t - Date.now()) / 60000)); return m >= 1440 ? `${Math.floor(m / 1440)} j ${Math.floor((m % 1440) / 60)} h` : `${Math.floor(m / 60)} h ${m % 60} min`; };
-  const doneAch = as.filter((a) => a.claimed).length;
-  return `
-  <section class="panel" style="display:flex;flex-direction:column;gap:12px">
-    <div class="eyebrow">Missions · <span>et succès</span></div>
-    <div class="row" style="justify-content:space-between"><h2 style="font-size:1.5rem;margin:0">Missions & succès</h2>
-      <button class="btn" type="button" data-claim="all" ${n ? "" : "disabled"}>Tout réclamer${n ? ` · ${n}` : ""}</button></div>
-    <p class="note">Reviens chaque jour : série de connexion, pack du jour et missions donnent de l'essence et des boosters en plus des gratuits.</p>
-  </section>
-  <section class="panel daily">
-    <div class="eyebrow">Série de 7 jours · <span>${st.n ? `jour ${st.n}` : "commence aujourd'hui"}</span></div>
-    <div class="streak">${STREAK.map((r, i) => { const dd = i + 1, done = dd <= st.n, now = st.canClaim && dd === st.next; return `
-      <div class="day ${done ? "done" : ""} ${now ? "now" : ""}"><i></i><b>J${dd}</b><span>${rewardText(r)}</span></div>`; }).join("")}</div>
-    <button class="btn" type="button" data-claim="streak" ${st.canClaim ? "" : "disabled"}>${st.canClaim ? `Récupérer J${st.next} · ${rewardText(STREAK[st.next - 1])}` : "Reviens demain"}</button>
-  </section>
-  <section class="panel daily">
-    <div class="eyebrow">Missions du jour · <span>nouvelles dans ${left(nextDay)}</span></div>
-    <div class="missions">${ms.map((m) => missionRow(m, "mission", m.id)).join("")}</div>
-    ${bonusRow("Les 3 réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}
-  </section>
-  <section class="panel daily">
-    <div class="eyebrow">Missions de la semaine · <span>nouvelles dans ${left(nextWeek)}</span></div>
-    <div class="missions">${ws.map((m) => missionRow(m, "weekly", m.id)).join("")}</div>
-    ${bonusRow("Les 3 réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}
-  </section>
-  ${(save.first || {}).bonus ? "" : `<section class="panel daily">
-    <div class="eyebrow">Premiers pas · <span>${fs.filter((f) => f.claimed).length}/${fs.length}</span></div>
-    <div class="missions">${fs.map((f) => missionRow(f, "first", f.id)).join("")}</div>
-    ${bonusRow("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}
-  </section>`}
-  <section class="panel daily">
-    <div class="eyebrow">Succès · <span>${doneAch}/${as.length}</span></div>
-    <div class="missions">${as.map((a) => missionRow(a, "ach", a.id)).join("")}</div>
-  </section>`;
-}
-function draw() {
-  header();
-  document.querySelectorAll(".tab").forEach((t) => t.setAttribute("aria-selected", t.dataset.view === view));
-  if (opening) return drawOpening();
-  $("view").innerHTML = view === "missions" ? viewMissions() : view === "pred" ? viewPred() : view === "admin" ? viewAdmin() : view === "album" ? viewAlbum() : view === "market" ? viewMarket() : view === "community" ? viewCommunity() : viewBoosters();
-  fillNames();
-}
 
 // ===== Ouverture =====
 // couleur de la lueur du coffre : celle de la meilleure carte, comme les coffres de LoL
-const glowOf = (o) => { const best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]); return o.divine ? "#ff6ad5" : RAR[best.c.rar].rank >= 3 || best.gold ? (best.gold ? "#f0d38a" : `var(--r-${best.c.rar})`) : "#0ac8b9"; };
-function chestHTML(o) {
-  return `<div class="chest-stage" style="--glow:${glowOf(o)}">
-    <button class="chest" type="button" id="pack" aria-label="Ouvrir le coffre">
-      <span class="hex h1"></span><span class="hex h2"></span><span class="hex h3"></span>
-      <span class="ring"></span><span class="ring r2"></span><span class="bolt"></span><span class="gem"></span>
-    </button></div>`;
-}
-function drawOpening() {
-  const o = opening, el = $("view");
-  if (o.phase === "pack") {
-    el.innerHTML = `<section class="stage"><div class="eyebrow">${o.pk.skins ? "Coffre hextech" : o.pk.name} · <span>${o.paid ? "acheté" : "gratuit"}</span></div>${chestHTML(o)}<div class="hint">Touche le coffre pour l'ouvrir</div></section>`;
-    return;
-  }
-  if (o.phase === "cards") {
-    const x = o.cards[o.i];
-    el.innerHTML = `<section class="stage">
-      <div class="dots">${o.cards.map((_, j) => `<i class="${j <= o.i ? "on" : ""}"></i>`).join("")}</div>
-      ${o.divine && o.i === 0 ? '<div class="divine-banner">Booster divin !</div>' : ""}
-      <div class="reveal-wrap ${o.flipped ? "on" : ""} ${RAR[x.c.rar].rank >= 3 || x.gold ? "big" : ""}" style="--rc:${x.gold ? "#f0d38a" : RAR[x.c.rar].color}"><span class="rays"></span>
-      <button class="reveal-card ${o.flipped ? "on" : ""}" type="button" id="revealBtn" aria-label="${o.flipped ? "Carte suivante" : "Retourner la carte"}">
-        <div class="in">
-          <div class="face"><div class="cardback r-${x.c.rar}"></div></div>
-          <div class="face front">${o.flipped ? `<span class="burst" style="--rc:${RAR[x.c.rar].color}"></span>` : ""}${cardHTML(x.c, { gold: x.gold, isNew: x.isNew })}</div>
-        </div>
-      </button></div>
-      <div class="hint">${o.flipped ? `${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `Carte ${o.i + 1} sur ${PACK} — touche pour retourner`}</div>
-      <button class="btn ghost" type="button" data-act="skip">Tout voir</button>
-    </section>`;
-    return;
-  }
-  const news = o.cards.filter((x) => x.isNew).length;
-  const best = o.cards[PACK - 1];
-  el.innerHTML = `<section class="stage">
-    <div class="eyebrow">Résultat</div>
-    <h2 style="font-size:1.5rem">${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true })).join("")}</div>
-    <div class="row" style="justify-content:center">
-      ${save.free ? `<button class="btn" type="button" data-act="open-free">Encore un <span class="n">${save.free}</span></button>`
-                  : `<button class="btn" type="button" data-act="open-buy" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
-      <button class="btn ghost" type="button" data-act="to-album">Voir l'album</button>
-      ${RAR[best.c.rar].rank >= 3 || best.gold ? `<button class="btn ghost" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
-    </div>
-  </section>`;
-}
 let busy = false;
 async function startOpening(paid, packId) {
   if (busy) return;
@@ -1402,22 +448,9 @@ async function startOpening(paid, packId) {
   finally { busy = false; }
   const pk = r.pack === "jour" ? dailyPackOf() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
-  view = "boosters";
   opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine };
+  closeMenu(); $("overlay").hidden = true;
   draw();
-  scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
-}
-async function tearPack() {
-  const p = $("pack"); if (!p || p.classList.contains("shake") || p.classList.contains("chest-out")) return;
-  if (!reduced) {
-    p.classList.add("shake"); await sleep(560);
-    p.classList.remove("shake"); p.classList.add("chest-out");
-    const stage = p.parentElement, glow = getComputedStyle(stage).getPropertyValue("--glow");
-    for (let i = 0; i < 14; i++) { const s = document.createElement("i"); s.className = "shard"; s.style.setProperty("--a", `${i * (360 / 14) + Math.random() * 12}deg`); stage.appendChild(s); }
-    const f = document.createElement("div"); f.className = "flash"; f.style.setProperty("--glow", glow); document.body.appendChild(f); setTimeout(() => f.remove(), 900);
-    await sleep(650);
-  }
-  opening.phase = "cards"; draw();
 }
 function advance() {
   const o = opening;
@@ -1427,61 +460,13 @@ function advance() {
 }
 
 // ===== Fiche (wiki) =====
-function openSheet(id) {
-  if (!visible(byId[id])) return toast("Ce perso n'est pas encore débloqué pour toi. Il arrive avec un prochain épisode.");
-  const c = byId[id], o = own(id), p = PEOPLE[c.who], got = o.n + o.gold > 0, f = FACTIONS[p.fac];
-  const row = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : "");
-  const quotes = [p.quote, ...(MORE[c.who] || [])].filter(Boolean);
-  const cv = cote(id);
-  $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Fiche de ${got ? p.name : "carte"}">
-    ${cardHTML(c, { locked: !got, gold: !o.n && o.gold > 0 })}
-    <span class="fac-chip" style="--fc:${f.color}">${f.label}</span>
-    ${got ? `<h2 style="font-size:1.4rem;text-align:center">${p.name} <span class="muted" style="font-size:.9rem;display:block;font-family:var(--font-mono);font-weight:600;letter-spacing:.06em">${c.title}</span></h2>
-    <dl class="facts">
-      ${row("Pouvoir", p.power)}
-      ${row("Apparence", p.look)}
-      ${row("Caractère", p.mood)}
-      <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re Zéro : LoL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
-      ${quotes.length ? `<dt>Citations</dt><dd class="quotes">${quotes.map((q) => `<q>${q}</q>`).join("")}</dd>` : ""}
-      <dt>Rareté</dt><dd style="color:${RAR[c.rar].color}">${RAR[c.rar].label}</dd>
-      <dt>Exemplaires</dt><dd>${o.n} normale${o.n > 1 ? "s" : ""} · ${o.gold} dorée${o.gold > 1 ? "s" : ""}</dd>
-      <dt>Cote</dt><dd>${cv ? `~${cv} ◆ au marché` : "Pas encore de vente au marché"}</dd>
-      <dt>Recyclage</dt><dd>${RAR[c.rar].chakra} ◆ (dorée : ${RAR[c.rar].chakra * 3} ◆)</dd>
-      <dt>Obtenue le</dt><dd>${new Date(o.first).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</dd>
-    </dl>
-    <div class="row" style="justify-content:center">
-      ${DB && canShare ? `<button class="btn" type="button" data-sell="${id}">Vendre au marché</button>` : ""}
-      <button class="btn ghost" type="button" data-share="${id}" data-gold="${!o.n && o.gold ? 1 : ""}">Partager</button>
-      ${SRV ? `<button class="btn ghost" type="button" data-show="${id}">${(save.showcase || []).includes(id) ? "Retirer de la vitrine" : "Mettre en vitrine"}</button>` : ""}
-      ${o.n + o.gold > 1 ? `<button class="btn ghost" type="button" data-dis="${id}" data-gold="${o.n > 1 ? "" : 1}">Désenchanter un doublon · +${cardValue(id, !(o.n > 1))} ◆</button>` : ""}
-    </div>` : `<p class="note" style="text-align:center">Carte ${RAR[c.rar].label.toLowerCase()} pas encore obtenue. Ouvre des boosters pour débloquer sa fiche${cv ? `, ou achète-la au marché (cote ~${cv} ◆)` : ""}.</p>
-    ${SRV ? `<div class="row" style="justify-content:center"><button class="btn ghost" type="button" data-wish="${id}">${wishSet().has(id) ? "♥ Retirer de mes envies" : "♡ Ajouter à mes envies"}</button></div>` : ""}`}
-    <button class="btn ghost" type="button" data-act="close">Fermer</button>
-  </div>`;
-  $("overlay").hidden = false;
-  $("overlay").querySelector("[data-act=close]").focus();
-}
 
 // ===== Marché =====
-function openSell(id) {
-  const c = byId[id], o = own(id), p = PEOPLE[c.who];
-  const gold = !o.n && o.gold > 0;
-  const suggest = cote(id) || RAR[c.rar].chakra * 3;
-  $("overlay").innerHTML = `<form class="sheet" id="sellForm" data-id="${id}" data-gold="${gold ? 1 : ""}" aria-label="Vendre ${p.name}">
-    ${cardHTML(c, { gold })}
-    <h2 style="font-size:1.3rem;text-align:center">Vendre ${p.name}${gold ? " (dorée)" : ""}</h2>
-    <p class="note" style="text-align:center">Tu en as ${gold ? o.gold : o.n}. La carte quitte ta collection pendant la vente. Tu touches l'essence dès qu'un joueur l'achète.</p>
-    <label class="field" for="sellPrice">Prix en essence ◆<input id="sellPrice" type="number" inputmode="numeric" min="5" max="9999" step="1" value="${suggest}" required></label>
-    <div class="row" style="justify-content:center"><button class="btn" type="submit">Mettre en vente</button><button class="btn ghost" type="button" data-act="close">Annuler</button></div>
-  </form>`;
-  $("overlay").hidden = false;
-  $("sellPrice").focus();
-}
 async function confirmSell(form) {
   const id = form.dataset.id, gold = !!form.dataset.gold, price = Math.round(+$("sellPrice").value);
   if (!(price >= 5 && price <= 9999)) return toast("Choisis un prix entre 5 et 9999 ◆.");
   if (SRV) {
-    try { await srv("market/sell", { id, gold, price }); $("overlay").hidden = true; toast("Carte mise en vente."); view = "market"; draw(); }
+    try { await srv("market/sell", { id, gold, price }); $("overlay").hidden = true; toast("Carte mise en vente."); marketTab = "mine"; nav("market"); }
     catch (e) { toast(e.message); }
     return;
   }
@@ -1492,7 +477,7 @@ async function confirmSell(form) {
   try {
     await DB.collection("market").add({ seller: ME, card: id, gold, price, status: "open", t: Date.now() });
     track("sell"); persist();
-    $("overlay").hidden = true; toast("Carte mise en vente."); view = "market"; draw();
+    $("overlay").hidden = true; toast("Carte mise en vente."); marketTab = "mine"; nav("market");
   } catch (e) {
     if (gold) o.gold++; else o.n++;
     save.owned[id] = o; persist();
@@ -1577,17 +562,6 @@ async function disenchant(id, gold) {
   } catch (e) { toast(e.message); }
 }
 // fenêtre « Objet déverrouillé ! » façon LoL
-function unlocked(x) {
-  const c = byId[x.id];
-  $("overlay").innerHTML = `<div class="sheet unlock" role="dialog" aria-modal="true" aria-label="Objet déverrouillé">
-    <div class="eyebrow">Objet déverrouillé !</div>
-    ${cardHTML(c, { gold: x.gold, isNew: x.isNew })}
-    <h2 style="font-size:1.3rem;text-align:center">${PEOPLE[c.who].name} · ${c.title}</h2>
-    <p class="note" style="text-align:center">${RAR[c.rar].label}${x.isNew ? " · nouveau dans ta collection" : " · doublon"}</p>
-    <button class="btn" type="button" data-act="close">Super</button></div>`;
-  $("overlay").hidden = false;
-  draw();
-}
 
 // ===== Chat du QG et notifications =====
 // Sur le site Cloudflare, tout passe par /api/game/pulse (un seul appel régulier) ;
@@ -1601,14 +575,6 @@ let MYNAME = "";
 const NICON = { sold: "◆", trade: "⇄", mention: "@", episode: "★", pred: "?", announce: "!" };
 const canChat = () => (SRV ? true : !!(DB && ME && canShare));
 
-function todos() {
-  const out = [];
-  if (save.dailyPack !== dayKey()) out.push({ text: "Ton pack du jour t'attend.", go: "boosters" });
-  const n = toClaim(); if (n) out.push({ text: `${n} récompense${n > 1 ? "s" : ""} à récupérer dans Missions.`, go: "missions" });
-  if (save.free >= FREE_MAX) out.push({ text: "Tes boosters gratuits sont pleins : ouvre-les pour qu'ils se rechargent.", go: "boosters" });
-  const p = SRV ? pendingTrades().length : 0; if (p) out.push({ text: `${p} échange${p > 1 ? "s" : ""} attend${p > 1 ? "ent" : ""} ta réponse.`, go: "trades" });
-  return out;
-}
 function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
 function badges() {
@@ -1634,18 +600,6 @@ async function togglePush() {
 }
 
 // --- cloche ---
-function drawNotifs() {
-  const box = $("notifPanel"); if (!box) return;
-  const td = todos();
-  const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
-  box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
-    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
-    <div class="np-sec">Récent</div>
-    ${SRV ? (notif.items.length ? notif.items.map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
-      : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
-      : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
-    ${"Notification" in window ? `<button class="btn ghost sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
-}
 function toggleNotifs(force) {
   notif.open = force ?? !notif.open;
   $("notifPanel").hidden = !notif.open; $("bellBtn").setAttribute("aria-expanded", notif.open);
@@ -1660,10 +614,7 @@ function goTo(go) {
   toggleNotifs(false);
   if (go === "chat") return openChat(true);
   if (!go) return;
-  if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord.");
-  opening = null;
-  if (go === "trades" || go === "market") { view = "market"; marketTab = go === "trades" ? "trades" : "mine"; } else view = go;
-  $("overlay").hidden = true; draw(); scrollTo({ top: 0 });
+  if (go === "trades" || go === "market") { marketTab = go === "trades" ? "trades" : "mine"; nav("market"); } else nav(go);
 }
 
 // --- appel régulier au serveur ---
@@ -1716,44 +667,6 @@ function subscribeChat() {
     badges();
   }, () => {});
 }
-function cardChip(id, gold) {
-  const c = byId[id]; if (!c) return "";
-  const key = ART[c.img] ? c.img : ART[c.who] ? c.who : null;
-  const th = key ? `<span class="th who-${key}"><span class="layer"></span></span>` : PHOTO[c.who] ? `<span class="th who-${c.who}"><span class="photo"></span></span>` : `<span class="th">${PEOPLE[c.who].kanji || ""}</span>`;
-  return `<button class="cchip" type="button" data-card="${id}" style="--cc:${gold ? "#f0d38a" : `var(--r-${c.rar})`}">${th}<span><em>${RAR[c.rar].label}${gold ? " · dorée" : ""}</em>${esc(PEOPLE[c.who].name)} · ${esc(c.title)}</span></button>`;
-}
-const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-function msgHTML(m) {
-  const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const av = `<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">`;
-  if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
-  if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
-  const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
-  const text = esc(m.text).replace(/@([^\s@&<,.!?;:]{2,32})/g, "<mark>@$1</mark>");
-  return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${av}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">×</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
-}
-function drawChatList() {
-  const list = $("chatList"); if (!list) return;
-  const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 80;
-  list.innerHTML = chat.msgs.length ? chat.msgs.map(msgHTML).join("")
-    : `<p class="chat-empty">${!canChat() ? "Ici, tout le QG discute en direct, partage ses cartes et ses meilleurs tirages." : chat.loaded ? "Personne n'a encore écrit. Lance la discussion !" : "Chargement…"}</p>`;
-  if (atBottom || !list.dataset.ready) list.scrollTop = list.scrollHeight;
-  list.dataset.ready = "1";
-  fillNames();
-  if (chat.msgs.length) { chat.seen = Math.max(chat.seen, chat.msgs[chat.msgs.length - 1].ts); lsSet("rzlol-chat-seen", chat.seen); }
-  badges();
-}
-function drawChat() {
-  const box = $("chatPanel");
-  const foot = canChat()
-    ? `<div class="chat-att" id="chatAtt" ${chat.card ? "" : "hidden"}>${chat.card ? `${cardChip(chat.card.id, chat.card.gold)}<button class="linkbtn" type="button" data-act="chat-uncard">Retirer</button>` : ""}</div>
-       <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatIn" maxlength="300" placeholder="Écris au QG… (@Nom pour mentionner)" aria-label="Message">
-       <button class="btn ghost sm" type="button" data-act="chat-card" title="Montrer une de tes cartes">Carte</button><button class="btn sm" type="submit">Envoyer</button></form>`
-    : `<p class="note" style="margin:0">${window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour discuter avec le QG.` : "Le chat s'active quand tu es connecté à l'app."}</p>`;
-  box.innerHTML = `<div class="chat-head"><h2>Chat du QG<small>QG de Shinjuku · en direct</small></h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le chat">×</button></div>
-    <div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
-  drawChatList();
-}
 function openChat(open) {
   chat.open = open; $("chatPanel").hidden = !open; $("chatFab").hidden = open;
   if (open) { toggleNotifs(false); drawChat(); subscribeChat(); if (SRV) pulse(); setTimeout(() => $("chatIn")?.focus(), 50); }
@@ -1767,18 +680,8 @@ async function sendChat() {
   inp.value = ""; chat.card = null; $("chatAtt").hidden = true; $("chatAtt").innerHTML = "";
   try {
     if (SRV) { await srv("chat/send", body); await pulse(); }
-    else { await DB.collection("chat").add({ uid: ME, kind: "msg", text: text.slice(0, 300), card: body.card, gold: body.gold, t: Date.now() }); }
+    else { await DB.collection("chat").add({ uid: ME, kind: "msg", text: text.slice(0, 300), card: body.card, gold: body.gold, t: Date.now() }); track("chat"); persist(); }
   } catch (e) { inp.value = text; chat.card = card; toast(e.message || "Message pas envoyé."); }
-}
-function pickChatCard() {
-  const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
-  if (!mine.length) return toast("Ouvre d'abord un booster pour avoir des cartes à montrer.");
-  const opts = mine.flatMap((c) => { const o = own(c.id), lbl = `${PEOPLE[c.who].name} · ${c.title} (${RAR[c.rar].label})`; return [...(o.n ? [`<option value="${c.id}|">${esc(lbl)}</option>`] : []), ...(o.gold ? [`<option value="${c.id}|1">${esc(lbl)} · dorée</option>`] : [])]; }).join("");
-  $("overlay").innerHTML = `<form class="sheet" id="chatCardForm" role="dialog" aria-modal="true" aria-label="Montrer une carte">
-    <div class="eyebrow">Chat du QG</div><h2 style="font-size:1.3rem">Montrer une carte</h2>
-    <label class="field" for="chatCardSel">Ta carte<select id="chatCardSel">${opts}</select></label>
-    <button class="btn" type="submit">Joindre au message</button><button class="btn ghost" type="button" data-act="close">Annuler</button></form>`;
-  $("overlay").hidden = false;
 }
 async function deleteChat(id) {
   try { await srv("chat/delete", { id: +id }); chat.msgs = chat.msgs.filter((m) => m.id !== +id); drawChatList(); } catch (e) { toast(e.message); }
@@ -1815,96 +718,3 @@ document.addEventListener("submit", (e) => {
   }
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (chat.open && $("overlay").hidden) openChat(false); toggleNotifs(false); } });
-
-let toastT;
-function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
-
-// ===== Événements =====
-document.addEventListener("click", (e) => {
-  const t = e.target;
-  const tab = t.closest(".tab") || t.closest("[data-go]");
-  if (tab) { if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord."); opening = null; view = tab.dataset.view || tab.dataset.go; draw(); return scrollTo({ top: 0 }); }
-  const pkBtn = t.closest("[data-pack]");
-  if (pkBtn) { save.pack = pkBtn.dataset.pack; persist(); return draw(); }
-  const cBtn2 = t.closest("[data-claim]"); if (cBtn2) { cBtn2.disabled = true; return claim(cBtn2.dataset.claim, cBtn2.dataset.id); }
-  const vBtn = t.closest("[data-vote]"); if (vBtn) return vote(vBtn.dataset.vote, +vBtn.dataset.idx);
-  const pqBtn = t.closest("[data-pq]");
-  if (pqBtn) {
-    const qid = pqBtn.dataset.q, a = pqBtn.dataset.pq;
-    if (a === "resolve") { const sel = document.querySelector(`[data-pq-answer="${qid}"]`); if (!sel || sel.value === "") return toast("Choisis d'abord la bonne réponse."); return adminPred("resolve", qid, +sel.value); }
-    return adminPred(a, qid);
-  }
-  const bonusBtn = t.closest("[data-bonus]"); if (bonusBtn) return openBonus(bonusBtn.dataset.bonus);
-  const mt = t.closest("[data-mtab]"); if (mt) { marketTab = mt.dataset.mtab; return draw(); }
-  const bt = t.closest("[data-btab]"); if (bt) { boardTab = bt.dataset.btab; return draw(); }
-  const tr = t.closest("[data-trade]"); if (tr) { tr.disabled = true; return answerTrade(tr.dataset.trade, tr.dataset.ta); }
-  const pr = t.closest("[data-propose]"); if (pr) return openTradeBuilder(pr.dataset.propose);
-  const wi = t.closest("[data-wish]"); if (wi) return toggleWish(wi.dataset.wish);
-  const sh = t.closest("[data-show]"); if (sh) return toggleShowcase(sh.dataset.show);
-  const disBtn = t.closest("[data-dis]"); if (disBtn) return disenchant(disBtn.dataset.dis, !!disBtn.dataset.gold);
-  const shareBtn = t.closest("[data-share]"); if (shareBtn) return share(shareBtn.dataset.share, !!shareBtn.dataset.gold);
-  const sellBtn = t.closest("[data-sell]"); if (sellBtn) return openSell(sellBtn.dataset.sell);
-  const buyBtn = t.closest("[data-buy]"); if (buyBtn) { buyBtn.disabled = true; return buy(buyBtn.dataset.buy); }
-  const cBtn = t.closest("[data-cancel]"); if (cBtn) { cBtn.disabled = true; return cancelSale(cBtn.dataset.cancel); }
-  const act = t.closest("[data-act]")?.dataset.act;
-  if (act === "open-free") return startOpening(false);
-  if (act === "open-buy") return startOpening(true);
-  if (act === "skip") { opening.phase = "done"; return draw(); }
-  if (act === "to-album") { opening = null; view = "album"; return draw(); }
-  if (act === "recycle") return recycle();
-  if (act === "craft") return craft();
-  if (act === "wish-all") return wishAllMissing();
-  if (act === "open-day") return startOpening(false, "jour");
-  if (act === "close" || t.id === "overlay") { $("overlay").hidden = true; return; }
-  if (t.closest("#pack")) return tearPack();
-  if (t.closest("#revealBtn")) return advance();
-  const by = t.closest(".by");
-  if (by) { const u = by.querySelector("[data-uid]")?.dataset.uid; if (u && SRV) openProfile(u); return; }
-  const card = t.closest("[data-card]"); if (card) return openSheet(card.dataset.card);
-});
-document.addEventListener("submit", (e) => {
-  if (e.target.id === "sellForm") { e.preventDefault(); confirmSell(e.target); }
-  if (e.target.id === "pqForm") { e.preventDefault(); addQuestion(e.target); }
-  if (e.target.id === "tradeForm") { e.preventDefault(); sendTrade(); }
-});
-let mqT;
-document.addEventListener("input", (e) => {
-  if (e.target.id === "mq") { marketQuery = e.target.value; clearTimeout(mqT); mqT = setTimeout(() => { draw(); const i = $("mq"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); }
-  if (e.target.closest?.("#tradeForm")) updateTradeFair();
-});
-document.addEventListener("change", (e) => {
-  if (e.target.id === "mr") { marketRar = e.target.value; draw(); }
-  if (e.target.closest?.("#tradeForm")) updateTradeFair();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") $("overlay").hidden = true;
-  if ((e.key === "Enter" || e.key === " ") && e.target.matches("[data-card]")) { e.preventDefault(); openSheet(e.target.dataset.card); }
-});
-
-// ===== Compte Discord (version Cloudflare) =====
-async function drawAccount() {
-  if (!window.DISCORD_LOGIN) return;
-  const box = $("acct"), m = await window.discordMe();
-  box.hidden = false;
-  box.innerHTML = m
-    ? `<button class="acct-btn" type="button" data-act="acct" aria-label="Mon compte"><img src="${m.avatar}" alt=""></button>
-       <div class="acct-menu" id="acctMenu" hidden>
-         <div class="acct-who"><img src="${m.avatar}" alt=""><div><b></b><span>${m.admin ? "Admin" : m.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</span></div></div>
-         <a class="btn ghost sm" href="/auth/logout">Se déconnecter</a></div>`
-    : `<a class="acct-login" href="/auth/login"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.6 1.3a18.3 18.3 0 0 0-5.5 0L8.6 3a19.7 19.7 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18a19.9 19.9 0 0 0 6 3l1.3-2a12.9 12.9 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12.2 0l.5.4c-.6.4-1.3.7-2 1l1.3 2a19.8 19.8 0 0 0 6-3c.5-5.1-.8-9.6-3.6-13.6ZM8 15.3c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.5 8 10.5s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg><span>Discord</span></a>`;
-  if (m) box.querySelector(".acct-who b").textContent = m.name || "Joueur";
-}
-document.addEventListener("click", (e) => {
-  const menu = $("acctMenu"); if (!menu) return;
-  if (e.target.closest("[data-act=acct]")) { menu.hidden = !menu.hidden; return; }
-  if (!e.target.closest("#acctMenu")) menu.hidden = true;
-});
-drawAccount();
-regen(); ensureDaily(); draw();
-let wasFull = save.free >= FREE_MAX;
-setInterval(() => { const full = save.free >= FREE_MAX; if (full && !wasFull) pushOS("Tes boosters gratuits sont pleins : viens les ouvrir !"); wasFull = full; }, 30000);
-setInterval(() => { if (regen()) persist(); if (!opening && $("overlay").hidden && view === "boosters") draw(); else header(); }, 30000);
-// en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
-setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => draw()).catch(() => {}); }, 45000);
-connect();
-</script>

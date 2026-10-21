@@ -134,7 +134,10 @@ const MISSIONS = [
   { id: "sell1",  label: "Mets une carte en vente au marché",     key: "sell",    goal: 1, reward: { chakra: 40 } },
   { id: "open6",  label: "Ouvre 6 boosters",                      key: "open",    goal: 6, reward: { boosters: 1 } },
   { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 50 } },
-  { id: "pred1",  label: "Fais une prédiction sur l'épisode",       key: "predict", goal: 1, reward: { boosters: 1 } },
+  { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { boosters: 1 } },
+  { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 20 } },
+  { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 30 } },
+  { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 20 } },
 ];
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
@@ -168,13 +171,13 @@ const dayKey = (ts = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone:
 const prevDay = (ts = Date.now()) => dayKey(ts - 86400e3);
 
 function freshSave(now = Date.now()) {
-  return { free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, history: [], updated: 0, pack: "saison1",
+  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, history: [], updated: 0, pack: "saison1",
     streak: { last: "", n: 0 }, daily: null, paid: [], sales: 0, predPaid: [], trades: 0, crafted: 0 };
 }
 function normalizeSave(s, now = Date.now()) {
   const f = freshSave(now), out = { ...f, ...(s || {}) };
   out.owned = out.owned && typeof out.owned === "object" ? out.owned : {};
-  for (const k of ["history", "paid", "predPaid"]) if (!Array.isArray(out[k])) out[k] = [];
+  for (const k of ["history", "paid", "predPaid", "predVoted"]) if (!Array.isArray(out[k])) out[k] = [];
   if (!out.streak || typeof out.streak !== "object") out.streak = { last: "", n: 0 };
   return out;
 }
@@ -213,6 +216,9 @@ const WEEKLY = [
   { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",  goal: 2,  reward: { chakra: 200 } },
   { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",  goal: 2,  reward: { chakra: 150 } },
   { id: "w-epic5",  label: "Obtiens 5 Épiques ou mieux",       key: "epic",   goal: 5,  reward: { chakra: 200 } },
+  { id: "w-pred3",  label: "Vote pour 3 prédictions",          key: "predict", goal: 3, reward: { chakra: 150 } },
+  { id: "w-predok", label: "Réussis une prédiction",           key: "predwin", goal: 1, reward: { chakra: 200 } },
+  { id: "w-chat10", label: "Écris 10 messages dans le chat",   key: "chat",   goal: 10, reward: { chakra: 100 } },
 ];
 const DAILY_BONUS = { boosters: 1 };     // les 3 missions du jour réclamées
 const WEEKLY_BONUS = { boosters: 3 };    // les 3 missions de la semaine réclamées
@@ -223,6 +229,8 @@ const FIRST_STEPS = [
   { id: "f-wish",   label: "Ajoute 3 persos à tes envies", test: (s) => (s.wish || []).length >= 3,              reward: { chakra: 20 } },
   { id: "f-show",   label: "Mets une carte en vitrine",    test: (s) => (s.showcase || []).length >= 1,          reward: { chakra: 20 } },
   { id: "f-pred",   label: "Fais une prédiction",          test: (s) => (s.counts?.predict || 0) >= 1,           reward: { chakra: 30 } },
+  { id: "f-chat",   label: "Dis bonjour dans le chat du QG", test: (s) => (s.counts?.chat || 0) >= 1,            reward: { chakra: 20 } },
+  { id: "f-sheet",  label: "Ouvre une fiche de perso",     test: (s) => (s.counts?.sheet || 0) >= 1,             reward: { chakra: 20 } },
   { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
 ];
 const FIRST_BONUS = { boosters: 3 };
@@ -244,7 +252,18 @@ const ACHIEVEMENTS = [
   { id: "a-trade1",   label: "Poignée de main",     desc: "Réussir un échange",                 val: (s) => s.trades || 0, goal: 1, reward: { chakra: 30 } },
   { id: "a-trade10",  label: "Négociateur",         desc: "Réussir 10 échanges",                val: (s) => s.trades || 0, goal: 10, reward: { chakra: 250 } },
   { id: "a-divine",   label: "Touché par les dieux", desc: "Ouvrir un booster divin",           val: (s) => s.counts?.divine || 0, goal: 1, reward: { chakra: 500 } },
+  { id: "a-fac1",     label: "Premier album",       desc: "Compléter une faction",              val: (s) => factionsDoneS(s), goal: 1, reward: { chakra: 50 } },
+  { id: "a-facall",   label: "Conservateur",        desc: "Compléter toutes les factions",      val: (s) => factionsDoneS(s), goal: Object.keys(FACTIONS).length, reward: { chakra: 1000 } },
+  { id: "a-pred1",    label: "Oracle",              desc: "Réussir une prédiction",             val: (s) => s.counts?.predwin || 0, goal: 1, reward: { chakra: 50 } },
+  { id: "a-pred10",   label: "Prophète",            desc: "Réussir 10 prédictions",             val: (s) => s.counts?.predwin || 0, goal: 10, reward: { chakra: 300 } },
+  { id: "a-vote25",   label: "Visionnaire",         desc: "Voter pour 25 prédictions",          val: (s) => s.counts?.predict || 0, goal: 25, reward: { chakra: 150 } },
+  { id: "a-chat50",   label: "Pilier du QG",        desc: "Écrire 50 messages dans le chat",    val: (s) => s.counts?.chat || 0, goal: 50, reward: { chakra: 100 } },
 ];
+// une faction est complète quand on a toutes ses cartes de base (hors skins)
+const factionsDoneS = (s) => Object.keys(FACTIONS).filter((f) => { const cs = CARDS.filter((c) => PEOPLE[c.who].fac === f); return cs.length && cs.every((c) => hasCard(s, c.id)); }).length;
+// récompense d'une bonne prédiction : fixée par Billy sur chaque question (◆), 50 par défaut
+const PRED_REWARD = 50;
+const predRewardOf = (q) => Math.max(0, Math.min(5000, Math.round(+(q?.reward ?? PRED_REWARD)) || 0));
 // semaine : du lundi au dimanche, heure de Paris
 function weekKey(now = Date.now()) {
   const d = new Date(dayKey(now) + "T12:00:00Z"), dow = (d.getUTCDay() + 6) % 7;
@@ -444,6 +463,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
     if (!pool.length) return { error: "Aucun perso du pack du jour n'est encore débloqué pour toi." };
     s.dailyPack = dayKey(now);
     const r = openPackS(s, { ...pk, last: { e: 85, l: 12, m: 3 } }, pool, rng, now);
+    trackS(s, "day", 1, now);
     if (pk.skins) trackS(s, "coffre", 1, now);
     return { pack: "jour", ...r };
   }
@@ -507,7 +527,9 @@ function statsS(s) {
   const unique = ALL_CARDS.filter((c) => hasCard(s, c.id)).length;
   const mythics = ALL_CARDS.filter((c) => c.rar === "m" && hasCard(s, c.id)).length;
   const skins = SKINS.filter((c) => hasCard(s, c.id)).length;
-  return { cards, unique, gold, total, mythics, skins, opened: s.opened, sales: s.sales || 0, trades: s.trades || 0 };
+  const firsts = Object.values(s.owned).map((o) => o.first).filter(Boolean);
+  return { cards, unique, gold, total, mythics, skins, opened: s.opened, sales: s.sales || 0, trades: s.trades || 0,
+    ach: Object.keys(s.ach || {}).length, predwin: s.counts?.predwin || 0, since: s.created || (firsts.length ? Math.min(...firsts) : 0) };
 }
 const itemsValue = (items) => (items || []).reduce((a, it) => a + (CARD_BY_ID[it.id] ? cardValue(it.id, it.gold) * (it.n || 1) : 0), 0);
 function tradeFair(give, want, chakraGive = 0) {

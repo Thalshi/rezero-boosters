@@ -33,7 +33,7 @@ function parsePath(path, wantDoc) {
 // ---------- Droits ----------
 // lecture : tout joueur connecté ; écriture : membre du serveur Discord ; admin : ADMIN_IDS.
 // data/users/<id>/… : privé à ce joueur. votes : chacun le sien, l'admin lit tout.
-// config, predq, pred : écriture réservée à l'admin.
+// config, predq, pred : écriture réservée à l'admin. avis : le sien. bugs : lus par l'admin seulement.
 // feed, players, market, trades : écrits seulement par le serveur du jeu (game-api.js).
 const SERVER_ONLY = ["feed", "players", "market", "trades"];
 function allowed(user, segs, op) {
@@ -47,6 +47,9 @@ function allowed(user, segs, op) {
     return segs[1] === user.id ? (!write || user.member || user.admin) : op === "read" && user.admin;
   }
   if (["config", "predq", "pred"].includes(top)) return !write || user.admin;
+  // avis : chacun écrit le sien ; bugs : on peut en envoyer, seul l'admin les lit
+  if (top === "avis") return !write || (segs[1] === user.id && (user.member || user.admin));
+  if (top === "bugs") return write ? user.member || user.admin : user.admin;
   return !write || user.member || user.admin;
 }
 

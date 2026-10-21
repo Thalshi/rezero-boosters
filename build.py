@@ -2,8 +2,6 @@
 import base64, pathlib, re
 
 ROOT = pathlib.Path(__file__).parent
-FONTS_OLD = "family=Unbounded:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@500;700&family=JetBrains+Mono:wght@500"
-FONTS_NEW = "family=Cinzel:wght@600;700;900&family=Barlow:wght@500;600;700&family=Barlow+Condensed:wght@500;600;700"
 SKELETON = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
             '<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}'
@@ -16,8 +14,11 @@ def uri(name):
 
 def main():
     head = (ROOT / "src/head.css.html").read_text(encoding="utf8").rstrip()
-    head = head[: -len("</style>")].replace(FONTS_OLD, FONTS_NEW)
-    body = (ROOT / "src/body.html").read_text(encoding="utf8")
+    # la page : structure (shell.html) puis un seul script = règles + images + logique + pages + démarrage
+    shell = (ROOT / "src/shell.html").read_text(encoding="utf8")
+    js = "\n".join((ROOT / f"src/{n}.js").read_text(encoding="utf8") for n in ("app", "views", "views2", "boot"))
+    body = "</style>\n" + shell + "\n<script>\n/*ART*/\n" + js + "\n</script>\n"
+    head = head[: -len("</style>")]
     art = (ROOT / "src/art.js").read_text(encoding="utf8").replace(
         "};\n", f'  rayzoS: "{uri("rayzoS")}",\n  rayzoH: "{uri("rayzoH")}",\n  billyFA: "{uri("billyFA")}",\n  reichiFA: "{uri("reichiFA")}",\n}};\n', 1)
     game = (ROOT / "src/game.js").read_text(encoding="utf8")

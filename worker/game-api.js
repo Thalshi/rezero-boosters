@@ -117,6 +117,7 @@ async function chatRoute(env, user, path, body) {
       if (!o || (gold ? o.gold < 1 : o.n + o.gold < 1)) return fail(400, "Tu ne peux montrer que tes propres cartes.");
     }
     await sayChat(env, user.id, "msg", text, card, gold);
+    await mutate(env, user.id, (s, now) => { G.trackS(s, "chat", 1, now); return {}; }).catch(() => {});
     // mentions : @Nom d'un joueur connu → notification pour lui
     if (text.includes("@")) {
       const low = text.toLowerCase(), { results } = await env.DB.prepare("SELECT id, name FROM users WHERE name IS NOT NULL").all();
@@ -187,6 +188,14 @@ export async function gameRoute(req, env, user, path) {
       await postFeed(env, user.id, r.cards);
       return json(r);
     }
+    if (path === "/api/game/seen") {
+      const r = await mutate(env, user.id, (s, now) => {
+        const d = G.ensureDailyS(s, now);
+        if ((d.prog.sheet || 0) >= 10) return { abort: true };
+        G.trackS(s, "sheet", 1, now); return {};
+      });
+      return json(r.state ? r : { ok: true });
+    }
     if (path === "/api/game/recycle") {
       const r = await mutate(env, user.id, (s, now) => ({ value: G.recycleS(s, now) }));
       return json(r);
@@ -216,14 +225,21 @@ export async function gameRoute(req, env, user, path) {
       // crédite les bonnes prédictions validées par Billy, et la mission « fais une prédiction »
       const votes = (await readDoc(env, "votes/" + user.id))?.data?.answers || {};
       const { results } = await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'predq'").all();
-      const won = results.map((q) => ({ id: q.id, ...JSON.parse(q.data) })).filter((q) => q.status === "resolved" && votes[q.id] === q.answer);
+      const qs = results.map((q) => ({ id: q.id, ...JSON.parse(q.data) }));
+      const won = qs.filter((q) => q.status === "resolved" && votes[q.id] === q.answer);
       const r = await mutate(env, user.id, (s, now) => {
+        // chaque nouveau vote compte pour les missions « vote pour une prédiction »
+        const voted = qs.filter((q) => votes[q.id] != null && !s.predVoted.includes(q.id));
+        for (const q of voted) s.predVoted.push(q.id);
+        if (voted.length) G.trackS(s, "predict", voted.length, now);
+        // chaque bonne prédiction rapporte ce que Billy a fixé sur la question
         const fresh = won.filter((q) => !s.predPaid.includes(q.id));
         for (const q of fresh) s.predPaid.push(q.id);
-        s.chakra += fresh.length * 50;
-        const d = G.ensureDailyS(s, now);
-        if (Object.keys(votes).length && !d.prog.predict) G.trackS(s, "predict", 1, now);
-        return { won: fresh.length, value: fresh.length * 50 };
+        const value = fresh.reduce((t, q) => t + G.predRewardOf(q), 0);
+        s.chakra += value;
+        if (fresh.length) G.trackS(s, "predwin", fresh.length, now);
+        if (!voted.length && !fresh.length) return { abort: true, won: 0, value: 0 };
+        return { won: fresh.length, value };
       });
       return json(r);
     }

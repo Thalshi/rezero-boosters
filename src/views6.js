@@ -110,7 +110,7 @@ function viewConfront() {
     ${L.miennes.length ? `<section class="sec"><h2>Mes parties</h2>${L.miennes.map((g) => row(g, "Reprendre")).join("")}</section>` : ""}
     <section class="sec"><h2>Salons ouverts</h2>${L.salons.length ? L.salons.map((g) => row(g, "Voir")).join("") : `<p class="note">Aucun salon public pour l'instant. Crée le tien !</p>`}</section>
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
-    <section class="sec"><h2>Les 4 rôles</h2><p class="note">À partir de 4 joueurs, chacun reçoit un rôle. Seul le Gardien est connu de tous.</p><div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r, { short: true })).join("")}</div></section>
+    <section class="sec"><h2>Les rôles</h2><p class="note">À partir de 4 joueurs : deux camps, Gardien et Sentinelles contre Briseurs. Seul le Gardien est connu de tous. Chaque table est réglée pour que chaque camp ait une chance sur deux.</p><div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r, { short: true })).join("")}</div></section>
     <section class="sec"><h2>Les 8 branches</h2><div class="cf-branches">${(CF.cat?.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>
       <p class="note">Chaque carte a sa branche : les cartes Épique et plus d'un perso en ont souvent une autre. La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. <a href="#/confront/regles">Lire le livret complet</a>.</p></section></div>`;
 }
@@ -126,7 +126,7 @@ function cfTableHTML() {
   let body = "";
   if (v.phase === "lobby") {
     body = `<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : ""}</span>`).join("")}</div>
-      <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : `Mode Classique, avec des rôles secrets : ${ROLE_SPLIT[v.joueurs.length].map((x, i) => x ? `${x} ${ROLES[ROLE_ORDER[i]].nom}${x > 1 ? "s" : ""}` : "").filter(Boolean).join(", ")}.`} <a href="#/confront/regles">Comment jouer</a></p>
+      <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : `Mode Classique, avec des rôles secrets : ${ROLE_SPLIT[v.joueurs.length].map((x, i) => x ? `${x} ${ROLES[ROLE_ORDER[i]].nom}${x > 1 ? "s" : ""}` : "").filter(Boolean).join(", ")} (${ROLE_BONUS[v.joueurs.length]}).`} <a href="#/confront/regles">Comment jouer</a></p>
       <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
       ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}${has1("quitter") ? `<button class="btn" type="button" data-cfa='{"type":"quitter"}'>Quitter</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {

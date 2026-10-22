@@ -13,8 +13,17 @@ export const MODES = {
 /** Mode correspondant à un nombre de joueurs. */
 export const modeFor = (n) => (n === 2 ? "duel" : n === 3 ? "trio" : n >= 4 && n <= 7 ? "classique" : null);
 
-/** Répartition des rôles en mode classique (le Gardien est toujours visible). */
+/** Répartition des rôles en mode classique (le Gardien est toujours visible).
+ * Deux camps seulement, sans Errant (corrigé, voir EQUILIBRAGE.md : l'Errant ne gagnait que 8 à 23 %
+ * des parties, surtout par hasard). Chaque table est réglée pour que chaque camp gagne environ une
+ * partie sur deux : la victoire dépend des décisions, pas du rôle tiré. Avant : ROLES_AVEC_ERRANT. */
 export const ROLES_PAR_TABLE = {
+  4: { gardien: 1, sentinelle: 1, briseur: 2 },
+  5: { gardien: 1, sentinelle: 2, briseur: 2 },
+  6: { gardien: 1, sentinelle: 2, briseur: 3 },
+  7: { gardien: 1, sentinelle: 3, briseur: 3 },
+};
+export const ROLES_AVEC_ERRANT = {
   4: { gardien: 1, sentinelle: 0, briseur: 2, errant: 1 },
   5: { gardien: 1, sentinelle: 1, briseur: 2, errant: 1 },
   6: { gardien: 1, sentinelle: 1, briseur: 3, errant: 1 },
@@ -26,9 +35,17 @@ export const ROLES_PAR_TABLE = {
 export const DEFAULT_CONFIG = {
   // Points de vie de départ par mode (provisoire : 6 / 5 / 4)
   pv: { duel: 6, trio: 5, classique: 4 },
-  // PV en plus pour le Gardien, par taille de table (corrigé, avant : +1 partout).
+  // Répartition des rôles par taille de table (null = ROLES_PAR_TABLE)
+  roles: null,
+  // PV en plus pour le Gardien, par taille de table (corrigé deux fois : +1 partout, puis +2/+0/+2/+1
+  // avec l'Errant ; sans Errant : seul le 6 joueurs en a besoin).
   // Un nombre (même bonus partout) ou un objet { 4: …, 5: …, 6: …, 7: … }.
-  bonusGardien: { 4: 2, 5: 0, 6: 2, 7: 1 },
+  bonusGardien: { 4: 0, 5: 0, 6: 2, 7: 0 },
+  // PV en plus pour un autre rôle : { role: { taille: n } } (aucun pour l'instant)
+  bonusPvRole: {},
+  // Réglage fin des camps : cartes en plus dans la main de départ { role: { taille: n } } (mesuré :
+  // chaque camp gagne 49 à 51 % des parties simulées à 4, 5, 6 et 7 joueurs)
+  bonusMainRole: { gardien: { 4: 2, 7: 3 }, sentinelle: { 4: 1 }, briseur: { 5: 2 } },
   // PV en plus pour l'Errant, par taille de table (corrigé, avant : aucun)
   bonusErrant: { 4: 0, 5: 0, 6: 1, 7: 1 },
   // Limite de main en fin de tour = PV actuels, bornée par [min, max] (max null = pas de plafond)
@@ -112,6 +129,8 @@ export const DEFAULT_CONFIG = {
 
 /** Configuration d'origine (avant les corrections mesurées), pour comparer dans les simulations. */
 export const CONFIG_AVANT_CORRECTIONS = {
+  roles: ROLES_AVEC_ERRANT,
+  bonusMainRole: {},
   bonusGardien: 1,
   bonusErrant: { 4: 0, 5: 0, 6: 0, 7: 0 },
   assaut: { piocheSiTouche: 0 },

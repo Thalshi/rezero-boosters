@@ -329,9 +329,13 @@ t.section("Corrections d'équilibrage appliquées (valeurs par défaut)");
   t.check("Défense à 5 joueurs : présage Vent, pas d'esquive (Eau seul)", !types(rd7.events).includes("esquive") && rd7.state.prompt.kind === "reaction");
   // PV du Gardien par table, compensation du second joueur en duel
   const pvG = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pvg" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "gardien").pvMax; };
-  t.check("PV du Gardien : 6 à 4 joueurs, 4 à 5, 6 à 6, 5 à 7", pvG(4) === 6 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 5, [4, 5, 6, 7].map(pvG));
-  const pvE = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pve" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "errant").pvMax; };
-  t.check("PV de l'Errant : 4 à 4 et 5 joueurs, 5 à 6 et 7", pvE(4) === 4 && pvE(5) === 4 && pvE(6) === 5 && pvE(7) === 5, [4, 5, 6, 7].map(pvE));
+  t.check("PV du Gardien : 4 à 4 joueurs, 4 à 5, 6 à 6, 4 à 7", pvG(4) === 4 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 4, [4, 5, 6, 7].map(pvG));
+  // deux camps, sans Errant : Gardien et Sentinelles contre Briseurs, réglés à environ 50/50 par table
+  const comp = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "cmp" + n }); const g = playGame(s, { maxSteps: n }).state; const c = {}; for (const p of g.players) c[p.role] = (c[p.role] || 0) + 1; return c; };
+  const want = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
+  t.check("répartition : 1-1-2, 1-2-2, 1-2-3, 1-3-3 (Gardien, Sentinelles, Briseurs), jamais d'Errant", [4, 5, 6, 7].every((n) => { const c = comp(n); return c.gardien === want[n][0] && (c.sentinelle || 0) === want[n][1] && c.briseur === want[n][2] && !c.errant; }), [4, 5, 6, 7].map(comp));
+  const eq = (n, extra) => E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "eq" + n, config: extra });
+  t.check("l'Errant reste possible par réglage (ancienne répartition)", (() => { const g = playGame(eq(5, { roles: { 5: { gardien: 1, sentinelle: 1, briseur: 2, errant: 1 } } }), { maxSteps: 5 }).state; return g.players.some((p) => p.role === "errant"); })());
   const du = playGame(E.createGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "second" }), { maxSteps: 2 }).state;
   const second = du.players.find((p) => p.id !== du.premier);
   t.check("duel : le second joueur commence avec 7 cartes (6 + 1 de compensation)", second.main.length === 7);

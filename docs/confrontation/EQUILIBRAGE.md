@@ -43,6 +43,21 @@ Toutes sont des réglages de `worker/confront/config.mjs` ; `CONFIG_AVANT_CORREC
 
 Variantes mesurées puis **écartées** (trop fortes), laissées à 0 dans la configuration : Précision pioche quand sa Frappe est parée (duel 66 % contre Chance, trio +11) ; Survie à 1 carte pour sa première Ténacité du tour (duel 66 %) ; Survie +1 PV max à petite table (trio 68 %) ; Voleur seulement sur un joueur plus riche que lui (duel 42 %, trop faible) ; Précision 2 PV sur une cible sans carte (effet presque nul en trio).
 
+## Rôles : deux camps à 50/50 (correction C9, sans Errant)
+
+Demande de Reichi : retirer les rôles trop faibles pour que la victoire vienne de la réflexion, pas du rôle tiré. L'Errant (8 à 23 % de victoires selon la table) est retiré ; chaque table a sa composition et un petit réglage, cherchés par simulation (1 000 à 1 500 parties par essai, puis 2 000 pour confirmer).
+
+| Joueurs | Composition (G / S / B) | Réglage | Camp du Gardien | Briseurs |
+|---|---|---|---|---|
+| 4 | 1 / 1 / 2 | Gardien +2 cartes au départ, Sentinelle +1 | 51,2 % | 48,8 % |
+| 5 | 1 / 2 / 2 | chaque Briseur +2 cartes au départ | 48,9 % | 51,0 % |
+| 6 | 1 / 2 / 3 | Gardien +2 PV | 49,3 % | 50,7 % |
+| 7 | 1 / 3 / 3 | Gardien +3 cartes au départ | 50,4 % | 49,6 % |
+
+Ce qui a été essayé : un PV de Gardien en plus ou en moins fait basculer d'environ 15 points (trop grossier) ; la récompense d'élimination d'un Briseur (0 à 5 cartes) ne bouge presque rien ; les cartes de départ en plus permettent un réglage fin (environ 3 à 5 points par carte). Compositions écartées : 1/1/3 à 5 joueurs (Briseurs 72 à 96 %), 1/2/4 à 7 joueurs (Briseurs 72 à 96 %).
+
+Effets mesurés : parties plus courtes (25 à 35 tours au lieu de 39 à 50), effondrement presque jamais atteint (moins de 1 % au lieu de 7 à 21 %). Dispersion des branches comparable (7 à 10 points ; Résistance la plus forte, +3 à +5 ; Survie la plus faible, −3 à −5).
+
 ## Dispersion entre branches, avant et après
 
 Écart entre la meilleure et la pire branche (en points de victoire) :

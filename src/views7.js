@@ -5,15 +5,15 @@ const ROLES = {
   gardien: {
     nom: "Gardien", kanji: "守", col: "var(--gold)", vu: "Visible de tous",
     icon: RI(`<path d="M18 14l7 7 7-11 7 11 7-7-3 14H21z"/><path d="M14 30h36v10c0 10-8 16-18 20-10-4-18-10-18-20z"/><path d="M32 36v14"/>`),
-    but: "Survivre jusqu'à ce que tous les Briseurs et l'Errant soient éliminés.",
+    but: "Survivre jusqu'à ce que tous les Briseurs soient éliminés.",
     camp: "Avec les Sentinelles, mais tu ne sais pas qui elles sont.",
-    plus: "Tu commences la partie et tu as des PV en plus (sauf à 5 joueurs).",
+    plus: "Tu commences la partie. Selon la table, tu as des PV ou des cartes en plus (voir « Réglages de chaque table »).",
     conseil: "Frappe avec prudence : si tu élimines une Sentinelle, tu défausses toute ta main et tout ton équipement.",
   },
   sentinelle: {
     nom: "Sentinelle", kanji: "衛", col: "var(--cyan)", vu: "Secret",
     icon: RI(`<path d="M32 8l20 8v14c0 13-9 22-20 26-11-4-20-13-20-26V16z"/><circle cx="32" cy="30" r="6"/><path d="M20 30h6M38 30h6"/>`),
-    but: "Protéger le Gardien : ton camp gagne quand tous les Briseurs et l'Errant sont tombés, le Gardien encore debout.",
+    but: "Protéger le Gardien : ton camp gagne quand tous les Briseurs sont tombés, le Gardien encore debout.",
     camp: "Avec le Gardien. Tu gagnes avec lui même si tu es éliminé en chemin.",
     plus: "Personne ne sait que tu es Sentinelle : à toi de le montrer par tes actes (soigner le Gardien, frapper ses ennemis).",
     conseil: "Le Gardien ne te connaît pas et peut te frapper par erreur : aide-le assez tôt pour qu'il te fasse confiance.",
@@ -35,8 +35,10 @@ const ROLES = {
     conseil: "Le Gardien doit tomber en dernier : s'il tombe alors qu'un autre joueur que toi est encore en vie, ce sont les Briseurs qui gagnent. Aide-le parfois contre les Briseurs.",
   },
 };
-const ROLE_ORDER = ["gardien", "sentinelle", "briseur", "errant"];
-const ROLE_SPLIT = { 4: [1, 0, 2, 1], 5: [1, 1, 2, 1], 6: [1, 1, 3, 1], 7: [1, 2, 3, 1] };
+// deux camps, sans Errant (rôle retiré : il gagnait surtout par hasard) ; mêmes valeurs que worker/confront/config.mjs
+const ROLE_ORDER = ["gardien", "sentinelle", "briseur"];
+const ROLE_SPLIT = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
+const ROLE_BONUS = { 4: "Gardien : 2 cartes de plus au départ, Sentinelle : 1", 5: "chaque Briseur : 2 cartes de plus au départ", 6: "Gardien : 2 PV de plus", 7: "Gardien : 3 cartes de plus au départ" };
 // fiche d'un rôle (livret, salon, et « ton rôle » pendant la partie)
 function roleCard(r, opts = {}) {
   const R = ROLES[r];
@@ -70,7 +72,7 @@ function viewRegles() {
   return `<div class="wrap page rg">${head("Confrontation · 対決 · Livret", "Comment jouer", "Le livret complet de Re Zéro : Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
     <div class="row"><button class="btn sm" type="button" data-nav="confront">‹ Retour aux salons</button></div>
     <section class="sec rg-quick"><h2>En 30 secondes</h2><ol class="rg-steps">
-      <li><b>Un rôle</b><span>Gardien, Sentinelle, Briseur ou Errant. Chacun a son propre but (à partir de 4 joueurs).</span></li>
+      <li><b>Un camp</b><span>Gardien et Sentinelles contre Briseurs, à partir de 4 joueurs. Seul le Gardien est connu : à toi de deviner qui est avec toi.</span></li>
       <li><b>Un personnage</b><span>Tiré de ta collection ou de celles des autres. Sa branche lui donne un pouvoir.</span></li>
       <li><b>À ton tour</b><span>Pioche 2 cartes, joue ce que tu veux (une seule Frappe), garde au plus autant de cartes que tes PV.</span></li>
       <li><b>À 0 PV</b><span>Tu es éliminé et ton rôle est révélé. La partie s'arrête dès qu'un camp a gagné.</span></li></ol></section>
@@ -84,12 +86,12 @@ function viewRegles() {
 
     ${sec("roles", 2, "Les rôles (mode Classique)", `<p>Au début de la partie, chacun reçoit un rôle au hasard. Le <b>Gardien</b> se montre à tous ; les autres rôles restent <b>secrets</b> : tu ne connais que le tien. Un rôle se révèle quand son joueur est éliminé, et tous à la fin.</p>
       <div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r)).join("")}</div>
-      <h3>Combien de chaque rôle ?</h3>
-      <div class="tbl-wrap"><table class="rg-tbl"><thead><tr><th>Joueurs</th>${ROLE_ORDER.map((r) => `<th style="color:${ROLES[r].col}">${ROLES[r].nom}</th>`).join("")}</tr></thead>
-        <tbody>${Object.entries(ROLE_SPLIT).map(([n, v]) => `<tr><td>${n}</td>${v.map((x) => `<td>${x || "–"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      <h3>Combien de chaque rôle ?</h3><p>Deux camps de taille proche. Chaque table a un petit réglage pour que <b>chaque camp gagne environ une partie sur deux</b> (mesuré sur 2 000 parties simulées par table) : ce n'est pas le rôle tiré qui décide, ce sont tes choix.</p>
+      <div class="tbl-wrap"><table class="rg-tbl"><thead><tr><th>Joueurs</th>${ROLE_ORDER.map((r) => `<th style="color:${ROLES[r].col}">${ROLES[r].nom}s</th>`).join("")}<th>Réglage de la table</th></tr></thead>
+        <tbody>${Object.entries(ROLE_SPLIT).map(([n, v]) => `<tr><td>${n}</td>${v.map((x) => `<td>${x || "–"}</td>`).join("")}<td class="rg-bonus">${ROLE_BONUS[n]}</td></tr>`).join("")}</tbody></table></div>
       <h3>Qui gagne ?</h3><p>Le serveur vérifie après chaque élimination :</p>
-      <ol class="rg-ol"><li>Le <b>Gardien</b> vient de tomber : si l'<b>Errant</b> est le seul encore en vie, il gagne. Sinon, ce sont les <b>Briseurs</b> qui gagnent, tous, même ceux déjà éliminés.</li>
-        <li>Plus aucun Briseur ni Errant en vie : le <b>Gardien et les Sentinelles</b> gagnent.</li><li>Sinon, on continue.</li></ol>
+      <ol class="rg-ol"><li>Le <b>Gardien</b> vient de tomber : les <b>Briseurs</b> gagnent, tous, même ceux déjà éliminés.</li>
+        <li>Plus aucun Briseur en vie : le <b>Gardien et les Sentinelles</b> gagnent, même ceux déjà éliminés.</li><li>Sinon, on continue.</li></ol>
       <div class="rg-box"><b>Récompense et pénalité</b><p>Éliminer un <b>Briseur</b> fait piocher 3 cartes, quel que soit ton rôle. Si le <b>Gardien élimine une Sentinelle</b>, il défausse toute sa main et tout ce qui est posé devant lui.</p></div>`)}
 
     ${sec("perso", 3, "Ton personnage et sa branche", `<p>Les personnages viennent de vos collections : chacun peut <b>apporter au plus une carte par branche</b>. Pour chaque branche que tu laisses vide, le jeu ajoute une <b>carte de prêt</b> (un personnage générique). Tout est mélangé, puis chacun reçoit <b>deux propositions secrètes</b> et en choisit une.</p>
@@ -98,10 +100,10 @@ function viewRegles() {
       <div class="cf-branches">${(cat.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>`)}
 
     ${sec("miseenplace", 4, "Mise en place", `<ol class="rg-ol"><li>Le serveur place les joueurs au hasard autour de la table.</li>
-      <li>Chacun reçoit ses PV (Duel 6, Trio 5, Classique 4 ; le Gardien en a plus, l'Errant aussi à 6 et 7 joueurs).</li>
+      <li>Chacun reçoit ses PV (Duel 6, Trio 5, Classique 4 ; à 6 joueurs, le Gardien en a 2 de plus).</li>
       <li>La pioche commune de ${total || 82} cartes d'action est mélangée.</li>
       <li>Le <b>Gardien</b> commence (au hasard en Duel et en Trio).</li>
-      <li>Chacun reçoit autant de cartes que ses PV. En Duel, le second joueur reçoit une carte de plus.</li></ol>`)}
+      <li>Chacun reçoit autant de cartes que ses PV, plus le réglage de la table (cartes en plus pour un camp, voir les rôles). En Duel, le second joueur reçoit une carte de plus.</li></ol>`)}
 
     ${sec("tour", 5, "Le déroulement d'un tour", `<div class="rg-flow">
       <div><i>1</i><b>Début du tour</b><p>Les effets posés devant toi agissent : Orbe instable, puis Sceau d'entrave.</p></div>

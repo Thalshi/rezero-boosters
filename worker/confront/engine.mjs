@@ -287,7 +287,7 @@ function setupGame(s, now) {
   const n = s.players.length, cfg = s.config;
   // rôles : générateur séparé, indépendant du tirage des personnages
   if (s.mode === "classique") {
-    const t = ROLES_PAR_TABLE[n], roles = [];
+    const t = cfg.roles?.[n] || ROLES_PAR_TABLE[n], roles = [];
     for (const [r, k] of Object.entries(t)) for (let i = 0; i < k; i++) roles.push(r);
     shuffle(s, "roles", roles);
     s.players.forEach((p, i) => { p.role = roles[i]; p.roleVisible = roles[i] === "gardien"; });
@@ -301,7 +301,7 @@ function setupGame(s, now) {
     const c = s.reserve.find((x) => x.instanceId === p.choix);
     p.perso = { ...c };
     s.usage.push({ joueur: p.id, instanceId: c.instanceId, cardId: c.cardId, proprietaire: c.proprietaire, pret: c.pret });
-    p.pvMax = cfg.pv[s.mode] + (p.role === "gardien" ? bonusGardien(cfg, n) : 0) + (p.role === "errant" ? (cfg.bonusErrant || {})[n] || 0 : 0) + (petiteTable(s) && p.perso.branch === "survie" ? cfg.petiteTable.surviePvMax || 0 : 0);
+    p.pvMax = cfg.pv[s.mode] + (p.role === "gardien" ? bonusGardien(cfg, n) : 0) + (p.role === "errant" ? (cfg.bonusErrant || {})[n] || 0 : 0) + (cfg.bonusPvRole?.[p.role]?.[n] || 0) + (petiteTable(s) && p.perso.branch === "survie" ? cfg.petiteTable.surviePvMax || 0 : 0);
     p.pv = p.pvMax;
     s.stats.joueurs[p.id] = { mainMax: 0 };
   }
@@ -318,6 +318,8 @@ function setupGame(s, now) {
   const fi = seats.indexOf(first), ordre = seats.slice(fi).concat(seats.slice(0, fi));
   const want = Object.fromEntries(ordre.map((p) => [p.id, cfg.mainDepart === "pv" ? p.pvMax : +cfg.mainDepart]));
   want[ordre[ordre.length - 1].id] += cfg.bonusDernierJoueur[s.mode] || 0;
+  // réglage fin de l'équilibre des camps : cartes en plus au départ selon le rôle et la taille de table
+  for (const p of ordre) want[p.id] += cfg.bonusMainRole?.[p.role]?.[n] || 0;
   for (let k = 0; k < Math.max(...Object.values(want)); k++) for (const p of ordre) if (p.main.length < want[p.id]) piocher(s, p, 1, "depart");
   s.phase = "partie";
   s.deadline = null;

@@ -61,31 +61,30 @@ Un joueur ouvre un salon (privé sur invitation ou public : géré par le serveu
 
 ## 4. Les rôles (mode classique, 4 à 7 joueurs)
 
-### 4.1 Répartition [Livret pour la structure, Original pour les noms]
+### 4.1 Répartition [Livret pour la structure, Original pour les noms et les réglages]
 
-| Joueurs | Gardien | Sentinelles | Briseurs | Errant |
+Deux camps seulement : Gardien et Sentinelles contre Briseurs. L'Errant a été retiré (il gagnait 8 à 23 % des parties, surtout par hasard ; il reste disponible par réglage, `ROLES_AVEC_ERRANT`). Chaque table a un réglage mesuré pour que chaque camp gagne environ une partie sur deux.
+
+| Joueurs | Gardien | Sentinelles | Briseurs | Réglage de la table [Provisoire, mesuré] |
 |---|---|---|---|---|
-| 4 | 1 | 0 | 2 | 1 |
-| 5 | 1 | 1 | 2 | 1 |
-| 6 | 1 | 1 | 3 | 1 |
-| 7 | 1 | 2 | 3 | 1 |
+| 4 | 1 | 1 | 2 | Gardien +2 cartes au départ, Sentinelle +1 |
+| 5 | 1 | 2 | 2 | chaque Briseur +2 cartes au départ |
+| 6 | 1 | 2 | 3 | Gardien +2 PV |
+| 7 | 1 | 3 | 3 | Gardien +3 cartes au départ |
 
 - Le **Gardien** (le chef) est révélé à tous dès le début. Tous les autres rôles sont secrets : chacun ne connaît que le sien.
 - Un rôle est révélé quand son joueur est éliminé, et tous à la fin de la partie.
 
 ### 4.2 Objectifs précis
 
-- **Gardien et Sentinelles** (même camp) : gagnent ensemble quand **tous les Briseurs et l'Errant sont éliminés**, le Gardien étant encore en vie. Les Sentinelles gagnent même si elles sont éliminées en chemin.
-- **Briseurs** : gagnent ensemble dès que **le Gardien est éliminé**, sauf dans le cas de l'Errant ci-dessous. Ils gagnent même s'ils sont tous éliminés à ce moment-là.
-- **Errant** (le solitaire) : gagne seul s'il est **le dernier joueur en vie**. Concrètement, il doit éliminer (ou voir éliminer) tout le monde, et le Gardien en dernier : si le Gardien tombe alors qu'un autre joueur que l'Errant est encore en vie, ce sont les Briseurs qui gagnent.
+- **Gardien et Sentinelles** (même camp) : gagnent ensemble quand **tous les Briseurs sont éliminés**, le Gardien étant encore en vie. Les Sentinelles gagnent même si elles sont éliminées en chemin.
+- **Briseurs** : gagnent ensemble dès que **le Gardien est éliminé**, même ceux déjà éliminés.
 
 ### 4.3 Conditions de victoire, vérifiées après chaque élimination
 
-1. Le Gardien vient d'être éliminé : si l'Errant est le seul joueur en vie, **victoire de l'Errant** ; sinon **victoire des Briseurs** (tous, vivants ou non).
-2. Sinon, s'il ne reste plus aucun Briseur ni Errant en vie : **victoire du Gardien et des Sentinelles**.
+1. Le Gardien vient d'être éliminé : **victoire des Briseurs** (tous, vivants ou non).
+2. Sinon, s'il ne reste plus aucun Briseur en vie : **victoire du Gardien et des Sentinelles**.
 3. Sinon la partie continue.
-
-Exemples : les Briseurs sont tous tombés mais l'Errant vit encore : on continue, l'Errant seul contre le Gardien et ses Sentinelles. Le Gardien tombe alors qu'il reste une Sentinelle et l'Errant : victoire des Briseurs, même éliminés.
 
 ### 4.4 Récompenses et pénalité d'élimination [Livret, Provisoire]
 - Celui qui élimine un **Briseur** (quel que soit son propre rôle, même Briseur) pioche **3 cartes**.

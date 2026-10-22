@@ -78,9 +78,9 @@ try {
     t.check(`${label} · Créateur : cosmétique publié et dans la Boutique`, await page.evaluate((n) => COSMETICS.some((c) => c.name === n) && Z_COLLECTIONS.some((z) => z.items.some((id) => COS_BY_ID[id]?.name === n)), "Aura " + label));
     // Confrontation : le livret de règles (rôles, branches, 25 cartes), puis une partie avec 2 bots jusqu'à la fin
     await go("confront"); await page.waitForTimeout(1200);
-    t.check(`${label} · Confrontation : les 4 rôles expliqués dès les salons`, (await page.locator(".rl-card").count()) === 4);
+    t.check(`${label} · Confrontation : les 3 rôles expliqués dès les salons`, (await page.locator(".rl-card").count()) === 3);
     await page.click('.cf-howto [data-p="regles"]'); await page.waitForTimeout(1500);
-    t.check(`${label} · livret : rôles, 8 branches et 25 cartes illustrées`, (await page.locator(".rl-card").count()) === 4 && (await page.locator(".rg .cf-br").count()) === 8 && (await page.locator(".rg-card .cff-art.pic").count()) === 25);
+    t.check(`${label} · livret : rôles, 8 branches et 25 cartes illustrées`, (await page.locator(".rl-card").count()) === 3 && (await page.locator(".rg .cf-br").count()) === 8 && (await page.locator(".rg-card .cff-art.pic").count()) === 25);
     await go("confront"); await page.waitForTimeout(1200);
     await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800); await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800);

@@ -70,7 +70,11 @@ try {
     await who("666024039776518157"); await go("defile"); await page.waitForTimeout(1500);
     await page.click('[data-act="def-close"]'); await page.waitForTimeout(200); await page.click('[data-act="def-close"]'); await page.waitForTimeout(1500);
     t.check(`${label} · Défilé : clôture par confirmation dans la page`, await page.evaluate(() => DEF.current?.phase === "clos"));
-    // Confrontation avec 2 bots jusqu'à la fin
+    // Confrontation : le livret de règles (rôles, branches, 25 cartes), puis une partie avec 2 bots jusqu'à la fin
+    await go("confront"); await page.waitForTimeout(1200);
+    t.check(`${label} · Confrontation : les 4 rôles expliqués dès les salons`, (await page.locator(".rl-card").count()) === 4);
+    await page.click('.cf-howto [data-p="regles"]'); await page.waitForTimeout(1500);
+    t.check(`${label} · livret : rôles, 8 branches et 25 cartes illustrées`, (await page.locator(".rl-card").count()) === 4 && (await page.locator(".rg .cf-br").count()) === 8 && (await page.locator(".rg-card .cff-art.pic").count()) === 25);
     await go("confront"); await page.waitForTimeout(1200);
     await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800); await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800);

@@ -96,11 +96,13 @@ const cfBranch = (b) => CF.cat?.branches?.[b] || { nom: b, kanji: "?" };
 function viewConfront() {
   if (!SRV) return `<div class="wrap page">${head("Confrontation · 対決", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
   if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re Zéro : Confrontation");
+  if (param === "regles") return viewRegles();
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
   const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
   return `<div class="wrap page">${head("Confrontation · 対決", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
+    <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label><button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
       <div class="lab-form cf-keep"><label>Rejoindre avec un code <input type="text" id="cfCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"></label><button class="btn" type="button" data-act="cf-code">Ouvrir</button></div></section>
@@ -108,8 +110,9 @@ function viewConfront() {
     ${L.miennes.length ? `<section class="sec"><h2>Mes parties</h2>${L.miennes.map((g) => row(g, "Reprendre")).join("")}</section>` : ""}
     <section class="sec"><h2>Salons ouverts</h2>${L.salons.length ? L.salons.map((g) => row(g, "Voir")).join("") : `<p class="note">Aucun salon public pour l'instant. Crée le tien !</p>`}</section>
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
+    <section class="sec"><h2>Les 4 rôles</h2><p class="note">À partir de 4 joueurs, chacun reçoit un rôle. Seul le Gardien est connu de tous.</p><div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r, { short: true })).join("")}</div></section>
     <section class="sec"><h2>Les 8 branches</h2><div class="cf-branches">${(CF.cat?.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>
-      <p class="note">La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. Règles complètes dans le livret (docs/confrontation/REGLES.md).</p></section></div>`;
+      <p class="note">La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. <a href="#/confront/regles">Lire le livret complet</a>.</p></section></div>`;
 }
 
 function cfTableHTML() {
@@ -123,7 +126,7 @@ function cfTableHTML() {
   let body = "";
   if (v.phase === "lobby") {
     body = `<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : ""}</span>`).join("")}</div>
-      <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : "Mode Classique, avec des rôles secrets."}</p>
+      <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : `Mode Classique, avec des rôles secrets : ${ROLE_SPLIT[v.joueurs.length].map((x, i) => x ? `${x} ${ROLES[ROLE_ORDER[i]].nom}${x > 1 ? "s" : ""}` : "").filter(Boolean).join(", ")}.`} <a href="#/confront/regles">Comment jouer</a></p>
       <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
       ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}${has1("quitter") ? `<button class="btn" type="button" data-cfa='{"type":"quitter"}'>Quitter</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {
@@ -165,13 +168,15 @@ function cfBoard(v) {
   };
   const res = v.resultat;
   const fin = v.phase === "fin" && res ? `<section class="sec cf-fin"><h2>${res.gagnants?.includes(v.moi) ? "Victoire !" : res.gagnants?.length ? `Victoire de ${res.gagnants.map(cfName).map(esc).join(", ")}` : "Partie terminée sans vainqueur"}</h2><p class="note">${res.camp ? `Camp gagnant : ${esc(res.camp)} · ` : ""}${res.tours} tours.${res.raison === "annulee" ? " Partie annulée." : ""}</p></section>` : "";
-  const help = `<details class="cf-help"${CF.helpOpen === false ? "" : " open"}><summary>Comment jouer</summary><ol>
-    <li><b>But</b> : ${v.monRole ? esc(ROLE_TXT[v.monRole]) : v.mode === "duel" ? "fais tomber l'autre joueur à 0 PV." : "sois le dernier en vie."}</li>
+  const roleBox = v.monRole ? roleCard(v.monRole, { mine: true, short: true }) : me && v.mode !== "classique" ? `<p class="note">${v.mode === "duel" ? "Duel" : "Trio"} : pas de rôle, chacun pour soi.</p>` : "";
+  const help = `<details class="cf-help"${CF.helpOpen === false ? "" : " open"}><summary>Ton rôle et comment jouer</summary>${roleBox}<ol>
+    ${v.monRole ? "" : `<li><b>But</b> : ${v.mode === "duel" ? "fais tomber l'autre joueur à 0 PV." : "sois le dernier en vie."}</li>`}
     <li><b>À ton tour</b> : tu pioches 2 cartes, tu joues celles que tu veux (une seule Frappe par tour), puis <b>Finis ton tour</b>.</li>
     <li><b>Attaquer</b> : la Frappe touche un joueur à portée de ton arme (↔ distance ≤ portée). Les armes augmentent la portée.</li>
     <li><b>Quand on t'attaque</b> : joue une Parade pour annuler, ou encaisse (−1 PV).</li>
     <li><b>Fin du tour</b> : tu gardes au plus autant de cartes que tes PV.</li>
-    ${me?.perso ? `<li><b>Ton pouvoir (${esc(cfBranch(me.perso.branch).nom)})</b> : ${esc(cfBranch(me.perso.branch).pouvoir)}</li>` : ""}</ol></details>`;
+    ${me?.perso ? `<li><b>Ton pouvoir (${esc(cfBranch(me.perso.branch).nom)})</b> : ${esc(cfBranch(me.perso.branch).pouvoir)}</li>` : ""}</ol>
+    <p class="note"><a href="#/confront/regles">Livret complet : rôles, distance, toutes les cartes</a></p></details>`;
   return `${fin}${me && v.phase === "partie" ? cfBanner(v, me, pr) : ""}<div class="cf-board">${v.joueurs.map(seat).join("")}</div>
     <div class="cf-mid"><span class="cf-pile">Pioche <b>${v.pioche}</b></span><span class="cf-pile">Défausse <b>${v.nbDefausse}</b></span>${v.defausse?.length ? `<span>Dernière jouée ${cfChip(v.defausse.at(-1))}</span>` : ""}${v.etal?.length ? `<span>Étal ${v.etal.map(cfChip).join("")}</span>` : ""}</div>
     ${me ? cfHand(v, me, pr, acts) : ""}${me ? help : ""}`;

@@ -219,6 +219,8 @@ const CARD_BY_ID = Object.fromEntries(ALL_CARDS.map((c) => [c.id, c]));
 const CATALOG_NO = Object.fromEntries([...ALL_CARDS].sort((a, b) => RANKS.indexOf(b.rar) - RANKS.indexOf(a.rar) || a.id.localeCompare(b.id)).map((c, i) => [c.id, i + 1]));
 
 // ===== Règles de l'économie (mêmes règles dans le navigateur et sur le serveur) =====
+const MARKET_FEE = 0;                  // frais de vente retenus au vendeur (0 = aucun ; option proposée : 0.05, en attente de décision)
+const marketNet = (price) => price - Math.floor(price * MARKET_FEE);
 const MARKET_MIN_OPENED = 10;         // boosters ouverts avant de pouvoir vendre, acheter ou échanger
 const CRAFT_COST = 3;                 // doublons combinés pour un skin au hasard (comme le reroll de LoL)
 const TRADE_FREE_VALUE = 40;          // en dessous, un échange passe toujours
@@ -897,4 +899,25 @@ function defileRank(d) {
   const n = {}; for (const e of Object.values(d.votes || {})) n[e] = (n[e] || 0) + 1;
   return Object.entries(d.entries || {}).filter(([, e]) => !e.removed).map(([uid, e]) => ({ uid, votes: n[uid] || 0, t: e.t }))
     .sort((a, b) => b.votes - a.votes || a.t - b.t);
+}
+
+// ===== Marché des créations : vendre une carte avec son design =====
+// Seules les instances uniques (Sanctuaire) voyagent avec la carte ; les cosmétiques de compte restent au vendeur
+// et ne sont montrés qu'en aperçu. Les instances sont sous séquestre pendant la vente.
+function takeDesignForSaleS(s, cardId) {
+  const cos = cosOf(s), d = cos.designs[cardId] || {}, inst = [], acct = {};
+  for (const [slot, ref] of Object.entries(d)) {
+    const c = refCos(s, ref); if (!c) continue;
+    if (ref.startsWith("i:")) { const k = cos.inst.findIndex((x) => x.i === ref.slice(2)); if (k >= 0) { inst.push({ ...cos.inst[k], slot }); cos.inst.splice(k, 1); delete d[slot]; } }
+    else acct[slot] = c.id;
+  }
+  if (cos.designs[cardId] && !Object.keys(d).length) delete cos.designs[cardId];
+  return { inst, acct };
+}
+// donne les instances (achat, ou retour au vendeur) et les pose sur la carte reçue
+function giveDesignS(s, cardId, inst, now = Date.now()) {
+  const cos = cosOf(s); if (!inst?.length) return;
+  const d = { ...(cos.designs[cardId] || {}) };
+  for (const it of inst) { if (!COS_BY_ID[it.c] || cos.inst.some((x) => x.i === it.i)) continue; cos.inst.push({ i: it.i, c: it.c, t: it.t || now }); d[it.slot || COS_BY_ID[it.c].slot] = "i:" + it.i; }
+  if (hasCard(s, cardId)) cos.designs[cardId] = d;
 }

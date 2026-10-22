@@ -73,7 +73,7 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 | 4.5 | Sanctuaire des Invocations : ×1 et ×5, tirage serveur, Portail scellé | ✅ | ⛔ coût 150 ◆ / ×5 à 675 ◆, taux, pity 80, ×5 au moins Rare : provisoires |
 | 4.6 | Feinte de rareté et intensité selon la rareté | ✅ | Mythique annoncée Épique, Légendaire annoncée Rare |
 | 4.7 | Atelier Arcanique : prévisualiser, équiper, retirer, enregistrer un design | ✅ | |
-| 4.8 | Cartes personnalisées affichées partout (collection, fiche, profil, marché) | 🟡 | collection, fiche, profil, vitrine, vedette ✅ ; marché ⬜ (étape 9) |
+| 4.8 | Cartes personnalisées affichées partout (collection, fiche, profil, marché) | ✅ | marché compris (annonces et fiche d'annonce) |
 
 ## 5. Profil, carte vedette, Défilé des Légendes (dossier §6)
 | # | Élément | État | Notes |
@@ -91,9 +91,9 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 |---|---|---|---|
 | 6.1 | Vente, achat, retrait, cote, historique | ✅ | |
 | 6.2 | Échanges équilibrés, transferts atomiques, anti-duplication | ✅ | |
-| 6.3 | Vendre une carte nue ou avec son design (liste des cosmétiques transférables inclus) | ⬜ | |
-| 6.4 | Effets de compte en aperçu seulement, jamais transférés | ⬜ | |
-| 6.5 | Frais de vente | ⛔ | option 5 % |
+| 6.3 | Vendre une carte nue ou avec son design (liste des cosmétiques transférables inclus) | ✅ | instances sous séquestre, rendues à l'annulation ; `tests/marche-designs.mjs` |
+| 6.4 | Effets de compte en aperçu seulement, jamais transférés | ✅ | listés à part dans l'annonce |
+| 6.5 | Frais de vente | ⛔ | réglage `MARKET_FEE` prêt, laissé à 0 ; option proposée 5 % |
 | 6.6 | Badges et titres personnels jamais transférés | ✅ | `s.titles` reste au joueur ; rien dans le marché ni les échanges |
 
 ## 7. Invocation (dossier §7, 03 + décisions)

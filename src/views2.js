@@ -6,8 +6,8 @@ function lsHTML(l, mine) {
   const vis = visible(c), wished = wishSet().has(l.card) && !has(l.card);
   const st = l.status === "open" ? "En vente" : l.status === "sold" ? "Vendue" : "Retirée";
   return `<div class="ls ${wished ? "wish" : ""}" data-listing="${l.id}" role="button" tabindex="0">
-    ${cardHTML(c, { soon: !vis, gold: l.gold })}
-    <div class="ls-r"><span class="pill">Prix fixe</span><span class="ls-st ${l.status === "open" ? "" : "end"}">${st}</span></div>
+    ${cardHTML(c, { soon: !vis, gold: l.gold, design: listingDesign(l) })}
+    <div class="ls-r"><span class="pill">${l.dz?.inst?.length ? "Avec design" : "Prix fixe"}</span><span class="ls-st ${l.status === "open" ? "" : "end"}">${st}</span></div>
     <div class="ls-p">${fmtN(l.price)} <span class="dia"></span></div>
     <div class="ls-m"><span>${mine ? ago(l.t) : `<span data-uid="${l.seller}">…</span>`}</span>${pctMed(l)}</div>
   </div>`;
@@ -63,7 +63,8 @@ function openListing(lid) {
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Annonce">
     <div class="sheet-h"><h2>${vis ? esc(nameOf(c)) : "???"}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b">
-      ${cardHTML(c, { soon: !vis, gold: l.gold })}
+      ${cardHTML(c, { soon: !vis, gold: l.gold, design: listingDesign(l), present: true })}
+      ${listingDzHTML(l)}
       ${vis ? `<button class="link" type="button" data-nav="carte" data-p="${c.id}" style="align-self:center">Voir la fiche</button>` : ""}
       <div class="row"><span class="pill">Prix fixe</span><b style="color:${RAR[c.rar].color};font-size:14px">${RAR[c.rar].label}${l.gold ? " · dorée" : ""}</b><span class="note">vendu par ${mine ? "toi" : `<b data-uid="${l.seller}">…</b>`}</span>
         <span class="pill ${owned ? "" : "ok"}" style="margin-left:auto">${owned ? "Tu l'as déjà" : "Tu ne l'as pas encore"}</span></div>
@@ -80,6 +81,23 @@ function openListing(lid) {
   fillNames();
 }
 const marketBlock2 = () => `Le marché s'ouvre après ${MARKET_MIN_OPENED} boosters ouverts (tu en es à ${save.opened}).`;
+// design d'une annonce : les instances incluses, plus les effets de compte du vendeur en aperçu
+const listingDesign = (l) => (l.dz ? { ...l.dz.acct, ...Object.fromEntries(l.dz.inst.map((x) => [x.slot, x.c])) } : null);
+function listingDzHTML(l) {
+  if (!l.dz) return "";
+  const inc = l.dz.inst.map((x) => COS_BY_ID[x.c]).filter(Boolean), prev = Object.values(l.dz.acct).map((id) => COS_BY_ID[id]).filter(Boolean);
+  return `<div class="dz-box">${inc.length ? `<p><b>Inclus avec la carte</b> (instances uniques) : ${inc.map((c) => `<span class="ti" style="color:${RAR[c.rar].color}">${esc(c.name)}</span>`).join(" ")}</p>` : ""}
+    ${prev.length ? `<p class="note">Aperçu seulement, non transféré (cosmétiques de compte du vendeur) : ${prev.map((c) => esc(c.name)).join(", ")}</p>` : ""}</div>`;
+}
+function sellDesignHTML(id) {
+  const d = cosOf(save).designs[id]; if (!d) return "";
+  const inst = Object.entries(d).filter(([, r]) => r.startsWith("i:")).map(([, r]) => refCos(save, r)).filter(Boolean);
+  const acct = Object.entries(d).filter(([, r]) => r.startsWith("a:")).map(([, r]) => refCos(save, r)).filter(Boolean);
+  if (!inst.length && !acct.length) return "";
+  return `<label class="zopt-line"><input type="checkbox" id="sellDz" ${inst.length ? "checked" : "disabled"}> Vendre avec son design</label>
+    <div class="dz-box">${inst.length ? `<p>Partiront avec la carte : ${inst.map((c) => `<span class="ti" style="color:${RAR[c.rar].color}">${esc(c.name)}</span>`).join(" ")}</p>` : `<p class="note">Aucune instance unique sur ce design : rien à transférer.</p>`}
+    ${acct.length ? `<p class="note">Restent à toi (cosmétiques de compte, montrés en aperçu à l'acheteur) : ${acct.map((c) => esc(c.name)).join(", ")}</p>` : ""}</div>`;
+}
 function openSell(id) {
   const c = byId[id], o = own(id), p = PEOPLE[c.who], gold = !o.n && o.gold > 0;
   if (!DB || !canShare) return toast("Connecte-toi avec Discord pour vendre au marché.");
@@ -89,6 +107,7 @@ function openSell(id) {
     <div class="sheet-b">${cardHTML(c, { gold })}
       <p class="note" style="text-align:center">Tu en as ${gold ? o.gold : o.n}. La carte quitte ta collection pendant la vente. Tu touches l'essence dès qu'un joueur l'achète.</p>
       <div class="kv3"><div><small>Cote (médiane 30 j)</small><b>${cote(id) ? `${fmtN(cote(id))} ◆` : "—"}</b></div><div><small>Recyclage</small><b>${RAR[c.rar].chakra} ◆</b></div></div>
+      ${sellDesignHTML(id)}
       <label class="field" for="sellPrice">Prix en essence ◆<input id="sellPrice" type="number" inputmode="numeric" min="5" max="9999" step="1" value="${suggest}" required></label>
       <button class="btn acc big block" type="submit">Mettre en vente</button></div>
   </form>`;

@@ -493,7 +493,7 @@ async function confirmSell(form) {
   const id = form.dataset.id, gold = !!form.dataset.gold, price = Math.round(+$("sellPrice").value);
   if (!(price >= 5 && price <= 9999)) return toast("Choisis un prix entre 5 et 9999 ◆.");
   if (SRV) {
-    try { await srv("market/sell", { id, gold, price }); $("overlay").hidden = true; toast("Carte mise en vente."); marketTab = "mine"; nav("market"); }
+    try { await srv("market/sell", { id, gold, price, withDesign: !!$("sellDz")?.checked }); $("overlay").hidden = true; toast("Carte mise en vente."); marketTab = "mine"; nav("market"); }
     catch (e) { toast(e.message); }
     return;
   }

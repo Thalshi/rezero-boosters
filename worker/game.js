@@ -220,6 +220,8 @@ const CARD_BY_ID = Object.fromEntries(ALL_CARDS.map((c) => [c.id, c]));
 const CATALOG_NO = Object.fromEntries([...ALL_CARDS].sort((a, b) => RANKS.indexOf(b.rar) - RANKS.indexOf(a.rar) || a.id.localeCompare(b.id)).map((c, i) => [c.id, i + 1]));
 
 // ===== Règles de l'économie (mêmes règles dans le navigateur et sur le serveur) =====
+const MARKET_FEE = 0;                  // frais de vente retenus au vendeur (0 = aucun ; option proposée : 0.05, en attente de décision)
+const marketNet = (price) => price - Math.floor(price * MARKET_FEE);
 const MARKET_MIN_OPENED = 10;         // boosters ouverts avant de pouvoir vendre, acheter ou échanger
 const CRAFT_COST = 3;                 // doublons combinés pour un skin au hasard (comme le reroll de LoL)
 const TRADE_FREE_VALUE = 40;          // en dessous, un échange passe toujours
@@ -900,4 +902,25 @@ function defileRank(d) {
     .sort((a, b) => b.votes - a.votes || a.t - b.t);
 }
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, defileRank };
+// ===== Marché des créations : vendre une carte avec son design =====
+// Seules les instances uniques (Sanctuaire) voyagent avec la carte ; les cosmétiques de compte restent au vendeur
+// et ne sont montrés qu'en aperçu. Les instances sont sous séquestre pendant la vente.
+function takeDesignForSaleS(s, cardId) {
+  const cos = cosOf(s), d = cos.designs[cardId] || {}, inst = [], acct = {};
+  for (const [slot, ref] of Object.entries(d)) {
+    const c = refCos(s, ref); if (!c) continue;
+    if (ref.startsWith("i:")) { const k = cos.inst.findIndex((x) => x.i === ref.slice(2)); if (k >= 0) { inst.push({ ...cos.inst[k], slot }); cos.inst.splice(k, 1); delete d[slot]; } }
+    else acct[slot] = c.id;
+  }
+  if (cos.designs[cardId] && !Object.keys(d).length) delete cos.designs[cardId];
+  return { inst, acct };
+}
+// donne les instances (achat, ou retour au vendeur) et les pose sur la carte reçue
+function giveDesignS(s, cardId, inst, now = Date.now()) {
+  const cos = cosOf(s); if (!inst?.length) return;
+  const d = { ...(cos.designs[cardId] || {}) };
+  for (const it of inst) { if (!COS_BY_ID[it.c] || cos.inst.some((x) => x.i === it.i)) continue; cos.inst.push({ i: it.i, c: it.c, t: it.t || now }); d[it.slot || COS_BY_ID[it.c].slot] = "i:" + it.i; }
+  if (hasCard(s, cardId)) cos.designs[cardId] = d;
+}
+
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, defileRank, takeDesignForSaleS, giveDesignS };

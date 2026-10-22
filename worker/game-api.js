@@ -370,12 +370,17 @@ export async function gameRoute(req, env, user, path) {
       const lid = newId();
       const r = await mutate(env, user.id, (s, now) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
-        if (!G.CARD_BY_ID[body.id] || !G.removeCardS(s, body.id, !!body.gold)) return { abort: true, error: "Tu n'as plus cette carte." };
+        if (!G.CARD_BY_ID[body.id] || !G.hasCard(s, body.id)) return { abort: true, error: "Tu n'as plus cette carte." };
+        // avec son design : les instances uniques partent sous séquestre avec la carte
+        const dz = body.withDesign ? G.takeDesignForSaleS(s, body.id) : null;
+        if (!G.removeCardS(s, body.id, !!body.gold)) return { abort: true, error: "Tu n'as plus cette carte." };
         G.trackS(s, "sell", 1, now);
-        return { lid };
+        return { lid, dz };
       });
       if (r.error) return fail(400, r.error);
-      await writeDoc(env, "market", lid, { seller: user.id, card: body.id, gold: !!body.gold, price, status: "open", t: Date.now() });
+      const dz = r.dz && (r.dz.inst.length || Object.keys(r.dz.acct).length) ? r.dz : null;
+      delete r.dz;
+      await writeDoc(env, "market", lid, { seller: user.id, card: body.id, gold: !!body.gold, price, status: "open", t: Date.now(), ...(dz ? { dz } : {}) });
       return json(r);
     }
     if (path === "/api/game/market/buy") {
@@ -396,11 +401,12 @@ export async function gameRoute(req, env, user, path) {
       const r = await mutate(env, user.id, (s, now) => {
         if (s.chakra < l.price) return { abort: true, error: "Plus assez d'essence." };
         s.chakra -= l.price; G.addCardS(s, l.card, l.gold, now);
+        if (l.dz?.inst?.length) G.giveDesignS(s, l.card, l.dz.inst, now);
         return {};
       });
       if (r.error) { await writeDoc(env, "market", body.lid, l); return fail(400, r.error); }
-      await mutate(env, l.seller, (s, now) => { s.chakra += l.price; s.sales = (s.sales || 0) + 1; G.trackS(s, "sold", 1, now); return {}; }).catch(() => {});
-      await notify(env, l.seller, "sold", `${user.name} a acheté ta carte ${cardName(l.card)}${l.gold ? " dorée" : ""} : +${l.price} ◆`, { go: "market" });
+      await mutate(env, l.seller, (s, now) => { s.chakra += G.marketNet(l.price); s.sales = (s.sales || 0) + 1; G.trackS(s, "sold", 1, now); return {}; }).catch(() => {});
+      await notify(env, l.seller, "sold", `${user.name} a acheté ta carte ${cardName(l.card)}${l.gold ? " dorée" : ""} : +${G.marketNet(l.price)} ◆`, { go: "market" });
       return json({ ...r, card: l.card, price: l.price });
     }
     if (path === "/api/game/market/cancel") {
@@ -411,7 +417,7 @@ export async function gameRoute(req, env, user, path) {
         .bind(JSON.stringify({ ...l, status: "cancelled" }), Date.now(), "market/" + body.lid, doc.version).run();
       if (!res.meta.changes) return fail(409, "Cette carte vient d'être vendue.");
       await bumpRev(env, "market");
-      const r = await mutate(env, user.id, (s, now) => { G.addCardS(s, l.card, l.gold, now); return {}; });
+      const r = await mutate(env, user.id, (s, now) => { G.addCardS(s, l.card, l.gold, now); if (l.dz?.inst?.length) G.giveDesignS(s, l.card, l.dz.inst, now); return {}; });
       return json(r);
     }
 

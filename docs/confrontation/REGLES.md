@@ -19,7 +19,7 @@ Chaque joueur incarne un personnage tiré d'une réserve commune, avec un pouvoi
 |---|---|---|---|---|
 | Duel | 2 | aucun | 6 [Provisoire] | rester le dernier en vie |
 | Trio | 3 | aucun, chacun pour soi | 5 [Provisoire] | rester le dernier en vie |
-| Classique | 4 à 7 | Gardien visible, rôles secrets | 4, Gardien +2/+0/+2/+1 selon la table [Provisoire] | objectif de son camp (§ 4) |
+| Classique | 4 à 7 | Gardien visible, rôles secrets | 4, Gardien +2/+0/+2/+1 et Errant +0/+0/+1/+1 selon la table [Provisoire] | objectif de son camp (§ 4) |
 
 ## 2. Vocabulaire
 
@@ -95,7 +95,7 @@ Exemples : les Briseurs sont tous tombés mais l'Errant vit encore : on continue
 ## 5. Mise en place
 
 1. **Sièges** : le serveur place les joueurs au hasard autour de la table.
-2. **PV** : chacun reçoit les PV du mode (Duel 6, Trio 5, Classique 4) ; le Gardien en reçoit en plus selon la table : **+2 à 4 joueurs, +0 à 5, +2 à 6, +1 à 7** [Provisoire, corrigé après simulation, voir `EQUILIBRAGE.md` ; hypothèse de départ : +1 partout]. Les PV maximum ne changent plus pendant la partie.
+2. **PV** : chacun reçoit les PV du mode (Duel 6, Trio 5, Classique 4) ; le Gardien en reçoit en plus selon la table : **+2 à 4 joueurs, +0 à 5, +2 à 6, +1 à 7** [Provisoire, corrigé après simulation, voir `EQUILIBRAGE.md` ; hypothèse de départ : +1 partout]. L'Errant reçoit +1 PV à 6 et 7 joueurs [Provisoire, corrigé : sans ce bonus il ne gagnait que 4 à 8 % des parties simulées]. Les PV maximum ne changent plus pendant la partie.
 3. **Pioche** : les 82 cartes d'action sont mélangées par le serveur.
 4. **Premier joueur** : en classique, le **Gardien** commence [Livret] ; en Duel et en Trio, le premier joueur est tiré au hasard [Original].
 5. **Mains de départ** : chacun reçoit autant de cartes que ses PV maximum, une par une à partir du premier joueur [Livret]. En Duel, le second joueur reçoit **1 carte de plus** pour compenser l'avantage de commencer [Original, Provisoire, mesuré].
@@ -298,6 +298,7 @@ Toutes dans `worker/confront/config.mjs` :
 |---|---|---|
 | PV Duel / Trio / Classique | 6 / 5 / 4 | [Provisoire] |
 | Bonus du Gardien (4 / 5 / 6 / 7 joueurs) | +2 / +0 / +2 / +1 | [Provisoire, corrigé] |
+| Bonus de l'Errant (4 / 5 / 6 / 7 joueurs) | +0 / +0 / +1 / +1 | [Provisoire, corrigé] |
 | Limite de main | PV actuels, sans plafond | [Livret, Provisoire] |
 | Pioche par tour | 2 | [Livret] |
 | Frappes par tour | 1 (Assaut 2) | [Livret, Original] |

@@ -140,7 +140,10 @@ function cfTableHTML() {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
-  } else body = cfBoard(v);
+  } else if (Arena.wants(T)) { setTimeout(() => Arena.sync(CF.table), 0); return `<div class="wrap page cf-page">${top}<p class="note">La partie se joue dans l'arène.</p></div>`; }
+  else if (Arena.loading()) return `<div class="wrap page cf-page">${top}<p class="note">Entrée dans l'arène…</p></div>`;
+  else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
+  if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
   return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
 }
 function cfPerso(c, big) {
@@ -254,6 +257,7 @@ document.addEventListener("click", (e) => {
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
+  if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });

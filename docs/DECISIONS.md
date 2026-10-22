@@ -42,6 +42,8 @@ Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lance
 |---|---|---|---|---|
 | F1 🟠 | PV et limite de main | | 6 / 5 / 4 PV (+1 chef) ; main = PV | `worker/confront/config.mjs` |
 | F2 🟠 | Récompenses de partie et anti-farm | rien / essence plafonnée | à proposer après les simulations | |
+| F3 🟢 | Affichage de la partie | arène 3D / plateau classique | arène 3D par défaut (Three.js depuis le CDN jsdelivr), « Vue classique » en un clic et en secours sans WebGL | `src/arena.js` |
+| F4 🟢 | Salon de la table | | 8 émotes, messages de 120 caractères, 1 message toutes les 2 s, 40 derniers gardés, seuls les joueurs de la table écrivent | `worker/confront-api.js` |
 
 ## Titres
 - 28 titres provisoires (liste dans `TITLES`, `src/game.js`) : ouvertures (Double couronne pour 2 Légendaires, Cœurs jumeaux pour 2 Mythiques, Trinité, Arc-en-ciel, Pluie d'or, Élu des dieux, Alignement des astres), invocations (2 Légendaires, 2 Mythiques, Mythique en ×1, 100 objets), Confrontation (1re victoire, victoire par rôle, à 1 PV, à 7 joueurs, 10 et 50 victoires), Défilé (podium, 5 participations), collection, prédictions.

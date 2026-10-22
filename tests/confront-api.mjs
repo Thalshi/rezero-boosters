@@ -68,6 +68,13 @@ try {
   t.section("Choix et partie complète par l'API");
   const spect = await S.api("confront/state", { gid });
   t.check("spectateur : aucune main, aucune proposition", spect.spectateur && !spect.vue.main && !spect.vue.propositions?.length);
+  t.section("Salon de la table");
+  const m1 = await A.api("confront/salon", { gid, kind: "msg", v: "  Bonne   chance  " });
+  t.check("message : envoyé, espaces nettoyés", m1.status === 200 && m1.salon.at(-1)?.v === "Bonne chance" && m1.salon.at(-1)?.pid === A.id);
+  t.check("message : 2 s minimum entre deux messages", (await A.api("confront/salon", { gid, kind: "msg", v: "encore" })).status === 429);
+  t.check("émote connue : acceptée", (await B.api("confront/salon", { gid, kind: "emote", v: "salut" })).salon.at(-1)?.kind === "emote");
+  t.check("émote inconnue ou message vide : refusé", (await B.api("confront/salon", { gid, kind: "emote", v: "<img>" })).status === 400 && (await B.api("confront/salon", { gid, kind: "msg", v: "   " })).status === 400);
+  t.check("spectateur : lit le salon mais n'écrit pas", (await S.api("confront/state", { gid })).salon.length === 2 && (await S.api("confront/salon", { gid, kind: "msg", v: "coucou" })).status === 403);
   let steps = 0, last = null;
   while (steps < 900) {
     let moved = false;
@@ -109,6 +116,8 @@ try {
   for (const [label, vp] of [["ordi", { width: 1366, height: 900 }], ["mobile", { width: 390, height: 844 }]]) {
     const ctx = await browser.newContext({ viewport: vp }), page = await ctx.newPage(), errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
+    // la vue classique reste disponible (l'arène 3D a son propre test : confront-arene.mjs)
+    await page.addInitScript(() => localStorage.setItem("cf-vue", "classique"));
     await page.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await page.waitForTimeout(2500);
     await page.goto(`${srv.base}/#/confront`); await page.waitForTimeout(1500);
     t.check(`${label} · page des salons et des 8 branches`, (await page.locator(".cf-br").count()) === 8);

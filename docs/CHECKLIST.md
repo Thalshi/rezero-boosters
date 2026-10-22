@@ -107,19 +107,19 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 ## 8. Confrontation (dossier §8 à §12, 04)
 | # | Élément | État | Notes |
 |---|---|---|---|
-| 8.1 | Livre de règles complet (2, 3, 4–7), partie fictive commentée | ⬜ | adaptation originale, pas de texte BANG! |
-| 8.2 | Catalogue original des cartes d'action avec quantités | ⬜ | |
-| 8.3 | Modes : Duel 2, Trio 3 sans rôles, classique 4–7 avec rôles | ⬜ | |
-| 8.4 | 8 branches (Assaut, Défense, Stratège, Voleur, Précision, Résistance, Survie, Chance) | ⬜ | effets reformulés |
-| 8.5 | Contributions (une carte par branche), prêts, réserve commune, 2 propositions, choix | ⬜ | |
-| 8.6 | Moteur serveur : tours, pioche, actions, réactions, délais, défausse, PV, portée, distance, armes, équipements | ⬜ | |
-| 8.7 | Informations secrètes filtrées, anti-triche, reconnexion, abandon, journal | ⬜ | |
-| 8.8 | Salons privés/publics, invitations, prêt, chronomètres, spectateurs | ⬜ | |
+| 8.1 | Livre de règles complet (2, 3, 4–7), partie fictive commentée | ✅ branche | `docs/confrontation/REGLES.md` (branche `dev/confrontation-moteur`), adaptation originale, partie à 5 tour par tour |
+| 8.2 | Catalogue original des cartes d'action avec quantités | ✅ branche | `docs/confrontation/CARTES.md`, 82 cartes, `worker/confront/cards.mjs` |
+| 8.3 | Modes : Duel 2, Trio 3 sans rôles, classique 4–7 avec rôles | ✅ branche | moteur `worker/confront/engine.mjs` |
+| 8.4 | 8 branches (Assaut, Défense, Stratège, Voleur, Précision, Résistance, Survie, Chance) | ✅ branche | `branches.mjs` ; ⛔ répartition des persos `branches-proposees.mjs` à valider par Billy |
+| 8.5 | Contributions (une carte par branche), prêts, réserve commune, 2 propositions, choix | ✅ branche | moteur ; blocage des instances pendant la partie à faire côté serveur |
+| 8.6 | Moteur serveur : tours, pioche, actions, réactions, délais, défausse, PV, portée, distance, armes, équipements | 🟡 | moteur pur fini et testé ; intégration dans `worker/game-api.js` (stockage D1, routes) ⬜ |
+| 8.7 | Informations secrètes filtrées, anti-triche, reconnexion, abandon, journal | 🟡 | `viewFor`, `eventsFor`, nonce/rev/promptId testés ; archivage du journal et diffusion côté serveur ⬜ |
+| 8.8 | Salons privés/publics, invitations, prêt, chronomètres, spectateurs | ⬜ | le moteur gère le salon minimal (rejoindre, lancer) et la vue spectateur ; le reste est serveur |
 | 8.9 | Interface : lobby, contribution, mélange, choix, table 2/3/7, main privée, réactions, résultats | ⬜ | mobile |
-| 8.10 | Simulations 2–7 joueurs, matrice d'équilibrage | ⬜ | |
-| 8.11 | Scénarios de tests obligatoires (04 §4) | ⬜ | |
-| 8.12 | Valeurs : PV 6/5/4 (+1 chef), limite de main | ⛔ | provisoires |
-| 8.13 | Récompenses de partie, anti-farm | ⛔ | options |
+| 8.10 | Simulations 2–7 joueurs, matrice d'équilibrage | ✅ branche | `tests/confront-sim.mjs` (20 400 parties), `docs/confrontation/EQUILIBRAGE.md`, 8 corrections limitées appliquées et réversibles |
+| 8.11 | Scénarios de tests obligatoires (04 §4) | ✅ branche | `tests/confront-engine.mjs` : 130 vérifications |
+| 8.12 | Valeurs : PV 6/5/4, bonus Gardien/Errant par table, limite de main | ⛔ | provisoires dans `worker/confront/config.mjs` ; proposition duel à 5 PV (voir EQUILIBRAGE.md) |
+| 8.13 | Récompenses de partie, anti-farm | ⛔ | le moteur calcule l'éligibilité ; montants et plafonds serveur à décider |
 
 ## 9. Technique, sécurité, performance (dossier §12, 04 §7)
 | # | Élément | État | Notes |

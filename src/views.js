@@ -31,21 +31,46 @@ function artIn(c) {
 }
 const thumb = (c, cls = "th") => `<span class="${cls}">${c && imgKey(c) ? artIn(c) : ""}</span>`;
 const nameOf = (c) => PEOPLE[c.who].name;
-const subOf = (c) => (c.skin ? c.title.replace("Skin ", "Skin ") : c.title);
+// chroma : une couleur nommée par perso, comme les chromas de LoL
+const CHROMAS = [["Rubis", "#e0314b"], ["Émeraude", "#1fae6a"], ["Saphir", "#2f6bff"], ["Améthyste", "#9b4dff"], ["Ambre", "#f0a020"], ["Obsidienne", "#3b3846"], ["Perle", "#cfc6b4"], ["Turquoise", "#18b8c2"]];
+const chromaOf = (who) => CHROMAS[hashOf(who) % CHROMAS.length];
+const subOf = (c) => (c.skin === "chroma" ? `Chroma ${chromaOf(c.who)[0]}` : c.title);
+// décor d'une carte personnalisée (Atelier Arcanique) : classes et éléments ajoutés, jamais par-dessus le visage
+const FOND_BG = {
+  nuit: (c) => `radial-gradient(1px 1px at 20% 30%, #fff9 50%, transparent), radial-gradient(1px 1px at 70% 20%, #fff7 50%, transparent), radial-gradient(1.5px 1.5px at 40% 75%, #fff8 50%, transparent), radial-gradient(1px 1px at 85% 60%, #fff6 50%, transparent), linear-gradient(170deg, ${c.c2}, ${c.c1} 70%)`,
+  degrade: (c) => `linear-gradient(170deg, ${c.c2}, ${c.c1} 72%)`,
+  aurore: (c) => `linear-gradient(160deg, transparent 20%, ${c.c2}55 35%, transparent 50%, ${c.c2}33 65%, transparent 80%), linear-gradient(175deg, ${c.c1}, #05080c)`,
+  washi: (c) => `repeating-linear-gradient(95deg, #ffffff08 0 2px, transparent 2px 7px), linear-gradient(170deg, ${c.c2}, ${c.c1} 75%)`,
+};
+function cosDeco(design, present) {
+  if (!design) return null;
+  const C = (sl) => (design[sl] ? COS_BY_ID[design[sl]] : null), f = C("cadre"), a = C("aura"), o = C("orn"), h = C("holo"), pa = C("part"), fo = C("fond"), pr = C("pres");
+  const kc = [], wrap = [], style = [];
+  const base = fo ? FOND_BG[fo.k](fo) : "linear-gradient(170deg, color-mix(in srgb, var(--rc) 26%, #17161d), color-mix(in srgb, var(--rc) 10%, #0e0d12) 70%)";
+  if (f) { kc.push("cz-cadre", "cz-cadre-" + f.k); style.push(`--zf1:${f.c1};--zf2:${f.c2}`, `background:${base} padding-box, ${f.k === "prisme" ? `conic-gradient(from var(--zang, 0deg), ${f.c1}, #ffd24d, ${f.c2}, #8a4dff, ${f.c1})` : `linear-gradient(135deg, ${f.c1}, ${f.c2} 45%, ${f.c1} 70%, ${f.c2})`} border-box`); }
+  else if (fo) style.push(`background:${base}`);
+  if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
+  if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
+  const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? "零" : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
+  // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
+  return { za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+}
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
-  return `<div class="kcw" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}"><div class="kc r-${c.rar} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
-    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};` : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
+  const dz = soon || locked ? null : cosDeco(o.design, o.present);
+  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}${dz?.za ? `--za:${dz.za};` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
+    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>
+    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}
   </div></div>`;
 }
-const cardFor = (c, o = {}) => cardHTML(c, { ...o, soon: !visible(c), locked: !has(c.id) });
+const myDesign = (id) => (has(id) ? designOfS(save, id) : null);
+const cardFor = (c, o = {}) => cardHTML(c, { design: myDesign(c.id), ...o, soon: !visible(c), locked: !has(c.id) });
 const icon = {
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
   lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
@@ -66,12 +91,16 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? ["神", "Légende"] : u
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
-  ["missions", "務", "Missions", toClaim()], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
-  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
+  ["missions", "務", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "華", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "対", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "店", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "召", "Sanctuaire"]] : []), ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
+  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["createur", "創", "Créateur"], ["branches", "枝", "Branches"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
   const cur = (v) => (view === v || (v === "wiki" && view === "carte") ? 'aria-current="page"' : "");
+  // barre du bas (téléphone) : les 5 endroits où l'on va le plus
+  const tb = $("tabbar"), tabs = [["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
+    featureOn(CONFIG, "confrontation") ? ["confront", "対", "Combat"] : ["pred", "予", "Prédictions", openPredCount()], ["profil", "我", "Profil", 0, "moi"]];
+  if (tb) tb.innerHTML = tabs.map(([v, k, l, n, p]) => `<button type="button" data-nav="${v}" ${p ? `data-p="${p}"` : ""} ${view === v ? 'aria-current="page"' : ""}><b aria-hidden="true">${k}</b>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("");
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>予 Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
@@ -147,7 +176,7 @@ function drawNotifs() {
 let heroIdx = 0, packTab = "free", heroT = null;
 function heroSlides() {
   const out = [];
-  const dp = dailyPackOf(), done = save.dailyPack === dayKey();
+  const dp = dailyPack(), done = save.dailyPack === dayKey() || dp.closed;
   out.push({ cls: "", eb: "Pack du jour · gratuit", title: dp.name.replace("Pack du jour · ", ""), txt: "Un booster offert chaque jour, thème différent, Épique garantie.",
     btns: `<button class="btn gold big" type="button" data-act="open-day" ${done ? "disabled" : ""}>${done ? "Reviens demain" : "Ouvrir le pack du jour"}</button><button class="btn big" type="button" data-act="see-pack" data-p="jour">Voir le booster</button>`,
     pool: poolFor(dp, CONFIG, ME) });
@@ -183,11 +212,11 @@ function qsHTML() {
   </div>`;
 }
 function packsForTab() {
-  if (packTab === "day") return [dailyPackOf(), ...packsNow().filter((p) => p.limited)];
+  if (packTab === "day") return [dailyPack(), ...packsNow().filter((p) => p.limited)];
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
-  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${PACK} cartes</span></div>`;
+  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
 }
 function selPack() {
   const list = packsForTab();
@@ -195,13 +224,21 @@ function selPack() {
   return list.find((p) => p.id === id) || list[0];
 }
 function boosterZone() {
-  const list = packsForTab(), pk = selPack(), pool = pk.daily ? poolFor(pk, CONFIG, ME) : poolOf(pk), k = pk.boost || 1;
+  const list = packsForTab(), pk = selPack(), pool = poolOf(pk), k = pk.boost || 1;
   const dayDone = save.dailyPack === dayKey(), shop = packTab === "shop";
-  const label = (p) => p.daily ? (dayDone ? "Demain" : "Gratuit") : p.limited ? "Limité" : shop ? `${PRICE} ◆` : "Gratuit";
+  // booster thématique pas encore ouvert : arrive avec un prochain épisode
+  const opensAt = (p) => packOpensAt(p, CONFIG, ME), soon = (p) => (opensAt(p) ? `Épisode ${opensAt(p)}` : "Bientôt");
+  const label = (p) => !packOpen(p) ? soon(p) : p.daily ? (dayDone ? "Demain" : "Gratuit") : p.limited ? "Limité" : shop ? `${PRICE} ◆` : "Gratuit";
+  const fill = packOpen(pk) ? mixFillOf(pk, CONFIG, ME) : [];
   let btn;
-  if (pk.daily) btn = `<button class="bigopen" type="button" data-act="open-day" ${dayDone ? "disabled" : ""}><b>Ouvrir</b><span>${dayDone ? "Déjà ouvert · reviens demain" : "Gratuit · 1 par jour"}</span></button>`;
+  if (!packOpen(pk)) btn = `<button class="bigopen" type="button" disabled><b>${pk.daily ? "Indisponible" : "Bientôt"}</b><span>${pk.daily ? "Aucun booster n'est encore ouvert" : opensAt(pk) ? `Arrive avec l'épisode ${opensAt(pk)}` : "Pas encore assez de persos"}</span></button>`;
+  else if (pk.daily) btn = `<button class="bigopen" type="button" data-act="open-day" ${dayDone ? "disabled" : ""}><b>Ouvrir</b><span>${dayDone ? "Déjà ouvert · reviens demain" : "Gratuit · 1 par jour"}</span></button>`;
   else if (shop) btn = `<button class="bigopen acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}><b>Acheter</b><span>${PRICE} ◆ · tu as ${fmtN(save.chakra)} ◆</span></button>`;
   else btn = `<button class="bigopen" type="button" data-act="open-pack" data-p="${pk.id}" ${save.free ? "" : "disabled"}><b>Ouvrir</b><span>${save.free ? `Gratuit · ${save.free} restant${save.free > 1 ? "s" : ""}` : `Prochain dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}`}</span></button>`;
+  // 2 boosters d'un coup : 10 cartes dans le coffre
+  if (packOpen(pk) && !pk.daily && !(shop && pk.limited)) btn += shop
+    ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="2" ${save.chakra < PRICE * 2 ? "disabled" : ""}><b>Acheter 2 · coffre</b><span>${fmtN(PRICE * 2)} ◆ · 10 cartes</span></button>`
+    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`;
   return `<section class="sec" id="boosters">
     <div class="sec-h"><h2>Choisis ton booster</h2></div>
     ${seg("packTab", [["free", "Gratuits"], ["day", "Du jour & limités", save.dailyPack !== dayKey()], ["shop", "Boutique"]], packTab, "gold")}
@@ -213,7 +250,8 @@ function boosterZone() {
           <div><b style="color:var(--acc)">${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
-        <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = pk.daily && r === "r" ? 1 : packChance(r, k); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
+        <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
+        ${fill.length ? `<p class="note">Pas encore de ${fill.map((r) => RAR[r].label).join(", ")} dans ce booster : ces raretés viennent du Mix, avec les mêmes chances.</p>` : ""}
         ${btn}
       </div>
     </div>
@@ -244,6 +282,7 @@ function viewBoosters() {
   return `<div class="wrap page">
     ${heroHTML()}
     ${qsHTML()}
+    ${hallHTML()}
     <div class="steps">
       <div><b>01</b><h3>Ouvre tes boosters</h3><p>Des boosters gratuits se rechargent toute la journée. L'essence en débloque d'autres, et le pack du jour est offert.</p></div>
       <div><b>02</b><h3>Complète les factions</h3><p>Chaque faction de l'anime est un album. Les doublons s'échangent au marché ou se recyclent en essence.</p></div>
@@ -293,7 +332,7 @@ function viewCollection() {
     <div class="flt"><label>Faction<select class="in" data-sel="colFac"><option value="">Toutes</option>${FACS().map((f) => `<option value="${f}" ${col.fac === f ? "selected" : ""}>${facLabel(f)}</option>`).join("")}</select></label>
       <label>Cartes<select class="in" data-sel="colOwn">${[["own", "Possédées"], ["missing", "Manquantes"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${col.own === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       <label>Tri<select class="in" data-sel="colSort">${[["num", "Numéro"], ["rar", "Rareté"], ["name", "Nom"]].map(([k, l]) => `<option value="${k}" ${col.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
-    ${list.length ? `<p class="mono mut" style="margin:0;font-size:13px">${list.length} carte${list.length > 1 ? "s" : ""}</p><div class="cgrid">${list.map((c) => { const o = own(c.id); return cardHTML(c, { soon: !visible(c), locked: !has(c.id), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true }); }).join("")}</div>`
+    ${list.length ? `<p class="mono mut" style="margin:0;font-size:13px">${list.length} carte${list.length > 1 ? "s" : ""}</p><div class="cgrid">${list.map((c) => { const o = own(c.id); return cardHTML(c, { soon: !visible(c), locked: !has(c.id), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true, design: myDesign(c.id) }); }).join("")}</div>`
       : empty(col.own === "own" && !stats().unique ? "Aucune carte pour l'instant. Ouvre ton premier booster !" : "Aucune carte ne correspond à ces filtres.", `<button class="btn sq" type="button" data-act="reset-col">Réinitialiser les filtres</button>`)}`}
   </div>`;
 }
@@ -357,11 +396,12 @@ function viewCard() {
       <h1>${esc(p.name)}</h1><p class="mono mut" style="margin:0">${p.kanji || ""} · ${noOf(c.id)} · ${esc(c.title)}</p></div></div>
     <div class="wrap page" style="padding-top:28px">
     <div class="wk-grid">
-      <div class="wk-card card">${cardHTML(c, { locked: !got, gold: !o.n && o.gold > 0 })}
+      <div class="wk-card card">${cardHTML(c, { locked: !got, gold: !o.n && o.gold > 0, design: myDesign(c.id) })}
         <div class="row" style="justify-content:space-between;width:100%"><span style="color:${R.color};font-weight:700;font-size:14px">${R.label} · ${got ? "possédée" : "non possédée"}</span><span class="mono mut" style="font-size:13px">${pct(chance)} / ${per}</span></div>
         <div class="row" style="width:100%">
           ${got ? `${DB && canShare ? `<button class="btn acc sm" type="button" data-sell="${c.id}">Vendre</button>` : ""}
             ${SRV ? `<button class="btn sm" type="button" data-show="${c.id}">${(save.showcase || []).includes(c.id) ? "★ Retirer de la vitrine" : "☆ Vitrine"}</button>` : ""}
+            <button class="btn sm" type="button" data-nav="atelier" data-p="${c.id}">飾 Personnaliser</button>
             ${o.n + o.gold > 1 ? `<button class="btn sm" type="button" data-dis="${c.id}" data-gold="${o.n > 1 ? "" : 1}">Désenchanter · +${cardValue(c.id, !(o.n > 1))} ◆</button>` : ""}
             ${canChat() ? `<button class="btn sm" type="button" data-act="chat-show" data-p="${c.id}">Montrer au comptoir</button>` : ""}
             <button class="btn sm" type="button" data-share="${c.id}" data-gold="${!o.n && o.gold ? 1 : ""}">Partager</button>`

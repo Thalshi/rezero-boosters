@@ -5,6 +5,28 @@
 
 ---
 
+## 2026-10-22 — Mise en production complète, design Arcane Néon
+- Tout déployé en production (fusion de `dev/re-zero-complet` dans `main`), toutes les nouveautés ouvertes, à la demande de Reichi. Point de restauration D1 noté avant.
+- Design « Arcane Néon » choisi parmi 4 propositions (Arcane, Néon Shinjuku, Encre et sceau, mélange) et appliqué à toute l'app, avec une barre de navigation en bas sur téléphone.
+- Créateur : Billy et Reichi ajoutent ou retouchent persos, cartes et cosmétiques depuis l'app, publiés directement, sans spoil, avec historique et notification à l'autre.
+- Confrontation : visuels finaux (25 cartes, emblèmes, fond de table), livret « Comment jouer » illustré, une branche par carte (variante en Épique et plus, réglable par Billy), deux camps sans Errant réglés à 50/50 par table.
+- Coffre : les cartes se dévoilent une par une après l'animation, comme sur Kyara. Bug corrigé : les auras étaient invisibles partout.
+- 22 suites de tests vertes (816 vérifications).
+
+## 2026-10-22 — Campagne de tests, illustrations, ouverture selon le nombre
+- Campagne de tests complète sur base isolée et prévisualisation sans installation (serveur du jeu dans le navigateur) : https://claude.ai/artifact/6xiA1siGGJxtffTESvFCrS. 8 bugs trouvés et corrigés, dont « openSheet is not defined » aussi présent en production.
+- Boutique refaite façon Boutique Discord ; clé du coffre au clic et coffre qui éclate ; Confrontation lisible (cartes illustrées, bandeau d'aide, PV) ; skins façon LoL.
+- Premier lot d'illustrations ChatGPT intégré (20 cartes, 8 emblèmes, 6 fonds de skins) ; 5 cartes attendent le lot 2.
+- Ouverture selon le nombre : ×1 une carte, ×5 une pochette, ×10 le coffre ; invocation ×10 (1 350 ◆, au moins une Épique) ; « Ouvrir 2 · coffre » pour les boosters ; portail supprimé.
+- 21 suites de tests vertes (769 vérifications). Rien en production.
+
+## 2026-10-22 — Jeu complet sur une branche
+- Accès Cloudflare D1 en lecture via les secrets réseau ; étapes 0 et 1 de l'optimisation déployées.
+- Audit et correction des boosters (Le Monde, Vilains, recyclage), 25 persos ajoutés à l'épisode 1 (161 cartes).
+- Prototype de l'Invocation validé : Portail scellé B + C, main qui touche, feinte de rareté.
+- Réalisé sur dev/re-zero-complet : Boutique, Sanctuaire, Atelier, carte vedette, coffre à 30 scénarios, galerie et labo admin, Défilé, vente avec design, Re Zéro Confrontation, synchro étape 2, interrupteurs.
+- 18 suites de tests vertes (575 vérifications) ; plan de mise en production et liste des décisions dans docs/.
+
 ## 2026-10-21 — Audit, sécurité et rôles
 - Audit complet du projet : deux failles critiques trouvées (import de sauvegarde falsifiée, votes modifiables après la réponse).
 - Corrigé et déployé : import limité à 50 cartes Communes ou Peu communes, votes validés par le serveur, paiement unique et seulement pour les votes faits à temps.

@@ -2,6 +2,10 @@
 // tient la collection et l'essence, et règle les ventes et les échanges. Le navigateur ne fait qu'afficher.
 import * as G from "./game.js";
 import { bumpRev } from "./sync.js";
+import { creationsRoute, ensureCreations } from "./creations-api.js";
+import { labRoute } from "./lab-api.js";
+import { defileRoute } from "./defile-api.js";
+import { confrontRoute, confrontLocked } from "./confront-api.js";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, message, extra = {}) => json({ error: message, ...extra }, status);
@@ -38,10 +42,12 @@ async function mutate(env, uid, fn) {
   }
   throw new Error("busy");
 }
+// carte vedette publique : la carte et son design, seulement si elle est encore dans la collection
+const featuredOf = (s) => (s.featured && G.hasCard(s, s.featured) ? { featured: s.featured, fd: G.designOfS(s, s.featured) } : { featured: null });
 async function publishStats(env, uid, s) {
   const st = G.statsS(s);
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'players', ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
-    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, t: Date.now() }), Date.now()).run();
+    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), t: Date.now() }), Date.now()).run();
   await bumpRev(env, "players");
 }
 async function getConfig(env) {
@@ -239,6 +245,7 @@ const marketBlock = (s) => `Le marché et les échanges s'ouvrent après ${G.MAR
 export async function gameRoute(req, env, user, path) {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   try {
+    await ensureCreations(env); // persos, cartes et cosmétiques créés depuis l'app
     const chatRes = await chatRoute(env, user, path, body);
     if (chatRes) return chatRes;
     if (path === "/api/game/admin/audit" || path === "/api/game/dev/audit") {
@@ -256,10 +263,18 @@ export async function gameRoute(req, env, user, path) {
     }
     await ensurePlayer(env, user, null);
     const cfg = await getConfig(env);
+    const creaRes = await creationsRoute(env, user, path, body, { notify, cfg });
+    if (creaRes) return creaRes;
+    const labRes = await labRoute(env, user, path, body, cfg);
+    if (labRes) return labRes;
+    const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
+    if (defRes) return defRes;
+    const cfRes = await confrontRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
+    if (cfRes) return cfRes;
 
     if (path === "/api/game/open") {
       const r = await mutate(env, user.id, (s, now) => {
-        const out = G.takeAndOpenS(s, body.pack, !!body.paid, cfg, user.id, rng, now);
+        const out = G.openManyS(s, body.pack, !!body.paid, +body.n === 2 ? 2 : 1, cfg, user.id, rng, now);
         return out.error ? { abort: true, error: out.error } : out;
       });
       if (r.error) return fail(400, r.error);
@@ -281,6 +296,7 @@ export async function gameRoute(req, env, user, path) {
     if (path === "/api/game/disenchant") {
       const r = await mutate(env, user.id, (s, now) => {
         if (G.ownOf(s, body.id)[body.gold ? "gold" : "n"] <= (body.keepLast ? 1 : 0)) return { abort: true, error: "Tu n'as plus d'exemplaire à désenchanter." };
+        if (confrontLocked(s, body.id)) return { abort: true, error: "Cette carte est engagée dans une partie de Confrontation en cours." };
         const v = G.disenchantS(s, body.id, !!body.gold, now);
         return v ? { value: v } : { abort: true, error: "Carte introuvable." };
       });
@@ -290,6 +306,31 @@ export async function gameRoute(req, env, user, path) {
       const r = await mutate(env, user.id, (s, now) => { const o = G.craftS(s, cfg, user.id, rng, now); return o.error ? { abort: true, error: o.error } : o; });
       if (r.error) return fail(400, r.error);
       await postFeed(env, user.id, [r.card]);
+      return json(r);
+    }
+    // --- cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique, carte vedette ---
+    if (path === "/api/game/shop/buy") {
+      if (!G.featureOn(cfg, "boutique")) return fail(403, "La Boutique Arcanique n'est pas encore ouverte.");
+      const r = await mutate(env, user.id, (s) => { const o = G.buyCosmeticS(s, String(body.id || "")); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
+    if (path === "/api/game/summon") {
+      if (!G.featureOn(cfg, "sanctuaire")) return fail(403, "Le Sanctuaire des Invocations n'est pas encore ouvert.");
+      // le tirage est fait ici, avant toute animation : le navigateur ne fait que montrer le résultat
+      const r = await mutate(env, user.id, (s, now) => { const o = G.summonS(s, G.SUMMON_COUNTS.includes(+body.n) ? +body.n : 0, rng, now); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
+    if (path === "/api/game/design") {
+      const r = await mutate(env, user.id, (s) => { const o = G.saveDesignS(s, String(body.card || ""), body.design || {}); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
+    if (path === "/api/game/featured") {
+      const id = body.card ? String(body.card) : null;
+      const r = await mutate(env, user.id, (s) => { if (id && !G.hasCard(s, id)) return { abort: true, error: "Tu n'as pas cette carte." }; s.featured = id; return {}; });
+      if (r.error) return fail(400, r.error);
       return json(r);
     }
     if (path === "/api/game/claim") {
@@ -339,12 +380,18 @@ export async function gameRoute(req, env, user, path) {
       const lid = newId();
       const r = await mutate(env, user.id, (s, now) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
-        if (!G.CARD_BY_ID[body.id] || !G.removeCardS(s, body.id, !!body.gold)) return { abort: true, error: "Tu n'as plus cette carte." };
+        if (!G.CARD_BY_ID[body.id] || !G.hasCard(s, body.id)) return { abort: true, error: "Tu n'as plus cette carte." };
+        if (confrontLocked(s, body.id)) return { abort: true, error: "Cette carte est engagée dans une partie de Confrontation en cours." };
+        // avec son design : les instances uniques partent sous séquestre avec la carte
+        const dz = body.withDesign && G.featureOn(cfg, "marcheDesign") ? G.takeDesignForSaleS(s, body.id) : null;
+        if (!G.removeCardS(s, body.id, !!body.gold)) return { abort: true, error: "Tu n'as plus cette carte." };
         G.trackS(s, "sell", 1, now);
-        return { lid };
+        return { lid, dz };
       });
       if (r.error) return fail(400, r.error);
-      await writeDoc(env, "market", lid, { seller: user.id, card: body.id, gold: !!body.gold, price, status: "open", t: Date.now() });
+      const dz = r.dz && (r.dz.inst.length || Object.keys(r.dz.acct).length) ? r.dz : null;
+      delete r.dz;
+      await writeDoc(env, "market", lid, { seller: user.id, card: body.id, gold: !!body.gold, price, status: "open", t: Date.now(), ...(dz ? { dz } : {}) });
       return json(r);
     }
     if (path === "/api/game/market/buy") {
@@ -365,11 +412,12 @@ export async function gameRoute(req, env, user, path) {
       const r = await mutate(env, user.id, (s, now) => {
         if (s.chakra < l.price) return { abort: true, error: "Plus assez d'essence." };
         s.chakra -= l.price; G.addCardS(s, l.card, l.gold, now);
+        if (l.dz?.inst?.length) G.giveDesignS(s, l.card, l.dz.inst, now);
         return {};
       });
       if (r.error) { await writeDoc(env, "market", body.lid, l); return fail(400, r.error); }
-      await mutate(env, l.seller, (s, now) => { s.chakra += l.price; s.sales = (s.sales || 0) + 1; G.trackS(s, "sold", 1, now); return {}; }).catch(() => {});
-      await notify(env, l.seller, "sold", `${user.name} a acheté ta carte ${cardName(l.card)}${l.gold ? " dorée" : ""} : +${l.price} ◆`, { go: "market" });
+      await mutate(env, l.seller, (s, now) => { s.chakra += G.marketNet(l.price); s.sales = (s.sales || 0) + 1; G.trackS(s, "sold", 1, now); return {}; }).catch(() => {});
+      await notify(env, l.seller, "sold", `${user.name} a acheté ta carte ${cardName(l.card)}${l.gold ? " dorée" : ""} : +${G.marketNet(l.price)} ◆`, { go: "market" });
       return json({ ...r, card: l.card, price: l.price });
     }
     if (path === "/api/game/market/cancel") {
@@ -380,7 +428,7 @@ export async function gameRoute(req, env, user, path) {
         .bind(JSON.stringify({ ...l, status: "cancelled" }), Date.now(), "market/" + body.lid, doc.version).run();
       if (!res.meta.changes) return fail(409, "Cette carte vient d'être vendue.");
       await bumpRev(env, "market");
-      const r = await mutate(env, user.id, (s, now) => { G.addCardS(s, l.card, l.gold, now); return {}; });
+      const r = await mutate(env, user.id, (s, now) => { G.addCardS(s, l.card, l.gold, now); if (l.dz?.inst?.length) G.giveDesignS(s, l.card, l.dz.inst, now); return {}; });
       return json(r);
     }
 
@@ -398,6 +446,7 @@ export async function gameRoute(req, env, user, path) {
       const r = await mutate(env, user.id, (s) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
         if (s.chakra < chakra) return { abort: true, error: "Pas assez d'essence." };
+        for (const it of give) { if (confrontLocked(s, it.id)) return { abort: true, error: "Une de ces cartes est engagée dans une partie de Confrontation en cours." }; }
         for (const it of give) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
         s.chakra -= chakra;
         return { tid };
@@ -428,6 +477,7 @@ export async function gameRoute(req, env, user, path) {
       }
       const r = await mutate(env, user.id, (s, now) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
+        for (const it of t.want) { if (confrontLocked(s, it.id)) return { abort: true, error: "Une de ces cartes est engagée dans une partie de Confrontation en cours." }; }
         for (const it of t.want) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
         for (const it of t.give) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now);
         s.chakra += t.chakra; s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now);
@@ -445,7 +495,10 @@ export async function gameRoute(req, env, user, path) {
       if (!row) return fail(404, "Profil introuvable.");
       const s = G.normalizeSave(JSON.parse(row.data));
       const owned = Object.fromEntries(Object.entries(s.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
-      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [] });
+      // designs visibles des cartes exposées (vitrine et carte vedette) ; rien d'autre de l'inventaire n'est public
+      const shown = [...new Set([...(s.showcase || []), ...(s.featured ? [s.featured] : [])])];
+      const designs = Object.fromEntries(shown.map((id) => [id, G.designOfS(s, id)]).filter(([, d]) => d));
+      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs, titles: s.titles || [] });
     }
     if (path === "/api/game/showcase") {
       const ids = (Array.isArray(body.ids) ? body.ids : []).filter((id) => G.CARD_BY_ID[id]).slice(0, 4);

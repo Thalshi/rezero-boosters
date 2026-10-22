@@ -1,6 +1,6 @@
 // Parcours réels dans le navigateur, à plusieurs joueurs : boosters, prédictions, marché, échanges,
 // comptoir, notifications, menus admin et dev. Mesure aussi le délai d'affichage chez l'autre joueur.
-import { startServer, reporter, playwright, IDS, sleep } from "./lib.mjs";
+import { startServer, reporter, playwright, IDS, sleep, grant } from "./lib.mjs";
 
 const srv = await startServer({ port: +(process.env.PORT || 8804) });
 const t = reporter("Interface · parcours multijoueur");
@@ -34,6 +34,7 @@ try {
   await R.click("[data-act=skip]"); await sleep(300);
   t.check("résumé : 5 cartes", (await R.$$(".summary .kcw")).length === 5);
   await R.click("[data-act=stage-close]"); await sleep(300);
+  grant(srv, [IDS.admin, IDS.dev, IDS.p1].map((id) => ({ id: "d" + id })), { free: 20 });
   for (const p of [B, R, T]) for (let i = 0; i < 10; i++) await p.api("open", { pack: "mix" });
   for (const p of [B, R, T]) await p.evaluate(() => srv("state"));
 

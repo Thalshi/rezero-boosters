@@ -4,6 +4,7 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 const SEG = {
   packTab: (v) => { packTab = v; }, colTab: (v) => { col.tab = v; }, colRar: (v) => { col.rar = v; }, colFac: (v) => { col.fac = col.fac === v ? "" : v; col.tab = "cards"; col.own = "all"; },
   mTab: (v) => { marketTab = v; }, mkRar: (v) => { mk.rar = v; }, mkWin: (v) => { mk.win = +v; }, achF: (v) => { achF = v; }, rankTab: (v) => { boardTab = v; },
+  ...Z_SEG, ...ADMIN_SEG,
 };
 document.addEventListener("click", (e) => {
   const t = e.target;
@@ -39,14 +40,18 @@ document.addEventListener("click", (e) => {
   const cBtn = t.closest("[data-cancel]"); if (cBtn) { cBtn.disabled = true; return cancelSale(cBtn.dataset.cancel).then(() => { $("overlay").hidden = true; }); }
   const ab = t.closest("[data-act]"), act = ab?.dataset.act;
   if (act === "open-day") return startOpening(false, "jour");
-  if (act === "open-pack") return startOpening(!!ab.dataset.paid, ab.dataset.p);
-  if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack);
+  if (act === "open-pack") return startOpening(!!ab.dataset.paid, ab.dataset.p, +ab.dataset.n || 1);
+  if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack, +ab.dataset.n || 1);
+  if (act === "summon-again") { const n = opening?.n || 1; closeStage(); return zSummon(n); }
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
   if (act === "pool") return openPool(ab.dataset.p);
-  if (act === "skip") { opening.phase = "done"; return drawOpening(); }
+  if (act === "skip") { Coffre.stop(); opening.phase = "done"; return drawOpening(); }
+  if (act === "cf-next") return Coffre.next();
+  if (act === "cf-sound") return Coffre.toggleSound();
   if (act === "stage-back") { if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }
+  if (act === "to-atelier") { closeStage(); return nav("atelier"); }
   if (act === "dev-refresh") { devData.stats = null; devData.audit = null; draw(); return loadDev(true); }
   if (act === "recycle") return recycle();
   if (act === "craft") return craft();
@@ -63,7 +68,7 @@ document.addEventListener("click", (e) => {
 function advanceCard() {
   const o = opening;
   if (!o.flipped) { o.flipped = true; return drawOpening(); }
-  if (o.i < PACK - 1) { o.i++; o.flipped = false; return drawOpening(); }
+  if (o.i < o.cards.length - 1) { o.i++; o.flipped = false; return drawOpening(); }
   o.phase = "done"; drawOpening();
 }
 document.addEventListener("submit", (e) => {

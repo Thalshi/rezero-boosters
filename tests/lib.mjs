@@ -40,6 +40,9 @@ export const IDS = {
  * (ex. tests/instrumented-worker.mjs pour la mesure) sans modifier le code du jeu.
  */
 export async function startServer({ port, script = null, root = ROOT, persist = null, keep = false } = {}) {
+  // un ancien serveur encore lancé sur ce port fausserait tout (vieille base) : on refuse de démarrer
+  const busy = await fetch(`http://localhost:${port}/api/me`).then(() => true).catch(() => false);
+  if (busy) throw new Error(`Le port ${port} est déjà utilisé (un ancien serveur de test tourne encore ?). Arrête-le avant de relancer.`);
   persist = persist || mkdtempSync(join(tmpdir(), "rezero-test-"));
   const args = ["dev", ...(script ? [script] : []), "--local", "--port", String(port), "--persist-to", persist,
     "--var", "DEV_LOGIN:1", "--var", `ADMIN_IDS:${IDS.admin}`, "--var", `DEV_IDS:${IDS.dev}`];
@@ -99,6 +102,18 @@ export function reporter(title) {
   };
   console.log(`\n===== ${title}`);
   return out;
+}
+// Donne des boosters gratuits ou de l'essence à des joueurs de test (base locale uniquement),
+// pour les scénarios qui en demandent plus que la réserve normale.
+export function grant(srv, players, { free, chakra } = {}) {
+  for (const p of [].concat(players)) {
+    const sets = [free != null && `'$.free', ${+free}`, chakra != null && `'$.chakra', ${+chakra}`].filter(Boolean).join(", ");
+    // la base locale peut être occupée par le serveur (SQLITE_BUSY) : on réessaie quelques fois
+    for (let i = 0; ; i++) {
+      try { srv.sql(`UPDATE players SET data = json_set(data, ${sets}) WHERE uid = '${p.id}'`); break; }
+      catch (e) { if (i >= 5 || !String(e.stderr || e.message).includes("SQLITE_BUSY")) throw e; Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 400); }
+    }
+  }
 }
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const total = (s) => Object.values(s.owned || {}).reduce((a, o) => a + o.n + o.gold, 0);

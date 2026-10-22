@@ -6,8 +6,8 @@ function lsHTML(l, mine) {
   const vis = visible(c), wished = wishSet().has(l.card) && !has(l.card);
   const st = l.status === "open" ? "En vente" : l.status === "sold" ? "Vendue" : "Retirée";
   return `<div class="ls ${wished ? "wish" : ""}" data-listing="${l.id}" role="button" tabindex="0">
-    ${cardHTML(c, { soon: !vis, gold: l.gold })}
-    <div class="ls-r"><span class="pill">Prix fixe</span><span class="ls-st ${l.status === "open" ? "" : "end"}">${st}</span></div>
+    ${cardHTML(c, { soon: !vis, gold: l.gold, design: listingDesign(l) })}
+    <div class="ls-r"><span class="pill">${l.dz?.inst?.length ? "Avec design" : "Prix fixe"}</span><span class="ls-st ${l.status === "open" ? "" : "end"}">${st}</span></div>
     <div class="ls-p">${fmtN(l.price)} <span class="dia"></span></div>
     <div class="ls-m"><span>${mine ? ago(l.t) : `<span data-uid="${l.seller}">…</span>`}</span>${pctMed(l)}</div>
   </div>`;
@@ -31,7 +31,7 @@ function viewMarket() {
     body = mine.length ? `<div class="mk-grid">${mine.map((l) => lsHTML(l, true)).join("")}</div>` : empty("Tu n'as rien mis en vente.", `<button class="btn" type="button" data-seg="mTab" data-v="sell">Vendre une carte</button>`);
   } else if (marketTab === "sell") {
     const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => (own(b.id).n + own(b.id).gold) - (own(a.id).n + own(a.id).gold) || RAR[b.rar].rank - RAR[a.rar].rank);
-    body = `<p class="note">Touche une carte pour la mettre en vente. Tes doublons sont en premier.</p>${mine.length ? `<div class="cgrid">${mine.map((c) => { const o = own(c.id); return `<div class="cell" data-sell="${c.id}" role="button" tabindex="0">${cardHTML(c, { gold: !o.n && o.gold > 0, count: o.n + o.gold })}<span class="cap"><span>${o.n + o.gold > 1 ? "Doublon" : "Dernier exemplaire"}</span><span>${cote(c.id) ? `~${cote(c.id)} ◆` : ""}</span></span></div>`; }).join("")}</div>` : empty("Ouvre des boosters pour avoir des cartes à vendre.")}`;
+    body = `<p class="note">Touche une carte pour la mettre en vente. Tes doublons sont en premier.</p>${mine.length ? `<div class="cgrid">${mine.map((c) => { const o = own(c.id); return `<div class="cell" data-sell="${c.id}" role="button" tabindex="0">${cardHTML(c, { gold: !o.n && o.gold > 0, count: o.n + o.gold, design: myDesign(c.id) })}<span class="cap"><span>${o.n + o.gold > 1 ? "Doublon" : "Dernier exemplaire"}</span><span>${cote(c.id) ? `~${cote(c.id)} ◆` : ""}</span></span></div>`; }).join("")}</div>` : empty("Ouvre des boosters pour avoir des cartes à vendre.")}`;
   } else {
     const q = mk.q.trim().toLowerCase(), w = wishSet();
     let open = shared.market.filter((l) => l.status === "open" && byId[l.card] && l.seller !== ME)
@@ -63,7 +63,8 @@ function openListing(lid) {
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Annonce">
     <div class="sheet-h"><h2>${vis ? esc(nameOf(c)) : "???"}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b">
-      ${cardHTML(c, { soon: !vis, gold: l.gold })}
+      ${cardHTML(c, { soon: !vis, gold: l.gold, design: listingDesign(l), present: true })}
+      ${listingDzHTML(l)}
       ${vis ? `<button class="link" type="button" data-nav="carte" data-p="${c.id}" style="align-self:center">Voir la fiche</button>` : ""}
       <div class="row"><span class="pill">Prix fixe</span><b style="color:${RAR[c.rar].color};font-size:14px">${RAR[c.rar].label}${l.gold ? " · dorée" : ""}</b><span class="note">vendu par ${mine ? "toi" : `<b data-uid="${l.seller}">…</b>`}</span>
         <span class="pill ${owned ? "" : "ok"}" style="margin-left:auto">${owned ? "Tu l'as déjà" : "Tu ne l'as pas encore"}</span></div>
@@ -80,15 +81,33 @@ function openListing(lid) {
   fillNames();
 }
 const marketBlock2 = () => `Le marché s'ouvre après ${MARKET_MIN_OPENED} boosters ouverts (tu en es à ${save.opened}).`;
+// design d'une annonce : les instances incluses, plus les effets de compte du vendeur en aperçu
+const listingDesign = (l) => (l.dz ? { ...l.dz.acct, ...Object.fromEntries(l.dz.inst.map((x) => [x.slot, x.c])) } : null);
+function listingDzHTML(l) {
+  if (!l.dz) return "";
+  const inc = l.dz.inst.map((x) => COS_BY_ID[x.c]).filter(Boolean), prev = Object.values(l.dz.acct).map((id) => COS_BY_ID[id]).filter(Boolean);
+  return `<div class="dz-box">${inc.length ? `<p><b>Inclus avec la carte</b> (instances uniques) : ${inc.map((c) => `<span class="ti" style="color:${RAR[c.rar].color}">${esc(c.name)}</span>`).join(" ")}</p>` : ""}
+    ${prev.length ? `<p class="note">Aperçu seulement, non transféré (cosmétiques de compte du vendeur) : ${prev.map((c) => esc(c.name)).join(", ")}</p>` : ""}</div>`;
+}
+function sellDesignHTML(id) {
+  const d = cosOf(save).designs[id]; if (!d || !featureOn(CONFIG, "marcheDesign")) return "";
+  const inst = Object.entries(d).filter(([, r]) => r.startsWith("i:")).map(([, r]) => refCos(save, r)).filter(Boolean);
+  const acct = Object.entries(d).filter(([, r]) => r.startsWith("a:")).map(([, r]) => refCos(save, r)).filter(Boolean);
+  if (!inst.length && !acct.length) return "";
+  return `<label class="zopt-line"><input type="checkbox" id="sellDz" ${inst.length ? "checked" : "disabled"}> Vendre avec son design</label>
+    <div class="dz-box">${inst.length ? `<p>Partiront avec la carte : ${inst.map((c) => `<span class="ti" style="color:${RAR[c.rar].color}">${esc(c.name)}</span>`).join(" ")}</p>` : `<p class="note">Aucune instance unique sur ce design : rien à transférer.</p>`}
+    ${acct.length ? `<p class="note">Restent à toi (cosmétiques de compte, montrés en aperçu à l'acheteur) : ${acct.map((c) => esc(c.name)).join(", ")}</p>` : ""}</div>`;
+}
 function openSell(id) {
   const c = byId[id], o = own(id), p = PEOPLE[c.who], gold = !o.n && o.gold > 0;
   if (!DB || !canShare) return toast("Connecte-toi avec Discord pour vendre au marché.");
   const suggest = cote(id) || RAR[c.rar].chakra * 3;
   $("overlay").innerHTML = `<form class="sheet" id="sellForm" data-id="${id}" data-gold="${gold ? 1 : ""}" aria-label="Vendre ${esc(p.name)}">
     <div class="sheet-h"><h2>Vendre ${esc(p.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b">${cardHTML(c, { gold })}
+    <div class="sheet-b">${cardHTML(c, { gold, design: myDesign(c.id) })}
       <p class="note" style="text-align:center">Tu en as ${gold ? o.gold : o.n}. La carte quitte ta collection pendant la vente. Tu touches l'essence dès qu'un joueur l'achète.</p>
       <div class="kv3"><div><small>Cote (médiane 30 j)</small><b>${cote(id) ? `${fmtN(cote(id))} ◆` : "—"}</b></div><div><small>Recyclage</small><b>${RAR[c.rar].chakra} ◆</b></div></div>
+      ${sellDesignHTML(id)}
       <label class="field" for="sellPrice">Prix en essence ◆<input id="sellPrice" type="number" inputmode="numeric" min="5" max="9999" step="1" value="${suggest}" required></label>
       <button class="btn acc big block" type="submit">Mettre en vente</button></div>
   </form>`;
@@ -250,7 +269,9 @@ async function loadProfile(uid) {
 }
 function selfProfile() {
   const owned = Object.fromEntries(Object.entries(save.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
-  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [] };
+  const featured = save.featured && has(save.featured) ? save.featured : null;
+  const designs = Object.fromEntries([...(save.showcase || []), ...(featured ? [featured] : [])].map((id) => [id, myDesign(id)]).filter(([, d]) => d));
+  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs, titles: save.titles || [] };
 }
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;
@@ -268,14 +289,16 @@ function viewProfil() {
       <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
       <p class="eyebrow">Collectionneur · コレクター</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
+      ${p.titles?.length ? `<div class="row def-titles">${p.titles.map((x) => `<span class="pill out" style="border-color:var(--gold);color:var(--gold)">華 ${esc(x)}</span>`).join("")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
       <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
+    ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette · 看板</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette · 看板</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
-      ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
+      ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
     <section class="sec"><h2>Collection</h2><p class="note">${st.unique} cartes uniques</p>
       <div class="rarbars">${RANKS.slice().reverse().map((k) => `<div style="--c:${RAR[k].color}"><small><i></i>${RAR[k].label}</small><b>${ids.filter((id) => byId[id].rar === k).length}</b></div>`).join("")}</div></section>
     <section class="sec"><h2>${isMe ? "Mes factions" : "Ses factions"}</h2><div class="sbars">${facs.map(([f, n, t]) => `<div class="sbar" style="cursor:default"><span>${facLabel(f)}</span><span class="m"><i style="width:${n / t * 100}%"></i></span><span class="v">${n}/${t}</span></div>`).join("")}</div></section>
@@ -378,6 +401,10 @@ function viewAdmin() {
   const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
   return `<div class="wrap page" style="max-width:900px">${head("Admin · 管理", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
+    <div class="card sec"><h3>Créateur</h3><p class="note">Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou crée des cosmétiques. Publié tout de suite.</p><button class="btn gold" type="button" data-nav="createur">Ouvrir le Créateur</button></div>
+    <div class="card sec"><h3>Confrontation : branches des cartes</h3><p class="note">Chaque carte a une branche (son pouvoir en partie), avec une variante possible selon la rareté. Une proposition est en place : à toi de l'ajuster.</p><button class="btn" type="button" data-nav="branches">Régler les branches</button></div>
+    <div class="card sec"><h3>Nouveautés ouvertes aux joueurs</h3><p class="note">Une nouveauté fermée disparaît du menu et le serveur refuse ses actions. Rien n'est perdu : on la rouvre quand on veut.</p>
+      <div class="feat-list">${FEATURES.map(([k, l]) => `<label class="zopt-line"><input type="checkbox" data-feat="${k}" ${featureOn(CONFIG, k) ? "checked" : ""}> ${l}</label>`).join("")}</div></div>
     ${SRV ? `<form class="card sec" id="annForm"><h3>Annonce</h3><p class="note">Elle s'affiche au comptoir et en notification pour tout le QG.</p><textarea class="in" id="annText" rows="2" maxlength="300" placeholder="Ex. : l'épisode 2 sort samedi à 18 h !"></textarea><button class="btn acc" type="submit">Envoyer l'annonce</button></form>` : ""}
     <section class="sec"><h2>Joueurs · ${ids.length}</h2>${ids.length ? `<div class="adm-list">${ids.map((uid) => `<div class="adm-row">${who(uid)}
         <select aria-label="Épisode atteint" data-prog="${uid}"><option value="" ${CONFIG.progress[uid] == null ? "selected" : ""}>Par défaut (${epLabel(CONFIG.def)})</option>${epOptions(CONFIG.progress[uid])}</select>
@@ -427,7 +454,7 @@ function openBonus(uid) {
 
 // ===== Liste des persos d'un booster =====
 function openPool(id) {
-  const pk = id === "jour" ? dailyPackOf() : packOf(id), pool = id === "jour" ? poolFor(pk, CONFIG, ME) : poolOf(pk);
+  const pk = id === "jour" ? dailyPack() : packOf(id), pool = poolOf(pk);
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Persos du booster" style="max-width:760px"><div class="sheet-h"><h2>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name} · ${pool.length} cartes</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b"><div class="cgrid">${pool.sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank).map((c) => cardFor(c, { click: true })).join("")}</div></div></div>`;
   $("overlay").hidden = false;
@@ -438,16 +465,17 @@ const glowOf = (o) => { const best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank
 function drawOpening() {
   const o = opening, el = $("stage");
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
-  const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button><span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span><span style="width:40px"></span></div>`;
+  const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">験 Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
+  if ((Coffre.isChest(o.pk) || o.scenario) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
     el.innerHTML = `${top}<section class="stage">
       ${chest ? `<button class="chest" type="button" id="pack" aria-label="Ouvrir le coffre"><span class="lid"></span><span class="box"></span><span class="gem"></span></button>`
         : `<div id="pack" role="button" tabindex="0" aria-label="Ouvrir le booster">${bstHTML(o.pk)}</div>`}
       <div class="floor"></div>
-      <p class="hint">${o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
-      <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : "Tire le booster vers le haut (ou touche-le)"}</p>
-      <p class="sub">Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus</p></section>`;
+      <p class="hint">${o.pk.cos ? `<b>${o.pk.name}</b> · ${o.cards.length} objets` : o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
+      <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : o.pk.cos ? "Tire la pochette vers le haut (ou touche-la)" : "Tire le booster vers le haut (ou touche-le)"}</p>
+      <p class="sub">${o.pk.cos ? `Mythique garantie dans ${Math.max(0, SUMMON_PITY_M - cosOf(save).sinceM)} invocations au plus` : `Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus`}</p></section>`;
     const p = $("pack"); if (!chest) bindPull(p);
     return;
   }
@@ -459,20 +487,29 @@ function drawOpening() {
       <div class="reveal ${o.flipped ? "on" : ""} ${big ? "big" : ""}" style="--rc:${rc};position:relative"><span class="rays"></span>
         <button class="reveal-card ${o.flipped ? "on" : ""}" type="button" id="revealBtn" aria-label="${o.flipped ? "Carte suivante" : "Retourner la carte"}"><div class="in">
           <div class="face"><div class="cardback"></div></div>
-          <div class="face front">${o.flipped ? cardHTML(x.c, { gold: x.gold, isNew: x.isNew }) : ""}</div></div></button></div>
-      <p class="hint">${o.flipped ? `<b style="color:${rc}">${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `Carte ${o.i + 1} sur ${PACK} — touche pour retourner`}</p>
+          <div class="face front">${o.flipped ? itemHTML(x) : ""}</div></div></button></div>
+      <p class="hint">${o.flipped ? `<b style="color:${rc}">${x.cos ? `${esc(x.cos.name)} · ` : ""}${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `${o.pk.cos ? "Objet" : "Carte"} ${o.i + 1} sur ${o.cards.length} — touche pour retourner`}</p>
       <button class="btn" type="button" data-act="skip">Tout voir</button></section>`;
     return;
   }
   const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
   el.innerHTML = `${top}<section class="stage">
-    <p class="eyebrow gold">Résultat</p><h2>${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true })).join("")}</div>
+    <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
     <div class="row" style="justify-content:center">
-      ${o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
-      <button class="btn big" type="button" data-act="to-col">Ma collection</button>
-      ${RAR[best.c.rar].rank >= 3 || best.gold ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
+      ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
+        : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
+        : o.pk.daily ? "" : againBtn(o)}
+      ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
+      ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
       <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
+}
+// « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
+function againBtn(o) {
+  const n = o.n || 1;
+  if (save.free) { const k = Math.min(n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>`; }
+  const k = n > 1 && save.chakra >= PRICE * 2 ? 2 : 1;
+  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>`;
 }
 function bindPull(p) {
   let y0 = null, dy = 0;
@@ -495,7 +532,7 @@ async function tearPack() {
   }
   opening.phase = "cards"; drawOpening();
 }
-function closeStage() { opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; draw(); }
+function closeStage() { Coffre.stop(); opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
   const c = byId[x.id];
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Objet déverrouillé"><div class="sheet-h"><h2>Objet déverrouillé !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
@@ -557,7 +594,7 @@ function draw() {
   $("view").innerHTML = (VIEWS[view] || viewBoosters)();
   if (opening) drawOpening(); else $("stage").hidden = true;
   $("chatFab").hidden = chat.open;
-  fillNames();
+  fillNames(); afterViews();
 }
 function subscribeExtra() {
   if (!DB || subscribeExtra.done) return; subscribeExtra.done = true;

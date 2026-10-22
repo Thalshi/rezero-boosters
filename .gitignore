@@ -2,3 +2,4 @@ node_modules/
 .wrangler/
 tests/node_modules/
 tests/reports/
+tools/preview/dist/

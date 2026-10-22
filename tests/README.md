@@ -18,6 +18,8 @@ Si wrangler ou playwright sont déjà installés ailleurs : `WRANGLER=/chemin/ve
 
 | Fichier | Ce qu'il vérifie |
 |---|---|
+| `boosters.mjs` | Sans serveur, sur chaque épisode et des réglages extrêmes : aucun booster vide, jamais de rareté plus haute que celle tirée, chances réelles égales aux chances affichées, rotation du pack du jour sur deux ans, pity, dorées, rendement du recyclage, Saison 1 non achetable, constantes exportées vers le serveur |
+| `simulation-economie.mjs` | Pas un test : progression de joueurs occasionnels, réguliers et très actifs à 7, 30, 90 et 180 jours avec les vraies règles (`node tests/simulation-economie.mjs`) |
 | `api-securite.mjs` | Import de sauvegarde (falsifiée, légitime, ancien chemin), votes de prédiction (avant/après clôture et réponse), réclamations simultanées, contrôle des comptes |
 | `api-economie.mjs` | Boosters et concurrence, marché (vente, double achat, retrait), échanges (course accepter/annuler, déséquilibre, refus), comptoir, notifications, annonces |
 | `api-confidentialite.mjs` | Accès sans connexion, rôles admin/dev, documents réservés, échanges privés, votes, anciennes sauvegardes, avis, bugs, notifications, profils publics |

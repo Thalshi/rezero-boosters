@@ -39,12 +39,15 @@ function parsePath(path, wantDoc) {
 // votes : écrits par le serveur du jeu ; chacun lit le sien, l'admin lit tout.
 // config, predq, pred : écriture réservée à l'admin. avis : le sien. bugs : lus par l'admin seulement.
 // feed, players, market, trades : écrits seulement par le serveur du jeu (game-api.js).
+// lab, qa : jamais accessibles ici (routes dédiées, réservées à l'admin).
 const SERVER_ONLY = ["feed", "players", "market", "trades"];
 function allowed(user, segs, op) {
   if (!user) return false;
   const write = op !== "read" && op !== "list";
   const top = segs[0];
   if (SERVER_ONLY.includes(top)) return !write;
+  // labo admin et contrôle qualité : seulement par leurs routes (/api/game/lab, /api/game/qa), jamais par l'API des documents
+  if (top === "lab" || top === "qa" || top === "defile" || top === "confront" || top === "confrontcfg" || top === "creations" || top === "creaimg") return false;
   // ancienne sauvegarde du compte : lisible par son joueur, plus modifiable (le serveur tient la partie)
   if (top === "data" && segs[1] === "users") return segs.length >= 3 && segs[2] === user.id && !write;
   // votes : écrits seulement par le serveur (/api/game/vote vérifie que la question est ouverte)
@@ -259,6 +262,8 @@ export default {
     const user = await currentUser(req, env);
     if (p === "/api/me") return user ? json(user) : fail(401, "not_signed_in", "Pas connecté.");
     if (!user) return fail(401, "not_signed_in", "Connecte-toi avec Discord.");
+    // synchro (étape 2) : les compteurs de version de toutes les sections, en une seule lecture
+    if (p === "/api/sync") { const r = await env.DB.prepare("SELECT k, v FROM sync_rev").all(); return json({ revs: Object.fromEntries(r.results.map((x) => [x.k, x.v])) }); }
     if (p === "/api/doc") return docRoute(req, env, user);
     if (p === "/api/acquire" && req.method === "POST") return acquireRoute(req, env, user);
     if (p === "/api/coll") return collRoute(req, env, user);

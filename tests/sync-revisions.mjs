@@ -1,7 +1,7 @@
 // Étape 1 de l'optimisation : compteurs de version par section (table sync_rev).
 // Vérifie que chaque écriture fait monter le compteur de sa section, qu'une action refusée n'en fait
 // monter aucun, et que la migration se fait sans perte sur une base créée par la version de main.
-import { startServer, player, reporter, IDS, ROOT } from "./lib.mjs";
+import { startServer, player, reporter, IDS, ROOT, grant } from "./lib.mjs";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -13,7 +13,8 @@ let srv, old, worktree;
 try {
   t.section("Migration depuis la version de main");
   worktree = mkdtempSync(join(tmpdir(), "rezero-main-"));
-  execFileSync("git", ["worktree", "add", "--detach", worktree, "main"], { cwd: ROOT, stdio: "pipe" });
+  // version d'avant l'étape 1 (déployée jusqu'au 21/10) : la migration et le retour arrière se testent depuis elle
+  execFileSync("git", ["worktree", "add", "--detach", worktree, "7122d0c"], { cwd: ROOT, stdio: "pipe" });
   old = await startServer({ port, root: worktree, keep: true });
   const O = await player(old.base, IDS.p1, "Ancien");
   await O.api("state"); for (let i = 0; i < 3; i++) await O.api("open", { pack: "mix" });
@@ -39,6 +40,7 @@ try {
   await diff("connexion : users", async () => { A = await player(srv.base, IDS.admin, "Billy"); R = await player(srv.base, IDS.dev, "Reichi"); T = await player(srv.base, IDS.p2, "Teo"); }, ["users"]);
   await diff("création d'un joueur : players", () => R.api("state"), ["players"]);
   await T.api("state"); await A.api("state");
+  grant(srv, [R, A, T], { free: 30 });
   for (let i = 0; i < 10; i++) { await R.api("open", { pack: "mix" }); await A.api("open", { pack: "mix" }); await T.api("open", { pack: "mix" }); }
   await diff("ouverture de booster : players", () => R.api("open", { pack: "jour" }), ["players"], ["market", "trades", "config"]);
   await diff("config (admin) : config", () => A.doc("PUT", "config/game", {}), ["config"], ["players"]);
@@ -73,7 +75,7 @@ try {
   t.check("vote sur une question inexistante : votes inchangé", rv.status === 404 && revs().votes === v.votes);
   t.check("chaque compteur a une date de mise à jour", srv.rows("SELECT COUNT(*) AS n FROM sync_rev WHERE t > 0")[0].n === srv.rows("SELECT COUNT(*) AS n FROM sync_rev")[0].n);
 
-  t.section("Retour arrière : l'ancien Worker (main) sur une base déjà migrée");
+  t.section("Retour arrière : l'ancien Worker (avant l'étape 1) sur une base déjà migrée");
   const snap = (await R.api("state")).state, revBefore = revs();
   await srv.stop(); srv = null;
   old = await startServer({ port, root: worktree, persist, keep: true });
@@ -82,8 +84,12 @@ try {
   t.check("ancien Worker : données du joueur intactes", st2.opened === snap.opened && st2.chakra === snap.chakra && JSON.stringify(st2.owned) === JSON.stringify(snap.owned));
   const steps = {};
   steps.booster = (await T2.api("open", { pack: "mix", paid: true })).status;
-  const c3 = Object.entries(st2.owned).find(([, o]) => o.n > 0)[0];
-  const l3 = await R2.api("market/sell", { id: c3, price: 10 }); steps.vente = l3.status;
+  // l'ancien Worker ne connaît pas les cartes ajoutées depuis (nouveaux persos de l'épisode 1) : on vend une carte connue des deux versions
+  const owned3 = Object.entries(st2.owned).filter(([, o]) => o.n > 0).map(([id]) => id);
+  let l3 = null, refused = 0;
+  for (const c3 of owned3) { l3 = await R2.api("market/sell", { id: c3, price: 10 }); if (l3.status === 200) break; refused++; }
+  steps.vente = l3.status;
+  if (refused) t.note(`Retour arrière : ${refused} carte(s) du nouveau catalogue refusée(s) à la vente par l'ancien Worker (il ne les connaît pas). À prévoir dans le plan de retour arrière.`);
   steps.achat = (await A2.api("market/buy", { lid: l3.lid })).status;
   steps.comptoir = (await T2.api("chat/send", { text: "retour arrière" })).status;
   steps.config = (await A2.doc("PUT", "config/game", {})).status;

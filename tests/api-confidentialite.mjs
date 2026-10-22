@@ -1,6 +1,6 @@
 // Règles de confidentialité et d'accès : qui peut lire et écrire quoi.
 // Ces règles devront rester identiques avec la future route /api/game/sync.
-import { startServer, player, reporter, IDS } from "./lib.mjs";
+import { startServer, player, reporter, IDS, grant } from "./lib.mjs";
 
 const srv = await startServer({ port: +(process.env.PORT || 8803) });
 const t = reporter("API · confidentialité et accès");
@@ -8,6 +8,7 @@ try {
   const A = await player(srv.base, IDS.admin, "Billy"), D = await player(srv.base, IDS.dev, "Reichi");
   const P1 = await player(srv.base, IDS.p1, "Joueur1"), P2 = await player(srv.base, IDS.p2, "Joueur2"), P3 = await player(srv.base, IDS.p3, "Joueur3");
   for (const p of [A, D, P1, P2, P3]) await p.api("state");
+  grant(srv, [P1, P2], { free: 20 });
   for (let i = 0; i < 10; i++) for (const p of [P1, P2]) await p.api("open", { pack: "mix" });
 
   t.section("Sans connexion");

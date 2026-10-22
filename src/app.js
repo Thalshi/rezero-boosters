@@ -117,6 +117,7 @@ async function srv(action, body = {}) {
   const out = await r.json().catch(() => ({}));
   if (out.state) { const pack = save.pack; save = normalizeSave(out.state); save.pack = pack; }
   if (!r.ok) throw new Error(out.error || "Le serveur ne répond pas. Réessaie dans un instant.");
+  if (out.titles?.length) announceTitles(out.titles);
   return out;
 }
 let DB = null, USER = null, ME = null, canShare = false;
@@ -228,6 +229,7 @@ document.addEventListener("change", (e) => {
 
 function persist() {
   if (SRV) return;  // le serveur garde déjà tout
+  announceTitles(grantTitlesS(save));
   save.updated = Date.now();
   try { localStorage.setItem(LS, JSON.stringify(save)); } catch (e) {}
   if (remote) { clearTimeout(pushT); pushT = setTimeout(() => remote.set(save).catch(() => { remote = null; }), 600); }
@@ -300,7 +302,7 @@ function publishPlayer() {
   if (SRV || !DB || !ME || !canShare) return;
   clearTimeout(playerT);
   playerT = setTimeout(() => {
-    const s = stats(), key = JSON.stringify(s);
+    const s = { ...stats(), title: save.titleShown || null }, key = JSON.stringify(s);
     if (key === lastPlayer) return;
     lastPlayer = key;
     DB.doc("players/" + ME).set({ uid: ME, ...s, t: Date.now() }).catch(() => { canShare = false; });
@@ -473,12 +475,12 @@ async function startOpening(paid, packId, n = 1) {
   try {
     const pack = packId || save.pack;
     if (SRV) r = await srv("open", n > 1 ? { pack, paid, n } : { pack, paid });
-    else { r = openManyS(save, pack, paid, n, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
+    else { r = openManyS(save, pack, paid, n, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); announceTitles(r.titles); persist(); }
   } catch (e) { toast(e.message); header(); return; }
   finally { busy = false; }
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
-  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, n, divine: r.divine, scenario: r.scenario };
+  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, n, divine: r.divine, scenario: r.scenario, titles: takeTitles() };
   closeMenu(); $("overlay").hidden = true;
   draw();
 }
@@ -487,10 +489,10 @@ const SUMMON_PK = { 1: "Invocation", 5: "Pochette du Sanctuaire", 10: "Coffre du
 function summonOpening(got, scenario, extra = {}) {
   const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "召", color: "#b072ff", count: n };
   const cards = got.map((x) => ({ c: { id: x.id, rar: x.rar }, cos: COS_BY_ID[x.id], gold: false, isNew: !!x.isNew }));
-  opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, ...extra };
+  opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, titles: takeTitles(), ...extra };
   closeMenu(); $("overlay").hidden = true; $("stage").dataset.cf = "";
   draw();
-  if (n === 1) { const o = opening; setTimeout(() => { if (opening === o && !o.flipped) { o.flipped = true; drawOpening(); } }, reduced ? 0 : 650); }
+  if (n === 1) { const o = opening; setTimeout(() => { if (opening === o && !o.flipped) Reveal.tap(); }, reduced ? 0 : 650); }
 }
 // une ouverture contient des cartes (boosters) ou des cosmétiques (Sanctuaire)
 const itemName = (x) => (x.cos ? x.cos.name : nameOf(x.c));

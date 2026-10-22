@@ -83,6 +83,10 @@ const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.m
 const rarChips = (name, cur) => `<div class="chips">${[["", "Toutes"], ...RANKS.map((k) => [k, RAR[k].label])].map(([k, l]) => `<button class="chip" type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${k ? `<i class="d" style="background:${RAR[k].color}"></i>` : ""}${l}</button>`).join("")}</div>`;
 const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`;
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
+// titre choisi par un joueur (le sien vient de la sauvegarde, les autres du classement partagé)
+const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
+const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${t.kanji}</i>${esc(t.name)}</span>` : "");
+const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
 const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${av(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
 const titleOf = (unique) => unique >= ALL_CARDS.length ? ["神", "Légende"] : unique >= 90 ? ["達人", "Maître"] : unique >= 50 ? ["鑑定士", "Expert"] : unique >= 20 ? ["熟", "Confirmé"] : ["初", "Débutant"];
@@ -269,7 +273,7 @@ function lrowHTML(l) {
 }
 function podiumHTML(list, val, unit) {
   const [a, b, c] = list;
-  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${av(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span><span class="sc">${unit(p)}</span>
+  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${av(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span>${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : ""}<span class="sc">${unit(p)}</span>
     <span class="ped"><span class="no">${i}</span><b>${fmtN(val(p))}</b><small>${unit.short || ""}</small></span></button>` : "<span></span>";
   return `<div class="podium">${pod(b, 2)}${pod(a, 1)}${pod(c, 3)}</div>`;
 }

@@ -17,7 +17,7 @@ const zTile = (c, action = "", extra = "") => `<div class="zt r-${c.rar}">
 // --- actions (serveur, ou sauvegarde locale en mode invité) ---
 async function zCall(action, body, local) {
   if (SRV) return srv(action, body);
-  const r = local(); if (r.error) throw new Error(r.error); persist(); return r;
+  const r = local(); if (r.error) throw new Error(r.error); announceTitles(r.titles); persist(); return r;
 }
 async function zBuy(id) {
   try { await zCall("shop/buy", { id }, () => buyCosmeticS(save, id)); toast(`${COS_BY_ID[id].name} ajouté à ton inventaire.`); draw(); if (zItem === id && !$("overlay").hidden) zOpenItem(id); }

@@ -21,6 +21,7 @@
 - Préparer l'épisode 2 : débloquer ses persos, publier les prédictions.
 - Chantier Sanctuaire ouvert : quoi gagner (proposition faite : bannière par saison avec gros lot exclusif, doublons en éclats, paliers de progression), en attente de l'avis de Reichi.
 - Illustrations de Confrontation : visuels finaux intégrés (25 cartes, 8 emblèmes, 6 fonds de skins, fond de table). Une planche se découpe avec `tools/illus/planche.py` puis `tools/illus/import.py`. Possible : versions plus grandes, une image par carte.
+- En cours (branche `dev/re-zero-complet`, pas en production) : nouveau coffre et nouvelle clé plus détaillés, dévoilement carte par carte spectaculaire avec rotation des effets (`src/reveal.js`), puis titres gagnés selon les invocations, la Confrontation et le Défilé (ex. deux Légendaires dans la même invocation).
 - Billy et Reichi ajoutent persos, cartes et cosmétiques eux-mêmes dans le Créateur (publié directement), et règlent la branche de chaque carte dans Admin → Branches.
 
 ## À faire / à vérifier / en attente

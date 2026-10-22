@@ -39,7 +39,7 @@ try {
     await tool("ess"); await tool("free");
     // booster et coffre
     await page.click(await choisir(page, "coffre")); await page.waitForTimeout(1200);
-    await page.click("#cfKey");
+    await page.click("#cfKey", { force: true });
     await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
     t.check(`${label} · coffre : animation puis les 5 cartes une par une`, (await page.locator("#stage .pdots i").count()) === 5 && (await page.locator("#revealBtn").count()) === 1);
     await page.click('#stage [data-act="skip"]'); await page.waitForTimeout(400);

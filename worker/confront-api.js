@@ -49,7 +49,21 @@ function runBots(g, now) {
 async function release(env, h, g) {
   if (g.released) return;
   g.released = true;
-  for (const p of g.state.players) if (!isBot(p.id)) await h.mutate(env, p.id, (s) => { if (s.confront?.gid === g.id) delete s.confront; return {}; }).catch(() => null);
+  const res = g.state.result, n = g.state.players.length;
+  for (const p of g.state.players) if (!isBot(p.id)) await h.mutate(env, p.id, (s, now) => {
+    if (s.confront?.gid === g.id) delete s.confront;
+    // victoires comptées seulement pour une partie valable (anti-farm du moteur) : elles donnent les titres de Confrontation
+    const rc = res?.recompenses?.[p.id];
+    if (rc?.eligible) {
+      G.trackS(s, "cfPlay", 1, now);
+      if (rc.gagnant) {
+        G.trackS(s, "cfWin", 1, now); G.trackS(s, "cfWin_" + p.role, 1, now);
+        if (p.vivant && p.pv === 1) G.trackS(s, "cfWin1pv", 1, now);
+        if (n >= 7) G.trackS(s, "cfWin7", 1, now);
+      }
+    }
+    return {};
+  }).catch(() => null);
 }
 // modifie une partie en réessayant si quelqu'un d'autre l'a modifiée entre-temps
 async function edit(env, h, gid, fn) {

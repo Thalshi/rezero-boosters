@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-22 — Retours de Reichi sur le coffre (en cours)
+- Coffre et clé redessinés (plus de détails, runes, sceau) ; prototype : https://claude.ai/artifact/RwNyhqNqZwfdM6AUPQqumf.
+- Dévoilement carte par carte refait pour faire pro : effets qui tournent selon la rareté (3 variantes par niveau), titre LÉGENDAIRE ou MYTHIQUE, cartes rangées dans une réserve.
+- À suivre : titres gagnés (invocations, Confrontation, Défilé), tests, commit. Rien en production.
+
 ## 2026-10-22 — Mise en production complète, design Arcane Néon
 - Tout déployé en production (fusion de `dev/re-zero-complet` dans `main`), toutes les nouveautés ouvertes, à la demande de Reichi. Point de restauration D1 noté avant.
 - Design « Arcane Néon » choisi parmi 4 propositions (Arcane, Néon Shinjuku, Encre et sceau, mélange) et appliqué à toute l'app, avec une barre de navigation en bas sur téléphone.

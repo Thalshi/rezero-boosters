@@ -61,16 +61,16 @@ try {
       const k = ids.indexOf(id);
       if (k === 0) { await page.focus("#cfKey"); await page.keyboard.press("Enter"); }
       else if (k === 1) await page.click("#cfChest", { force: true }); // ouvrir en touchant le coffre lui-même
-      else await page.click("#cfKey");
+      else await page.click("#cfKey", { force: true });
       const dur = sc.beats.reduce((a, [b, n]) => a + ({ pause: n || 400, shake: 360 * (n || 1), runes: 90 * (n || 8) + 200, ladder: 260 * 6, crystal: 460 * (n || 1), banner: 1500 }[b] ?? 1000), 0);
       await sleep(Math.min(dur * .55, 4500));
       await page.screenshot({ path: join(OUT, `coffre-${label}-${id}.png`) });
       const ok = await page.waitForSelector("#revealBtn", { timeout: dur + 6000 }).then(() => true).catch(() => false);
       t.check(`${label} · ${id} : le scénario se termine sur les 5 cartes, à dévoiler une par une`, ok && (await page.locator("#stage .pdots i").count()) === 5, errors.slice(-1));
       if (!ok) { await page.evaluate(() => closeStage()); continue; }
-      await page.click("#revealBtn"); await sleep(250);
+      await page.click("#revealBtn"); await sleep(1700);
       t.check(`${label} · ${id} : toucher retourne la première carte`, (await page.locator("#stage .reveal-card.on .kc").count()) === 1);
-      await page.click("#revealBtn"); await sleep(150);
+      await page.click("#revealBtn"); await sleep(600);
       if (ids.indexOf(id) === 0) await page.screenshot({ path: join(OUT, `coffre-${label}-cartes.png`) });
       await page.click('[data-act="skip"]'); await sleep(250);
       t.check(`${label} · ${id} : récapitulatif`, (await page.locator(".summary .kcw").count()) === 5);
@@ -79,7 +79,7 @@ try {
     }
     // Passer pendant l'animation : on va droit au récapitulatif, sans erreur
     await openChest(page, "fk-redemarrage", cardsFor("fk-redemarrage"));
-    await page.click("#cfKey"); await sleep(700); await page.click('[data-act="skip"]'); await sleep(2500);
+    await page.click("#cfKey", { force: true }); await sleep(700); await page.click('[data-act="skip"]'); await sleep(2500);
     t.check(`${label} · « Passer » pendant l'animation : récapitulatif, l'animation ne reprend pas`, (await page.locator(".summary .kcw").count()) === 5 && (await page.locator("#cfChest").count()) === 0);
     await page.click('[data-act="stage-close"]');
     t.check(`${label} · aucune erreur JavaScript`, errors.length === 0, errors);
@@ -90,7 +90,7 @@ try {
   const rErr = []; rp.on("pageerror", (e) => rErr.push(e.message));
   await rp.goto("file://" + join(ROOT, "artifact.html")); await sleep(900);
   await openChest(rp, "sp-seisme", cardsFor("sp-seisme"));
-  await rp.click("#cfKey"); await sleep(300);
+  await rp.click("#cfKey", { force: true }); await sleep(300);
   t.check("animations réduites : les cartes arrivent tout de suite", (await rp.locator("#revealBtn").count()) === 1, rErr);
   // le vrai tirage invité donne un scénario permis par ses cartes
   await rp.click('[data-act="skip"]'); await sleep(200); await rp.click('[data-act="stage-close"]');

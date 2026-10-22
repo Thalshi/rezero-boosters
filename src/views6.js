@@ -157,7 +157,7 @@ function cfBoard(v) {
     const pct = p.pvMax ? Math.max(0, p.pv) / p.pvMax * 100 : 0, low = p.pv <= 1;
     return `<div class="cf-seat ${v.tour?.pid === p.id ? "turn" : ""} ${pr?.pid === p.id ? "wait" : ""} ${p.vivant ? "" : "dead"} ${p.id === v.moi ? "me" : ""} ${tg.length ? "target" : ""}" data-cft="${p.id}">
       ${v.tour?.pid === p.id ? `<span class="cf-ribbon">${p.id === v.moi ? "Ton tour" : "Son tour"}</span>` : ""}
-      <div class="cf-seat-top">${cfPerso(p.perso)}<div class="cf-seat-id"><b>${esc(cfName(p.id))}</b>
+      <div class="cf-seat-top">${cfPerso(p.perso)}<div class="cf-seat-id"><b>${esc(cfName(p.id))}</b>${ttag(p.id, "sm")}
         ${p.role ? `<span class="cf-role r-${p.role}">${ROLE_LABEL[p.role]}</span>` : ""}${p.perso ? `<small class="cf-brl">${cfEmb(p.perso.branch, "sm")} ${esc(cfBranch(p.perso.branch).nom)}</small>` : ""}
         ${p.vivant ? "" : `<small class="cf-ko">Éliminé</small>`}${p.enLigne ? "" : `<small>Hors ligne</small>`}</div></div>
       <div class="cf-hp ${low ? "low" : ""}" role="img" aria-label="${p.pv} PV sur ${p.pvMax}"><span style="width:${pct}%"></span>${Array.from({ length: p.pvMax }, () => "<i></i>").join("")}<b>${p.pv}/${p.pvMax} PV</b></div>

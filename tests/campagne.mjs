@@ -45,7 +45,7 @@ async function ouvrir(J, selector, { label = "", flipAll = false } = {}) {
   let leaked = 0;
   if (chest) {
     leaked = await page.locator("#stage [data-card]").count(); // aucune carte ne doit être visible avant l'ouverture
-    await page.click("#cfKey");
+    await page.click("#cfKey", { force: true });
     const sc = G.CHEST_BY_ID[res.scenario];
     for (let i = 0; i < 40 && !(await page.locator("#revealBtn").count()); i++) { if (i === 3) leaked += await page.locator("#stage .kc").count(); await page.waitForTimeout(250); }
     if (!(await page.locator("#revealBtn").count())) return { res, chest, stuck: true, scenario: sc?.id };
@@ -74,7 +74,7 @@ async function choisir(page, packId, paid = false) {
   return `[data-act="open-pack"][data-p="${packId}"]${paid ? "[data-paid]" : ":not([data-paid])"} >> visible=true`;
 }
 async function finir(page) {
-  if (await page.locator("#cfKey").count()) { await page.click("#cfKey"); await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {}); }
+  if (await page.locator("#cfKey").count()) { await page.click("#cfKey", { force: true }); await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {}); }
   else if (await page.locator("#pack").count()) { await page.click("#pack"); await page.waitForTimeout(900); }
   if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]').catch(() => {});
   await page.waitForTimeout(300);
@@ -175,7 +175,7 @@ try {
   const picksM = [["m", 0], ["c", 0], ["c", 1], ["c", 2], ["c", 3]].map(([r, i]) => sk(r, i));
   await A.page.evaluate((ids) => { lab.picks = ids; draw(); }, picksM);
   const resP = A.page.waitForResponse((r) => r.url().includes("/api/game/lab/open")); await A.page.click('[data-act="lab-open"]'); await resP; await A.page.waitForTimeout(500);
-  await A.page.click("#cfKey");
+  await A.page.click("#cfKey", { force: true });
   const tints = new Set();
   for (let i = 0; i < 30; i++) { tints.add(await A.page.evaluate(() => getComputedStyle(document.getElementById("cf") || document.body).getPropertyValue("--rare").trim())); await A.page.waitForTimeout(150); if (await A.page.locator(".cf-grid").count()) break; }
   t.check("feinte « faux redémarrage » sur une Mythique : passe par des teintes plus basses puis finit rouge", tints.size >= 2, [...tints]);
@@ -212,7 +212,7 @@ try {
   await P.page.dblclick('[data-zsum="10"]'); await P.page.waitForTimeout(800);
   sa = await P.state();
   t.check("Sanctuaire ×10 : double clic, une seule invocation (10 objets, un débit), ouverte dans le coffre", sa.chakra === sb.chakra - G.summonCost(10) && sa.cos.inst.length === sb.cos.inst.length + 10 && (await P.page.locator("#cfChest").count()) === 1);
-  await P.page.click("#cfKey"); await P.page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
+  await P.page.click("#cfKey", { force: true }); await P.page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
   t.check("Sanctuaire ×10 : après le scénario, les 10 objets se dévoilent un par un", (await P.page.locator("#stage .pdots i").count()) === 10 && (await P.page.locator("#revealBtn").count()) === 1);
   await P.page.click('[data-act="skip"]').catch(() => {}); await P.page.click('[data-act="stage-close"]').catch(() => {});
   sb = sa;

@@ -43,6 +43,11 @@ Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lance
 | F1 🟠 | PV et limite de main | | 6 / 5 / 4 PV (+1 chef) ; main = PV | `worker/confront/config.mjs` |
 | F2 🟠 | Récompenses de partie et anti-farm | rien / essence plafonnée | à proposer après les simulations | |
 
+## Titres
+- 28 titres provisoires (liste dans `TITLES`, `src/game.js`) : ouvertures (Double couronne pour 2 Légendaires, Cœurs jumeaux pour 2 Mythiques, Trinité, Arc-en-ciel, Pluie d'or, Élu des dieux, Alignement des astres), invocations (2 Légendaires, 2 Mythiques, Mythique en ×1, 100 objets), Confrontation (1re victoire, victoire par rôle, à 1 PV, à 7 joueurs, 10 et 50 victoires), Défilé (podium, 5 participations), collection, prédictions.
+- À trancher : noms, seuils (10 et 50 victoires, 10 et 25 prédictions), et si certains titres donnent aussi de l'essence (aucune pour l'instant).
+- Les victoires de Confrontation ne comptent que pour une partie valable (anti-farm du moteur : durée minimale, pas d'abandon ni d'absence).
+
 ## Mise en production
 | # | Décision | Options |
 |---|---|---|

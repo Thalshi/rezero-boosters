@@ -2,6 +2,7 @@
 // tient la collection et l'essence, et règle les ventes et les échanges. Le navigateur ne fait qu'afficher.
 import * as G from "./game.js";
 import { bumpRev } from "./sync.js";
+import { creationsRoute, ensureCreations } from "./creations-api.js";
 import { labRoute } from "./lab-api.js";
 import { defileRoute } from "./defile-api.js";
 import { confrontRoute, confrontLocked } from "./confront-api.js";
@@ -244,6 +245,7 @@ const marketBlock = (s) => `Le marché et les échanges s'ouvrent après ${G.MAR
 export async function gameRoute(req, env, user, path) {
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   try {
+    await ensureCreations(env); // persos, cartes et cosmétiques créés depuis l'app
     const chatRes = await chatRoute(env, user, path, body);
     if (chatRes) return chatRes;
     if (path === "/api/game/admin/audit" || path === "/api/game/dev/audit") {
@@ -261,6 +263,8 @@ export async function gameRoute(req, env, user, path) {
     }
     await ensurePlayer(env, user, null);
     const cfg = await getConfig(env);
+    const creaRes = await creationsRoute(env, user, path, body, { notify, cfg });
+    if (creaRes) return creaRes;
     const labRes = await labRoute(env, user, path, body, cfg);
     if (labRes) return labRes;
     const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow, cfg });

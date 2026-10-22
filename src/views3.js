@@ -49,8 +49,15 @@ const Z_COLLECTIONS = [
   { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
   { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
 ];
-// tout objet de boutique qui n'est dans aucune collection rejoint « Néon du QG »
-(() => { const used = new Set(Z_COLLECTIONS.flatMap((c) => c.items)); Z_COLLECTIONS.at(-1).items = COSMETICS.filter((c) => !c.only && !used.has(c.id)).map((c) => c.id); })();
+// un objet créé depuis l'app rejoint la collection choisie (champ « coll ») ; tout objet de boutique
+// qui n'est dans aucune collection rejoint « Néon du QG ». Recalculé après chaque mise à jour des créations.
+const Z_COLL_BASE = Object.fromEntries(Z_COLLECTIONS.map((c) => [c.id, c.items.slice()]));
+function zCollRefill() {
+  for (const c of Z_COLLECTIONS) c.items = [...Z_COLL_BASE[c.id], ...COSMETICS.filter((x) => x.coll === c.id && !Z_COLL_BASE[c.id].includes(x.id)).map((x) => x.id)].filter((id) => COS_BY_ID[id] && !COS_BY_ID[id].only);
+  const used = new Set(Z_COLLECTIONS.flatMap((c) => c.items));
+  Z_COLLECTIONS.at(-1).items.push(...COSMETICS.filter((c) => !c.only && !used.has(c.id)).map((c) => c.id));
+}
+zCollRefill();
 const zCollOf = (id) => Z_COLLECTIONS.find((c) => c.items.includes(id));
 const zFeatured = () => Z_COLLECTIONS[Math.floor(Date.now() / 86400e3) % Z_COLLECTIONS.length]; // la vedette change chaque jour
 let zShopFilter = "", zItem = null;

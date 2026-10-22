@@ -19,7 +19,8 @@ En production aujourd'hui : `main` = étapes 0 et 1 (sauvegarde D1, compteurs `s
 ## 2. Base de données : aucune migration
 - Aucune nouvelle table, aucune colonne : tout le nouveau tient dans les tables existantes.
   - `players.data` (JSON) reçoit des champs en plus : `cos`, `featured`, `titles`. L'ancien code les garde sans les lire (`normalizeSave` conserve les champs inconnus).
-  - `docs` reçoit de nouvelles collections : `lab`, `qa`, `defile`. Elles sont fermées à l'API des documents.
+  - `docs` reçoit de nouvelles collections : `lab`, `qa`, `defile`, `confront`, `confrontcfg` (branches choisies par Billy), `creations` (catalogue du Créateur) et `creaimg` (ses images). Elles sont toutes fermées à l'API des documents ; aucune migration : ce sont des lignes de la table `docs` existante.
+  - Le Créateur publie directement : à l'ouverture en production, les créations faites en test ne partent pas (base différente).
 - `sync_rev` existe déjà (étape 1).
 - Les `CREATE TABLE IF NOT EXISTS` au démarrage n'ajoutent rien de nouveau.
 

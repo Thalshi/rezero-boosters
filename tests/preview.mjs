@@ -70,6 +70,12 @@ try {
     await who("666024039776518157"); await go("defile"); await page.waitForTimeout(1500);
     await page.click('[data-act="def-close"]'); await page.waitForTimeout(200); await page.click('[data-act="def-close"]'); await page.waitForTimeout(1500);
     t.check(`${label} · Défilé : clôture par confirmation dans la page`, await page.evaluate(() => DEF.current?.phase === "clos"));
+    // Créateur (Reichi est admin et dev) : un cosmétique publié arrive aussitôt en Boutique
+    await go("createur"); await page.waitForTimeout(800);
+    await page.click('[data-seg="crTab"][data-v="cos"]'); await page.waitForTimeout(300);
+    await page.click('[data-cr-new="cos"]'); await page.waitForTimeout(300);
+    await page.fill('[data-crf="name"]', "Aura " + label); await page.click("[data-cr-save]"); await page.waitForTimeout(150); await page.click("[data-cr-save]"); await page.waitForTimeout(2500);
+    t.check(`${label} · Créateur : cosmétique publié et dans la Boutique`, await page.evaluate((n) => COSMETICS.some((c) => c.name === n) && Z_COLLECTIONS.some((z) => z.items.some((id) => COS_BY_ID[id]?.name === n)), "Aura " + label));
     // Confrontation : le livret de règles (rôles, branches, 25 cartes), puis une partie avec 2 bots jusqu'à la fin
     await go("confront"); await page.waitForTimeout(1200);
     t.check(`${label} · Confrontation : les 4 rôles expliqués dès les salons`, (await page.locator(".rl-card").count()) === 4);

@@ -1061,6 +1061,30 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 /* ===== Confrontation ===== */
 .cf-row { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 12px 14px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--panel); }
 .cf-row .btn { margin-left: auto; }
+/* Créateur (admin et dev) */
+.cr-row .th .layer, .cr-row .th .photo { position: absolute; inset: 0; background-size: cover; background-position: var(--pos, 50% 22%); }
+.cr-row .th .mono-a { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; color: var(--mut); }
+.cr-body { margin-top: 14px; }
+.cr-q { max-width: 280px; }
+.cr-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-top: 12px; }
+.cr-row { position: relative; display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); text-align: left; cursor: pointer; }
+.cr-row:hover, .cr-card:hover, .cr-cos:hover { border-color: var(--gold); }
+.cr-row .th { width: 40px; height: 52px; flex: none; position: relative; overflow: hidden; border-radius: 6px; background: var(--bg2); }
+.cr-n { display: grid; gap: 2px; min-width: 0; } .cr-n small { color: var(--mut); font-size: 12px; }
+.cr-b { position: absolute; top: 6px; right: 6px; z-index: 3; padding: 1px 7px; border-radius: 999px; font: 700 10px var(--mono); }
+.cr-b.new { background: var(--gold); color: #1a1406; } .cr-b.mod { background: var(--cyan); color: #04141a; }
+.cr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+.cr-card, .cr-cos { position: relative; padding: 0; border: 1px solid transparent; border-radius: 14px; background: none; cursor: pointer; text-align: left; color: inherit; }
+.cr-ed { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+.cr-form { display: grid; gap: 12px; }
+.cr-form .field { display: grid; gap: 6px; font-size: 13px; color: var(--fg2); }
+.cr-form select, .cr-form .in { width: 100%; box-sizing: border-box; }
+.cr-form input[type="color"] { width: 64px; height: 36px; padding: 0; border: 1px solid var(--line2); border-radius: 8px; background: none; }
+.cr-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cr-prev { position: sticky; top: 90px; }
+@media (max-width: 760px) { .cr-ed { grid-template-columns: 1fr; } .cr-prev { order: -1; position: static; } .cr-big .kcw { --w: 180px; } }
+.cr-big { display: grid; justify-items: center; } .cr-big .kcw { --w: 240px; }
+.cr-log { display: grid; gap: 8px; padding-left: 20px; } .cr-log small { display: block; color: var(--mut); font-size: 12px; }
 /* Admin : branches des cartes */
 .brx-sum { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .brx-sum span { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line2); font-size: 13px; }
@@ -1647,7 +1671,7 @@ const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "su
   "lion", "cerf", "felin", "oiseau", "elfe1", "elfe2", "belier", "gobelin"];
 const EP_MAX = 12;
 const HIDDEN = 99;
-const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });
+const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, PEOPLE[k].ep ?? (EP1.includes(k) ? 1 : 2)])), progress: {}, def: 1, extra: {} });
 
 // ===== Skins des persos IRL (gammes façon LoL, une par rareté) =====
 const SKIN_LINES = [
@@ -2184,6 +2208,29 @@ const COSMETICS = [
   { id: "pres-orbite", slot: "pres", name: "Orbite lente", rar: "l", k: "orbite", only: "sanctuaire" },
 ];
 const COS_BY_ID = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
+
+// ===== Créations de l'admin et du dev : persos, cartes et cosmétiques ajoutés ou retouchés depuis l'app =====
+// data = { people: { who: champs }, cards: { id: champs }, cos: { id: champs } } (doc « creations/catalog »).
+// Un id du jeu de base = retouche (champs remplacés) ; un id nouveau = ajout. Repart toujours du jeu de base :
+// appliquer deux fois la même chose donne le même catalogue.
+const CREA_BASE = { people: JSON.parse(JSON.stringify(PEOPLE)), cards: CARDS.map((c) => ({ ...c })), cos: COSMETICS.map((c) => ({ ...c })) };
+const refill = (obj, entries) => { for (const k of Object.keys(obj)) delete obj[k]; Object.assign(obj, Object.fromEntries(entries)); };
+function applyCreations(data) {
+  const d = data || {}, P = d.people || {}, C = d.cards || {}, Z = d.cos || {};
+  refill(PEOPLE, [...Object.entries(CREA_BASE.people).map(([k, p]) => [k, { ...p, ...(P[k] || {}) }]), ...Object.entries(P).filter(([k]) => !CREA_BASE.people[k])]);
+  const baseIds = new Set(CREA_BASE.cards.map((c) => c.id));
+  CARDS.splice(0, CARDS.length, ...CREA_BASE.cards.map((c) => ({ ...c, ...(C[c.id] || {}), id: c.id })),
+    ...Object.entries(C).filter(([id, c]) => !baseIds.has(id) && PEOPLE[c.who]).map(([id, c]) => ({ ...c, id })));
+  SKINNED.splice(0, SKINNED.length, ...Object.keys(PEOPLE).filter((k) => PEOPLE[k].fac === "irl"));
+  SKINS.splice(0, SKINS.length, ...SKINNED.flatMap((who) => SKIN_LINES.map((l) => ({ id: `${who}-sk-${l.id}`, who, skin: l.id, title: `Skin ${l.name}`, rar: l.rar, ...(C[`${who}-sk-${l.id}`] || {}) }))));
+  ALL_CARDS.splice(0, ALL_CARDS.length, ...CARDS, ...SKINS);
+  refill(CARD_BY_ID, ALL_CARDS.map((c) => [c.id, c]));
+  refill(CATALOG_NO, [...ALL_CARDS].sort((a, b) => RANKS.indexOf(b.rar) - RANKS.indexOf(a.rar) || a.id.localeCompare(b.id)).map((c, i) => [c.id, i + 1]));
+  const cosBase = new Set(CREA_BASE.cos.map((c) => c.id));
+  COSMETICS.splice(0, COSMETICS.length, ...CREA_BASE.cos.map((c) => ({ ...c, ...(Z[c.id] || {}), id: c.id })), ...Object.entries(Z).filter(([id]) => !cosBase.has(id)).map(([id, c]) => ({ ...c, id })));
+  refill(COS_BY_ID, COSMETICS.map((c) => [c.id, c]));
+  const all = ACHIEVEMENTS.find((a) => a.id === "a-all"); if (all) all.goal = ALL_CARDS.length;
+}
 // --- valeurs PROVISOIRES (à valider) : prix en boutique, coût et probabilités des invocations ---
 const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
 const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
@@ -2703,6 +2750,7 @@ async function connect() {
       SRV = true;
       const r = await srv("state", { guest });
       if (r.imported === "invité") toast("Tes cartes communes jouées en invité ont été reprises sur ton compte Discord.");
+      await creaLoad(true); // persos, cartes et cosmétiques créés depuis l'app
       subscribeShared();
       subscribePred();
       MYNAME = (await window.discordMe())?.name || "";
@@ -3274,13 +3322,14 @@ function cosDeco(design, present) {
   if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
   const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? "零" : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
-  return { kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+  // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
+  return { za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
 }
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
   const dz = soon || locked ? null : cosDeco(o.design, o.present);
-  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
+  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}${dz?.za ? `--za:${dz.za};` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
     style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
@@ -3313,7 +3362,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
   ["missions", "務", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "華", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "対", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "店", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "召", "Sanctuaire"]] : []), ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
-  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["branches", "枝", "Branches"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
+  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["createur", "創", "Créateur"], ["branches", "枝", "Branches"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -4046,6 +4095,7 @@ function viewAdmin() {
   const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
   return `<div class="wrap page" style="max-width:900px">${head("Admin · 管理", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
+    <div class="card sec"><h3>Créateur</h3><p class="note">Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou crée des cosmétiques. Publié tout de suite.</p><button class="btn gold" type="button" data-nav="createur">Ouvrir le Créateur</button></div>
     <div class="card sec"><h3>Confrontation : branches des cartes</h3><p class="note">Chaque carte a une branche (son pouvoir en partie), avec une variante possible selon la rareté. Une proposition est en place : à toi de l'ajuster.</p><button class="btn" type="button" data-nav="branches">Régler les branches</button></div>
     <div class="card sec"><h3>Nouveautés ouvertes aux joueurs</h3><p class="note">Une nouveauté fermée disparaît du menu et le serveur refuse ses actions. Rien n'est perdu : on la rouvre quand on veut.</p>
       <div class="feat-list">${FEATURES.map(([k, l]) => `<label class="zopt-line"><input type="checkbox" data-feat="${k}" ${featureOn(CONFIG, k) ? "checked" : ""}> ${l}</label>`).join("")}</div></div>
@@ -4296,8 +4346,15 @@ const Z_COLLECTIONS = [
   { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
   { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
 ];
-// tout objet de boutique qui n'est dans aucune collection rejoint « Néon du QG »
-(() => { const used = new Set(Z_COLLECTIONS.flatMap((c) => c.items)); Z_COLLECTIONS.at(-1).items = COSMETICS.filter((c) => !c.only && !used.has(c.id)).map((c) => c.id); })();
+// un objet créé depuis l'app rejoint la collection choisie (champ « coll ») ; tout objet de boutique
+// qui n'est dans aucune collection rejoint « Néon du QG ». Recalculé après chaque mise à jour des créations.
+const Z_COLL_BASE = Object.fromEntries(Z_COLLECTIONS.map((c) => [c.id, c.items.slice()]));
+function zCollRefill() {
+  for (const c of Z_COLLECTIONS) c.items = [...Z_COLL_BASE[c.id], ...COSMETICS.filter((x) => x.coll === c.id && !Z_COLL_BASE[c.id].includes(x.id)).map((x) => x.id)].filter((id) => COS_BY_ID[id] && !COS_BY_ID[id].only);
+  const used = new Set(Z_COLLECTIONS.flatMap((c) => c.items));
+  Z_COLLECTIONS.at(-1).items.push(...COSMETICS.filter((c) => !c.only && !used.has(c.id)).map((c) => c.id));
+}
+zCollRefill();
 const zCollOf = (id) => Z_COLLECTIONS.find((c) => c.items.includes(id));
 const zFeatured = () => Z_COLLECTIONS[Math.floor(Date.now() / 86400e3) % Z_COLLECTIONS.length]; // la vedette change chaque jour
 let zShopFilter = "", zItem = null;
@@ -5136,6 +5193,207 @@ ADMIN_SEG.brxF = (v) => { BRX.filtre = v; };
 document.addEventListener("change", (e) => {
   const one = e.target.closest?.("[data-brx]"); if (one) return brxSet([one.dataset.brx], one.value);
   const all = e.target.closest?.("[data-brxall]"); if (all && all.value) return brxSet(ALL_CARDS.filter((c) => c.who === all.dataset.brxall).map((c) => c.id), all.value === "__prop" ? null : all.value);
+});
+
+// ===== Créateur : l'admin et le dev ajoutent ou retouchent persos, cartes et cosmétiques (#/createur) =====
+// Publié directement pour tout le monde. Le serveur relit tout (worker/creations-api.js) ; ici : formulaires,
+// aperçu en direct, image réduite dans le navigateur avant l'envoi. Au démarrage, chaque joueur charge le catalogue.
+ROUTES.push("createur");
+const CREA = { v: 0, imgV: {}, uris: {}, log: [], raw: { people: {}, cards: {}, cos: {} }, loading: null };
+// --- chargement du catalogue (tous les joueurs, sur le site) ---
+async function creaLoad(force) {
+  if (!window.DISCORD_LOGIN) return false;
+  if (CREA.loading) return CREA.loading;
+  CREA.loading = (async () => {
+    let r;
+    try { r = await srv("creations", force ? {} : { v: CREA.v }); } catch (e) { return false; }
+    if (r.same) return false;
+    creaApply(r);
+    return true;
+  })().finally(() => { CREA.loading = null; });
+  return CREA.loading;
+}
+async function creaApply(r) {
+  CREA.v = r.v; if (r.log) CREA.log = r.log;
+  CREA.raw = { people: r.people || {}, cards: r.cards || {}, cos: r.cos || {} };
+  applyCreations({ people: r.people, cards: r.cards, cos: r.cos });
+  if (typeof zCollRefill === "function") zCollRefill();
+  const todo = Object.entries(r.imgs || {}).filter(([k, v]) => CREA.imgV[k] !== v);
+  await Promise.all(todo.map(async ([k, v]) => { try { const x = await srv("creations/img", { k }); CREA.uris[k] = x.uri; CREA.imgV[k] = v; ART[k] = x.uri; } catch (e) {} }));
+  creaStyle();
+}
+// une règle CSS par image créée (comme les images de base : .who-<clé> .layer)
+function creaStyle() {
+  let st = document.getElementById("crea-art");
+  if (!st) { st = document.createElement("style"); st.id = "crea-art"; document.head.appendChild(st); }
+  st.textContent = Object.entries(CREA.uris).map(([k, u]) => `.who-${k} .layer{background-image:url(${u})}`).join("");
+}
+setInterval(() => { if (SRV && !document.hidden) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
+
+// --- la page ---
+const CR = { tab: "persos", q: "", who: "", edit: null, busy: false };
+const CR_SLOTS = () => COS_SLOTS.map((s) => [s.id, s.label]);
+const CR_KINDS = (slot) => [...new Set(COSMETICS.filter((c) => c.slot === slot && !c.id.startsWith("__")).map((c) => c.k))];
+const CR_BRANCHES = [["", "Proposée par le jeu"], ["assaut", "Assaut"], ["defense", "Défense"], ["stratege", "Stratège"], ["voleur", "Voleur"], ["precision", "Précision"], ["resistance", "Résistance"], ["survie", "Survie"], ["chance", "Chance"]];
+const crOpts = (list, cur) => list.map(([v, l]) => `<option value="${esc(v)}" ${String(cur ?? "") === String(v) ? "selected" : ""}>${esc(l)}</option>`).join("");
+const crRar = () => RANKS.map((r) => [r, RAR[r].label]);
+const crBadge = (kind, id) => { const box = { perso: "people", carte: "cards", cos: "cos" }[kind], base = kind === "perso" ? CREA_BASE.people[id] : kind === "carte" ? CREA_BASE.cards.some((c) => c.id === id) || byId[id]?.skin : CREA_BASE.cos.some((c) => c.id === id);
+  return !base ? `<span class="cr-b new">Créé</span>` : CREA.raw[box]?.[id] ? `<span class="cr-b mod">Retouché</span>` : ""; };
+
+function viewCreateur() {
+  if (!IS_ADMIN && !IS_DEV) return `<div class="wrap page">${empty("Cette page est réservée à l'admin et au dev.")}</div>`;
+  if (!SRV) return `<div class="wrap page">${empty("Le Créateur s'utilise sur le site du QG, connecté avec Discord.")}</div>`;
+  if (CR.edit) return crEditor();
+  const tabs = seg("crTab", [["persos", "Persos"], ["cartes", "Cartes"], ["cos", "Cosmétiques"], ["log", "Historique"]], CR.tab);
+  let body = "";
+  if (CR.tab === "persos") {
+    const q = CR.q.trim().toLowerCase(), list = Object.entries(PEOPLE).filter(([k, p]) => !k.startsWith("__") && (!q || p.name.toLowerCase().includes(q)))
+      .sort((a, b) => epOfCfg(CONFIG, a[0]) - epOfCfg(CONFIG, b[0]) || a[1].name.localeCompare(b[1].name));
+    body = `<div class="row"><button class="btn gold" type="button" data-cr-new="perso">+ Nouveau perso</button><input class="in cr-q" type="search" id="crQ" placeholder="Chercher un perso" value="${esc(CR.q)}"></div>
+      <div class="cr-list">${list.map(([k, p]) => { const c = byId[k] || ALL_CARDS.find((x) => x.who === k);
+        return `<button type="button" class="cr-row" data-cr-edit="perso" data-id="${k}">${c ? thumb(c) : `<span class="th"></span>`}<span class="cr-n"><b>${esc(p.name)}</b><small>${FACTIONS[p.fac]?.label || ""} · ${epLabel(epOfCfg(CONFIG, k))}</small></span>${crBadge("perso", k)}</button>`; }).join("")}</div>`;
+  } else if (CR.tab === "cartes") {
+    const who = CR.who && PEOPLE[CR.who] ? CR.who : "", cards = who ? ALL_CARDS.filter((c) => c.who === who).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank) : [];
+    body = `<div class="row"><label class="field">Perso <select id="crWho"><option value="">Choisir un perso…</option>${Object.entries(PEOPLE).filter(([k]) => !k.startsWith("__")).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, p]) => `<option value="${k}" ${k === who ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
+      ${who ? `<button class="btn gold" type="button" data-cr-new="carte">+ Nouvelle carte de ${esc(PEOPLE[who].name)}</button>` : ""}</div>
+      ${who ? `<div class="cr-cards">${cards.map((c) => `<button type="button" class="cr-card" data-cr-edit="carte" data-id="${c.id}">${cardHTML(c, {})}${crBadge("carte", c.id)}</button>`).join("")}</div>` : `<p class="note">Choisis un perso pour voir ses cartes, en ajouter une (autre rareté, autre image) ou en retoucher une.</p>`}`;
+  } else if (CR.tab === "cos") {
+    body = `<div class="row"><button class="btn gold" type="button" data-cr-new="cos">+ Nouveau cosmétique</button></div>
+      <div class="zgrid">${COSMETICS.filter((c) => !c.id.startsWith("__")).map((c) => `<button type="button" class="cr-cos" data-cr-edit="cos" data-id="${c.id}">${zTile(c, "", c.only ? " · Sanctuaire" : "")}${crBadge("cos", c.id)}</button>`).join("")}</div>`;
+  } else {
+    body = CREA.log.length ? `<ol class="cr-log">${CREA.log.map((l) => `<li><b>${esc(l.name || "")}</b> ${esc(l.text)}<small>${new Date(l.t).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</small></li>`).join("")}</ol>` : `<p class="note">Rien n'a encore été créé ni retouché.</p>`;
+  }
+  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Dev · 創", "Créateur", "Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou dessine des cosmétiques. C'est publié tout de suite pour tout le monde ; un perso d'un épisode pas encore atteint reste caché aux joueurs. Chaque publication prévient l'autre membre de l'équipe.")}
+    ${tabs}<div class="cr-body">${body}</div></div>`;
+}
+
+// --- formulaire : ouverture ---
+function crOpen(kind, id) {
+  let f;
+  if (kind === "perso") {
+    const p = id ? PEOPLE[id] : null, c = id ? byId[id] : null;
+    f = p ? { name: p.name, fac: p.fac, kanji: p.kanji || "", color: p.color || "#5ab0ff", tag: p.tag || c?.title || "", power: p.power || "", look: p.look || "", ep: epOfCfg(CONFIG, id), branche: p.branche || "" }
+      : { name: "", fac: "irl", kanji: "", color: "#5ab0ff", tag: "", power: "", look: "", ep: Math.min(EP_MAX, (CONFIG.def || 1) + 1), branche: "", rar: "c" };
+  } else if (kind === "carte") {
+    const c = id ? byId[id] : null;
+    f = c ? { title: c.title, rar: c.rar, pos: c.pos || "50% 30%", zoom: c.zoom || 1, branche: c.branche || "" } : { who: CR.who, title: "", rar: "c", pos: "50% 30%", zoom: 1, branche: "" };
+  } else {
+    const c = id ? COS_BY_ID[id] : null;
+    f = c ? { name: c.name, rar: c.rar, slot: c.slot, k: c.k, c1: c.c1 || "#f5c518", c2: c.c2 || "#3a1440", only: c.only || "", coll: c.coll || "" } : { name: "", rar: "r", slot: "aura", k: CR_KINDS("aura")[0], c1: "#f5c518", c2: "#3a1440", only: "", coll: "neon" };
+  }
+  CR.edit = { kind, id: id || null, f, start: JSON.parse(JSON.stringify(f)), image: null };
+  draw(); scrollTo(0, 0);
+}
+// --- formulaire : rendu ---
+function crEditor() {
+  const E = CR.edit, f = E.f, isNew = !E.id;
+  const title = { perso: isNew ? "Nouveau perso" : `Perso : ${PEOPLE[E.id]?.name}`, carte: isNew ? `Nouvelle carte de ${PEOPLE[f.who]?.name || "?"}` : `Carte : ${byId[E.id]?.title}`, cos: isNew ? "Nouveau cosmétique" : `Cosmétique : ${COS_BY_ID[E.id]?.name}` }[E.kind];
+  const fld = (label, html, hint = "") => `<label class="field">${label}${html}${hint ? `<small class="note">${hint}</small>` : ""}</label>`;
+  const txt = (k, max, ph = "") => `<input class="in" type="text" data-crf="${k}" maxlength="${max}" value="${esc(f[k] ?? "")}" placeholder="${esc(ph)}">`;
+  const area = (k, max, ph = "") => `<textarea class="in" rows="2" data-crf="${k}" maxlength="${max}" placeholder="${esc(ph)}">${esc(f[k] ?? "")}</textarea>`;
+  const sel = (k, list) => `<select data-crf="${k}">${crOpts(list, f[k])}</select>`;
+  const col = (k) => `<input type="color" data-crf="${k}" value="${esc(f[k] || "#ffffff")}">`;
+  const img = `${fld("Image", `<input type="file" accept="image/*" id="crImg">`, E.image ? "Nouvelle image prête (réduite à 640 px)." : "jpeg, png ou webp ; réduite automatiquement avant l'envoi.")}`;
+  let form = "";
+  if (E.kind === "perso") form = `${fld("Nom", txt("name", 30, "Ex. Zéphyr"))}${fld("Faction", sel("fac", Object.entries(FACTIONS).map(([k, v]) => [k, v.label])), f.fac === "irl" ? "QG de Shinjuku : 6 skins (Chroma à Prestige) sont créés automatiquement." : "")}
+      ${isNew ? fld("Rareté de sa carte", sel("rar", crRar())) : ""}${fld("Titre de sa carte", txt("tag", 40, "Ex. Vent du QG"))}
+      <div class="cr-2">${fld("Kanji", txt("kanji", 2, "風"))}${fld("Couleur", col("color"))}</div>
+      ${fld("Épisode d'arrivée", sel("ep", Array.from({ length: EP_MAX }, (_, i) => [i + 1, epLabel(i + 1)])), "Caché aux joueurs tant que Billy n'a pas débloqué cet épisode.")}
+      ${fld("Branche en Confrontation", sel("branche", CR_BRANCHES))}${fld("Pouvoir", area("power", 220))}${fld("Apparence", area("look", 220))}${img}`;
+  else if (E.kind === "carte") form = `${fld("Titre", txt("title", 40, "Ex. Tempête"))}${fld("Rareté", sel("rar", crRar()), isNew ? "" : "Changer la rareté change la valeur de la carte pour ceux qui l'ont déjà.")}
+      ${img}<div class="cr-2">${fld(`Cadrage horizontal <b>${parseInt(f.pos)}%</b>`, `<input type="range" min="0" max="100" data-crpos="0" value="${parseInt(f.pos)}">`)}${fld(`Cadrage vertical <b>${parseInt(f.pos.split(" ")[1])}%</b>`, `<input type="range" min="0" max="100" data-crpos="1" value="${parseInt(f.pos.split(" ")[1])}">`)}</div>
+      ${fld(`Zoom <b>×${(+f.zoom).toFixed(1)}</b>`, `<input type="range" min="1" max="3" step="0.1" data-crf="zoom" value="${f.zoom}">`)}${fld("Branche en Confrontation", sel("branche", CR_BRANCHES), "Vide : branche du perso (ou sa variante en Épique et plus).")}`;
+  else form = `${fld("Nom", txt("name", 30, "Ex. Aura du vent"))}${fld("Rareté", sel("rar", crRar()), `Prix en Boutique : ${fmtN(COS_PRICE[f.rar])} ◆`)}
+      ${isNew ? fld("Emplacement", sel("slot", CR_SLOTS())) : ""}${fld("Effet", sel("k", CR_KINDS(f.slot).map((k) => [k, k])))}
+      <div class="cr-2">${fld("Couleur 1", col("c1"))}${fld("Couleur 2", col("c2"))}</div>
+      ${fld("Collection de la Boutique", sel("coll", Z_COLLECTIONS.map((c) => [c.id, c.name])))}
+      <label class="zopt-line"><input type="checkbox" data-crf="only" ${f.only ? "checked" : ""}> Réservé au Sanctuaire (ne s'achète pas)</label>`;
+  const changed = JSON.stringify(f) !== JSON.stringify(E.start) || !!E.image;
+  const canReset = !isNew && crBadge(E.kind, E.id).includes("Retouché");
+  return `<div class="wrap page" style="max-width:1100px">${head("Créateur · 創", esc(title))}
+    <div class="cr-ed"><div class="cr-form">${form}
+      <div class="row cr-act"><button class="btn gold big" type="button" data-cr-save ${changed && !CR.busy ? "" : "disabled"}>${isNew ? "Publier" : "Publier les changements"}</button>
+        <button class="btn" type="button" data-cr-cancel>Annuler</button>${canReset ? `<button class="btn" type="button" data-cr-reset>Remettre d'origine</button>` : ""}</div>
+      <p class="note">Publié tout de suite pour tout le monde. L'autre membre de l'équipe reçoit une notification.</p></div>
+    <div class="cr-prev"><p class="eyebrow mut">Aperçu</p><div id="crPrev">${crPreview()}</div></div></div></div>`;
+}
+// aperçu : la vraie carte, avec les valeurs du formulaire (objets temporaires retirés aussitôt)
+function crPreview() {
+  const E = CR.edit, f = E.f;
+  if (E.image) { ART.__prev = E.image; let st = document.getElementById("crea-prev"); if (!st) { st = document.createElement("style"); st.id = "crea-prev"; document.head.appendChild(st); } st.textContent = `.who-__prev .layer{background-image:url(${E.image})}`; }
+  if (E.kind === "cos") {
+    COS_BY_ID.__prev = { id: "__prev", slot: E.id ? COS_BY_ID[E.id].slot : f.slot, k: f.k, name: f.name || "Aperçu", rar: f.rar, c1: f.c1, c2: f.c2 };
+    try { return `<div class="cr-big">${cardHTML(zSample(), { design: { [COS_BY_ID.__prev.slot]: "__prev" }, present: true })}</div>`; } finally { delete COS_BY_ID.__prev; }
+  }
+  const who = E.kind === "perso" ? E.id || "__prev" : E.id ? byId[E.id].who : f.who;
+  const base = E.kind === "carte" && E.id ? byId[E.id] : E.kind === "perso" && E.id ? byId[E.id] || { id: E.id, who, rar: "c" } : { id: "__prev", who, rar: f.rar || "c" };
+  const c = { ...base, ...(E.kind === "carte" ? { title: f.title || "Titre", rar: f.rar, pos: f.pos, zoom: +f.zoom } : { title: f.tag || "Titre" }), ...(E.image ? { img: "__prev" } : {}) };
+  const keep = PEOPLE[who], P = E.kind === "perso" ? { ...(keep || {}), name: f.name || "Nom", fac: f.fac, kanji: f.kanji, color: f.color, tag: f.tag } : keep;
+  PEOPLE[who] = P;
+  try { return `<div class="cr-big">${cardHTML(c, {})}</div>`; } finally { if (keep) PEOPLE[who] = keep; else delete PEOPLE[who]; }
+}
+// image : réduite dans le navigateur (640 px au plus, jpeg) pour rester sous la limite du serveur
+function crReadImage(file) {
+  return new Promise((ok, ko) => {
+    const rd = new FileReader();
+    rd.onerror = () => ko(new Error("Image illisible."));
+    rd.onload = () => { const im = new Image(); im.onerror = () => ko(new Error("Image illisible.")); im.onload = () => {
+      const k = Math.min(1, 640 / Math.max(im.width, im.height)), cv = document.createElement("canvas");
+      cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k); cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height);
+      let q = 0.86, u = cv.toDataURL("image/jpeg", q); while (u.length > 380000 && q > 0.4) { q -= 0.1; u = cv.toDataURL("image/jpeg", q); }
+      u.length > 380000 ? ko(new Error("Image trop lourde, même réduite.")) : ok(u); }; im.src = rd.result; };
+    rd.readAsDataURL(file);
+  });
+}
+async function crSave(reset) {
+  const E = CR.edit; if (!E || CR.busy) return;
+  const data = {};
+  for (const [k, v] of Object.entries(E.f)) if (!E.id || JSON.stringify(v) !== JSON.stringify(E.start[k])) data[k] = k === "only" ? (v ? "sanctuaire" : "") : v;
+  if (E.kind === "perso" && E.id && "ep" in data) delete data.ep; // l'épisode d'un perso existant se règle dans Admin (il reste modifiable ici pour un nouveau)
+  CR.busy = true; draw();
+  try {
+    const r = await srv(reset ? "creations/reset" : "creations/save", reset ? { kind: E.kind, id: E.id } : { kind: E.kind, id: E.id, data, image: E.image || undefined });
+    await creaApply(r);
+    if (E.kind === "perso" && E.id && E.f.ep !== E.start.ep) await crSetEp(E.id, E.f.ep);
+    toast(reset ? "Remis d'origine." : E.id ? "Changements publiés." : "Publié pour tout le monde !");
+    if (E.kind === "carte") CR.who = r.cards?.[r.id]?.who || byId[r.id]?.who || CR.who;
+    CR.edit = null;
+  } catch (e) { toast(e.message); }
+  CR.busy = false; draw();
+}
+// épisode d'un perso déjà dans le jeu : même réglage que la page Admin (config du jeu)
+async function crSetEp(who, ep) { CONFIG.ep[who] = +ep; await saveConfig(); }
+
+VIEWS.createur = viewCreateur;
+ADMIN_SEG.crTab = (v) => { CR.tab = v; };
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const n = t.closest("[data-cr-new]"); if (n) return crOpen(n.dataset.crNew, null);
+  const ed = t.closest("[data-cr-edit]"); if (ed) return crOpen(ed.dataset.crEdit, ed.dataset.id);
+  if (t.closest("[data-cr-cancel]")) { CR.edit = null; return draw(); }
+  const sv = t.closest("[data-cr-save]"); if (sv) return sure(sv, "Toucher encore pour publier") && crSave(false);
+  const rs = t.closest("[data-cr-reset]"); if (rs) return sure(rs, "Toucher encore pour remettre d'origine") && crSave(true);
+});
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.id === "crQ") { CR.q = t.value; clearTimeout(CR.qT); CR.qT = setTimeout(() => { draw(); const i = $("crQ"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); return; }
+  if (!CR.edit) return;
+  const k = t.dataset.crf, p = t.dataset.crpos;
+  if (k) CR.edit.f[k] = t.type === "checkbox" ? t.checked : t.type === "range" ? +t.value : t.value;
+  else if (p != null) { const xy = CR.edit.f.pos.split(" "); xy[+p] = t.value + "%"; CR.edit.f.pos = xy.join(" "); }
+  else return;
+  if (k === "slot") { CR.edit.f.k = CR_KINDS(t.value)[0]; return draw(); }
+  if (t.tagName === "SELECT" || t.type === "checkbox") return draw();
+  $("crPrev").innerHTML = crPreview();
+  const lab = t.closest("label")?.querySelector("b"); if (lab && t.type === "range") lab.textContent = k === "zoom" ? `×${(+t.value).toFixed(1)}` : `${t.value}%`;
+  const sv = document.querySelector("[data-cr-save]"); if (sv) sv.disabled = false;
+});
+document.addEventListener("change", async (e) => {
+  if (e.target.id === "crWho") { CR.who = e.target.value; return draw(); }
+  if (e.target.id === "crImg" && CR.edit && e.target.files?.[0]) {
+    try { CR.edit.image = await crReadImage(e.target.files[0]); } catch (err) { toast(err.message); }
+    draw();
+  }
 });
 
 // ===== Coffre arcanique : scène 3D, clé, et lecteur de scénarios =====

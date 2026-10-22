@@ -1053,6 +1053,30 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 /* ===== Confrontation ===== */
 .cf-row { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 12px 14px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--panel); }
 .cf-row .btn { margin-left: auto; }
+/* Créateur (admin et dev) */
+.cr-row .th .layer, .cr-row .th .photo { position: absolute; inset: 0; background-size: cover; background-position: var(--pos, 50% 22%); }
+.cr-row .th .mono-a { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; color: var(--mut); }
+.cr-body { margin-top: 14px; }
+.cr-q { max-width: 280px; }
+.cr-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-top: 12px; }
+.cr-row { position: relative; display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); text-align: left; cursor: pointer; }
+.cr-row:hover, .cr-card:hover, .cr-cos:hover { border-color: var(--gold); }
+.cr-row .th { width: 40px; height: 52px; flex: none; position: relative; overflow: hidden; border-radius: 6px; background: var(--bg2); }
+.cr-n { display: grid; gap: 2px; min-width: 0; } .cr-n small { color: var(--mut); font-size: 12px; }
+.cr-b { position: absolute; top: 6px; right: 6px; z-index: 3; padding: 1px 7px; border-radius: 999px; font: 700 10px var(--mono); }
+.cr-b.new { background: var(--gold); color: #1a1406; } .cr-b.mod { background: var(--cyan); color: #04141a; }
+.cr-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 12px; }
+.cr-card, .cr-cos { position: relative; padding: 0; border: 1px solid transparent; border-radius: 14px; background: none; cursor: pointer; text-align: left; color: inherit; }
+.cr-ed { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
+.cr-form { display: grid; gap: 12px; }
+.cr-form .field { display: grid; gap: 6px; font-size: 13px; color: var(--fg2); }
+.cr-form select, .cr-form .in { width: 100%; box-sizing: border-box; }
+.cr-form input[type="color"] { width: 64px; height: 36px; padding: 0; border: 1px solid var(--line2); border-radius: 8px; background: none; }
+.cr-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cr-prev { position: sticky; top: 90px; }
+@media (max-width: 760px) { .cr-ed { grid-template-columns: 1fr; } .cr-prev { order: -1; position: static; } .cr-big .kcw { --w: 180px; } }
+.cr-big { display: grid; justify-items: center; } .cr-big .kcw { --w: 240px; }
+.cr-log { display: grid; gap: 8px; padding-left: 20px; } .cr-log small { display: block; color: var(--mut); font-size: 12px; }
 /* Admin : branches des cartes */
 .brx-sum { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .brx-sum span { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line2); font-size: 13px; }

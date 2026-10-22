@@ -202,7 +202,7 @@ const EP1 = ["billy", "seb", "mojo", "kuradai", "byakko", "stalk", "nestor", "su
   "lion", "cerf", "felin", "oiseau", "elfe1", "elfe2", "belier", "gobelin"];
 const EP_MAX = 12;
 const HIDDEN = 99;
-const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, EP1.includes(k) ? 1 : 2])), progress: {}, def: 1, extra: {} });
+const DEFAULT_CONFIG = () => ({ ep: Object.fromEntries(Object.keys(PEOPLE).map((k) => [k, PEOPLE[k].ep ?? (EP1.includes(k) ? 1 : 2)])), progress: {}, def: 1, extra: {} });
 
 // ===== Skins des persos IRL (gammes façon LoL, une par rareté) =====
 const SKIN_LINES = [
@@ -739,6 +739,29 @@ const COSMETICS = [
   { id: "pres-orbite", slot: "pres", name: "Orbite lente", rar: "l", k: "orbite", only: "sanctuaire" },
 ];
 const COS_BY_ID = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
+
+// ===== Créations de l'admin et du dev : persos, cartes et cosmétiques ajoutés ou retouchés depuis l'app =====
+// data = { people: { who: champs }, cards: { id: champs }, cos: { id: champs } } (doc « creations/catalog »).
+// Un id du jeu de base = retouche (champs remplacés) ; un id nouveau = ajout. Repart toujours du jeu de base :
+// appliquer deux fois la même chose donne le même catalogue.
+const CREA_BASE = { people: JSON.parse(JSON.stringify(PEOPLE)), cards: CARDS.map((c) => ({ ...c })), cos: COSMETICS.map((c) => ({ ...c })) };
+const refill = (obj, entries) => { for (const k of Object.keys(obj)) delete obj[k]; Object.assign(obj, Object.fromEntries(entries)); };
+function applyCreations(data) {
+  const d = data || {}, P = d.people || {}, C = d.cards || {}, Z = d.cos || {};
+  refill(PEOPLE, [...Object.entries(CREA_BASE.people).map(([k, p]) => [k, { ...p, ...(P[k] || {}) }]), ...Object.entries(P).filter(([k]) => !CREA_BASE.people[k])]);
+  const baseIds = new Set(CREA_BASE.cards.map((c) => c.id));
+  CARDS.splice(0, CARDS.length, ...CREA_BASE.cards.map((c) => ({ ...c, ...(C[c.id] || {}), id: c.id })),
+    ...Object.entries(C).filter(([id, c]) => !baseIds.has(id) && PEOPLE[c.who]).map(([id, c]) => ({ ...c, id })));
+  SKINNED.splice(0, SKINNED.length, ...Object.keys(PEOPLE).filter((k) => PEOPLE[k].fac === "irl"));
+  SKINS.splice(0, SKINS.length, ...SKINNED.flatMap((who) => SKIN_LINES.map((l) => ({ id: `${who}-sk-${l.id}`, who, skin: l.id, title: `Skin ${l.name}`, rar: l.rar, ...(C[`${who}-sk-${l.id}`] || {}) }))));
+  ALL_CARDS.splice(0, ALL_CARDS.length, ...CARDS, ...SKINS);
+  refill(CARD_BY_ID, ALL_CARDS.map((c) => [c.id, c]));
+  refill(CATALOG_NO, [...ALL_CARDS].sort((a, b) => RANKS.indexOf(b.rar) - RANKS.indexOf(a.rar) || a.id.localeCompare(b.id)).map((c, i) => [c.id, i + 1]));
+  const cosBase = new Set(CREA_BASE.cos.map((c) => c.id));
+  COSMETICS.splice(0, COSMETICS.length, ...CREA_BASE.cos.map((c) => ({ ...c, ...(Z[c.id] || {}), id: c.id })), ...Object.entries(Z).filter(([id]) => !cosBase.has(id)).map(([id, c]) => ({ ...c, id })));
+  refill(COS_BY_ID, COSMETICS.map((c) => [c.id, c]));
+  const all = ACHIEVEMENTS.find((a) => a.id === "a-all"); if (all) all.goal = ALL_CARDS.length;
+}
 // --- valeurs PROVISOIRES (à valider) : prix en boutique, coût et probabilités des invocations ---
 const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
 const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
@@ -949,4 +972,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openManyS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openManyS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

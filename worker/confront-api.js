@@ -5,7 +5,7 @@
 import * as G from "./game.js";
 import { createGame, act, tick, viewFor, legalActions } from "./confront/engine.mjs";
 import { botAction } from "./confront/bots.mjs";
-import { brancheDeCarte, brancheProposeeCarte } from "./confront/branches-proposees.mjs";
+import { brancheProposeeCarte } from "./confront/branches-proposees.mjs";
 import { BRANCHES, BRANCH_IDS } from "./confront/branches.mjs";
 import { CARD_DEFS, SIGNES } from "./confront/cards.mjs";
 import { modeFor } from "./confront/config.mjs";
@@ -81,8 +81,11 @@ async function viewOf(env, g, uid) {
   return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me) };
 }
 // cartes de collection apportables : celles du joueur, avec leur branche (rien d'autre du catalogue n'est envoyé)
+// proposition : branche donnée à la création (carte, puis perso créé depuis l'app), sinon la table proposée
+const propOf = (card) => (card && (card.branche || brancheProposeeCarte(card) || G.PEOPLE[card.who]?.branche)) || null;
+const branchOf = (card, choix) => (card && choix[card.id]) || propOf(card);
 function myCards(s, choix) {
-  return Object.keys(s.owned).filter((id) => G.hasCard(s, id) && G.CARD_BY_ID[id]).map((id) => ({ cardId: id, branch: brancheDeCarte(G.CARD_BY_ID[id], choix) })).filter((c) => c.branch);
+  return Object.keys(s.owned).filter((id) => G.hasCard(s, id) && G.CARD_BY_ID[id]).map((id) => ({ cardId: id, branch: branchOf(G.CARD_BY_ID[id], choix) })).filter((c) => c.branch);
 }
 // branches choisies par Billy, carte par carte (doc « confrontcfg/branches », fermé à l'API des documents) ;
 // une carte sans choix garde la proposition (branche du perso, variante en Épique et plus)
@@ -107,11 +110,11 @@ export async function confrontRoute(env, user, path, body, h) {
       if (!ids.length || ids.some((id) => !G.CARD_BY_ID[id])) return fail(400, "Carte inconnue.");
       if (b && !BRANCH_IDS.includes(b)) return fail(400, "Branche inconnue.");
       // choisir la proposition revient à ne rien imposer : la carte suivra une proposition corrigée plus tard
-      for (const id of ids) { if (!b || b === brancheProposeeCarte(G.CARD_BY_ID[id])) delete choix[id]; else choix[id] = b; }
+      for (const id of ids) { if (!b || b === propOf(G.CARD_BY_ID[id])) delete choix[id]; else choix[id] = b; }
       await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'confrontcfg', 'branches', ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
         .bind(BR_DOC, JSON.stringify({ cartes: choix }), Date.now()).run();
     }
-    return json({ proposees: Object.fromEntries(Object.values(G.CARD_BY_ID).map((c) => [c.id, brancheProposeeCarte(c)])), choix });
+    return json({ proposees: Object.fromEntries(Object.values(G.CARD_BY_ID).map((c) => [c.id, propOf(c)])), choix });
   }
   if (a === "list") {
     const since = Date.now() - STALE;

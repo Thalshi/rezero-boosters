@@ -248,6 +248,7 @@ async function connect() {
       SRV = true;
       const r = await srv("state", { guest });
       if (r.imported === "invité") toast("Tes cartes communes jouées en invité ont été reprises sur ton compte Discord.");
+      await creaLoad(true); // persos, cartes et cosmétiques créés depuis l'app
       subscribeShared();
       subscribePred();
       MYNAME = (await window.discordMe())?.name || "";

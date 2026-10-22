@@ -21,7 +21,7 @@ async function table(A) {
 }
 // toucher une carte de la main par son coin visible (elles se chevauchent)
 const idle = (page) => page.waitForFunction(() => !Arena.st?.running && !document.querySelector("#ar-react.on"), null, { timeout: 15000 }).catch(() => null);
-async function tap(page, uid) { await idle(page); const b = await page.locator(`.ar-hc[data-cu="${uid}"]`).boundingBox(); await page.mouse.click(b.x + b.width * .25, Math.min(b.y + 20, page.viewportSize().height - 4)); }
+async function tap(page, uid) { await idle(page); const l = page.locator(`.ar-hc[data-cu="${uid}"]`); if (!(await l.waitFor({ timeout: 6000 }).then(() => true).catch(() => false))) return; const b = await l.boundingBox(); await page.mouse.click(b.x + b.width * .25, Math.min(b.y + 20, page.viewportSize().height - 4)); }
 try {
   const A = await player(srv.base, IDS.p1, "Aiko");
   await A.api("state");

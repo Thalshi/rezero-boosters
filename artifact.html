@@ -6727,7 +6727,8 @@ const Arena = (() => {
   function cancelTarget() { targeting = null; hover(null); renderTags(); }
   function hover(p) { if (hovered && hovered !== p) hovered.ringM.scale.setScalar(1); hovered = p; if (p) p.ringM.scale.setScalar(1.18); }
   function pickTarget(p) {
-    const acts = targetsFor(p); if (!acts.length) return;
+    const acts = targetsFor(p);
+    if (!acts.length) { cancelTarget(); st.sel = null; layoutHand(); return showInfo(p); }
     cancelTarget(); st.sel = null; layoutHand();
     if (acts.length === 1) return act(acts[0]);
     // Larcin, Dissipation : une carte de sa main ou une carte posée devant lui
@@ -6953,6 +6954,7 @@ const Arena = (() => {
   // appelée à chaque rendu de la table (views6) : met l'arène à jour avec la dernière vue du serveur
   function refresh(fx = true) {
     const T = CF.table, v = T.vue;
+    if (targeting && !plays(targeting.uid).some((a) => a.cible)) { targeting = null; hover(null); }
     if (!st.running) applyView(v, fx);
     syncHand(v, fx); renderSide(); renderReact(); layoutHand();
   }

@@ -97,6 +97,10 @@ const MENU = () => [
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
   const cur = (v) => (view === v || (v === "wiki" && view === "carte") ? 'aria-current="page"' : "");
+  // barre du bas (téléphone) : les 5 endroits où l'on va le plus
+  const tb = $("tabbar"), tabs = [["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
+    featureOn(CONFIG, "confrontation") ? ["confront", "対", "Combat"] : ["pred", "予", "Prédictions", openPredCount()], ["profil", "我", "Profil", 0, "moi"]];
+  if (tb) tb.innerHTML = tabs.map(([v, k, l, n, p]) => `<button type="button" data-nav="${v}" ${p ? `data-p="${p}"` : ""} ${view === v ? 'aria-current="page"' : ""}><b aria-hidden="true">${k}</b>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("");
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>予 Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>

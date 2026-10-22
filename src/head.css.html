@@ -1,7 +1,7 @@
 <title>Re Zéro : LoL · Boosters</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Même interface que Kyara (couleurs, polices, pilules, cartes), avec l'univers de Re Zéro : LoL. */
 :root {
@@ -1323,4 +1323,78 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .cf-emb.big { width: 70%; height: auto; aspect-ratio: 1; }
 .cf-br .cf-emb { width: 52px; height: 52px; }
 .cf-brl { display: inline-flex; align-items: center; gap: 4px; }
+
+/* ===================== Thème « Arcane Néon » (choisi par Reichi le 22/10/2026) =====================
+   Arcane : or, cadres taillés, titres classiques (Cinzel). Néon : grande image, lueurs rose et cyan,
+   barre du bas arrondie. Les couleurs ont un rôle : or = prestige et action principale,
+   cyan = utile tout de suite (essence, missions, cible), rose = l'événement (pack du jour, Mythique). */
+:root {
+  --bg: #080712; --bg2: #0c0a18; --panel: #100c1e; --panel2: #130e24; --raise: #1b1530;
+  --line: #e8c77e1c; --line2: #e8c77e33; --line3: #e8c77e5c;
+  --fg: #f0e6d2; --fg2: #c9bfd6; --fg3: #ddd3e4; --mut: #a99cc8; --dim: #6a6280;
+  --acc: #ff2e88; --acc2: #ff5aa5; --acc-soft: #ff2e881f;
+  --cyan: #2ee6ff; --gold: #e8c77e; --gold-soft: #e8c77e1f; --gold2: #f0d38c; --gold3: #b88a3e;
+  --disp: "Cinzel", Georgia, serif; --body: "Inter", "Zen Kaku Gothic New", system-ui, sans-serif;
+  --r-sm: 2px; --r-md: 3px; --r-lg: 4px; --r-xl: 6px;
+  --bevel: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+  --glow-acc: 0 0 18px #ff2e8866; --glow-cyan: 0 0 16px #2ee6ff44; --glow-gold: 0 0 20px #e8c77e44;
+}
+html { background: var(--bg); }
+body { background: radial-gradient(120% 50% at 50% -8%, #1d1236 0%, #080712 62%) no-repeat, var(--bg); }
+::selection { background: var(--acc); color: #fff; }
+/* en-tête et logo (losange doré) */
+.hd { background: rgba(8, 7, 18, .9); border-bottom-color: var(--line2); }
+.logo-mk { width: 32px; height: 32px; border-radius: 0; transform: rotate(45deg); background: none; border: 1.5px solid var(--gold); box-shadow: var(--glow-acc); }
+.logo-mk i { transform: rotate(-45deg); background: none; color: var(--gold); font: 800 14px/1 var(--disp); width: auto; height: auto; }
+.logo b { font: 800 18px/1 var(--disp); letter-spacing: .14em; }
+.nav > a[aria-current="page"]::after { background: var(--acc); box-shadow: var(--glow-acc); }
+.nav .ev { color: var(--gold2); }
+.wal, .mpill, .ib { border-radius: 0; border-color: var(--line2); background: #100c1ecc; }
+.wal .bar i { background: var(--acc); }
+.badge { background: var(--acc); color: #fff; }
+/* titres */
+h1 { font-weight: 800; letter-spacing: .01em; }
+h1 em { color: var(--acc); text-shadow: var(--glow-acc); }
+h2, h3 { font-weight: 700; letter-spacing: .01em; }
+.eyebrow { color: var(--cyan); }
+.eyebrow.gold { color: var(--gold); }
+.hero h2.big, .ft p b { font-weight: 800; }
+/* boutons : or taillé pour l'action principale, rose lumineux pour l'événement */
+.btn { border-radius: 0; border-color: var(--line3); background: #0c0a18cc; font-family: var(--body); }
+.btn.gold { background: linear-gradient(180deg, var(--gold2), var(--gold3)); border-color: transparent; color: #1a1206; font: 700 15px var(--body); padding: 0 30px; clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%); }
+.btn.gold:focus-visible { clip-path: none; outline: 2px solid var(--cyan); outline-offset: 2px; }
+.btn.acc { background: var(--acc); border-color: var(--acc); color: #fff; font: 700 15px var(--body); box-shadow: var(--glow-acc); }
+.btn.big { font-size: 16px; }
+.btn.sq { border-radius: 0; }
+.bigopen { border-radius: 0; background: linear-gradient(180deg, var(--gold2), var(--gold3)); color: #1a1206; clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%); }
+.bigopen.acc { background: var(--acc); color: #fff; }
+.bigopen.two { background: transparent; clip-path: none; color: var(--cyan); box-shadow: inset 0 0 0 1.5px var(--cyan), var(--glow-cyan); }
+.bigopen.two.acc { color: var(--acc2); box-shadow: inset 0 0 0 1.5px var(--acc), var(--glow-acc); }
+.comptoir { background: var(--acc); color: #fff; box-shadow: var(--glow-acc), 0 8px 20px #0008; font-family: var(--body); }
+/* panneaux : bord doré fin ; le grand bandeau de l'accueil est taillé et lumineux */
+.card, .pkd, .acc-card, .m-foot { border-color: var(--line2); }
+.hero { border: 0; border-radius: 0; clip-path: var(--bevel); background: radial-gradient(70% 70% at 60% 60%, #ff2e8822, transparent 70%), linear-gradient(180deg, #171030, #0c0918); box-shadow: inset 0 0 0 1.5px var(--gold); }
+.hero.acc { background: radial-gradient(70% 70% at 60% 60%, #ff2e8833, transparent 70%), linear-gradient(180deg, #1a0d24, #0c0918); box-shadow: inset 0 0 0 1.5px var(--acc); }
+.hero.vio { background: radial-gradient(70% 70% at 60% 60%, #2ee6ff26, transparent 70%), linear-gradient(180deg, #0f1430, #0c0918); box-shadow: inset 0 0 0 1.5px var(--cyan); }
+.hero-t .eyebrow { color: var(--acc); }
+.mgrid button { border-radius: 0; }
+.mgrid button[aria-current="page"] { border-color: var(--acc); box-shadow: var(--glow-acc); }
+.mgrid button[aria-current="page"] i { color: var(--acc); }
+.m-foot a:first-child, .m-foot button:first-child { color: var(--acc); }
+.toast { background: var(--gold2); color: #1a1206; }
+/* barre du bas (téléphone) : arrondie, onglet actif rose */
+.tabbar { display: none; }
+@media (max-width: 899px) {
+  .tabbar { position: fixed; z-index: 35; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; padding: 6px; border-radius: 20px; background: #120d22f2; box-shadow: 0 0 0 1px var(--line3), 0 12px 30px #000b; backdrop-filter: blur(8px); }
+  .tabbar button { position: relative; display: grid; place-items: center; gap: 1px; min-height: 50px; padding: 6px 0; border: 0; border-radius: 14px; background: none; color: var(--mut); font: 600 11px var(--body); cursor: pointer; }
+  .tabbar button b { font: 700 18px/1.1 var(--body); }
+  .tabbar button[aria-current="page"] { background: var(--acc); color: #fff; box-shadow: var(--glow-acc); }
+  .tabbar .badge { top: 2px; right: 10%; }
+  body { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  /* le Comptoir devient une icône ronde au-dessus de la barre : il ne cache plus le contenu */
+  .comptoir { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); right: 14px; width: 48px; height: 48px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
+  .comptoir svg { width: 22px; height: 22px; }
+  .comptoir .badge { font-size: 11px; }
+  .toast { bottom: calc(146px + env(safe-area-inset-bottom, 0px)); }
+}
 </style>

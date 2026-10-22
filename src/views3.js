@@ -20,7 +20,7 @@ async function zCall(action, body, local) {
   const r = local(); if (r.error) throw new Error(r.error); persist(); return r;
 }
 async function zBuy(id) {
-  try { await zCall("shop/buy", { id }, () => buyCosmeticS(save, id)); toast(`${COS_BY_ID[id].name} ajouté à ton inventaire.`); draw(); }
+  try { await zCall("shop/buy", { id }, () => buyCosmeticS(save, id)); toast(`${COS_BY_ID[id].name} ajouté à ton inventaire.`); draw(); if (zItem === id && !$("overlay").hidden) zOpenItem(id); }
   catch (e) { toast(e.message); draw(); }
 }
 async function zSaveDesign() {
@@ -40,22 +40,66 @@ function sure(btn, label) {
   return false;
 }
 const closedHTML = (name) => `<div class="wrap page">${head("Bientôt · 準備中", name)}${empty("Cette partie du jeu n'est pas encore ouverte. Billy l'annoncera au QG.")}</div>`;
-// ===== Boutique Arcanique =====
+// ===== Boutique Arcanique (organisée comme la Boutique Discord : collections, tuiles, aperçu sur ton profil) =====
+// Les collections ne sont qu'une présentation : prix et règles restent ceux du serveur (COS_PRICE, buyCosmeticS).
+const Z_COLLECTIONS = [
+  { id: "lumiere", name: "Lumière céleste", kanji: "光", tag: "Auréoles, ailes et or pur pour les cartes qui brillent.", c1: "#f5c518", c2: "#7a4dff", items: ["orn-aureole", "orn-ailes-lumiere", "aura-solaire", "cadre-or", "orn-couronne", "fond-aurore", "orn-etoile"] },
+  { id: "braise", name: "Feu et sang", kanji: "火", tag: "Braises, cuivre et cornes d'ombre : la collection des cartes qui frappent.", c1: "#ff4d2e", c2: "#3a0d14", items: ["cadre-sang", "cadre-cuivre", "aura-braise", "part-braises", "fond-forge", "orn-cornes", "cadre-obsidienne"] },
+  { id: "givre", name: "Givre et nuit", kanji: "夜", tag: "Le calme d'une nuit à Shinjuku, du givre jusqu'au néant.", c1: "#4dd6ff", c2: "#101a3a", items: ["aura-givre", "part-flocons", "fond-nuit", "fond-abysse", "aura-neant", "cadre-argent"] },
+  { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
+  { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
+];
+// tout objet de boutique qui n'est dans aucune collection rejoint « Néon du QG »
+(() => { const used = new Set(Z_COLLECTIONS.flatMap((c) => c.items)); Z_COLLECTIONS.at(-1).items = COSMETICS.filter((c) => !c.only && !used.has(c.id)).map((c) => c.id); })();
+const zCollOf = (id) => Z_COLLECTIONS.find((c) => c.items.includes(id));
+const zFeatured = () => Z_COLLECTIONS[Math.floor(Date.now() / 86400e3) % Z_COLLECTIONS.length]; // la vedette change chaque jour
+let zShopFilter = "", zItem = null;
+// une tuile : l'objet porté par ta carte, son nom, sa collection, son prix
+function zShopTile(c) {
+  const owned = !!cosOf(save).own[c.id], price = COS_PRICE[c.rar];
+  const tagTxt = c.only ? "Sanctuaire" : owned ? "Possédé" : `${fmtN(price)} ◆`;
+  return `<button type="button" class="zs-tile r-${c.rar} ${owned ? "own" : ""}" data-zitem="${c.id}" style="--rc:${RAR[c.rar].color}" aria-label="${esc(c.name)}, ${RAR[c.rar].label}, ${tagTxt}">
+    <span class="zs-art">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: false })}</span>
+    <span class="zs-meta"><b>${esc(c.name)}</b><small>${COS_SLOT_LABEL[c.slot]} · <i style="color:${RAR[c.rar].color}">${RAR[c.rar].label}</i></small>
+      <span class="zs-price ${owned ? "own" : ""} ${c.only ? "only" : ""}">${owned ? "✓ " : ""}${tagTxt}</span></span></button>`;
+}
 function viewBoutique() {
   if (!featureOn(CONFIG, "boutique")) return closedHTML("Boutique Arcanique");
-  const list = COSMETICS.filter((c) => c.slot === zShopSlot);
-  const own = cosOf(save).own;
+  const F = zFeatured(), fItems = F.items.map((id) => COS_BY_ID[id]).filter(Boolean);
+  const hero = `<section class="zs-hero" style="--h1:${F.c1};--h2:${F.c2}">
+      <div class="zs-hero-t"><p class="eyebrow">Collection à la une · ${F.kanji}</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
+        <button class="btn gold" type="button" data-zcoll="${F.id}">Voir la collection</button></div>
+      <div class="zs-hero-cards">${fItems.slice(0, 3).map((c) => `<div class="zs-hero-card">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: true })}</div>`).join("")}</div>
+      <span class="zs-hero-k" aria-hidden="true">${F.kanji}</span></section>`;
+  const filters = seg("zShopF", [["", "Tout"], ...COS_SLOTS.map((sl) => [sl.id, sl.label])], zShopFilter);
+  const rows = zShopFilter
+    ? `<section class="sec"><h2>${COS_SLOT_LABEL[zShopFilter]}</h2><div class="zs-grid">${COSMETICS.filter((c) => c.slot === zShopFilter).map(zShopTile).join("")}</div></section>`
+    : [...Z_COLLECTIONS.map((col) => `<section class="sec zs-row" id="zcoll-${col.id}"><div class="zs-row-h" style="--h1:${col.c1}"><span class="zs-k">${col.kanji}</span><div><h2>${esc(col.name)}</h2><p class="note">${esc(col.tag)}</p></div></div>
+        <div class="zs-grid">${col.items.map((id) => COS_BY_ID[id]).filter(Boolean).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zShopTile).join("")}</div></section>`),
+      `<section class="sec zs-row"><div class="zs-row-h" style="--h1:#ff4d2e"><span class="zs-k">封</span><div><h2>Exclusifs du Sanctuaire</h2><p class="note">Ils ne s'achètent pas : on les obtient seulement en invoquant au Sanctuaire.</p></div></div>
+        <div class="zs-grid">${COSMETICS.filter((c) => c.only).map(zShopTile).join("")}</div></section>`].join("");
   return `<div class="wrap page">${head("Boutique Arcanique · 店", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
     <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span><button class="btn sm" type="button" data-nav="atelier">Ouvrir l'Atelier</button></div>
-    ${seg("zShop", COS_SLOTS.map((s) => [s.id, s.label]), zShopSlot)}
-    <div class="zgrid">${list.map((c) => {
-      const owned = !!own[c.id], price = COS_PRICE[c.rar];
-      const act = c.only === "sanctuaire" ? `<button class="btn sm" type="button" data-nav="sanctuaire">Sanctuaire uniquement</button>`
-        : owned ? `<button class="btn sm" type="button" disabled>Possédé</button>`
-        : `<button class="btn sm gold" type="button" data-zbuy="${c.id}" ${save.chakra < price ? "disabled" : ""}>Acheter · ${fmtN(price)} ◆</button>`;
-      return zTile(c, act);
-    }).join("")}</div></div>`;
+    ${hero}${filters}${rows}</div>`;
 }
+// fiche d'un objet : aperçu sur ton profil et sur ta carte vedette (avec son design actuel), puis achat
+function zOpenItem(id) {
+  const c = COS_BY_ID[id]; if (!c) return; zItem = id;
+  const card = zSample(), cur = has(card.id) ? designOfS(save, card.id) || {} : {}, design = { ...cur, [c.slot]: c.id };
+  const owned = !!cosOf(save).own[c.id], price = COS_PRICE[c.rar], col = zCollOf(c.id), name = ACCT?.name || "Toi";
+  const act = c.only ? `<button class="btn gold big block" type="button" data-nav="sanctuaire">Invoquer au Sanctuaire</button><p class="note">Objet exclusif : il ne s'achète pas, il s'obtient seulement par invocation.</p>`
+    : owned ? `<button class="btn gold big block" type="button" data-nav="atelier" data-p="${card.id}">Équiper à l'Atelier</button><p class="note">Tu l'as déjà : il s'utilise sur autant de cartes que tu veux.</p>`
+    : `<button class="btn gold big block" type="button" data-zbuy="${c.id}" ${save.chakra < price ? "disabled" : ""}>Acheter · ${fmtN(price)} ◆</button>
+       <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Objet de compte : il reste à toi, ne se vend pas et s'utilise sur toutes tes cartes.</p>`;
+  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(c.name)}"><div class="sheet-h"><h2>${esc(c.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><div class="zs-prev" style="--h1:${col?.c1 || RAR[c.rar].color};--h2:${col?.c2 || "#15141a"}">
+        <div class="zs-prof"><span class="zs-av">${esc(name[0].toUpperCase())}</span><div><b>${esc(name)}</b><small>Aperçu sur ton profil</small></div></div>
+        <div class="zs-prev-card">${cardHTML(card, { design, present: true, gold: has(card.id) && !own(card.id).n && own(card.id).gold > 0 })}</div></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${col ? `<span class="pill">${col.kanji} ${esc(col.name)}</span>` : ""}<span class="pill">Aucun bonus de jeu</span></div>
+      ${act}</div></div>`;
+  $("overlay").hidden = false;
+}
+const ZS_SEG = { zShopF: (v) => { zShopFilter = v; } };
 
 // ===== Atelier Arcanique =====
 function zOptions(slot) {
@@ -257,10 +301,12 @@ function afterViews() {
   if (view === "sanctuaire") Portal.attach($("sanctumHost"));
   if (view === "labo" && $("labSanctum")) Portal.attach($("labSanctum"));
 }
-const Z_SEG = { zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
+const Z_SEG = { ...ZS_SEG, zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
 document.addEventListener("click", (e) => {
   const t = e.target;
   const b = t.closest("[data-zbuy]"); if (b) { b.disabled = true; return zBuy(b.dataset.zbuy); }
+  const it = t.closest("[data-zitem]"); if (it) return zOpenItem(it.dataset.zitem);
+  const zc = t.closest("[data-zcoll]"); if (zc) { zShopFilter = ""; draw(); document.getElementById("zcoll-" + zc.dataset.zcoll)?.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
   const s = t.closest("[data-zset]"); if (s) { const sl = s.dataset.zset, ref = s.dataset.ref; if (ref) zDraft[sl] = ref; else delete zDraft[sl]; return draw(); }
   if (t.closest("[data-zsave]")) return zSaveDesign();
   if (t.closest("[data-zclear]")) { zDraft = {}; return draw(); }

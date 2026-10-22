@@ -186,8 +186,12 @@ try {
   await P.page.reload(); await P.page.waitForTimeout(2000);
   await P.go("boutique");
   let sb = await P.state();
-  firstBuy = await P.page.getAttribute("[data-zbuy]", "data-zbuy");
-  await P.page.dblclick(`[data-zbuy="${firstBuy}"]`); await P.page.waitForTimeout(1200);
+  firstBuy = await P.page.getAttribute(".zs-tile:has(.zs-price:not(.own):not(.only)) >> nth=0", "data-zitem");
+  await P.page.click(`[data-zitem="${firstBuy}"] >> nth=0`); await P.page.waitForTimeout(400);
+  t.check("Boutique : la fiche montre l'objet sur ta carte vedette avant l'achat", (await P.page.locator(".zs-sheet .zs-prev-card .kcw").count()) === 1);
+  await P.page.dblclick(`#overlay [data-zbuy="${firstBuy}"]`); await P.page.waitForTimeout(1200);
+  t.check("Boutique : après l'achat, la fiche indique « Équiper à l'Atelier »", (await P.page.locator('#overlay [data-nav="atelier"]').count()) === 1);
+  await P.page.click('#overlay [data-act="close"]').catch(() => {});
   let sa = await P.state();
   t.check("Boutique : double clic sur Acheter, un seul débit", sa.chakra === sb.chakra - G.COS_PRICE[G.COS_BY_ID[firstBuy].rar] && sa.cos.own[firstBuy], { avant: sb.chakra, après: sa.chakra });
   await P.go("sanctuaire");

@@ -20,11 +20,15 @@ try {
     await page.evaluate(() => { save.chakra = 5000; save.owned.billy = { n: 1, gold: 0, first: Date.now() }; persist(); });
 
     await go(page, "boutique");
-    t.check(`${label} · la Boutique s'affiche`, (await page.locator(".zt").count()) > 3);
+    t.check(`${label} · la Boutique s'affiche`, (await page.locator(".zs-tile").count()) > 30);
     await page.screenshot({ path: join(OUT, `cos-boutique-${label}.png`) });
-    const first = await page.getAttribute("[data-zbuy]", "data-zbuy");
+    t.check(`${label} · Boutique : bannière de la collection à la une et rayons par collection`, (await page.locator(".zs-hero").count()) === 1 && (await page.locator(".zs-row").count()) >= 5);
+    const first = await page.getAttribute(".zs-tile:has(.zs-price:not(.own):not(.only)) >> nth=0", "data-zitem");
+    await page.click(`[data-zitem="${first}"] >> nth=0`); await sleep(300);
+    t.check(`${label} · Boutique : fiche avec aperçu sur ton profil`, (await page.locator(".zs-sheet .zs-prof").count()) === 1);
     const c0 = await page.evaluate(() => save.chakra);
-    await page.click(`[data-zbuy="${first}"]`); await sleep(300);
+    await page.click(`#overlay [data-zbuy="${first}"]`); await sleep(300);
+    await page.click('#overlay [data-act="close"]').catch(() => {});
     t.check(`${label} · achat en boutique`, await page.evaluate((id) => !!save.cos.own[id], first));
     t.check(`${label} · le prix est débité`, (await page.evaluate(() => save.chakra)) === c0 - (await page.evaluate((id) => COS_PRICE[COS_BY_ID[id].rar], first)));
     t.check(`${label} · un objet du Sanctuaire ne s'achète pas`, (await page.evaluate(() => buyCosmeticS(save, "cadre-prisme").error || "")).length > 0);

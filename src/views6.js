@@ -120,6 +120,8 @@ const EVT = {
   pioche: (e) => `Tu pioches ${e.n || e.cartes?.length || ""} carte(s).`, pioche_publique: (e) => `${cfName(e.pid)} pioche ${e.n || ""} carte(s).`, delai_expire: (e) => `${cfName(e.pid)} n'a pas répondu à temps.`,
   rejoint: (e) => `${cfName(e.pid)} rejoint la table.`, quitte: (e) => `${cfName(e.pid)} quitte la table.`, contribution: (e) => `${cfName(e.pid)} a apporté ses cartes.`, choix: (e) => `${cfName(e.pid)} a choisi son perso.`,
   sauvetage: (e) => `${cfName(e.pid)} se sauve de justesse.`,
+  entrave: (e) => `${cfName(e.pid)} reste entravé et passe son tour.`, entrave_brisee: (e) => `${cfName(e.pid)} brise le Sceau d'entrave.`,
+  reconnexion: (e) => `${cfName(e.pid)} est de retour.`, deconnexion: (e) => `${cfName(e.pid)} s'est déconnecté.`,
   defi_relance: (e) => `${cfName(e.pid)} relance le défi.`, defi_perdu: (e) => `${cfName(e.pid)} perd le défi.`, onde_evitee: (e) => `${cfName(e.pid)} évite l'onde de choc.`,
   reprise: (e) => `${cfName(e.pid)} reprend sa Frappe.`, remelange: () => "La défausse est remélangée dans la pioche.", effondrement: (e) => `Effondrement : ${cfName(e.pid)} perd 1 PV.`,
   orbe_explose: (e) => `L'Orbe instable explose sur ${cfName(e.pid)} !`, orbe_passe: (e) => `L'Orbe instable passe à ${cfName(e.cible || e.pid)}.`, kanji_absorbe: (e) => `${cfName(e.pid)} absorbe les dégâts (Kanji de garde).`,

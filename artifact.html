@@ -219,19 +219,44 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .kc.locked .kc-h b, .kc.locked .kc-s, .kc.locked .kc-p { color: var(--mut); }
 .kc.soon .kc-a { background: radial-gradient(circle at 50% 40%, #24222c, #0e0d12); }
 .kc.soon .kc-h b { letter-spacing: .1em; }
-/* skins des persos IRL : filtres par gamme */
-.kc.skin .kc-a .layer, .kc.skin .kc-a .photo { --h: 0deg; }
-.sk-chroma .kc-a .layer, .sk-chroma .kc-a .photo { filter: hue-rotate(var(--hue)) saturate(1.5); }
-.sk-arcade .kc-a .layer, .sk-arcade .kc-a .photo { filter: saturate(1.8) contrast(1.25); }
-.sk-arcade .kc-a::before { content: ""; position: absolute; inset: 0; z-index: 1; background: repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 2px, transparent 2px 4px), linear-gradient(180deg, rgba(255,60,200,.25), rgba(60,220,255,.25)); mix-blend-mode: overlay; }
-.sk-neon .kc-a .layer, .sk-neon .kc-a .photo { filter: grayscale(1) contrast(1.5) brightness(.75); }
-.sk-neon .kc-a::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(160deg, hsl(var(--h) 100% 55% / .55), transparent 55%, hsl(calc(var(--h) + 120) 100% 55% / .5)); mix-blend-mode: color; }
-.sk-lune .kc-a .layer, .sk-lune .kc-a .photo { filter: sepia(.5) hue-rotate(180deg) saturate(1.2) brightness(.85); }
-.sk-lune .kc-a::before { content: ""; position: absolute; inset: 0; z-index: 1; background: radial-gradient(circle at 75% 18%, rgba(220,235,255,.65), transparent 22%), linear-gradient(180deg, rgba(40,60,140,.35), rgba(10,10,40,.5)); mix-blend-mode: screen; }
-.sk-astral .kc-a .layer, .sk-astral .kc-a .photo { filter: saturate(1.4) brightness(.9); }
-.sk-astral .kc-a::before { content: ""; position: absolute; inset: 0; z-index: 1; background: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 70% 20%, #fff, transparent), radial-gradient(1.5px 1.5px at 40% 70%, #fff, transparent), radial-gradient(1px 1px at 85% 60%, #fff, transparent), linear-gradient(160deg, rgba(120,60,255,.45), rgba(20,200,255,.3)); mix-blend-mode: screen; }
-.sk-prestige .kc-a .layer, .sk-prestige .kc-a .photo { filter: sepia(.6) saturate(1.6) brightness(1.05) contrast(1.1); }
-.sk-prestige .kc-a::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(120deg, transparent 30%, rgba(255,230,150,.55) 48%, transparent 62%); background-size: 250% 100%; animation: holo 3.2s linear infinite; mix-blend-mode: screen; }
+/* skins des persos IRL, façon LoL : le visage reste naturel, c'est l'univers autour qui change (décor, lumière, cadre, effets) */
+.kc.skin .kc-a { isolation: isolate; }
+.kc.skin .kc-a .layer, .kc.skin .kc-a .photo { filter: none; }
+.skx { position: absolute; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: multiply; }
+:where(.kc.skin:not(.locked)) .kc-a::before, :where(.kc.skin:not(.locked)) .kc-a::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.kc.skin .kc-jp, .kc.skin .kc-no { z-index: 3; }
+.kc-sw { position: absolute; left: 5%; top: 5%; z-index: 3; width: 9cqw; height: 9cqw; border-radius: 50%; background: var(--chr); border: 1.2cqw solid #fff; box-shadow: 0 0 0 .6cqw #0006, 0 0 4cqw var(--chr); }
+/* Chroma : une couleur nommée par perso, pastille comme dans LoL */
+.kc.sk-chroma { border-color: var(--chr); box-shadow: 0 0 3cqw color-mix(in srgb, var(--chr) 45%, transparent), 0 8px 20px #0007; }
+.sk-chroma .skx { background: radial-gradient(72% 64% at 50% 60%, #fff 50%, color-mix(in srgb, var(--chr) 55%, #fff) 74%, var(--chr) 100%); }
+.sk-chroma:not(.locked) .kc-a::before { background: linear-gradient(to top, color-mix(in srgb, var(--chr) 60%, transparent), transparent 32%); mix-blend-mode: screen; }
+/* Arcade : borne magenta et cyan, grille de pixels, HUD */
+.kc.sk-arcade { border-color: #ff3ec8; box-shadow: 0 0 0 .8cqw #2a0a5a inset, 0 0 3cqw #ff3ec866, 0 8px 20px #0007; }
+.sk-arcade .skx { background: radial-gradient(62% 56% at 50% 60%, #fff 48%, #ff8ae0 70%, #6a1fd0 100%); }
+.sk-arcade:not(.locked) .kc-a::before { mix-blend-mode: screen; background: linear-gradient(to top, #00f0ff66, transparent 28%), repeating-linear-gradient(0deg, #ffffff10 0 1px, transparent 1px 3px), linear-gradient(90deg, #ff3ec822 1px, transparent 1px) 0 0 / 8% 8%, linear-gradient(#ff3ec822 1px, transparent 1px) 0 0 / 8% 8%; }
+.sk-arcade:not(.locked) .kc-a::after { content: "1UP  ★★★"; inset: auto auto 22% 6%; font: 700 6.5cqw/1 var(--mono); letter-spacing: .1em; color: #ffe14d; text-shadow: .6cqw .6cqw 0 #ff3ec8; }
+/* Néon : nuit de ville, néons cyan et magenta sur les bords */
+.kc.sk-neon { border-color: #00e5ff; box-shadow: 0 0 3cqw #00e5ff88, inset 0 0 2cqw #ff2bd655, 0 8px 20px #0007; }
+.sk-neon .skx { background: radial-gradient(60% 56% at 50% 58%, #fff 46%, #4a5cff 72%, #070b2a 100%); }
+.sk-neon:not(.locked) .kc-a::before { mix-blend-mode: screen; background: linear-gradient(90deg, #00e5ffaa, transparent 20%), linear-gradient(270deg, #ff2bd6aa, transparent 20%), linear-gradient(to top, #00e5ff44, transparent 25%); }
+.sk-neon:not(.locked) .kc-a::after { inset: 6% 6% auto auto; width: 18%; height: 12%; border: .8cqw solid #ff2bd6; border-radius: 2cqw; box-shadow: 0 0 3cqw #ff2bd6, inset 0 0 2cqw #ff2bd6; }
+/* Lune de sang : lune rouge, nuit pourpre, pétales */
+.kc.sk-lune { border-color: #c4162a; box-shadow: inset 0 0 0 .8cqw #3a0408, inset 0 0 0 1.4cqw #c9a24a55, 0 0 3cqw #c4162a66, 0 8px 20px #0007; }
+.sk-lune .skx { background: radial-gradient(60% 55% at 50% 60%, #fff 44%, #e05060 66%, #4a0610 86%, #160204 100%); }
+.sk-lune:not(.locked) .kc-a::before { mix-blend-mode: screen; background: radial-gradient(circle at 80% 16%, #ff4040 0 8%, #ff404066 11%, transparent 20%), radial-gradient(1.2cqw 0.8cqw at 18% 30%, #ff6b7a, transparent), radial-gradient(1cqw .7cqw at 30% 70%, #ff6b7a, transparent), radial-gradient(1.2cqw .8cqw at 82% 62%, #ff6b7a, transparent), radial-gradient(.9cqw .6cqw at 64% 84%, #ff6b7a, transparent); }
+/* Astral : nébuleuse, étoiles, emblème */
+.kc.sk-astral { border-color: #b9a4ff; box-shadow: 0 0 3cqw #8a6bff88, inset 0 0 2cqw #ff9be655, 0 8px 20px #0007; }
+.sk-astral .skx { background: radial-gradient(62% 56% at 50% 60%, #fff 46%, #9b8cff 70%, #1a1050 100%); }
+.sk-astral:not(.locked) .kc-a::before { mix-blend-mode: screen; background: radial-gradient(40% 30% at 18% 22%, #ff8fd766, transparent), radial-gradient(40% 30% at 84% 30%, #6fb6ff66, transparent), radial-gradient(.7cqw .7cqw at 12% 48%, #fff, transparent), radial-gradient(.6cqw .6cqw at 26% 14%, #fff, transparent), radial-gradient(.8cqw .8cqw at 88% 14%, #fff, transparent), radial-gradient(.6cqw .6cqw at 92% 56%, #fff, transparent), radial-gradient(.5cqw .5cqw at 70% 8%, #fff, transparent); }
+.sk-astral:not(.locked) .kc-a::after { content: "✦"; inset: 3% 0 auto 0; text-align: center; font: 700 9cqw/1 var(--body); color: #fff; text-shadow: 0 0 3cqw #ff8fd7, 0 0 6cqw #8a6bff; }
+/* Prestige : or blanc, cadre orné, reflet qui passe */
+.kc.sk-prestige { border-color: #e8c66a; background: linear-gradient(160deg, #3a2c12, #17120a 60%); box-shadow: inset 0 0 0 .7cqw #7a5a1e, inset 0 0 0 1.3cqw #f3dc8a88, 0 0 4cqw #e8c66a77, 0 8px 20px #0007; }
+.sk-prestige .kc-a .layer, .sk-prestige .kc-a .photo { filter: sepia(.25) saturate(1.1) brightness(1.04); }
+.sk-prestige .skx { background: radial-gradient(64% 58% at 50% 60%, #fff 48%, #f0d48a 70%, #8a6420 100%); }
+.sk-prestige:not(.locked) .kc-a::before { mix-blend-mode: screen; background: linear-gradient(115deg, transparent 35%, #fff4c866 48%, transparent 60%) 0 0 / 250% 100%; animation: skSheen 4s ease-in-out infinite; }
+.sk-prestige:not(.locked) .kc-a::after { content: "PRESTIGE"; inset: 5% auto auto 5%; padding-inline: 2.5cqw; height: auto; padding: 1cqw 0; text-align: center; font: 700 5cqw/1 var(--mono); letter-spacing: .25em; color: #2a1c06; background: linear-gradient(90deg, #b8862a, #fff0b0, #b8862a); border-radius: 1cqw; }
+@keyframes skSheen { 0%, 40% { background-position: 120% 0; } 70%, 100% { background-position: -40% 0; } }
+@media (prefers-reduced-motion: reduce) { .sk-prestige .kc-a::before { animation: none; } }
 .cgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 @media (min-width: 560px) { .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 900px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; } }
@@ -1108,6 +1133,16 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .zs-av { width: 54px; height: 54px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 700 22px var(--body); background: var(--raise); border: 4px solid var(--bg2); color: var(--fg); }
 .zs-prev-card { width: min(220px, 62vw); }
 @media (prefers-reduced-motion: reduce) { .zs-tile { transition: none; } .zs-tile:hover { transform: none; } }
+
+/* le coffre éclate après l'ouverture */
+.cf .c3-scene.gone { animation: cfgone .6s ease-in forwards; }
+@keyframes cfgone { 0% { transform: scale(1); opacity: 1; } 25% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1.45); opacity: 0; } }
+.cf-fx .boom { position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: radial-gradient(circle, #fff, color-mix(in srgb, var(--rare) 70%, #fff) 40%, transparent 70%); animation: cfboom .6s ease-out forwards; }
+@keyframes cfboom { from { transform: scale(.4); opacity: 1; } to { transform: scale(9); opacity: 0; } }
+.cf .c3-scene.gone .beam, .cf .c3-scene.gone .cf-runes, .cf .c3-scene.gone .cf-crystal { opacity: 0; transition: opacity .3s; }
+.cf-fx .shard { position: absolute; width: 34px; height: 26px; margin: -13px 0 0 -17px; clip-path: polygon(0 20%, 60% 0, 100% 55%, 40% 100%); background: linear-gradient(160deg, #c9a24a, var(--rare) 55%, #1d2735); box-shadow: 0 0 10px var(--rare); animation: cfshard .65s cubic-bezier(.2,.7,.3,1) forwards; }
+@keyframes cfshard { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(var(--s)); opacity: 0; } }
+.cf .key, .cf .c3 { cursor: pointer; }
 </style>
 <header class="hd">
   <div class="wrap hd-in">
@@ -2857,7 +2892,10 @@ function artIn(c) {
 }
 const thumb = (c, cls = "th") => `<span class="${cls}">${c && imgKey(c) ? artIn(c) : ""}</span>`;
 const nameOf = (c) => PEOPLE[c.who].name;
-const subOf = (c) => (c.skin ? c.title.replace("Skin ", "Skin ") : c.title);
+// chroma : une couleur nommée par perso, comme les chromas de LoL
+const CHROMAS = [["Rubis", "#e0314b"], ["Émeraude", "#1fae6a"], ["Saphir", "#2f6bff"], ["Améthyste", "#9b4dff"], ["Ambre", "#f0a020"], ["Obsidienne", "#3b3846"], ["Perle", "#cfc6b4"], ["Turquoise", "#18b8c2"]];
+const chromaOf = (who) => CHROMAS[hashOf(who) % CHROMAS.length];
+const subOf = (c) => (c.skin === "chroma" ? `Chroma ${chromaOf(c.who)[0]}` : c.title);
 // décor d'une carte personnalisée (Atelier Arcanique) : classes et éléments ajoutés, jamais par-dessus le visage
 const FOND_BG = {
   nuit: (c) => `radial-gradient(1px 1px at 20% 30%, #fff9 50%, transparent), radial-gradient(1px 1px at 70% 20%, #fff7 50%, transparent), radial-gradient(1.5px 1.5px at 40% 75%, #fff8 50%, transparent), radial-gradient(1px 1px at 85% 60%, #fff6 50%, transparent), linear-gradient(170deg, ${c.c2}, ${c.c1} 70%)`,
@@ -2882,10 +2920,10 @@ function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
   const dz = soon || locked ? null : cosDeco(o.design, o.present);
   return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
-    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
+    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
+    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}
@@ -4597,23 +4635,19 @@ const Coffre = (() => {
         <div class="cf-crystal" id="cfCrystal" aria-hidden="true"><i></i><i></i><i></i></div>
         ${chestHTML()}</div>
       <div class="keybox"><div class="key" id="cfKey" tabindex="0" role="button" aria-label="Utiliser la clé sur le coffre">${KEY_SVG}</div>
-        <span class="keyhint" id="cfHint">Glisse la clé dans la serrure · ou touche-la</span></div>
+        <span class="keyhint" id="cfHint">Touche la clé pour ouvrir le coffre</span></div>
       <p class="sr-only" aria-live="polite" id="cfLive"></p>
       <div class="cf-tools"><button class="btn sm" type="button" data-act="cf-sound" aria-pressed="${soundOn}">${soundOn ? "Son activé" : "Son coupé"}</button><button class="btn sm" type="button" data-act="skip">Passer</button></div>
       <p class="sub">${o.pk.name}${o.pk.daily ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
     el.dataset.cf = o.id;
     wireKey(o, sc);
   }
+  // ouverture au clic : on touche la clé ou le coffre (ou Entrée au clavier), la clé va seule dans la serrure
   function wireKey(o, sc) {
-    const key = $("cfKey"), lock = $("cfLock"); let drag = null;
-    const over = (x, y) => { const r = lock.getBoundingClientRect(); return x > r.left - 24 && x < r.right + 24 && y > r.top - 24 && y < r.bottom + 24; };
-    key.addEventListener("pointerdown", (ev) => { if (o.cf !== "key") return; ev.preventDefault(); key.setPointerCapture(ev.pointerId); drag = { x0: ev.clientX, y0: ev.clientY, moved: false }; });
-    key.addEventListener("pointermove", (ev) => { if (!drag) return; if (Math.hypot(ev.clientX - drag.x0, ev.clientY - drag.y0) > 6) drag.moved = true; if (!drag.moved) return;
-      key.classList.add("drag"); key.style.translate = `${ev.clientX - drag.x0}px ${ev.clientY - drag.y0}px`; lock.classList.toggle("hot", over(ev.clientX, ev.clientY)); });
-    const up = (ev) => { if (!drag) return; const ok = !drag.moved || over(ev.clientX, ev.clientY); drag = null;
-      key.classList.remove("drag"); key.style.translate = ""; lock.classList.remove("hot"); if (ok) play(o, sc); };
-    key.addEventListener("pointerup", up); key.addEventListener("pointercancel", () => { drag = null; key.classList.remove("drag"); key.style.translate = ""; });
-    key.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); play(o, sc); } });
+    const go = (ev) => { if (o.cf !== "key") return; ev?.preventDefault?.(); play(o, sc); };
+    $("cfKey").addEventListener("click", go);
+    $("cfChest").addEventListener("click", go);
+    $("cfKey").addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") go(ev); });
   }
 
   // --- les temps forts ---
@@ -4663,7 +4697,17 @@ const Coffre = (() => {
     async aurora() { spawnFx("aurora", 3, (e, i) => e.style.setProperty("--i", i)); await wait(1300); },
     async banner(o, text) { spawnFx("banner", 1, (e) => { e.textContent = text; }); live(text); await wait(1500); clearFx(".banner"); },
     async pause(o, ms = 400) { await wait(ms); },
-    async open(o) { const k = $("cfKey"); if (k) k.style.opacity = 0; setTint(bestOf(o)); $("stage").style.setProperty("--glow", (o.glow = glowOf(o))); chest()?.classList.add("open"); $("cfScene")?.classList.add("open"); snd(880, .5, "triangle"); if (!reducedNow()) { stage()?.classList.add("glowing"); } await wait(1100); },
+    async open(o) { const k = $("cfKey"); if (k) k.style.opacity = 0; setTint(bestOf(o)); $("stage").style.setProperty("--glow", (o.glow = glowOf(o))); chest()?.classList.add("open"); $("cfScene")?.classList.add("open"); snd(880, .5, "triangle"); if (!reducedNow()) { stage()?.classList.add("glowing"); } await wait(750); await BEAT.shatter(o); },
+    // le coffre éclate en morceaux derrière les cartes qui arrivent
+    async shatter() {
+      const c = chest(), box = fx(); if (!c || !box) return;
+      const r = c.getBoundingClientRect(), b = box.getBoundingClientRect(), cx = r.left + r.width / 2 - b.left, cy = r.top + r.height / 2 - b.top;
+      spawnFx("shard", 16, (e, i) => { const a = (i / 16) * Math.PI * 2 + Math.random() * .4, d = 120 + Math.random() * 160; e.style.left = cx + "px"; e.style.top = cy + "px"; e.style.setProperty("--dx", Math.cos(a) * d + "px"); e.style.setProperty("--dy", Math.sin(a) * d - 40 + "px"); e.style.setProperty("--r", Math.round(Math.random() * 540 - 270) + "deg"); e.style.setProperty("--s", (0.6 + Math.random() * 0.8).toFixed(2)); });
+      spawnFx("boom", 1, (e) => { e.style.left = cx + "px"; e.style.top = cy + "px"; });
+      c.classList.add("gone"); $("cfScene")?.classList.add("gone");
+      snd(140, .4, "sawtooth", .05);
+      await wait(650);
+    },
   };
   const live = (t) => { const l = $("cfLive"); if (l) l.textContent = t; };
 

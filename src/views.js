@@ -31,7 +31,10 @@ function artIn(c) {
 }
 const thumb = (c, cls = "th") => `<span class="${cls}">${c && imgKey(c) ? artIn(c) : ""}</span>`;
 const nameOf = (c) => PEOPLE[c.who].name;
-const subOf = (c) => (c.skin ? c.title.replace("Skin ", "Skin ") : c.title);
+// chroma : une couleur nommée par perso, comme les chromas de LoL
+const CHROMAS = [["Rubis", "#e0314b"], ["Émeraude", "#1fae6a"], ["Saphir", "#2f6bff"], ["Améthyste", "#9b4dff"], ["Ambre", "#f0a020"], ["Obsidienne", "#3b3846"], ["Perle", "#cfc6b4"], ["Turquoise", "#18b8c2"]];
+const chromaOf = (who) => CHROMAS[hashOf(who) % CHROMAS.length];
+const subOf = (c) => (c.skin === "chroma" ? `Chroma ${chromaOf(c.who)[0]}` : c.title);
 // décor d'une carte personnalisée (Atelier Arcanique) : classes et éléments ajoutés, jamais par-dessus le visage
 const FOND_BG = {
   nuit: (c) => `radial-gradient(1px 1px at 20% 30%, #fff9 50%, transparent), radial-gradient(1px 1px at 70% 20%, #fff7 50%, transparent), radial-gradient(1.5px 1.5px at 40% 75%, #fff8 50%, transparent), radial-gradient(1px 1px at 85% 60%, #fff6 50%, transparent), linear-gradient(170deg, ${c.c2}, ${c.c1} 70%)`,
@@ -56,10 +59,10 @@ function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
   const dz = soon || locked ? null : cosDeco(o.design, o.present);
   return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
-    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
+    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
+    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}

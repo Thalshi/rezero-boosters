@@ -1,4 +1,4 @@
-// Coffre arcanique dans le navigateur (mode invité, artifact.html) : clé au clavier, au toucher et en glisser,
+// Coffre arcanique dans le navigateur (mode invité, artifact.html) : clé au clavier, clé ou coffre au toucher,
 // chaque scénario joué jusqu'au bout, 5 cartes face cachée, récapitulatif, « Passer », animations réduites.
 // Usage : node tests/ui-coffre.mjs [--tous] (par défaut : une sélection ; --tous joue les 30 scénarios sur ordi)
 import { reporter, playwright, ROOT, sleep } from "./lib.mjs";
@@ -60,7 +60,7 @@ try {
       // clé : au clavier pour le premier, au glisser pour le deuxième, au toucher sinon
       const k = ids.indexOf(id);
       if (k === 0) { await page.focus("#cfKey"); await page.keyboard.press("Enter"); }
-      else if (k === 1) { const kb = await page.locator("#cfKey").boundingBox(), lb = await page.locator("#cfLock").boundingBox(); await page.mouse.move(kb.x + 20, kb.y + 20); await page.mouse.down(); await page.mouse.move(lb.x + 10, lb.y + 10, { steps: 8 }); await page.mouse.move(lb.x + lb.width / 2, lb.y + lb.height / 2, { steps: 4 }); await page.mouse.up(); }
+      else if (k === 1) await page.click("#cfChest", { force: true }); // ouvrir en touchant le coffre lui-même
       else await page.click("#cfKey");
       const dur = sc.beats.reduce((a, [b, n]) => a + ({ pause: n || 400, shake: 360 * (n || 1), runes: 90 * (n || 8) + 200, ladder: 260 * 6, crystal: 460 * (n || 1), banner: 1500 }[b] ?? 1000), 0);
       await sleep(Math.min(dur * .55, 4500));

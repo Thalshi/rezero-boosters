@@ -38,23 +38,19 @@ const Coffre = (() => {
         <div class="cf-crystal" id="cfCrystal" aria-hidden="true"><i></i><i></i><i></i></div>
         ${chestHTML()}</div>
       <div class="keybox"><div class="key" id="cfKey" tabindex="0" role="button" aria-label="Utiliser la clé sur le coffre">${KEY_SVG}</div>
-        <span class="keyhint" id="cfHint">Glisse la clé dans la serrure · ou touche-la</span></div>
+        <span class="keyhint" id="cfHint">Touche la clé pour ouvrir le coffre</span></div>
       <p class="sr-only" aria-live="polite" id="cfLive"></p>
       <div class="cf-tools"><button class="btn sm" type="button" data-act="cf-sound" aria-pressed="${soundOn}">${soundOn ? "Son activé" : "Son coupé"}</button><button class="btn sm" type="button" data-act="skip">Passer</button></div>
       <p class="sub">${o.pk.name}${o.pk.daily ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
     el.dataset.cf = o.id;
     wireKey(o, sc);
   }
+  // ouverture au clic : on touche la clé ou le coffre (ou Entrée au clavier), la clé va seule dans la serrure
   function wireKey(o, sc) {
-    const key = $("cfKey"), lock = $("cfLock"); let drag = null;
-    const over = (x, y) => { const r = lock.getBoundingClientRect(); return x > r.left - 24 && x < r.right + 24 && y > r.top - 24 && y < r.bottom + 24; };
-    key.addEventListener("pointerdown", (ev) => { if (o.cf !== "key") return; ev.preventDefault(); key.setPointerCapture(ev.pointerId); drag = { x0: ev.clientX, y0: ev.clientY, moved: false }; });
-    key.addEventListener("pointermove", (ev) => { if (!drag) return; if (Math.hypot(ev.clientX - drag.x0, ev.clientY - drag.y0) > 6) drag.moved = true; if (!drag.moved) return;
-      key.classList.add("drag"); key.style.translate = `${ev.clientX - drag.x0}px ${ev.clientY - drag.y0}px`; lock.classList.toggle("hot", over(ev.clientX, ev.clientY)); });
-    const up = (ev) => { if (!drag) return; const ok = !drag.moved || over(ev.clientX, ev.clientY); drag = null;
-      key.classList.remove("drag"); key.style.translate = ""; lock.classList.remove("hot"); if (ok) play(o, sc); };
-    key.addEventListener("pointerup", up); key.addEventListener("pointercancel", () => { drag = null; key.classList.remove("drag"); key.style.translate = ""; });
-    key.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); play(o, sc); } });
+    const go = (ev) => { if (o.cf !== "key") return; ev?.preventDefault?.(); play(o, sc); };
+    $("cfKey").addEventListener("click", go);
+    $("cfChest").addEventListener("click", go);
+    $("cfKey").addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") go(ev); });
   }
 
   // --- les temps forts ---
@@ -104,7 +100,17 @@ const Coffre = (() => {
     async aurora() { spawnFx("aurora", 3, (e, i) => e.style.setProperty("--i", i)); await wait(1300); },
     async banner(o, text) { spawnFx("banner", 1, (e) => { e.textContent = text; }); live(text); await wait(1500); clearFx(".banner"); },
     async pause(o, ms = 400) { await wait(ms); },
-    async open(o) { const k = $("cfKey"); if (k) k.style.opacity = 0; setTint(bestOf(o)); $("stage").style.setProperty("--glow", (o.glow = glowOf(o))); chest()?.classList.add("open"); $("cfScene")?.classList.add("open"); snd(880, .5, "triangle"); if (!reducedNow()) { stage()?.classList.add("glowing"); } await wait(1100); },
+    async open(o) { const k = $("cfKey"); if (k) k.style.opacity = 0; setTint(bestOf(o)); $("stage").style.setProperty("--glow", (o.glow = glowOf(o))); chest()?.classList.add("open"); $("cfScene")?.classList.add("open"); snd(880, .5, "triangle"); if (!reducedNow()) { stage()?.classList.add("glowing"); } await wait(750); await BEAT.shatter(o); },
+    // le coffre éclate en morceaux derrière les cartes qui arrivent
+    async shatter() {
+      const c = chest(), box = fx(); if (!c || !box) return;
+      const r = c.getBoundingClientRect(), b = box.getBoundingClientRect(), cx = r.left + r.width / 2 - b.left, cy = r.top + r.height / 2 - b.top;
+      spawnFx("shard", 16, (e, i) => { const a = (i / 16) * Math.PI * 2 + Math.random() * .4, d = 120 + Math.random() * 160; e.style.left = cx + "px"; e.style.top = cy + "px"; e.style.setProperty("--dx", Math.cos(a) * d + "px"); e.style.setProperty("--dy", Math.sin(a) * d - 40 + "px"); e.style.setProperty("--r", Math.round(Math.random() * 540 - 270) + "deg"); e.style.setProperty("--s", (0.6 + Math.random() * 0.8).toFixed(2)); });
+      spawnFx("boom", 1, (e) => { e.style.left = cx + "px"; e.style.top = cy + "px"; });
+      c.classList.add("gone"); $("cfScene")?.classList.add("gone");
+      snd(140, .4, "sawtooth", .05);
+      await wait(650);
+    },
   };
   const live = (t) => { const l = $("cfLive"); if (l) l.textContent = t; };
 

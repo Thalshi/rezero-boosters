@@ -15,7 +15,7 @@ import { playGame, botRng } from "../worker/confront/bots.mjs";
 import { BRANCH_IDS } from "../worker/confront/branches.mjs";
 import { BRANCHES_PROPOSEES } from "../worker/confront/branches-proposees.mjs";
 import { CONFIG_AVANT_CORRECTIONS, mergeConfig } from "../worker/confront/config.mjs";
-import { setup } from "./confront-outils.mjs";
+import { setup, conserved } from "./confront-outils.mjs";
 
 const arg = (k, d) => { const i = process.argv.indexOf("--" + k); return i > 0 ? process.argv[i + 1] : d; };
 
@@ -50,7 +50,7 @@ function oneGame(n, i, config, kind) {
   const order = Object.fromEntries(seats.map((p, k) => [p.id, (k - fi + n) % n]));
   return {
     kind, n, mode: s.mode, raison: s.result.raison, camp: s.result.camp, tours: s.result.tours, tourDeTable: s.result.tourDeTable, steps,
-    effondrement: s.stats.effondrement, remelanges: s.stats.remelanges,
+    effondrement: s.stats.effondrement, remelanges: s.stats.remelanges, conserve: conserved(s), pvOk: s.players.every((p) => p.pv <= p.pvMax),
     joueurs: s.players.map((p) => ({ id: p.id, branch: p.perso.branch, pret: p.perso.pret, role: p.role, ordre: order[p.id], gagne: s.result.gagnants.includes(p.id), elim: p.ordreElim, elimRound: elimRound[p.id] ?? null, ...s.stats.joueurs[p.id] })),
   };
 }
@@ -121,6 +121,8 @@ if (!isMainThread) {
   })))).flat();
   const t = reporter("Confrontation · simulations");
   t.check("aucune action de bot refusée, aucune erreur du moteur", !failure, failure && String(failure.message).slice(0, 300));
+  const games = results.filter((g) => g.kind !== "ref");
+  t.check(`${games.length} parties : les 82 cartes d'action sont toutes là, chacune une fois, à la fin de chaque partie ; aucun PV au-dessus du maximum`, games.every((g) => g.conserve && g.pvOk), { fautives: games.filter((g) => !g.conserve || !g.pvOk).length });
   const report = { regles: avant ? "avant corrections" : "par défaut (corrections appliquées)", config: config || null, parties: N, duree_s: 0, modes: {}, collusion: null, reference: {} };
   t.note(`règles : ${report.regles}${arg("config") ? " + " + arg("config") : ""}`);
   const pct = (x) => (100 * x).toFixed(1) + " %", sgn = (x) => (x >= 0 ? "+" : "") + (100 * x).toFixed(1);

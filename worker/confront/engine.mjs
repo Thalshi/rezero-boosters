@@ -301,7 +301,7 @@ function setupGame(s, now) {
     const c = s.reserve.find((x) => x.instanceId === p.choix);
     p.perso = { ...c };
     s.usage.push({ joueur: p.id, instanceId: c.instanceId, cardId: c.cardId, proprietaire: c.proprietaire, pret: c.pret });
-    p.pvMax = cfg.pv[s.mode] + (p.role === "gardien" ? bonusGardien(cfg, n) : 0) + (petiteTable(s) && p.perso.branch === "survie" ? cfg.petiteTable.surviePvMax || 0 : 0);
+    p.pvMax = cfg.pv[s.mode] + (p.role === "gardien" ? bonusGardien(cfg, n) : 0) + (p.role === "errant" ? (cfg.bonusErrant || {})[n] || 0 : 0) + (petiteTable(s) && p.perso.branch === "survie" ? cfg.petiteTable.surviePvMax || 0 : 0);
     p.pv = p.pvMax;
     s.stats.joueurs[p.id] = { mainMax: 0 };
   }
@@ -800,8 +800,11 @@ function respond(s, p, a, now, auto) {
         // Précision (réglage) : Frappe parée, présage ; sur les signes indiqués, la Frappe revient dans sa main
         const rep = s.config.precision.repriseSiParee;
         if (pr.data.nature === "frappe" && src.vivant && branche(src) === "precision" && rep && rep.length && pr.data.carte && s.discard.includes(pr.data.carte)) {
-          if (presage(s, src, "reprise", (k) => rep.includes(k.signe))) {
-            s.discard.splice(s.discard.lastIndexOf(pr.data.carte), 1);
+          // (le présage peut avoir remélangé la défausse : la Frappe est alors dans la pioche)
+          const ok = presage(s, src, "reprise", (k) => rep.includes(k.signe));
+          const from = s.discard.includes(pr.data.carte) ? s.discard : s.deck.includes(pr.data.carte) ? s.deck : null;
+          if (ok && from) {
+            from.splice(from.indexOf(pr.data.carte), 1);
             src.main.push(pr.data.carte);
             stat(s, src.id, "reprises");
             emit(s, "reprise", { pid: src.id, carte: cardPub(s, pr.data.carte) });

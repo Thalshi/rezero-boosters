@@ -303,6 +303,19 @@ t.section("Corrections d'équilibrage appliquées (valeurs par défaut)");
   deckTop(pr2, [{ signe: "eau" }]);
   pr2 = ok(pr2, "p1", { type: "parer", carte: card(pr2, "p1", "parade") });
   t.check("Précision : présage Eau, la Frappe reste à la défausse", !P(pr2, "p0").main.includes(f2) && pr2.discard.includes(f2));
+  // non-régression : pioche vide au moment du présage de reprise (la défausse est remélangée)
+  let okRem = true;
+  for (let i = 0; i < 40; i++) {
+    let x = setup(4, { seed: "rem" + i, branches: { p0: "precision", p1: "assaut", p2: "assaut", p3: "assaut" }, roles: { p0: "gardien", p1: "briseur", p2: "briseur", p3: "errant" }, seats: ["p0", "p1", "p2", "p3"] });
+    arrange(x, { p0: { main: ["frappe"] }, p1: { main: ["parade"], equip: [] } });
+    forceTurn(x, "p0");
+    const fx = card(x, "p0", "frappe");
+    x = ok(x, "p0", { type: "jouer", carte: fx, cible: "p1" });
+    x.discard.push(...x.deck.splice(0)); // pioche vide
+    x = ok(x, "p1", { type: "parer", carte: card(x, "p1", "parade") });
+    if (!conserved(x) || (P(x, "p0").main.includes(fx) && (x.deck.includes(fx) || x.discard.includes(fx)))) okRem = false;
+  }
+  t.check("Précision : reprise avec une pioche vide (remélange pendant le présage), aucune carte perdue ni dupliquée", okRem);
   // Défense à petite table : Vent esquive aussi
   let d = setup(2, { seed: "corr", branches: { p0: "assaut", p1: "defense" }, seats: ["p0", "p1"] });
   arrange(d, { p0: { main: ["frappe"] }, p1: { main: [], equip: [] } });
@@ -317,6 +330,8 @@ t.section("Corrections d'équilibrage appliquées (valeurs par défaut)");
   // PV du Gardien par table, compensation du second joueur en duel
   const pvG = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pvg" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "gardien").pvMax; };
   t.check("PV du Gardien : 6 à 4 joueurs, 4 à 5, 6 à 6, 5 à 7", pvG(4) === 6 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 5, [4, 5, 6, 7].map(pvG));
+  const pvE = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pve" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "errant").pvMax; };
+  t.check("PV de l'Errant : 4 à 4 et 5 joueurs, 5 à 6 et 7", pvE(4) === 4 && pvE(5) === 4 && pvE(6) === 5 && pvE(7) === 5, [4, 5, 6, 7].map(pvE));
   const du = playGame(E.createGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "second" }), { maxSteps: 2 }).state;
   const second = du.players.find((p) => p.id !== du.premier);
   t.check("duel : le second joueur commence avec 7 cartes (6 + 1 de compensation)", second.main.length === 7);

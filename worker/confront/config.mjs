@@ -29,6 +29,8 @@ export const DEFAULT_CONFIG = {
   // PV en plus pour le Gardien, par taille de table (corrigé, avant : +1 partout).
   // Un nombre (même bonus partout) ou un objet { 4: …, 5: …, 6: …, 7: … }.
   bonusGardien: { 4: 2, 5: 0, 6: 2, 7: 1 },
+  // PV en plus pour l'Errant, par taille de table (corrigé, avant : aucun)
+  bonusErrant: { 4: 0, 5: 0, 6: 1, 7: 1 },
   // Limite de main en fin de tour = PV actuels, bornée par [min, max] (max null = pas de plafond)
   limiteMain: { min: 0, max: null },
   // Main de départ : "pv" (autant que les PV max) ou un nombre
@@ -111,6 +113,7 @@ export const DEFAULT_CONFIG = {
 /** Configuration d'origine (avant les corrections mesurées), pour comparer dans les simulations. */
 export const CONFIG_AVANT_CORRECTIONS = {
   bonusGardien: 1,
+  bonusErrant: { 4: 0, 5: 0, 6: 0, 7: 0 },
   assaut: { piocheSiTouche: 0 },
   voleur: { petiteTableMainMin: 0 },
   resistance: { maxParTour: null },

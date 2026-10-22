@@ -57,11 +57,11 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 |---|---|---|---|
 | 3.1 | Admin : épisodes, déblocages, prédictions, annonces | ✅ | |
 | 3.2 | Vue Dev : santé serveur, contrôle des comptes | ✅ | |
-| 3.3 | Galerie de toutes les cartes (même non possédées), filtres, zoom, variantes | ⬜ | sans octroi de propriété |
-| 3.4 | Contrôle qualité des illustrations (marquage QA) | ⬜ | |
-| 3.5 | Bac à sable admin isolé côté serveur (faux soldes, inventaires, marché, pity, quêtes, or, cosmétiques, concours, invocations, parties) | ⬜ | données séparées, jamais les vraies |
-| 3.6 | « Tester l'ouverture avec cette carte », forcer 5 résultats et un scénario, rejouer | ⬜ | |
-| 3.7 | Permissions serveur strictes | 🟡 | rôles admin/dev existants |
+| 3.3 | Galerie de toutes les cartes (même non possédées), filtres, zoom, variantes | ✅ | `#/galerie` (admin) : rareté, faction, qualité, recherche, dorée, aperçu avec un cosmétique ; aucun octroi |
+| 3.4 | Contrôle qualité des illustrations (marquage QA) | ✅ | Validée / À revoir + motif, stocké à part (`qa/cards`), invisible des joueurs |
+| 3.5 | Bac à sable admin isolé côté serveur (faux soldes, inventaires, marché, pity, quêtes, or, cosmétiques, concours, invocations, parties) | 🟡 | `#/labo` + `worker/lab-api.js` : soldes, gratuits, pity (booster, dorée, invocation), collection complète, ouvertures, invocations ✅ ; marché, quêtes, concours, parties de Confrontation dans le labo ⬜ |
+| 3.6 | « Tester l'ouverture avec cette carte », forcer 5 résultats et un scénario, rejouer | ✅ | scénario incompatible signalé ; testé (`tests/admin-labo.mjs`) |
+| 3.7 | Permissions serveur strictes | ✅ | routes lab/qa réservées à l'admin ; collections lab et qa fermées à l'API des documents |
 
 ## 4. Cosmétiques : Boutique, Sanctuaire, inventaire, Atelier (dossier §5 + décisions)
 | # | Élément | État | Notes |

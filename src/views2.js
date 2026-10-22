@@ -441,8 +441,8 @@ const glowOf = (o) => { const best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank
 function drawOpening() {
   const o = opening, el = $("stage");
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
-  const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button><span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span><span style="width:40px"></span></div>`;
-  if (Coffre.isChest(o.pk) && Coffre.draw(el, o, top)) return;
+  const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">験 Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
+  if ((Coffre.isChest(o.pk) || o.scenario) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
     el.innerHTML = `${top}<section class="stage">
@@ -473,9 +473,9 @@ function drawOpening() {
     <p class="eyebrow gold">Résultat</p><h2>${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
     <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true })).join("")}</div>
     <div class="row" style="justify-content:center">
-      ${o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
-      <button class="btn big" type="button" data-act="to-col">Ma collection</button>
-      ${RAR[best.c.rar].rank >= 3 || best.gold ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
+      ${o.lab ? `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button><button class="btn big" type="button" data-act="lab-back">Retour au labo</button>` : o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
+      ${o.lab ? "" : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
+      ${!o.lab && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
       <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
 }
 function bindPull(p) {

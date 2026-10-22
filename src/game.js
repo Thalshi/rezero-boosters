@@ -864,3 +864,21 @@ function pickScenarioS(cards, rng, now = Date.now()) {
   if (of("spectacle").length && rng() < CHEST_W.spectacle) return pickWeighted(of("spectacle"), rng).id;
   return pickWeighted(of("classique"), rng).id;
 }
+
+// ===== Laboratoire admin : une partie de test isolée (jamais la vraie sauvegarde) =====
+const LAB_START = { chakra: 100000, free: 99 };
+// ouverture imposée : 5 cartes choisies et un scénario au choix ; rien n'est tiré
+function labForcedOpenS(s, picks, now = Date.now()) {
+  const list = (Array.isArray(picks) ? picks : []).slice(0, PACK).filter((x) => CARD_BY_ID[x?.id]);
+  if (list.length !== PACK) return { error: `Choisis exactement ${PACK} cartes.` };
+  const cards = list.map((x) => ({ id: x.id, gold: !!x.gold, isNew: addCardS(s, x.id, !!x.gold, now) }));
+  s.opened++;
+  return { cards };
+}
+function labSummonForcedS(s, rars, rng, now = Date.now()) {
+  const list = (Array.isArray(rars) ? rars : []).filter((r) => RANKS.includes(r));
+  if (list.length !== 1 && list.length !== 5) return { error: "Choisis 1 ou 5 raretés." };
+  const cos = cosOf(s);
+  const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
+  return { got, cost: 0 };
+}

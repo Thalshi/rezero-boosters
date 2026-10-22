@@ -957,4 +957,32 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .cf .slot.flipped .kcw { --w: 100%; }
 .stage-wrap.flashy::after { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, color-mix(in srgb, var(--glow) 55%, transparent), transparent 70%); animation: cfflash 1s ease-out forwards; }
 @media (prefers-reduced-motion: reduce) { .cf .c3, .cf-crystal i, .cf-fx * { animation: none !important; } }
+
+/* ===== Galerie et laboratoire (admin) ===== */
+.gal-f { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end; margin: 16px 0 10px; }
+.gal-f label, .lab-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--mut); }
+.gal-f label.zopt-line, .lab-form label.zopt-line { flex-direction: row; align-items: center; color: var(--fg2); font-size: 14px; }
+.gal-f select, .gal-f input[type=search], .lab-form select, .lab-form input, .lab-picks select, .gal-note { height: 42px; padding: 0 12px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line2); color: var(--fg); font: 500 14px var(--body); min-width: 0; }
+.gal-q { flex: 1 1 220px; }
+.gal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 10px; }
+@media (min-width: 700px) { .gal-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .gal-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.gal-c { position: relative; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; text-align: left; }
+.gal-c:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; border-radius: 12px; }
+.gal-tags { position: absolute; left: 6px; right: 6px; bottom: 6px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+.gal-tags i { font: 600 10px/1 var(--mono); font-style: normal; padding: 4px 6px; border-radius: 999px; background: #000c; border: 1px solid var(--line3); color: var(--fg2); }
+.gal-tags .qa-ok { color: var(--ok); border-color: var(--ok); }
+.gal-tags .qa-revoir { color: var(--warn); border-color: var(--warn); }
+.gal-tags .hid { color: var(--wish); border-color: var(--wish); }
+.gal-zoom { width: min(300px, 74vw); margin: 0 auto; }
+.gal-note { width: 100%; box-sizing: border-box; }
+.lab-warn { padding: 10px 14px; margin-bottom: 18px; border-radius: var(--r-md); border: 1px dashed var(--warn); color: var(--warn); font-size: 14px; }
+.lab-form { display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: end; }
+.lab-form input[type=number] { width: 120px; }
+.lab-form input[type=text] { width: min(360px, 80vw); }
+.lab-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.lab-picks > div { display: flex; flex-direction: column; gap: 6px; }
+.lab-picks select { width: 100%; }
+.lab-sanct .sanctum-host { max-height: 360px; }
+.lab-pill { color: var(--warn); border-color: var(--warn); font-size: 13px; }
 </style>

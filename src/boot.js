@@ -4,7 +4,7 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 const SEG = {
   packTab: (v) => { packTab = v; }, colTab: (v) => { col.tab = v; }, colRar: (v) => { col.rar = v; }, colFac: (v) => { col.fac = col.fac === v ? "" : v; col.tab = "cards"; col.own = "all"; },
   mTab: (v) => { marketTab = v; }, mkRar: (v) => { mk.rar = v; }, mkWin: (v) => { mk.win = +v; }, achF: (v) => { achF = v; }, rankTab: (v) => { boardTab = v; },
-  ...Z_SEG,
+  ...Z_SEG, ...ADMIN_SEG,
 };
 document.addEventListener("click", (e) => {
   const t = e.target;

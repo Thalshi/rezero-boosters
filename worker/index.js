@@ -39,12 +39,15 @@ function parsePath(path, wantDoc) {
 // votes : écrits par le serveur du jeu ; chacun lit le sien, l'admin lit tout.
 // config, predq, pred : écriture réservée à l'admin. avis : le sien. bugs : lus par l'admin seulement.
 // feed, players, market, trades : écrits seulement par le serveur du jeu (game-api.js).
+// lab, qa : jamais accessibles ici (routes dédiées, réservées à l'admin).
 const SERVER_ONLY = ["feed", "players", "market", "trades"];
 function allowed(user, segs, op) {
   if (!user) return false;
   const write = op !== "read" && op !== "list";
   const top = segs[0];
   if (SERVER_ONLY.includes(top)) return !write;
+  // labo admin et contrôle qualité : seulement par leurs routes (/api/game/lab, /api/game/qa), jamais par l'API des documents
+  if (top === "lab" || top === "qa") return false;
   // ancienne sauvegarde du compte : lisible par son joueur, plus modifiable (le serveur tient la partie)
   if (top === "data" && segs[1] === "users") return segs.length >= 3 && segs[2] === user.id && !write;
   // votes : écrits seulement par le serveur (/api/game/vote vérifie que la question est ouverte)

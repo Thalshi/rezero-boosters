@@ -866,4 +866,22 @@ function pickScenarioS(cards, rng, now = Date.now()) {
   return pickWeighted(of("classique"), rng).id;
 }
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestCtx, chestEligible, pickWeighted, pickScenarioS };
+// ===== Laboratoire admin : une partie de test isolée (jamais la vraie sauvegarde) =====
+const LAB_START = { chakra: 100000, free: 99 };
+// ouverture imposée : 5 cartes choisies et un scénario au choix ; rien n'est tiré
+function labForcedOpenS(s, picks, now = Date.now()) {
+  const list = (Array.isArray(picks) ? picks : []).slice(0, PACK).filter((x) => CARD_BY_ID[x?.id]);
+  if (list.length !== PACK) return { error: `Choisis exactement ${PACK} cartes.` };
+  const cards = list.map((x) => ({ id: x.id, gold: !!x.gold, isNew: addCardS(s, x.id, !!x.gold, now) }));
+  s.opened++;
+  return { cards };
+}
+function labSummonForcedS(s, rars, rng, now = Date.now()) {
+  const list = (Array.isArray(rars) ? rars : []).filter((r) => RANKS.includes(r));
+  if (list.length !== 1 && list.length !== 5) return { error: "Choisis 1 ou 5 raretés." };
+  const cos = cosOf(s);
+  const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
+  return { got, cost: 0 };
+}
+
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS };

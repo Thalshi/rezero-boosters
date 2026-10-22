@@ -223,7 +223,7 @@ const Portal = (() => {
     raf = requestAnimationFrame(frame);
   }
   const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
-  host.addEventListener("click", () => { if (ZR.status !== "running" && save.chakra >= summonCost(1)) zSummon(1); });
+  host.addEventListener("click", () => { if (view === "sanctuaire" && ZR.status !== "running" && save.chakra >= summonCost(1)) zSummon(1); });
   host.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); host.click(); } });
   return {
     host,
@@ -245,6 +245,7 @@ const Portal = (() => {
 VIEWS.boutique = viewBoutique; VIEWS.atelier = viewAtelier; VIEWS.sanctuaire = viewSanctuaire;
 function afterViews() {
   if (view === "sanctuaire") Portal.attach($("sanctumHost"));
+  if (view === "labo" && $("labSanctum")) Portal.attach($("labSanctum"));
 }
 const Z_SEG = { zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
 document.addEventListener("click", (e) => {

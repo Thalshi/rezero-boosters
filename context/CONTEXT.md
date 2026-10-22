@@ -19,6 +19,8 @@
 - Tout le cahier des charges est réalisé sur la branche `dev/re-zero-complet`, rien n'est en production. Suivi : `docs/CHECKLIST.md`, résultats : `docs/RESULTATS.md`.
 - Prochaine étape : trancher les décisions de `docs/DECISIONS.md`, puis déployer par lots selon `docs/MISE_EN_PRODUCTION.md`.
 - Préparer l'épisode 2 : débloquer ses persos, publier les prédictions.
+- Chantier Sanctuaire ouvert : quoi gagner (proposition faite : bannière par saison avec gros lot exclusif, doublons en éclats, paliers de progression), en attente de l'avis de Reichi.
+- Illustrations de Confrontation faites avec ChatGPT : lot 1 intégré (`tools/illus/import.py`), lot 2 attendu (Lance de chasse, Bâton runique, Festin du QG, Étal du marché, Kanji de garde, emblèmes sur fond transparent).
 
 ## À faire / à vérifier / en attente
 - Tester le site en ligne avec les vrais comptes Discord.
@@ -40,7 +42,7 @@
 - Pas de déploiement, de migration ni de changement de l'économie réelle sans accord explicite de Reichi.
 - Boosters = persos ; invocations = cosmétiques, jamais de persos.
 - Boutique de skins et Invocation de skins coexistent, avec un inventaire commun et l'Atelier Arcanique pour équiper.
-- L'Invocation utilise le Portail scellé B + C. Le coffre (et ses 30 scénarios) et l'Invocation sont deux systèmes distincts.
+- L'ouverture dépend du nombre, pour les invocations comme pour les boosters : ×1 une carte qui se retourne seule, ×5 une pochette, ×10 le coffre et ses 30 scénarios (2 boosters d'un coup = coffre). Le portail du Sanctuaire est supprimé.
 - Pas de paiement réel. Aucun visuel ni texte de BANG! repris.
 - Le jeton Cloudflare passe par les secrets réseau de l'environnement cloud, jamais dans le chat, GitHub ou un fichier.
 
@@ -50,9 +52,9 @@
 - `python3 build.py` assemble `src/` en `public/index.html` (site), `artifact.html` (version claude.ai) et `worker/game.js` (règles pour le serveur, généré : ne pas le modifier à la main).
 - La version claude.ai (https://claude.ai/artifact/VQWvCstEDhFmTZis9pnn7C) est à republier en même temps que le site.
 - Rôles dans `wrangler.jsonc` : `ADMIN_IDS` (Billy) et `DEV_IDS` (Reichi). Ajouter un rôle seulement dans le tableau de bord Cloudflare ne suffit pas : il est écrasé au déploiement suivant.
-- Sources de l'interface : `src/app.js`, `src/views.js` à `src/views6.js`, `src/coffre.js`, `src/boot.js`, `src/shell.html` et `src/head.css.html`.
+- Sources de l'interface : `src/illus.js` (images générées par `tools/illus/import.py`, ne pas modifier à la main), `src/app.js`, `src/views.js` à `src/views6.js`, `src/coffre.js`, `src/boot.js`, `src/shell.html` et `src/head.css.html`.
 - Serveur : `worker/lab-api.js` (galerie, labo), `worker/defile-api.js`, `worker/confront-api.js` et le moteur `worker/confront/`. `worker/confront/branches-proposees.mjs` ne doit jamais partir au navigateur (spoils).
 - Une constante par ligne au premier niveau de `src/game.js` : c'est ainsi que `worker/game.js` les reprend.
-- Tests : `node tests/run-all.mjs` (18 suites, serveur local isolé) ; simulation d'économie : `node tests/simulation-economie.mjs`.
+- Tests : `node tests/run-all.mjs` (21 suites, serveur local isolé ; définir `WRANGLER` si wrangler n'est pas installé dans `tests/`) ; simulation d'économie : `node tests/simulation-economie.mjs`.
 - Le navigateur appelle `/api/sync` toutes les 6 s et ne recharge que les sections changées.
 - Interrupteurs des nouveautés : Admin → « Nouveautés ouvertes aux joueurs » (`config/game.features`).

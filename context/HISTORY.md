@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-10-22 — Campagne de tests, illustrations, ouverture selon le nombre
+- Campagne de tests complète sur base isolée et prévisualisation sans installation (serveur du jeu dans le navigateur) : https://claude.ai/artifact/6xiA1siGGJxtffTESvFCrS. 8 bugs trouvés et corrigés, dont « openSheet is not defined » aussi présent en production.
+- Boutique refaite façon Boutique Discord ; clé du coffre au clic et coffre qui éclate ; Confrontation lisible (cartes illustrées, bandeau d'aide, PV) ; skins façon LoL.
+- Premier lot d'illustrations ChatGPT intégré (20 cartes, 8 emblèmes, 6 fonds de skins) ; 5 cartes attendent le lot 2.
+- Ouverture selon le nombre : ×1 une carte, ×5 une pochette, ×10 le coffre ; invocation ×10 (1 350 ◆, au moins une Épique) ; « Ouvrir 2 · coffre » pour les boosters ; portail supprimé.
+- 21 suites de tests vertes (769 vérifications). Rien en production.
+
 ## 2026-10-22 — Jeu complet sur une branche
 - Accès Cloudflare D1 en lecture via les secrets réseau ; étapes 0 et 1 de l'optimisation déployées.
 - Audit et correction des boosters (Le Monde, Vilains, recyclage), 25 persos ajoutés à l'épisode 1 (161 cartes).

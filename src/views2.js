@@ -254,7 +254,7 @@ function viewClassement() {
     <p class="lead">${desc}</p>
     <div class="search">${icon.search}<input class="in" id="rankQ" type="search" placeholder="Chercher un joueur pour se comparer…" value="${esc(rankQ)}"></div>
     ${list.length ? `${q ? "" : podiumHTML(list, score, unit)}
-      <div class="rank-list" id="rankList">${list.map((p, i) => ({ p, i })).slice(q ? 0 : 3, 60).map(({ p, i }) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}" data-rk="${p.uid}"><span class="no">${i + 1}</span>${av(p.uid)}<span class="nm"><span data-uid="${p.uid}">…</span> <span class="tit">${titleOf(p.unique || 0)[0]}</span></span><span class="v">${fmtN(score(p))}<small>${unitTxt}</small></span></button>`).join("")}</div>`
+      <div class="rank-list" id="rankList">${list.map((p, i) => ({ p, i })).slice(q ? 0 : 3, 60).map(({ p, i }) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}" data-rk="${p.uid}"><span class="no">${i + 1}</span>${av(p.uid)}<span class="nm"><span data-uid="${p.uid}">…</span> ${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : `<span class="tit">${titleOf(p.unique || 0)[0]}</span>`}</span><span class="v">${fmtN(score(p))}<small>${unitTxt}</small></span></button>`).join("")}</div>`
       : empty(sharedNote() ? "Le classement est visible quand tu joues avec le QG." : "Le classement apparaît dès que des joueurs ouvrent des boosters.")}
   </div>`;
 }
@@ -271,7 +271,51 @@ function selfProfile() {
   const owned = Object.fromEntries(Object.entries(save.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
   const featured = save.featured && has(save.featured) ? save.featured : null;
   const designs = Object.fromEntries([...(save.showcase || []), ...(featured ? [featured] : [])].map((id) => [id, myDesign(id)]).filter(([, d]) => d));
-  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs, titles: save.titles || [] };
+  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs, titles: save.titles || [], titleShown: save.titleShown || null };
+}
+// ===== Titres : ceux qu'on a (le sien se choisit d'un toucher) et, sur son profil, ceux qui restent à gagner =====
+let titlesAll = false;
+function titlesSection(p, isMe) {
+  const own = new Set((p.titles || []).map(titleIdOf).filter(Boolean));
+  if (!isMe && !own.size) return "";
+  const prog = isMe ? Object.fromEntries(titlesProgressS(save).map((x) => [x.id, x])) : {};
+  const item = (t) => {
+    const has = own.has(t.id), on = p.titleShown === t.id, pr = prog[t.id];
+    const tag = `<span class="ttl-k">${t.kanji}</span><span class="ttl-t"><b>${esc(t.name)}</b><small>${esc(t.desc)}${!has && pr?.goal > 1 ? ` · ${fmtN(pr.prog)}/${fmtN(pr.goal)}` : ""}</small></span>`;
+    return isMe && has ? `<button class="ttl-i r-${t.rar} ${on ? "on" : ""}" type="button" data-title="${on ? "" : t.id}" aria-pressed="${on}" title="${on ? "Ne plus l'afficher" : "L'afficher près de ton pseudo"}">${tag}${on ? `<em>Affiché</em>` : ""}</button>`
+      : `<div class="ttl-i r-${t.rar} ${has ? "" : "lock"}">${tag}</div>`;
+  };
+  const list = TITLES.filter((t) => own.has(t.id) || (isMe && titlesAll));
+  const cats = Object.entries(TITLE_CATS).map(([k, l]) => [l, list.filter((t) => t.cat === k)]).filter(([, l]) => l.length);
+  return `<section class="sec ttl-sec"><p class="eyebrow mut">Titres · 称号</p><h2>${isMe ? "Mes titres" : "Ses titres"} <small class="note">${own.size}/${TITLES.length}</small></h2>
+    ${isMe ? `<p class="note">${own.size ? "Touche un titre pour l'afficher près de ton pseudo (classement, Confrontation, Défilé)." : "Aucun titre pour l'instant : ils se gagnent en ouvrant, en invoquant, en jouant à Confrontation, au Défilé et aux prédictions."}</p>` : ""}
+    ${cats.map(([l, ts]) => `<p class="ttl-cat">${l}</p><div class="ttl-grid">${ts.map(item).join("")}</div>`).join("")}
+    ${isMe ? `<button class="btn sm" type="button" data-act="titles-all">${titlesAll ? "Masquer les titres à gagner" : `Voir les ${TITLES.length - own.size} titres à gagner`}</button>` : ""}</section>`;
+}
+// un titre vient d'être gagné : pendant une ouverture il attend le récapitulatif, sinon il s'annonce tout de suite
+let titlesPending = [];
+function announceTitles(ids) {
+  ids = (ids || []).filter((id) => TITLE_BY_ID[id] && !titlesPending.includes(id));
+  if (!ids.length) return;
+  titlesPending.push(...ids);
+  if (!opening && !busy && !zBusy) flushTitles();
+}
+const takeTitles = () => { const l = titlesPending; titlesPending = []; return l; };
+function titlesWonHTML(ids) {
+  return ids?.length ? `<div class="ttl-won">${ids.map((id) => { const t = TITLE_BY_ID[id]; return `<button class="ttl-i r-${t.rar} won" type="button" data-title="${t.id}"><span class="ttl-k">${t.kanji}</span><span class="ttl-t"><small>Nouveau titre</small><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span><em>${save.titleShown === t.id ? "Affiché" : "L'afficher"}</em></button>`; }).join("")}</div>` : "";
+}
+function flushTitles() {
+  const ids = takeTitles(); if (!ids.length) return;
+  if (!$("overlay").hidden) return toast(`Nouveau titre : ${ids.map((id) => TITLE_BY_ID[id].name).join(", ")} !`);
+  $("overlay").innerHTML = `<div class="sheet ttl-sheet" role="dialog" aria-modal="true" aria-label="Nouveau titre"><div class="sheet-h"><h2>Titre débloqué !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b">${titlesWonHTML(ids)}<p class="note">Il apparaît près de ton pseudo dans le classement, en Confrontation et au Défilé. Tu peux en changer sur ton profil.</p><button class="btn gold big block" type="button" data-act="close">Super</button></div></div>`;
+  $("overlay").hidden = false;
+}
+async function setShownTitle(id) {
+  try { if (SRV) await srv("title", { id }); else { const r = showTitleS(save, id); if (r.error) throw new Error(r.error); persist(); } }
+  catch (e) { return toast(e.message); }
+  toast(id ? `Titre affiché : ${TITLE_BY_ID[id].name}.` : "Plus aucun titre affiché.");
+  if (opening) drawOpening(); else if (!$("overlay").hidden && $("overlay").querySelector(".ttl-sheet")) $("overlay").querySelectorAll("[data-title] em").forEach((e) => { e.textContent = e.parentElement.dataset.title === id ? "Affiché" : "L'afficher"; }); else draw();
 }
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;
@@ -289,7 +333,7 @@ function viewProfil() {
       <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
       <p class="eyebrow">Collectionneur · コレクター</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
-      ${p.titles?.length ? `<div class="row def-titles">${p.titles.map((x) => `<span class="pill out" style="border-color:var(--gold);color:var(--gold)">華 ${esc(x)}</span>`).join("")}</div>` : ""}
+      ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
       <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
@@ -297,6 +341,7 @@ function viewProfil() {
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
     ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette · 看板</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette · 看板</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
+    ${titlesSection(p, isMe)}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
       ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
     <section class="sec"><h2>Collection</h2><p class="note">${st.unique} cartes uniques</p>
@@ -479,22 +524,12 @@ function drawOpening() {
     const p = $("pack"); if (!chest) bindPull(p);
     return;
   }
-  if (o.phase === "cards") {
-    const x = o.cards[o.i], big = RAR[x.c.rar].rank >= 3 || x.gold, rc = x.gold ? "#f0c860" : RAR[x.c.rar].color;
-    el.innerHTML = `${top}<section class="stage">
-      <div class="pdots">${o.cards.map((_, j) => `<i class="${j <= o.i ? "on" : ""}"></i>`).join("")}</div>
-      ${o.divine && o.i === 0 ? '<div class="divine">Booster divin !</div>' : ""}
-      <div class="reveal ${o.flipped ? "on" : ""} ${big ? "big" : ""}" style="--rc:${rc};position:relative"><span class="rays"></span>
-        <button class="reveal-card ${o.flipped ? "on" : ""}" type="button" id="revealBtn" aria-label="${o.flipped ? "Carte suivante" : "Retourner la carte"}"><div class="in">
-          <div class="face"><div class="cardback"></div></div>
-          <div class="face front">${o.flipped ? itemHTML(x) : ""}</div></div></button></div>
-      <p class="hint">${o.flipped ? `<b style="color:${rc}">${x.cos ? `${esc(x.cos.name)} · ` : ""}${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `${o.pk.cos ? "Objet" : "Carte"} ${o.i + 1} sur ${o.cards.length} — touche pour retourner`}</p>
-      <button class="btn" type="button" data-act="skip">Tout voir</button></section>`;
-    return;
-  }
+  if (o.phase === "cards") return Reveal.render(el, o, top);
+  delete el.dataset.rv;
   const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
   el.innerHTML = `${top}<section class="stage">
     <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    ${titlesWonHTML(o.titles)}
     <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
     <div class="row" style="justify-content:center">
       ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
@@ -532,7 +567,7 @@ async function tearPack() {
   }
   opening.phase = "cards"; drawOpening();
 }
-function closeStage() { Coffre.stop(); opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
+function closeStage() { Coffre.stop(); Reveal.stop(); opening = null; setTimeout(flushTitles, 0); loadStyles(); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
   const c = byId[x.id];
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Objet déverrouillé"><div class="sheet-h"><h2>Objet déverrouillé !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>

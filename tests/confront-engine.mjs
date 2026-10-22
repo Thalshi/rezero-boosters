@@ -17,16 +17,28 @@ function ok(s, pid, a, now = 0) {
   if (r.error) throw new Error(`${pid} ${JSON.stringify(a)} refusé : ${r.error.code} ${r.error.message}`);
   return r.state;
 }
+// les règles détaillées ci-dessous testent le tirage de 2 persos dans la réserve commune (ancien mode) ;
+// le choix parmi ses propres cartes (mode par défaut) a sa section à part
+const mkGame = (o) => E.createGame({ ...o, config: { persoLibre: false, ...(o.config || {}) } });
 const err = (s, pid, a, now = 0) => (E.act(s, pid, a, now).error || {}).code;
 const card = (s, pid, d) => P(s, pid).main.find((u) => defOf(u) === d);
 const types = (evs) => evs.map((e) => e.type);
 const deepEq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 // ===================================================================================
+t.section("Perso choisi parmi ses propres cartes (par défaut)");
+{
+  const s = E.createGame({ players: [{ id: "A", contribution: [{ instanceId: "A-1", cardId: "kai-1", branch: "stratege" }, { instanceId: "A-2", cardId: "irsy-1", branch: "chance" }] }, { id: "B", contribution: [] }], seed: "libre" });
+  t.check("A choisit parmi SES cartes apportées, et seulement elles", s.phase === "choix" && JSON.stringify([...P(s, "A").propositions].sort()) === '["A-1","A-2"]');
+  t.check("B n'a rien apporté : 2 cartes de prêt à lui", P(s, "B").propositions.length === 2 && P(s, "B").propositions.every((iid) => iid.startsWith("pret:B:")));
+  t.check("A ne peut pas prendre une carte de B", err(s, "A", { type: "choisir", instanceId: P(s, "B").propositions[0] }) === "CHOIX_INVALIDE");
+  const g = ok(ok(s, "A", { type: "choisir", instanceId: "A-2" }), "B", { type: "choisir", instanceId: P(s, "B").propositions[0] });
+  t.check("A joue bien sa propre carte", g.phase === "partie" && P(g, "A").perso?.instanceId === "A-2", P(g, "A").perso);
+}
 t.section("Contributions, prêts, réserve, tirage et choix");
 {
   // 1. Deux joueurs avec peu de cartes : prêts automatiques
-  const s = E.createGame({ players: [{ id: "A", contribution: [{ instanceId: "A-1", cardId: "kai-1", branch: "stratege" }] }, { id: "B", contribution: [] }], seed: "peu" });
+  const s = mkGame({ players: [{ id: "A", contribution: [{ instanceId: "A-1", cardId: "kai-1", branch: "stratege" }] }, { id: "B", contribution: [] }], seed: "peu" });
   const prets = s.reserve.filter((c) => c.pret);
   t.check("duel avec 1 carte apportée en tout : réserve de 16 (8 par joueur), 15 prêts", s.reserve.length === 16 && prets.length === 15, { reserve: s.reserve.length, prets: prets.length });
   t.check("chaque joueur a exactement une carte par branche dans la réserve (prêt ou collection)", ["A", "B"].every((id) => BRANCH_IDS.every((b) => s.reserve.filter((c) => c.apportePar === id && c.branch === b).length === 1)));
@@ -38,7 +50,7 @@ t.section("Contributions, prêts, réserve, tirage et choix");
   t.check("la partie à prêts va jusqu'au bout, un seul vainqueur", fin.phase === "fin" && fin.result.gagnants.length === 1, fin.result && fin.result.raison);
 
   // validations de contribution
-  const mk = (contribs) => { try { E.createGame({ players: contribs.map((c, i) => ({ id: "J" + i, contribution: c })), seed: "v" }); return "ok"; } catch (e) { return e.code; } };
+  const mk = (contribs) => { try { mkGame({ players: contribs.map((c, i) => ({ id: "J" + i, contribution: c })), seed: "v" }); return "ok"; } catch (e) { return e.code; } };
   t.check("deux cartes de la même branche dans une contribution : refusé", mk([[{ instanceId: "x1", cardId: "a", branch: "assaut" }, { instanceId: "x2", cardId: "b", branch: "assaut" }], []]) === "BRANCHE_EN_DOUBLE");
   t.check("la même instance apportée par deux joueurs : refusé", mk([[{ instanceId: "x1", cardId: "a", branch: "assaut" }], [{ instanceId: "x1", cardId: "a", branch: "chance" }]]) === "INSTANCE_EN_DOUBLE");
   t.check("une carte de prêt apportée comme une carte de collection : refusé", mk([[{ instanceId: "y", cardId: "pret-assaut", branch: "assaut" }], []]) === "PRET_INTERDIT");
@@ -47,12 +59,12 @@ t.section("Contributions, prêts, réserve, tirage et choix");
   t.check("8 cartes de 8 branches : accepté", mk([BRANCH_IDS.map((b, i) => ({ instanceId: "z" + i, cardId: "c" + i, branch: b })), []]) === "ok");
 
   // 6. Deux propriétaires apportent des instances distinctes du même personnage
-  const two = E.createGame({ players: [{ id: "A", contribution: [{ instanceId: "A-kai", cardId: "kai-1", branch: "stratege" }] }, { id: "B", contribution: [{ instanceId: "B-kai", cardId: "kai-1", branch: "stratege" }] }, { id: "C", contribution: [] }], seed: "deux-kai" });
+  const two = mkGame({ players: [{ id: "A", contribution: [{ instanceId: "A-kai", cardId: "kai-1", branch: "stratege" }] }, { id: "B", contribution: [{ instanceId: "B-kai", cardId: "kai-1", branch: "stratege" }] }, { id: "C", contribution: [] }], seed: "deux-kai" });
   t.check("deux instances distinctes du même personnage (A et B) : acceptées, toutes deux dans la réserve", two.reserve.filter((c) => c.cardId === "kai-1").length === 2);
   // sur de nombreux tirages : jamais la même instance deux fois, jamais deux fois le même perso dans une paire
   let dupInst = 0, samePair = 0, both = null;
   for (let i = 0; i < 400; i++) {
-    const g = E.createGame({ players: [{ id: "A", contribution: [{ instanceId: "A-kai", cardId: "kai-1", branch: "stratege" }, { instanceId: "A-x", cardId: "x-1", branch: "assaut" }] }, { id: "B", contribution: [{ instanceId: "B-kai", cardId: "kai-1", branch: "stratege" }] }, { id: "C", contribution: [] }], seed: "tir" + i });
+    const g = mkGame({ players: [{ id: "A", contribution: [{ instanceId: "A-kai", cardId: "kai-1", branch: "stratege" }, { instanceId: "A-x", cardId: "x-1", branch: "assaut" }] }, { id: "B", contribution: [{ instanceId: "B-kai", cardId: "kai-1", branch: "stratege" }] }, { id: "C", contribution: [] }], seed: "tir" + i });
     const all = g.players.flatMap((p) => p.propositions);
     if (new Set(all).size !== all.length) dupInst++;
     for (const p of g.players) { const [a, b] = p.propositions.map((iid) => g.reserve.find((c) => c.instanceId === iid)); if (a.cardId === b.cardId) samePair++; }
@@ -77,7 +89,7 @@ t.section("Contributions, prêts, réserve, tirage et choix");
   const cosm = { cadre: "aurore", aura: "turquoise", designId: "d-42" };
   let found = null;
   for (let i = 0; i < 500 && !found; i++) {
-    const g = E.createGame({ players: [{ id: "A", contribution: [{ instanceId: "A-perso", cardId: "irsy-3", branch: "stratege", cosmetique: cosm }] }, { id: "B", contribution: [] }], seed: "cos" + i });
+    const g = mkGame({ players: [{ id: "A", contribution: [{ instanceId: "A-perso", cardId: "irsy-3", branch: "stratege", cosmetique: cosm }] }, { id: "B", contribution: [] }], seed: "cos" + i });
     if (P(g, "B").propositions.includes("A-perso")) found = g;
   }
   if (found) {
@@ -95,7 +107,7 @@ t.section("Contributions, prêts, réserve, tirage et choix");
   } else t.check("tirage où B reçoit la carte de A trouvé", false);
 
   // choix invalides, abandon pendant le choix
-  const c = E.createGame({ players: [{ id: "A", contribution: [] }, { id: "B", contribution: [] }], seed: "ch" });
+  const c = mkGame({ players: [{ id: "A", contribution: [] }, { id: "B", contribution: [] }], seed: "ch" });
   t.check("choisir une carte non proposée : refusé", err(c, "A", { type: "choisir", instanceId: P(c, "B").propositions[0] }) === "CHOIX_INVALIDE");
   const c2 = ok(c, "A", { type: "choisir", instanceId: P(c, "A").propositions[0] });
   t.check("choisir deux fois : refusé", err(c2, "A", { type: "choisir", instanceId: P(c, "A").propositions[1] }) === "DEJA_CHOISI");
@@ -111,11 +123,11 @@ t.section("Contributions, prêts, réserve, tirage et choix");
 // ===================================================================================
 t.section("Salon (lobby)");
 {
-  let s = E.createGame({ players: [{ id: "H" }], lobby: true, seed: "lob" });
+  let s = mkGame({ players: [{ id: "H" }], lobby: true, seed: "lob" });
   s = ok(s, "J", { type: "rejoindre" });
   t.check("un joueur rejoint le salon", s.players.length === 2 && s.phase === "lobby");
   t.check("seul l'hôte lance la partie", err(s, "J", { type: "lancer" }) === "PAS_HOTE");
-  const bad = E.createGame({ players: [{ id: "H" }, { id: "J" }], lobby: true, mode: "classique" });
+  const bad = mkGame({ players: [{ id: "H" }, { id: "J" }], lobby: true, mode: "classique" });
   t.check("mode classique demandé à 2 joueurs : refusé", err(bad, "H", { type: "lancer" }) === "MODE_INCOMPATIBLE");
   s = ok(s, "H", { type: "lancer" }, 0);
   t.check("lancement : phase contributions, mode duel", s.phase === "contributions" && s.mode === "duel");
@@ -328,15 +340,15 @@ t.section("Corrections d'équilibrage appliquées (valeurs par défaut)");
   const rd7 = E.act(d7, "p0", { type: "jouer", carte: card(d7, "p0", "frappe"), cible: "p1" });
   t.check("Défense à 5 joueurs : présage Vent, pas d'esquive (Eau seul)", !types(rd7.events).includes("esquive") && rd7.state.prompt.kind === "reaction");
   // PV du Gardien par table, compensation du second joueur en duel
-  const pvG = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pvg" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "gardien").pvMax; };
+  const pvG = (n) => { const s = mkGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pvg" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "gardien").pvMax; };
   t.check("PV du Gardien : 4 à 4 joueurs, 4 à 5, 6 à 6, 4 à 7", pvG(4) === 4 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 4, [4, 5, 6, 7].map(pvG));
   // deux camps, sans Errant : Gardien et Sentinelles contre Briseurs, réglés à environ 50/50 par table
-  const comp = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "cmp" + n }); const g = playGame(s, { maxSteps: n }).state; const c = {}; for (const p of g.players) c[p.role] = (c[p.role] || 0) + 1; return c; };
+  const comp = (n) => { const s = mkGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "cmp" + n }); const g = playGame(s, { maxSteps: n }).state; const c = {}; for (const p of g.players) c[p.role] = (c[p.role] || 0) + 1; return c; };
   const want = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
   t.check("répartition : 1-1-2, 1-2-2, 1-2-3, 1-3-3 (Gardien, Sentinelles, Briseurs), jamais d'Errant", [4, 5, 6, 7].every((n) => { const c = comp(n); return c.gardien === want[n][0] && (c.sentinelle || 0) === want[n][1] && c.briseur === want[n][2] && !c.errant; }), [4, 5, 6, 7].map(comp));
-  const eq = (n, extra) => E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "eq" + n, config: extra });
+  const eq = (n, extra) => mkGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "eq" + n, config: extra });
   t.check("l'Errant reste possible par réglage (ancienne répartition)", (() => { const g = playGame(eq(5, { roles: { 5: { gardien: 1, sentinelle: 1, briseur: 2, errant: 1 } } }), { maxSteps: 5 }).state; return g.players.some((p) => p.role === "errant"); })());
-  const du = playGame(E.createGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "second" }), { maxSteps: 2 }).state;
+  const du = playGame(mkGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "second" }), { maxSteps: 2 }).state;
   const second = du.players.find((p) => p.id !== du.premier);
   t.check("duel : le second joueur commence avec 7 cartes (6 + 1 de compensation)", second.main.length === 7);
 }
@@ -523,7 +535,7 @@ t.section("Fin de partie au milieu d'une chaîne d'effets");
 t.section("Informations secrètes, reconnexion, spectateur");
 {
   const players = Array.from({ length: 7 }, (_, i) => ({ id: "p" + i, contribution: [] }));
-  let s = E.createGame({ players, seed: "secret" });
+  let s = mkGame({ players, seed: "secret" });
   s = playGame(s, { optsFor: () => ({ rng: botRng("sec") }), maxSteps: 120 }).state;
   t.check("partie à 7 en cours après 120 actions", s.phase === "partie");
   let leaks = [];
@@ -561,16 +573,16 @@ t.section("Informations secrètes, reconnexion, spectateur");
 t.section("Premier joueur, collusion à trois, robustesse sur parties complètes");
 {
   let firsts = { p0: 0, p1: 0 };
-  for (let i = 0; i < 400; i++) { const s = E.createGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "f" + i }); const g = playGame(s, { optsFor: () => ({ choix: "premier" }), maxSteps: 2 }).state; firsts[g.premier]++; }
+  for (let i = 0; i < 400; i++) { const s = mkGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "f" + i }); const g = playGame(s, { optsFor: () => ({ choix: "premier" }), maxSteps: 2 }).state; firsts[g.premier]++; }
   t.check("duel : premier joueur tiré au hasard (≈ 50 % chacun sur 400 parties)", firsts.p0 > 160 && firsts.p1 > 160, firsts);
   let gard = true;
-  for (let i = 0; i < 50; i++) { const s = E.createGame({ players: Array.from({ length: 4 + (i % 4) }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "g" + i }); const g = playGame(s, { maxSteps: s.players.length }).state; if (g.premier !== g.players.find((p) => p.role === "gardien").id) gard = false; }
+  for (let i = 0; i < 50; i++) { const s = mkGame({ players: Array.from({ length: 4 + (i % 4) }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "g" + i }); const g = playGame(s, { maxSteps: s.players.length }).state; if (g.premier !== g.players.find((p) => p.role === "gardien").id) gard = false; }
   t.check("classique : le Gardien commence toujours", gard);
 
   // Trois joueurs, deux attaquent systématiquement le troisième (collusion)
   let firstOut = 0, victimWins = 0, games = 200;
   for (let i = 0; i < games; i++) {
-    const s = E.createGame({ players: ["p0", "p1", "p2"].map((id) => ({ id, contribution: [] })), seed: "col" + i });
+    const s = mkGame({ players: ["p0", "p1", "p2"].map((id) => ({ id, contribution: [] })), seed: "col" + i });
     const rng = botRng("col" + i);
     const end = playGame(s, { optsFor: (pid) => (pid === "p2" ? { rng } : { rng, focus: "p2", partners: ["p0", "p1"] }) }).state;
     if (end.players.find((p) => p.ordreElim === 1).id === "p2") firstOut++;
@@ -584,7 +596,7 @@ t.section("Premier joueur, collusion à trois, robustesse sur parties complètes
   for (let n = 2; n <= 7; n++) for (let i = 0; i < 25; i++) {
     const players = Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: k % 2 ? [] : [{ instanceId: `i${n}-${i}-${k}`, cardId: "c" + k, branch: BRANCH_IDS[(i + k) % 8] }] }));
     const seed = `rob${n}-${i}`;
-    const s0 = E.createGame({ players, seed });
+    const s0 = mkGame({ players, seed });
     const rng = botRng(seed);
     const end = playGame(s0, {
       optsFor: () => ({ rng }),
@@ -599,7 +611,7 @@ t.section("Premier joueur, collusion à trois, robustesse sur parties complètes
     if (end.result && end.result.raison === "limite_de_tours") capped++;
     if (i < 3) {
       const rng2 = botRng(seed);
-      const again = playGame(E.createGame({ players, seed }), { optsFor: () => ({ rng: rng2 }) }).state;
+      const again = playGame(mkGame({ players, seed }), { optsFor: () => ({ rng: rng2 }) }).state;
       if (JSON.stringify(again) !== JSON.stringify(end)) bad.push(`${seed} : rejouer la même graine donne un autre résultat`);
     }
   }

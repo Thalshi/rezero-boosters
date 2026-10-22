@@ -239,6 +239,8 @@ function normalizeSave(s, now = Date.now()) {
   out.owned = out.owned && typeof out.owned === "object" ? out.owned : {};
   for (const k of ["history", "paid", "predPaid", "predVoted"]) if (!Array.isArray(out[k])) out[k] = [];
   if (!out.streak || typeof out.streak !== "object") out.streak = { last: "", n: 0 };
+  out.titles = [...new Set((Array.isArray(out.titles) ? out.titles : []).map(titleIdOf).filter(Boolean))];
+  if (out.titleShown && !out.titles.includes(out.titleShown)) out.titleShown = null;
   return out;
 }
 const ownOf = (s, id) => s.owned[id] || { n: 0, gold: 0, first: 0 };
@@ -576,17 +578,18 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
 }
 // Ouvre 1 ou 2 boosters d'un coup. 2 boosters = 10 cartes = un coffre (avec scénario).
 // Tout est vérifié avant de prendre quoi que ce soit : jamais un seul des deux débité.
+const openEv = (r) => ({ open: r.cards.map((x) => ({ rar: CARD_BY_ID[x.id].rar, gold: x.gold })), divine: r.divine });
 function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
   n = n === 2 ? 2 : 1;
-  if (n === 1) return takeAndOpenS(s, packId, paid, cfg, uid, rng, now);
+  if (n === 1) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (!r.error) r.titles = grantTitlesS(s, openEv(r), now); return r; }
   if (packId === "jour") return { error: "Le pack du jour s'ouvre un seul à la fois." };
   regenS(s, now);
   if (paid && s.chakra < PRICE * n) return { error: `Il te faut ${PRICE * n} ◆ (tu en as ${s.chakra}).` };
   if (!paid && (s.free || 0) < n) return { error: `Il te faut ${n} boosters gratuits (tu en as ${s.free || 0}).` };
   const runs = [];
   for (let k = 0; k < n; k++) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (r.error) return r; runs.push(r); }
-  const cards = runs.flatMap((r) => r.cards);
-  return { pack: runs[0].pack, n, cards, divine: runs.some((r) => r.divine), scenario: pickScenarioS(cards, rng, now) };
+  const cards = runs.flatMap((r) => r.cards), divine = runs.some((r) => r.divine);
+  return { pack: runs[0].pack, n, cards, divine, scenario: pickScenarioS(cards, rng, now), titles: grantTitlesS(s, openEv({ cards, divine }), now) };
 }
 function packChance(rar, k = 1, last = LAST) {
   const a = boosted(SLOT, k), b = boosted(last, k);
@@ -817,8 +820,9 @@ function summonS(s, n, rng, now = Date.now()) {
   const had = new Set([...Object.keys(cos.own || {}), ...cos.inst.map((x) => x.c)]);
   const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); const isNew = !had.has(c.id); had.add(c.id); return { i, id: c.id, rar: r, isNew }; });
   trackS(s, "summon", n, now);
+  const titles = grantTitlesS(s, { summon: got }, now);
   // ×10 : ouvert dans le coffre, avec un scénario choisi ici comme pour les boosters
-  return n === 10 ? { got, cost, scenario: pickScenarioS(got, rng, now) } : { got, cost };
+  return n === 10 ? { got, cost, titles, scenario: pickScenarioS(got, rng, now) } : { got, cost, titles };
 }
 // enregistre le design d'une carte ; une instance ne peut être que sur une carte à la fois (elle quitte l'ancienne)
 function saveDesignS(s, cardId, design) {
@@ -934,10 +938,68 @@ function labSummonForcedS(s, rars, rng, now = Date.now()) {
 const DEFILE_REWARDS = [300, 150, 75];         // essence des 3 premiers (provisoire)
 const DEFILE_PARTICIPATION = 20;               // essence de participation (provisoire)
 const DEFILE_TITLES = ["Légende du Défilé", "Étoile du Défilé", "Éclat du Défilé"]; // titres personnels, jamais transférés
+const DEFILE_TITLE_IDS = ["defile-1", "defile-2", "defile-3"];
 const DEFILE_VOTE_MIN_OPENED = 10;             // anti-comptes jetables : boosters ouverts pour voter
 const DEFILE_VOTE_MIN_DAYS = 3;                // et ancienneté du compte
 const DEFILE_HALL_DAYS = 7;                    // le gagnant reste à l'accueil une semaine
 const defileCanVote = (s, member, now = Date.now()) => !!member && s.opened >= DEFILE_VOTE_MIN_OPENED && now - (s.created || now) >= DEFILE_VOTE_MIN_DAYS * 86400e3;
+
+// ===== Titres : gagnés en jouant, jamais achetés ni échangés ; chacun en choisit un à afficher près de son pseudo =====
+// Deux sortes : ceux d'un coup d'éclat (une ouverture, une invocation : le résultat les donne tout de suite)
+// et ceux de progression (compteurs de la sauvegarde : vérifiés après chaque action).
+const TITLE_CATS = { ouverture: "Ouvertures", invocation: "Invocations", confrontation: "Confrontation", defile: "Défilé", collection: "Collection", oracle: "Prédictions" };
+const rarCount = (list, test) => list.filter((x) => test(RANKS.indexOf(x.rar))).length;
+const TITLES = [
+  { id: "o-2l", name: "Double couronne", kanji: "冠", cat: "ouverture", rar: "l", desc: "Deux Légendaires dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 4) >= 2 },
+  { id: "o-2m", name: "Cœurs jumeaux", kanji: "双", cat: "ouverture", rar: "m", desc: "Deux Mythiques dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 5) >= 2 },
+  { id: "o-lm", name: "Alignement des astres", kanji: "星", cat: "ouverture", rar: "m", desc: "Une Légendaire et une Mythique dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 4) >= 1 && rarCount(o.open, (r) => r === 5) >= 1 },
+  { id: "o-3e", name: "Trinité", kanji: "三", cat: "ouverture", rar: "e", desc: "Trois Épiques ou mieux dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r >= 3) >= 3 },
+  { id: "o-rainbow", name: "Arc-en-ciel", kanji: "虹", cat: "ouverture", rar: "e", desc: "Cinq raretés différentes dans la même ouverture", hit: (o) => new Set(o.open.map((x) => x.rar)).size >= 5 },
+  { id: "o-2gold", name: "Pluie d'or", kanji: "金", cat: "ouverture", rar: "l", desc: "Deux cartes dorées dans la même ouverture", hit: (o) => o.open.filter((x) => x.gold).length >= 2 },
+  { id: "o-divine", name: "Élu des dieux", kanji: "神", cat: "ouverture", rar: "l", desc: "Ouvrir un booster divin", hit: (o) => !!o.divine },
+  { id: "i-2l", name: "Double prodige", kanji: "冠", cat: "invocation", rar: "l", desc: "Deux Légendaires dans la même invocation", hit: (o) => rarCount(o.summon, (r) => r === 4) >= 2 },
+  { id: "i-2m", name: "Jumeaux du Sanctuaire", kanji: "双", cat: "invocation", rar: "m", desc: "Deux Mythiques dans la même invocation", hit: (o) => rarCount(o.summon, (r) => r === 5) >= 2 },
+  { id: "i-m1", name: "Main bénie", kanji: "手", cat: "invocation", rar: "m", desc: "Une Mythique en invoquant un seul objet", hit: (o) => o.summon.length === 1 && o.summon[0].rar === "m" },
+  { id: "i-100", name: "Pilier du Sanctuaire", kanji: "召", cat: "invocation", rar: "e", desc: "Invoquer 100 objets", val: (s) => s.counts?.summon || 0, goal: 100 },
+  { id: "c-win1", name: "Première victoire", kanji: "勝", cat: "confrontation", rar: "r", desc: "Gagner une partie de Confrontation", val: (s) => s.counts?.cfWin || 0, goal: 1 },
+  { id: "c-gardien", name: "Rempart du QG", kanji: "盾", cat: "confrontation", rar: "e", desc: "Gagner en Gardien", val: (s) => s.counts?.cfWin_gardien || 0, goal: 1 },
+  { id: "c-sentinelle", name: "Œil de la Sentinelle", kanji: "目", cat: "confrontation", rar: "e", desc: "Gagner en Sentinelle", val: (s) => s.counts?.cfWin_sentinelle || 0, goal: 1 },
+  { id: "c-briseur", name: "Briseur de sceaux", kanji: "破", cat: "confrontation", rar: "e", desc: "Gagner en Briseur", val: (s) => s.counts?.cfWin_briseur || 0, goal: 1 },
+  { id: "c-1pv", name: "Sur le fil", kanji: "糸", cat: "confrontation", rar: "l", desc: "Gagner en finissant à 1 PV", val: (s) => s.counts?.cfWin1pv || 0, goal: 1 },
+  { id: "c-table7", name: "Maître de la grande table", kanji: "卓", cat: "confrontation", rar: "l", desc: "Gagner une partie à 7 joueurs", val: (s) => s.counts?.cfWin7 || 0, goal: 1 },
+  { id: "c-win10", name: "Champion de l'arène", kanji: "王", cat: "confrontation", rar: "l", desc: "Gagner 10 parties", val: (s) => s.counts?.cfWin || 0, goal: 10 },
+  { id: "c-win50", name: "Légende de l'arène", kanji: "龍", cat: "confrontation", rar: "m", desc: "Gagner 50 parties", val: (s) => s.counts?.cfWin || 0, goal: 50 },
+  { id: "defile-1", name: DEFILE_TITLES[0], kanji: "華", cat: "defile", rar: "m", desc: "Finir 1er d'un Défilé des Légendes", val: (s) => s.counts?.defile1 || 0, goal: 1 },
+  { id: "defile-2", name: DEFILE_TITLES[1], kanji: "華", cat: "defile", rar: "l", desc: "Finir 2e d'un Défilé des Légendes", val: (s) => s.counts?.defile2 || 0, goal: 1 },
+  { id: "defile-3", name: DEFILE_TITLES[2], kanji: "華", cat: "defile", rar: "e", desc: "Finir 3e d'un Défilé des Légendes", val: (s) => s.counts?.defile3 || 0, goal: 1 },
+  { id: "d-part5", name: "Habitué du Défilé", kanji: "幕", cat: "defile", rar: "r", desc: "Participer à 5 Défilés", val: (s) => s.counts?.defile || 0, goal: 5 },
+  { id: "k-fac1", name: "Gardien d'album", kanji: "冊", cat: "collection", rar: "r", desc: "Compléter une faction", val: (s) => factionsDoneS(s), goal: 1 },
+  { id: "k-myth5", name: "Panthéon vivant", kanji: "殿", cat: "collection", rar: "l", desc: "Posséder 5 Mythiques différentes", val: (s) => statsS(s).mythics, goal: 5 },
+  { id: "k-all", name: "Mémoire du QG", kanji: "零", cat: "collection", rar: "m", desc: "Posséder toutes les cartes", val: (s) => statsS(s).unique, goal: () => ALL_CARDS.length },
+  { id: "p-10", name: "Oracle de Shinjuku", kanji: "占", cat: "oracle", rar: "e", desc: "Réussir 10 prédictions", val: (s) => s.counts?.predwin || 0, goal: 10 },
+  { id: "p-25", name: "Voix du destin", kanji: "予", cat: "oracle", rar: "l", desc: "Réussir 25 prédictions", val: (s) => s.counts?.predwin || 0, goal: 25 },
+];
+const TITLE_BY_ID = Object.fromEntries(TITLES.map((t) => [t.id, t]));
+const titleGoal = (t) => (typeof t.goal === "function" ? t.goal() : t.goal);
+// ancienne forme : le nom du titre au lieu de son identifiant (titres du Défilé d'avant)
+const titleIdOf = (x) => (TITLE_BY_ID[x] ? x : TITLES.find((t) => t.name === x)?.id || null);
+// donne les titres gagnés : ev = { open: [{rar, gold}], divine } ou { summon: [{rar}] } pour un coup d'éclat ; sans ev, les compteurs
+function grantTitlesS(s, ev = null, now = Date.now()) {
+  const have = new Set(s.titles || []), got = [];
+  for (const t of TITLES) {
+    if (have.has(t.id)) continue;
+    const ok = t.hit ? !!ev && ((ev.open && t.cat === "ouverture") || (ev.summon && t.cat === "invocation")) && t.hit(ev) : t.val(s) >= titleGoal(t);
+    if (ok) { got.push(t.id); have.add(t.id); }
+  }
+  if (got.length) { s.titles = [...have]; s.titleAt = { ...(s.titleAt || {}), ...Object.fromEntries(got.map((id) => [id, now])) }; if (!s.titleShown) s.titleShown = got[got.length - 1]; }
+  return got;
+}
+// le titre affiché : un de ceux qu'on a, ou aucun
+function showTitleS(s, id) {
+  if (id && !(s.titles || []).includes(id)) return { error: "Tu n'as pas encore ce titre." };
+  s.titleShown = id || null; return { titleShown: s.titleShown };
+}
+const titlesProgressS = (s) => TITLES.map((t) => ({ id: t.id, own: (s.titles || []).includes(t.id), prog: t.val ? Math.min(titleGoal(t), t.val(s)) : null, goal: t.val ? titleGoal(t) : null }));
 // classement : plus de votes d'abord ; à égalité, l'inscription la plus ancienne passe devant
 function defileRank(d) {
   const n = {}; for (const e of Object.values(d.votes || {})) n[e] = (n[e] || 0) + 1;

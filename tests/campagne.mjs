@@ -45,22 +45,23 @@ async function ouvrir(J, selector, { label = "", flipAll = false } = {}) {
   let leaked = 0;
   if (chest) {
     leaked = await page.locator("#stage [data-card]").count(); // aucune carte ne doit être visible avant l'ouverture
-    await page.click("#cfKey");
+    await page.click("#cfKey", { force: true });
     const sc = G.CHEST_BY_ID[res.scenario];
     for (let i = 0; i < 40 && !(await page.locator("#revealBtn").count()); i++) { if (i === 3) leaked += await page.locator("#stage .kc").count(); await page.waitForTimeout(250); }
     if (!(await page.locator("#revealBtn").count())) return { res, chest, stuck: true, scenario: sc?.id };
     // après le coffre, les cartes se dévoilent une par une (comme la pochette)
     const faces = [];
     if (flipAll) for (let i = 0; i < res.cards.length; i++) {
-      await page.click("#revealBtn"); await page.waitForTimeout(120);
+      // retournement : jusqu'à 1,6 s (Mythique), puis la carte file se ranger
+      await page.click("#revealBtn"); await page.waitForSelector("#stage .reveal-card.on .kc", { timeout: 4000 }).catch(() => {}); await page.waitForTimeout(150);
       faces.push(await page.getAttribute("#stage .reveal-card.on .kc", "aria-label").catch(() => ""));
-      await page.click("#revealBtn"); await page.waitForTimeout(80);
+      await page.click("#revealBtn"); await page.waitForTimeout(550);
     }
     if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]');
     res.faces = faces;
   } else {
     await page.click("#pack"); await page.waitForTimeout(900);
-    for (let i = 0; i < 14 && !(await page.locator(".summary").count()); i++) { await page.click("#revealBtn").catch(() => {}); await page.waitForTimeout(160); }
+    for (let i = 0; i < 40 && !(await page.locator(".summary").count()); i++) { await page.click("#revealBtn", { timeout: 2000 }).catch(() => {}); await page.waitForTimeout(450); }
   }
   await page.waitForSelector(".summary", { timeout: 8000 });
   const shown = await page.$$eval(".summary [data-card]", (els) => els.map((e) => e.getAttribute("data-card")));
@@ -74,26 +75,29 @@ async function choisir(page, packId, paid = false) {
   return `[data-act="open-pack"][data-p="${packId}"]${paid ? "[data-paid]" : ":not([data-paid])"} >> visible=true`;
 }
 async function finir(page) {
-  if (await page.locator("#cfKey").count()) { await page.click("#cfKey"); await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {}); }
+  if (await page.locator("#cfKey").count()) { await page.click("#cfKey", { force: true }); await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {}); }
   else if (await page.locator("#pack").count()) { await page.click("#pack"); await page.waitForTimeout(900); }
   if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]').catch(() => {});
   await page.waitForTimeout(300);
-  await page.click('#stage [data-act="stage-close"]').catch(() => {});
+  await closeStage(page);
   await page.waitForTimeout(300);
 }
 const deco = async (page, scope) => page.locator(`${scope} .cz-cadre, ${scope} .cz-aura, ${scope} .cz-holo, ${scope} .cz-part, ${scope} .cz-orn, ${scope} .cz-pres, ${scope} [class*="cz-fond"]`).count().catch(() => 0);
 const decoOf = async (page, scope) => (await page.locator(scope).count()) ? await page.evaluate((sel) => { const el = document.querySelector(sel); return !!el && (el.className.includes("cz-") || !!el.querySelector('[class*="cz-"]') || (el.getAttribute("style") || "").includes("--z")); }, scope) : false;
 const same = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
-const closeStage = (page) => page.click('#stage [data-act="stage-close"]').catch(() => page.click('#stage [data-act="lab-back"]').catch(() => {}));
+// fermer l'ouverture, puis la fenêtre « Titre débloqué » si un titre vient d'être gagné
+const closeStage = async (page) => { await page.click('#stage [data-act="stage-close"]').catch(() => page.click('#stage [data-act="lab-back"]').catch(() => {})); await page.waitForTimeout(250); if (await page.locator(".ttl-sheet").count()) await page.click('.ttl-sheet [data-act="close"] >> nth=-1').catch(() => {}); };
 
 let A, P, Q, R, solo, inst, firstBuy, lst, sk;
-async function etape(name, fn) { t.section(name); try { await fn(); } catch (e) { t.check(`${name} : l'étape va jusqu'au bout`, false, String(e.message || e).slice(0, 500)); for (const J of [A, P, Q, R].filter(Boolean)) await shot(J.page, `echec-${name.slice(0, 2).trim()}-${J.name.replace(/\W+/g, "-")}`); } }
+let CUR = null; // joueur en cours dans une étape qui crée ses propres joueurs (pour la capture en cas d'échec)
+async function etape(name, fn) { if (process.env.ONLY && !name.startsWith(process.env.ONLY)) return; t.section(name); try { await fn(); } catch (e) { t.check(`${name} : l'étape va jusqu'au bout`, false, String(e.message || e).slice(0, 500)); for (const J of [A, P, Q, R, CUR].filter(Boolean)) await shot(J.page, `echec-${name.slice(0, 2).trim()}-${J.name.replace(/\W+/g, "-")}`); } }
 try {
   // =====================================================================================
   await etape("1. Parcours joueur : boosters, coffre, économie (téléphone, ordi, animations réduites)", async () => {
   for (const [k, conf] of [["mobile", { vp: "mobile" }], ["ordi", { vp: "ordi" }], ["réduit", { vp: "mobile", reduced: true }]]) {
     const pid = { mobile: IDS.p1, ordi: IDS.p2, "réduit": IDS.p3 }[k];
     const J = await joueur(pid, "Joueur " + k, conf);
+    CUR = J;
     let s0 = await J.state();
     t.check(`${k} · compte neuf : 3 boosters gratuits, 120 ◆`, s0.free === G.FREE_MAX && s0.chakra === 120);
     const o1 = await ouvrir(J, await choisir(J.page, "mix"));
@@ -104,6 +108,7 @@ try {
     await closeStage(J.page);
     // pack du jour
     await J.go("boosters");
+    await J.page.click('[data-seg="packTab"][data-v="day"] >> visible=true').catch(() => {}); await J.page.waitForTimeout(300); // l'onglet du jour, pas le carrousel qui tourne
     const od = await ouvrir(J, '[data-act="open-day"] >> visible=true');
     t.check(`${k} · pack du jour : cartes identiques au serveur`, same(od.shown, od.res.cards.map((c) => c.id)));
     await closeStage(J.page);
@@ -175,7 +180,7 @@ try {
   const picksM = [["m", 0], ["c", 0], ["c", 1], ["c", 2], ["c", 3]].map(([r, i]) => sk(r, i));
   await A.page.evaluate((ids) => { lab.picks = ids; draw(); }, picksM);
   const resP = A.page.waitForResponse((r) => r.url().includes("/api/game/lab/open")); await A.page.click('[data-act="lab-open"]'); await resP; await A.page.waitForTimeout(500);
-  await A.page.click("#cfKey");
+  await A.page.click("#cfKey", { force: true });
   const tints = new Set();
   for (let i = 0; i < 30; i++) { tints.add(await A.page.evaluate(() => getComputedStyle(document.getElementById("cf") || document.body).getPropertyValue("--rare").trim())); await A.page.waitForTimeout(150); if (await A.page.locator(".cf-grid").count()) break; }
   t.check("feinte « faux redémarrage » sur une Mythique : passe par des teintes plus basses puis finit rouge", tints.size >= 2, [...tints]);
@@ -207,19 +212,19 @@ try {
   t.check("Sanctuaire ×5 : double clic, une seule invocation (5 objets, un débit)", sa.chakra === sb.chakra - G.summonCost(5) && sa.cos.inst.length === (sb.cos?.inst?.length || 0) + 5, { débit: sb.chakra - sa.chakra, objets: sa.cos.inst.length });
   await P.page.click("#pack"); await P.page.waitForTimeout(900); await P.page.click('[data-act="skip"]'); await P.page.waitForTimeout(300);
   t.check("Sanctuaire ×5 : la pochette mène au récapitulatif des 5 objets", (await P.page.locator(".summary .ocos").count()) === 5);
-  await P.page.click('[data-act="stage-close"]').catch(() => {});
+  await closeStage(P.page);
   sb = sa;
   await P.page.dblclick('[data-zsum="10"]'); await P.page.waitForTimeout(800);
   sa = await P.state();
   t.check("Sanctuaire ×10 : double clic, une seule invocation (10 objets, un débit), ouverte dans le coffre", sa.chakra === sb.chakra - G.summonCost(10) && sa.cos.inst.length === sb.cos.inst.length + 10 && (await P.page.locator("#cfChest").count()) === 1);
-  await P.page.click("#cfKey"); await P.page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
+  await P.page.click("#cfKey", { force: true }); await P.page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
   t.check("Sanctuaire ×10 : après le scénario, les 10 objets se dévoilent un par un", (await P.page.locator("#stage .pdots i").count()) === 10 && (await P.page.locator("#revealBtn").count()) === 1);
-  await P.page.click('[data-act="skip"]').catch(() => {}); await P.page.click('[data-act="stage-close"]').catch(() => {});
+  await P.page.click('[data-act="skip"]').catch(() => {}); await closeStage(P.page);
   sb = sa;
   await P.page.check("#zSkip"); await P.page.dblclick('[data-zsum="1"]'); await P.page.waitForTimeout(1500);
   sa = await P.state();
   t.check("Sanctuaire ×1 sans animation : double clic, un seul débit", sa.chakra === sb.chakra - G.summonCost(1) && sa.cos.inst.length === sb.cos.inst.length + 1);
-  await P.page.click('[data-act="stage-close"]').catch(() => {});
+  await closeStage(P.page);
   // design avec un objet de compte + une instance, sur une carte possédée en un exemplaire
   solo = Object.keys(sa.owned).find((id) => sa.owned[id].n === 1 && !sa.owned[id].gold && !G.CARD_BY_ID[id].skin);
   inst = sa.cos.inst.find((x) => G.COS_BY_ID[x.c].slot !== G.COS_BY_ID[firstBuy].slot);

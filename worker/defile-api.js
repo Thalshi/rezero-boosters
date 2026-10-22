@@ -103,9 +103,10 @@ export async function defileRoute(env, user, path, body, h) {
       const d = r.d, rank = G.defileRank(d);
       // récompenses : une seule fois par Défilé (le passage à « clos » ci-dessus ne réussit qu'une fois)
       for (const [i, e] of rank.entries()) {
-        const gain = (G.DEFILE_REWARDS[i] || 0) + G.DEFILE_PARTICIPATION, title = G.DEFILE_TITLES[i];
-        await h.mutate(env, e.uid, (s) => { s.chakra += gain; if (title) s.titles = [...new Set([...(s.titles || []), title])]; return {}; }).catch(() => null);
-        await h.notify(env, e.uid, "defile", i < 3 ? `${d.title} : tu finis ${i + 1}${i ? "e" : "er"} avec ${e.votes} vote${e.votes > 1 ? "s" : ""} ! +${gain} ◆${title ? ` et le titre « ${title} »` : ""}.` : `${d.title} : merci d'avoir défilé ! +${gain} ◆.`, { go: "defile" });
+        const gain = (G.DEFILE_REWARDS[i] || 0) + G.DEFILE_PARTICIPATION;
+        // le titre du podium vient du compteur (voir TITLES), donné par mutate avec sa notification
+        await h.mutate(env, e.uid, (s, t) => { s.chakra += gain; G.trackS(s, "defile", 1, t); if (i < 3) G.trackS(s, "defile" + (i + 1), 1, t); return {}; }).catch(() => null);
+        await h.notify(env, e.uid, "defile", i < 3 ? `${d.title} : tu finis ${i + 1}${i ? "e" : "er"} avec ${e.votes} vote${e.votes > 1 ? "s" : ""} ! +${gain} ◆.` : `${d.title} : merci d'avoir défilé ! +${gain} ◆.`, { go: "defile" });
       }
       const top = rank[0] && d.entries[rank[0].uid];
       if (top) await writeJSON(env, "defile", "hall", { id: d.id, title: d.title, uid: rank[0].uid, name: top.name, card: top.card, gold: top.gold, design: top.design, votes: rank[0].votes, until: now + G.DEFILE_HALL_DAYS * 86400e3 });

@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-10-22 — Deuxième mise en production : coffre, dévoilement, titres, Confrontation
+- En production (à la demande de Reichi) : nouveau coffre et nouvelle clé, dévoilement carte par carte avec effets en rotation (3 par rareté), 28 titres à gagner et à afficher près du pseudo, Confrontation où chacun choisit son perso parmi ses propres cartes, style de Confrontation affiché sur ses cartes et leur fiche. Point de restauration D1 noté dans docs/MISE_EN_PRODUCTION.md.
+- Bug corrigé (aussi en production avant) : le dos des cartes au dévoilement était écrasé par la règle des champs de saisie.
+- Prototypes à valider, pas encore dans le jeu : coffre en vraie 3D qui se fissure et éclate, carte Légendaire ou Mythique qui « prend vie » (https://claude.ai/artifact/QrZzHsoPnusVGCZpxEdADe) ; arène 3D de Confrontation jouable contre des bots, avec rôle secret, 25 cartes, présages, chrono 90 s, glisser-déposer, historique, émotes, salon, fiches des champions et icônes néon à la place des kanji (https://claude.ai/artifact/YRN2CKY8CHyzcG14By9BYN). Mode « figurine » essayé puis écarté par Reichi.
+- Demandes en attente : remplacer les kanji par des icônes néon dans tout le site (planche à valider), Boutique façon Discord (effets de profil animés, décorations, collections à thème, aperçu avant achat).
+- 22 suites de tests vertes (845 vérifications).
+
 ## 2026-10-22 — Mise en production complète, design Arcane Néon
 - Tout déployé en production (fusion de `dev/re-zero-complet` dans `main`), toutes les nouveautés ouvertes, à la demande de Reichi. Point de restauration D1 noté avant.
 - Design « Arcane Néon » choisi parmi 4 propositions (Arcane, Néon Shinjuku, Encre et sceau, mélange) et appliqué à toute l'app, avec une barre de navigation en bas sur téléphone.

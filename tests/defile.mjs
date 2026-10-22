@@ -72,8 +72,8 @@ try {
   t.check("podium : P1 (3 voix), puis égalité départagée par l'inscription la plus ancienne", fin.current.rank.map((r) => r.uid).join() === [P1.id, P2.id, P3.id].join() && fin.current.rank[0].votes === 3, fin.current.rank);
   const gains = {}; for (const p of [P1, P2, P3]) { const s = (await p.api("state")).state; gains[p.id] = s.chakra - before[p.id]; }
   t.check("récompenses versées une seule fois", gains[P1.id] === G.DEFILE_REWARDS[0] + G.DEFILE_PARTICIPATION && gains[P2.id] === G.DEFILE_REWARDS[1] + G.DEFILE_PARTICIPATION && gains[P3.id] === G.DEFILE_REWARDS[2] + G.DEFILE_PARTICIPATION, gains);
-  t.check("titre personnel du gagnant", ((await P1.api("state")).state.titles || []).includes(G.DEFILE_TITLES[0]));
-  t.check("titre visible sur le profil public", ((await P2.api("profile", { uid: P1.id })).titles || []).includes(G.DEFILE_TITLES[0]));
+  t.check("titre personnel du gagnant", ((await P1.api("state")).state.titles || []).includes(G.DEFILE_TITLE_IDS[0]));
+  t.check("titre visible sur le profil public", ((await P2.api("profile", { uid: P1.id })).titles || []).includes(G.DEFILE_TITLE_IDS[0]));
   t.check("gagnant à l'accueil pour une semaine", fin.hall?.uid === P1.id && fin.hall.design?.cadre === cadre.id && fin.hall.until > Date.now() + 6 * 86400e3);
   t.check("archive du Défilé", fin.archives[0]?.title === "Défilé de test" && fin.archives[0].podium.length === 3);
   t.check("un nouveau Défilé peut s'ouvrir", (await A.api("defile/admin", { action: "new", title: "Deuxième" })).status === 200);

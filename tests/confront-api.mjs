@@ -90,6 +90,9 @@ try {
   t.check("spectateur : voit la fin", endS.vue.phase === "fin");
   const stEnd = (await A.api("state")).state;
   t.check("fin : les verrous sont levés", !stEnd.confront);
+  const wonA = (last?.resultat?.gagnants || []).includes(A.id), played = stEnd.counts?.cfPlay || 0;
+  t.check("fin : la partie est comptée (victoire seulement si gagnée)", (stEnd.counts?.cfWin || 0) === (wonA && played ? 1 : 0), { wonA, counts: stEnd.counts });
+  t.check("fin : une victoire valable donne le titre « Première victoire »", !(stEnd.counts?.cfWin) || stEnd.titles.includes("c-win1"));
   t.check("aucune carte n'a changé de propriétaire", JSON.stringify(Object.keys(stEnd.owned).sort()) === JSON.stringify(Object.keys(stA.owned).sort()));
   if (solo) t.check("après la partie : la carte se vend de nouveau", (await A.api("market/sell", { id: solo, price: 10 })).status === 200);
 

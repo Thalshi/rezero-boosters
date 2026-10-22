@@ -36,9 +36,15 @@ async function mutate(env, uid, fn) {
     G.regenS(s, now);
     const result = await fn(s, now);
     if (result && result.abort) return result;
+    // titres de progression (collection, Confrontation, Défilé, prédictions) : vérifiés après chaque action
+    const more = G.grantTitlesS(s, null, now), won = [...(result?.titles || []), ...more];
     s.updated = now;
     const res = await env.DB.prepare("UPDATE players SET data = ?, version = version + 1, updated = ? WHERE uid = ? AND version = ?").bind(JSON.stringify(s), now, uid, row.version).run();
-    if (res.meta.changes) { await publishStats(env, uid, s); return { ...result, state: s }; }
+    if (res.meta.changes) {
+      await publishStats(env, uid, s);
+      for (const id of won) await notify(env, uid, "titre", `Nouveau titre : « ${G.TITLE_BY_ID[id].name} » (${G.TITLE_BY_ID[id].desc.toLowerCase()}). Choisis-le sur ton profil pour l'afficher.`, { go: "profil" }).catch(() => null);
+      return { ...result, ...(won.length ? { titles: won } : {}), state: s };
+    }
   }
   throw new Error("busy");
 }
@@ -47,7 +53,7 @@ const featuredOf = (s) => (s.featured && G.hasCard(s, s.featured) ? { featured: 
 async function publishStats(env, uid, s) {
   const st = G.statsS(s);
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'players', ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
-    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), t: Date.now() }), Date.now()).run();
+    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), title: s.titleShown || null, t: Date.now() }), Date.now()).run();
   await bumpRev(env, "players");
 }
 async function getConfig(env) {
@@ -498,7 +504,11 @@ export async function gameRoute(req, env, user, path) {
       // designs visibles des cartes exposées (vitrine et carte vedette) ; rien d'autre de l'inventaire n'est public
       const shown = [...new Set([...(s.showcase || []), ...(s.featured ? [s.featured] : [])])];
       const designs = Object.fromEntries(shown.map((id) => [id, G.designOfS(s, id)]).filter(([, d]) => d));
-      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs, titles: s.titles || [] });
+      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs, titles: s.titles || [], titleShown: s.titleShown || null });
+    }
+    if (path === "/api/game/title") {
+      const r = await mutate(env, user.id, (s) => { const o = G.showTitleS(s, body.id ? String(body.id) : null); return o.error ? { abort: true, error: o.error } : o; });
+      return r.error ? fail(400, r.error) : json(r);
     }
     if (path === "/api/game/showcase") {
       const ids = (Array.isArray(body.ids) ? body.ids : []).filter((id) => G.CARD_BY_ID[id]).slice(0, 4);

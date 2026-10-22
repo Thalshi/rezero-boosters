@@ -13,7 +13,7 @@
 //   viewFor(state, playerId | null)    -> vue filtrée (null = spectateur)
 //   legalActions(state, playerId)      -> actions possibles maintenant
 //
-// Phases : lobby -> contributions -> choix (après le tirage des 2 propositions) -> partie -> fin
+// Phases : lobby -> contributions -> choix (parmi ses propres cartes, ou 2 propositions tirées) -> partie -> fin
 
 import { DEFAULT_CONFIG, ROLES_PAR_TABLE, MODES, modeFor, mergeConfig } from "./config.mjs";
 import { CARD_DEFS, ARME_DE_BASE, buildDeck } from "./cards.mjs";
@@ -265,8 +265,19 @@ function finalizeReserve(s) {
   emit(s, "reserve", { n: s.reserve.length, prets: s.reserve.filter((c) => c.pret).length });
 }
 
-/** Tirage serveur : deux personnages distincts par joueur, jamais la même instance deux fois. */
+/** Persos proposés. persoLibre : chacun choisit parmi ses propres cartes apportées (2 cartes de prêt s'il n'en a
+ *  apporté aucune). Sinon, tirage serveur : deux personnages distincts par joueur, jamais la même instance deux fois. */
 function dealPropositions(s, now) {
+  if (s.config.persoLibre) {
+    for (const p of s.players) {
+      const own = p.contribution.map((c) => c.instanceId);
+      const props = own.length ? own : shuffle(s, "tirage", s.reserve.filter((c) => c.pret && c.apportePar === p.id).map((c) => c.instanceId)).slice(0, 2);
+      p.propositions = props;
+      emit(s, "propositions", { pid: p.id, propositions: props.map((iid) => s.reserve.find((c) => c.instanceId === iid)) }, [p.id]);
+    }
+    s.phase = "choix"; s.deadline = now + s.config.delais.choix; emit(s, "phase", { phase: "choix" });
+    return;
+  }
   const pool = shuffle(s, "tirage", s.reserve.map((c) => c.instanceId));
   const card = (iid) => s.reserve.find((c) => c.instanceId === iid);
   for (const p of s.players) {
@@ -751,7 +762,7 @@ function handle(s, pid, a, now) {
       mustP(s, pid);
       if (s.phase !== "choix") refuse("PHASE", "Ce n'est pas le moment de choisir.");
       if (p.choix) refuse("DEJA_CHOISI", "Tu as déjà choisi ton personnage.");
-      if (!p.propositions.includes(a.instanceId)) refuse("CHOIX_INVALIDE", "Tu dois choisir l'un de tes deux personnages proposés.");
+      if (!p.propositions.includes(a.instanceId)) refuse("CHOIX_INVALIDE", "Tu dois choisir l'un de tes personnages proposés.");
       p.choix = a.instanceId;
       emit(s, "choix", { pid }); // public : seulement le fait d'avoir choisi
       emit(s, "choix_prive", { pid, instanceId: a.instanceId }, [pid]);

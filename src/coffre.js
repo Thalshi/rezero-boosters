@@ -2,19 +2,50 @@
 // Les cartes et le scénario viennent du serveur (src/game.js : pickScenarioS) ; ici on ne fait que les mettre en scène.
 // Un scénario = une suite de temps forts (CHEST_BEATS). Une feinte ne montre jamais un faux résultat : elle retarde la vraie couleur.
 const Coffre = (() => {
-  const KEY_SVG = `<svg viewBox="0 0 132 40" aria-hidden="true"><defs><linearGradient id="cfkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".45" stop-color="#e2b54a"/><stop offset="1" stop-color="#8a6420"/></linearGradient><linearGradient id="cfkc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="var(--rare)"/><stop offset="1" stop-color="#101018"/></linearGradient></defs>
-  <path d="M6 14h10v-4h6v4h4v12h-4v4h-6v-4h-4v4H6z" fill="url(#cfkg)" stroke="#5a4214" stroke-width="1"/><rect x="24" y="17" width="78" height="6" rx="2" fill="url(#cfkg)" stroke="#5a4214" stroke-width="1"/>
-  <path d="M116 3l14 8.5v17L116 37l-14-8.5v-17z" fill="url(#cfkg)" stroke="#5a4214" stroke-width="1"/><path d="M116 10l8 5v10l-8 5-8-5V15z" fill="url(#cfkc)" stroke="#fff6" stroke-width=".8"/></svg>`;
-  const EMBLEM = `<svg viewBox="0 0 120 104" aria-hidden="true"><defs><linearGradient id="cfeg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#d8a83f"/><stop offset="1" stop-color="#7d5a1c"/></linearGradient></defs>
-  <g fill="url(#cfeg)" stroke="#5a4214" stroke-width="1.2"><path d="M50 26C36 18 16 22 4 40c14-5 24-3 32 3-12 4-20 12-24 24 12-8 22-10 30-8z"/><path d="M70 26c14-8 34-4 46 14-14-5-24-3-32 3 12 4 20 12 24 24-12-8-22-10-30-8z"/>
-  <path d="M60 4l20 12-3 50-17 34-17-34-3-50z"/></g><path d="M60 12l13 8-2 42-11 24-11-24-2-42z" fill="none" stroke="#fff3" stroke-width="1"/>
-  <text x="60" y="47" text-anchor="middle" font-family="Zen Kaku Gothic New, sans-serif" font-weight="700" font-size="21" fill="#3a280c">封</text>
-  <circle cx="60" cy="66" r="5" fill="#120d06"/><path d="M57.5 68h5l1.5 10h-8z" fill="#120d06"/></svg>`;
+  // clé ouvragée : anneau à gemme, tige gravée, panneton taillé (le panneton est à droite : c'est lui qui entre dans la serrure)
+  const KEY_SVG = `<svg viewBox="0 0 170 56" aria-hidden="true"><defs><linearGradient id="cfkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4cf"/><stop offset=".45" stop-color="#e8c77e"/><stop offset="1" stop-color="#7a5620"/></linearGradient><radialGradient id="cfkc" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#7ff3ff"/><stop offset="1" stop-color="#0a5a73"/></radialGradient></defs>
+  <g fill="none" stroke="url(#cfkg)" stroke-linecap="round"><circle cx="28" cy="28" r="19" stroke-width="5"/><circle cx="28" cy="28" r="12.5" stroke-width="1.5" opacity=".8"/><path d="M28 4C22 0 16 4 18 9M28 4C34 0 40 4 38 9M28 52C22 56 16 52 18 47M28 52C34 56 40 52 38 47" stroke-width="2"/><path d="M5 28C1 22 5 17 9 19M5 28C1 34 5 39 9 37" stroke-width="2"/></g>
+  <path d="M28 18l7 10-7 10-7-10z" fill="url(#cfkc)" stroke="#fff6" stroke-width=".8"/><rect x="46" y="24.5" width="96" height="7" rx="2" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/><path d="M54 28h80" stroke="#5a4214" stroke-width=".8" stroke-dasharray="3 4"/>
+  <rect x="46" y="21" width="6" height="14" rx="1.5" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/><rect x="70" y="22" width="4" height="12" rx="1" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".6"/>
+  <path d="M134 31v13h6v-5h5v7h6v-10h5v8h6v-13z" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/><circle cx="162" cy="28" r="4" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/></svg>`;
   const CROWN = `<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M4 34L8 8l12 14L30 4l10 18L52 8l4 26z" fill="#f5c518" stroke="#7d5a1c" stroke-width="2"/></svg>`;
   const RUNES = ["召", "零", "界", "悪", "友", "匠", "魂", "門"];
-  const faces = (part) => ["front", "back", "right", "left"].map((f) => `<div class="f ${f}"></div>`).join("") + (part === "base" ? '<div class="f bottom"></div><div class="f inside"></div>' : '<div class="f top"></div><div class="f under"></div>');
-  const chestHTML = () => `<div class="c3" id="cfChest"><div class="c3-lid">${faces("lid")}</div>
-      <div class="c3-base">${faces("base")}<div class="emblem">${EMBLEM}<div class="lock" id="cfLock"></div></div></div></div>`;
+  // coffre détaillé (SVG) : bois laqué, ferrures dorées, volutes, sceau à runes qui tourne, lumière dans la fente.
+  // La lumière, la gemme et les runes prennent la couleur montrée par le scénario (--rare).
+  const chestHTML = () => `<div class="ch2" id="cfChest"><svg viewBox="0 0 320 270" role="img" aria-label="Coffre arcanique scellé">
+    <defs><linearGradient id="chW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1d4d"/><stop offset=".55" stop-color="#160f2c"/><stop offset="1" stop-color="#0b0818"/></linearGradient>
+      <linearGradient id="chWS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#120c25"/><stop offset="1" stop-color="#07050f"/></linearGradient>
+      <linearGradient id="chG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1c2"/><stop offset=".35" stop-color="#e8c77e"/><stop offset=".7" stop-color="#b48a3c"/><stop offset="1" stop-color="#6e4c18"/></linearGradient>
+      <linearGradient id="chGH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a6420"/><stop offset=".5" stop-color="#f6dc9b"/><stop offset="1" stop-color="#8a6420"/></linearGradient>
+      <radialGradient id="chSeal" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#3a2a64"/><stop offset="1" stop-color="#120c25"/></radialGradient>
+      <radialGradient id="chGem" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".3" class="ch-rare"/><stop offset="1" stop-color="#1a0c30"/></radialGradient>
+      <linearGradient id="chSeam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" class="ch-rare"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <pattern id="chGrain" width="8" height="40" patternUnits="userSpaceOnUse"><path d="M2 0C4 10 0 20 2 40M6 0C8 14 5 26 6 40" stroke="#ffffff0d" fill="none"/></pattern>
+      <filter id="chGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <symbol id="chCurl" viewBox="0 0 40 24"><path d="M2 22C2 8 14 2 22 6C30 10 26 20 19 18C14 16 16 10 21 11" fill="none" stroke="url(#chG)" stroke-width="2" stroke-linecap="round"/><circle cx="21" cy="11" r="1.6" fill="#f6dc9b"/></symbol></defs>
+    <ellipse cx="160" cy="250" rx="128" ry="12" fill="#000" opacity=".55"/>
+    <g class="ch2-float">
+      <path d="M282 132L300 120L300 222L282 240Z" fill="url(#chWS)" stroke="#e8c77e55"/>
+      <rect x="38" y="132" width="244" height="108" rx="6" fill="url(#chW)"/><rect x="38" y="132" width="244" height="108" rx="6" fill="url(#chGrain)"/>
+      <rect x="38" y="132" width="244" height="108" rx="6" fill="none" stroke="url(#chG)" stroke-width="3"/><rect x="46" y="140" width="228" height="92" rx="3" fill="none" stroke="#e8c77e44"/>
+      <use href="#chCurl" x="58" y="196" width="46" height="28"/><use href="#chCurl" x="262" y="196" width="46" height="28" transform="scale(-1 1) translate(-524 0)"/>
+      <use href="#chCurl" x="96" y="148" width="34" height="20" transform="rotate(180 113 158)"/><use href="#chCurl" x="190" y="148" width="34" height="20" transform="scale(-1 -1) translate(-414 -316)"/>
+      <rect x="72" y="132" width="12" height="108" fill="url(#chG)" stroke="#5a4214" stroke-width=".6"/><rect x="236" y="132" width="12" height="108" fill="url(#chG)" stroke="#5a4214" stroke-width=".6"/>
+      <g fill="#5a4214"><circle cx="78" cy="142" r="2"/><circle cx="78" cy="186" r="2"/><circle cx="78" cy="230" r="2"/><circle cx="242" cy="142" r="2"/><circle cx="242" cy="186" r="2"/><circle cx="242" cy="230" r="2"/></g>
+      <g fill="url(#chG)" stroke="#5a4214" stroke-width=".6"><path d="M38 214h20v6h-14v20h-6z"/><path d="M282 214h-20v6h14v20h6z"/></g>
+      <g class="ch2-runes" font-family="Zen Kaku Gothic New, serif" font-size="11" text-anchor="middle"><text x="104" y="226">零</text><text x="124" y="226">封</text><text x="196" y="226">界</text><text x="216" y="226">神</text></g>
+      <rect class="ch2-seam" x="44" y="127" width="232" height="6" fill="url(#chSeam)" filter="url(#chGlow)"/>
+      <g class="ch2-lid">
+        <path d="M282 132L300 120L300 96Q292 70 282 98Z" fill="url(#chWS)" stroke="#e8c77e55"/>
+        <path d="M38 132L38 100Q160 34 282 100L282 132Z" fill="url(#chW)"/><path d="M38 132L38 100Q160 34 282 100L282 132Z" fill="url(#chGrain)"/>
+        <path d="M38 132L38 100Q160 34 282 100L282 132Z" fill="none" stroke="url(#chG)" stroke-width="3"/><path d="M52 120L52 104Q160 50 268 104L268 120" fill="none" stroke="#e8c77e44"/>
+        <path d="M72 132L72 84Q78 80 84 78L84 132Z" fill="url(#chG)" stroke="#5a4214" stroke-width=".6"/><path d="M248 132L248 84Q242 80 236 78L236 132Z" fill="url(#chG)" stroke="#5a4214" stroke-width=".6"/>
+        <use href="#chCurl" x="98" y="88" width="40" height="24"/><use href="#chCurl" x="182" y="88" width="40" height="24" transform="scale(-1 1) translate(-404 0)"/>
+        <rect x="36" y="124" width="248" height="10" fill="url(#chGH)" stroke="#5a4214" stroke-width=".6"/></g>
+      <g class="ch2-lock"><path d="M160 104L190 116L186 162L160 180L134 162L130 116Z" fill="url(#chG)" stroke="#5a4214"/><circle cx="160" cy="140" r="25" fill="url(#chSeal)" stroke="#5a4214"/>
+        <g class="ch2-ring" font-family="Zen Kaku Gothic New, serif" font-size="7.5" fill="#e8c77e" text-anchor="middle"><circle cx="160" cy="140" r="21" fill="none" stroke="#e8c77e66" stroke-dasharray="2 3"/><text x="160" y="124">召</text><text x="176" y="143">門</text><text x="160" y="161">魂</text><text x="144" y="143">界</text></g>
+        <circle cx="160" cy="140" r="9" fill="#0b0818" stroke="url(#chG)" stroke-width="1.5"/><path id="cfLock" d="M160 134a3 3 0 1 1 0 6l2 6h-4l2-6" fill="#000" stroke="#ffd27a88" stroke-width=".6"/></g>
+      <path class="ch2-gem" d="M160 92l7 9-7 9-7-9z" fill="url(#chGem)" stroke="#fff8" filter="url(#chGlow)"/></g></svg></div>`;
   const reducedNow = () => reduced || matchMedia("(prefers-reduced-motion: reduce)").matches;
   const wait = (ms) => new Promise((r) => setTimeout(r, reducedNow() ? 0 : ms));
   let run = 0; // identifiant de lecture : un « Passer » ou une fermeture coupe la lecture en cours
@@ -63,11 +94,11 @@ const Coffre = (() => {
     const key = $("cfKey"); if (!key) return;
     if (!lock) { key.style.transform = ""; key.style.opacity = 1; return; }
     const lr = $("cfLock").getBoundingClientRect(), kr = key.getBoundingClientRect();
-    key.style.transform = `translate(${lr.left + lr.width / 2 - kr.left - 10}px, ${lr.top + lr.height / 2 - kr.top - kr.height / 2}px) scale(.55)`;
+    key.style.transform = `translate(${lr.left + lr.width / 2 - (kr.left + kr.width * .92)}px, ${lr.top + lr.height / 2 - kr.top - kr.height / 2}px) scale(.6)`;
   }
   const BEAT = {
     async insert() { $("cfHint")?.setAttribute("hidden", ""); keyTo(true); snd(520, .08, "triangle"); await wait(420); },
-    async turn() { const k = $("cfKey"); if (k) k.style.transform += " rotateX(80deg)"; snd(330, .1, "square", .03); chest()?.classList.add("shake1"); await wait(420); chest()?.classList.remove("shake1"); },
+    async turn() { const k = $("cfKey"); if (k) k.style.transform += " rotateX(80deg)"; stage()?.classList.add("turning"); snd(330, .1, "square", .03); chest()?.classList.add("shake1"); await wait(420); chest()?.classList.remove("shake1"); },
     async tint(o, r) { setTint(r || bestOf(o)); if (!r) snd(660 + 80 * RAR[bestOf(o)].rank, .25); await wait(520); },
     async ladder(o) { for (const r of RANKS.slice(0, RAR[bestOf(o)].rank + 1)) { setTint(r); snd(300 + 90 * RAR[r].rank, .1); await wait(260); } },
     async shake(o, n = 1) { const c = chest(); c?.classList.add("shake" + Math.min(3, n)); snd(120, .2 * n, "sawtooth", .03); await wait(360 * n); c?.classList.remove("shake1", "shake2", "shake3"); },

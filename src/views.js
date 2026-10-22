@@ -63,7 +63,7 @@ function cardHTML(c, o = {}) {
     style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
+    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span>${soon || locked ? "" : brTag(c.id)}</div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}
@@ -83,6 +83,10 @@ const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.m
 const rarChips = (name, cur) => `<div class="chips">${[["", "Toutes"], ...RANKS.map((k) => [k, RAR[k].label])].map(([k, l]) => `<button class="chip" type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${k ? `<i class="d" style="background:${RAR[k].color}"></i>` : ""}${l}</button>`).join("")}</div>`;
 const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`;
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
+// titre choisi par un joueur (le sien vient de la sauvegarde, les autres du classement partagé)
+const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
+const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${t.kanji}</i>${esc(t.name)}</span>` : "");
+const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
 const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${av(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
 const titleOf = (unique) => unique >= ALL_CARDS.length ? ["神", "Légende"] : unique >= 90 ? ["達人", "Maître"] : unique >= 50 ? ["鑑定士", "Expert"] : unique >= 20 ? ["熟", "Confirmé"] : ["初", "Débutant"];
@@ -111,7 +115,15 @@ async function loadAccount() {
   if (window.DISCORD_LOGIN) ACCT = await window.discordMe();
   else if (USER) { const m = await USER.me().catch(() => null); ACCT = m ? { id: m.id, name: m.name, avatar: m.avatarUrl, admin: IS_ADMIN, member: canShare } : null; }
   drawAvatar(); if (menuOpen) drawMenu();
+  loadStyles();
 }
+// style de Confrontation de chacune de mes cartes (le serveur ne donne que celles que j'ai)
+let MY_BR = {};
+async function loadStyles() {
+  if (!SRV || !featureOn(CONFIG, "confrontation")) return;
+  try { await cfCat(); MY_BR = (await srv("confront/mes-styles")).cartes || {}; if (!opening) draw(); } catch (e) {}
+}
+const brTag = (id) => { const b = MY_BR[id]; return b ? `<span class="kc-br" title="Style en Confrontation : ${esc(cfBranch(b).nom)}">${cfEmb(b, "sm")}</span>` : ""; };
 function drawAvatar() {
   const a = ACCT;
   $("avImg").outerHTML = a?.avatar ? `<img id="avImg" src="${esc(a.avatar)}" alt="">` : `<span id="avImg">${a?.name ? esc(a.name[0].toUpperCase()) : "I"}</span>`;
@@ -269,7 +281,7 @@ function lrowHTML(l) {
 }
 function podiumHTML(list, val, unit) {
   const [a, b, c] = list;
-  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${av(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span><span class="sc">${unit(p)}</span>
+  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${av(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span>${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : ""}<span class="sc">${unit(p)}</span>
     <span class="ped"><span class="no">${i}</span><b>${fmtN(val(p))}</b><small>${unit.short || ""}</small></span></button>` : "<span></span>";
   return `<div class="podium">${pod(b, 2)}${pod(a, 1)}${pod(c, 3)}</div>`;
 }
@@ -410,6 +422,7 @@ function viewCard() {
         </div></div>
       <div class="sec">
         ${got ? `<div class="card"><dl class="facts">
+          ${MY_BR[c.id] ? `<dt>Style en Confrontation</dt><dd class="kc-brd">${cfEmb(MY_BR[c.id], "sm")} <b>${esc(cfBranch(MY_BR[c.id]).nom)}</b> · ${esc(cfBranch(MY_BR[c.id]).pouvoir || "")}</dd>` : ""}
           ${row("Pouvoir", esc(p.power))}${row("Apparence", esc(p.look))}${row("Caractère", esc(p.mood))}
           <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re Zéro : LoL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
           ${quotes.length ? `<dt>Citations</dt><dd class="quotes">${quotes.map((q) => `<q>${esc(q)}</q>`).join("")}</dd>` : ""}

@@ -21,6 +21,8 @@
 - Préparer l'épisode 2 : débloquer ses persos, publier les prédictions.
 - Chantier Sanctuaire ouvert : quoi gagner (proposition faite : bannière par saison avec gros lot exclusif, doublons en éclats, paliers de progression), en attente de l'avis de Reichi.
 - Illustrations de Confrontation : visuels finaux intégrés (25 cartes, 8 emblèmes, 6 fonds de skins, fond de table). Une planche se découpe avec `tools/illus/planche.py` puis `tools/illus/import.py`. Possible : versions plus grandes, une image par carte.
+- Deuxième mise en production le 22/10/2026 au soir : nouveau coffre, dévoilement carte par carte, titres, perso choisi parmi ses cartes en Confrontation, style de Confrontation sur les cartes.
+- Prototypes à valider avant intégration : coffre 3D qui éclate et cartes qui prennent vie (https://claude.ai/artifact/QrZzHsoPnusVGCZpxEdADe), arène 3D de Confrontation (https://claude.ai/artifact/YRN2CKY8CHyzcG14By9BYN). Suite prévue : icônes néon à la place des kanji dans tout le site, puis Boutique façon Discord.
 - Billy et Reichi ajoutent persos, cartes et cosmétiques eux-mêmes dans le Créateur (publié directement), et règlent la branche de chaque carte dans Admin → Branches.
 
 ## À faire / à vérifier / en attente

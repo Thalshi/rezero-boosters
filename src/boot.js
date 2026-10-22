@@ -45,10 +45,12 @@ document.addEventListener("click", (e) => {
   if (act === "summon-again") { const n = opening?.n || 1; closeStage(); return zSummon(n); }
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
   if (act === "pool") return openPool(ab.dataset.p);
-  if (act === "skip") { Coffre.stop(); opening.phase = "done"; return drawOpening(); }
+  const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
+  if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
+  if (act === "skip") { Coffre.stop(); Reveal.stop(); opening.phase = "done"; return drawOpening(); }
   if (act === "cf-next") return Coffre.next();
   if (act === "cf-sound") return Coffre.toggleSound();
-  if (act === "stage-back") { if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
+  if (act === "stage-back") { Reveal.stop(); if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }
   if (act === "to-atelier") { closeStage(); return nav("atelier"); }
@@ -65,12 +67,7 @@ document.addEventListener("click", (e) => {
   if (t.closest("#revealBtn")) return advanceCard();
   const card = t.closest("[data-card]"); if (card) { if (opening) closeStage(); return nav("carte", card.dataset.card); }
 });
-function advanceCard() {
-  const o = opening;
-  if (!o.flipped) { o.flipped = true; return drawOpening(); }
-  if (o.i < o.cards.length - 1) { o.i++; o.flipped = false; return drawOpening(); }
-  o.phase = "done"; drawOpening();
-}
+function advanceCard() { Reveal.tap(); }
 document.addEventListener("submit", (e) => {
   const id = e.target.id;
   if (id === "sellForm") { e.preventDefault(); confirmSell(e.target); }

@@ -4,7 +4,7 @@ ROUTES.push("confront");
 const CF = { cat: null, list: null, table: null, gid: null, timer: null, busy: false, sel: null, defausse: [], garder: [], contrib: {} };
 const cfName = (id) => (id === ME ? "Toi" : CF.table?.noms?.[id]?.name || "Joueur");
 const ROLE_LABEL = { gardien: "Gardien", sentinelle: "Sentinelle", briseur: "Briseur", errant: "Errant" };
-const PHASE_LABEL = { lobby: "Salon", contributions: "Chacun apporte ses cartes", choix: "Choix des personnages", partie: "Partie en cours", fin: "Partie terminée" };
+const PHASE_LABEL = { lobby: "Salon", contributions: "Chacun choisit ses cartes", choix: "Choix des personnages", partie: "Partie en cours", fin: "Partie terminée" };
 async function cfCat() { if (!CF.cat) try { CF.cat = await srv("confront/catalogue"); } catch (e) { CF.cat = { branches: {}, branchIds: [], cartes: {}, signes: [] }; } }
 async function cfLoadList() { await cfCat(); try { CF.list = await srv("confront/list"); } catch (e) { CF.list = { error: e.message }; } if (view === "confront" && !param) draw(); }
 async function cfLoadTable(gid) {
@@ -132,12 +132,12 @@ function cfTableHTML() {
   } else if (v.phase === "contributions") {
     const me = v.joueurs.find((p) => p.id === v.moi), mine = CF.list?.cartes || [];
     if (!CF.list) cfLoadList();
-    body = `<section class="sec"><h2>Apporte tes cartes</h2><p class="note">Au plus une carte par branche. Les branches que tu laisses vides reçoivent une carte de prêt. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
-      ${me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span><b>${cfBranch(b).kanji}</b> ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">Carte de prêt</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
-        <button class="btn gold" type="button" data-act="cf-contrib">Valider ma contribution</button>` : `<p class="note">Contribution enregistrée. En attente des autres…</p>`}
+    body = `<section class="sec"><h2>Choisis tes cartes</h2><p class="note">Chaque carte de ta collection a une branche (son style de jeu). Prends jusqu'à une carte par branche : à l'étape suivante, <b>tu choisis ton perso parmi elles</b>. Si tu n'en prends aucune, on te prête 2 persos. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
+      ${me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span><b>${cfBranch(b).kanji}</b> ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">Aucune</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
+        <button class="btn gold" type="button" data-act="cf-contrib">Valider mes cartes</button>` : `<p class="note">Cartes enregistrées. En attente des autres…</p>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
-    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">Deux persos tirés de la réserve commune. Ton choix reste secret jusqu'au début.</p>
+    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else body = cfBoard(v);

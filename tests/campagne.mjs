@@ -52,15 +52,16 @@ async function ouvrir(J, selector, { label = "", flipAll = false } = {}) {
     // après le coffre, les cartes se dévoilent une par une (comme la pochette)
     const faces = [];
     if (flipAll) for (let i = 0; i < res.cards.length; i++) {
-      await page.click("#revealBtn"); await page.waitForTimeout(120);
+      // retournement : jusqu'à 1,6 s (Mythique), puis la carte file se ranger
+      await page.click("#revealBtn"); await page.waitForSelector("#stage .reveal-card.on .kc", { timeout: 4000 }).catch(() => {}); await page.waitForTimeout(150);
       faces.push(await page.getAttribute("#stage .reveal-card.on .kc", "aria-label").catch(() => ""));
-      await page.click("#revealBtn"); await page.waitForTimeout(80);
+      await page.click("#revealBtn"); await page.waitForTimeout(550);
     }
     if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]');
     res.faces = faces;
   } else {
     await page.click("#pack"); await page.waitForTimeout(900);
-    for (let i = 0; i < 14 && !(await page.locator(".summary").count()); i++) { await page.click("#revealBtn").catch(() => {}); await page.waitForTimeout(160); }
+    for (let i = 0; i < 40 && !(await page.locator(".summary").count()); i++) { await page.click("#revealBtn", { timeout: 2000 }).catch(() => {}); await page.waitForTimeout(450); }
   }
   await page.waitForSelector(".summary", { timeout: 8000 });
   const shown = await page.$$eval(".summary [data-card]", (els) => els.map((e) => e.getAttribute("data-card")));

@@ -105,6 +105,8 @@ export const DEFAULT_CONFIG = {
   effondrement: { duel: 30, trio: 30, classique: 30, degats: 1 },
   // Fin forcée (match nul) après ce nombre de tours joués, filet de sécurité contre les boucles
   toursMax: 1000,
+  // Choix du perso parmi SES PROPRES cartes apportées (sinon : 2 persos tirés dans la réserve commune)
+  persoLibre: true,
   // Délais en millisecondes (le serveur appelle tick(state, now))
   delais: {
     contributions: 120000,

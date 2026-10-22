@@ -51,7 +51,7 @@ function viewDefile() {
         <div class="def-e-t"><b>${esc(e.name)}</b>${phase === "clos" ? `<small>${e.votes} vote${e.votes > 1 ? "s" : ""}</small>` : ""}</div>
         ${phase === "votes" && e.uid !== ME ? `<button class="btn sm ${d.myVote === e.uid ? "gold" : ""}" type="button" data-defvote="${e.uid}" ${DEF.canVote ? "" : "disabled"}>${d.myVote === e.uid ? "★ Ton vote" : "Voter"}</button>` : ""}
         ${phase === "votes" && e.uid === ME ? `<span class="note">Ta carte</span>` : ""}
-        ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
+        ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>${DEF.rm === e.uid ? `<div class="def-rm cf-keep"><input type="text" id="defRmWhy" maxlength="200" class="gal-note" placeholder="Motif envoyé au joueur"><button class="btn sm acc" type="button" data-defrmgo="${e.uid}">Retirer l'inscription</button></div>` : ""}` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
   }
   const admin = IS_ADMIN ? `<section class="sec def-admin"><p class="eyebrow">Admin</p><h2>Gérer le Défilé</h2>
     <div class="row">${!d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px"><button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions</button>` : ""}
@@ -67,12 +67,13 @@ VIEWS.defile = viewDefile;
 document.addEventListener("click", (e) => {
   const t = e.target;
   const v = t.closest("[data-defvote]"); if (v) return defAct("defile/vote", { entry: v.dataset.defvote }, "Vote enregistré.");
-  const rm = t.closest("[data-defrm]"); if (rm) { const reason = prompt("Motif du retrait (envoyé au joueur) :"); if (reason) defAct("defile/admin", { action: "remove", uid: rm.dataset.defrm, reason }, "Inscription retirée."); return; }
+  const rm = t.closest("[data-defrm]"); if (rm) { DEF.rm = DEF.rm === rm.dataset.defrm ? null : rm.dataset.defrm; return draw(); }
+  const rmGo = t.closest("[data-defrmgo]"); if (rmGo) { const reason = ($("defRmWhy")?.value || "").trim(); if (!reason) return toast("Indique un motif : il est envoyé au joueur."); DEF.rm = null; return defAct("defile/admin", { action: "remove", uid: rmGo.dataset.defrmgo, reason }, "Inscription retirée."); }
   const a = t.closest("[data-act]")?.dataset.act; if (!a || !a.startsWith("def-")) return;
   if (a === "def-enter") return defAct("defile/enter", { card: DEF.pick }, "Ta carte défile !");
   if (a === "def-withdraw") return defAct("defile/withdraw", {}, "Inscription retirée.");
   if (a === "def-new") return defAct("defile/admin", { action: "new", title: $("defTitle")?.value || "" }, "Défilé ouvert.");
   if (a === "def-votes") return defAct("defile/admin", { action: "votes" }, "Votes ouverts.");
-  if (a === "def-close" && confirm("Clore le Défilé et verser les récompenses ?")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
+  if (a === "def-close" && sure(t.closest("[data-act]"), "Confirmer : clore et récompenser")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
 });
 document.addEventListener("change", (e) => { if (e.target.id === "defPick") { DEF.pick = e.target.value; draw(); } });

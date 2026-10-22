@@ -1066,6 +1066,8 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .cf-card.picked { box-shadow: 0 0 0 2px var(--acc); }
 .cf-log { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--fg2); }
 .cf-fin h2 { color: var(--gold); }
+.btn.sure { box-shadow: 0 0 0 2px var(--warn); }
+.def-rm { display: flex; flex-direction: column; gap: 6px; }
 </style>
 <header class="hd">
   <div class="wrap hd-in">
@@ -3824,6 +3826,13 @@ async function zFeature(id) {
   catch (e) { toast(e.message); }
 }
 
+// confirmation dans la page (le lecteur de claude.ai bloque confirm et prompt) : 1er clic arme le bouton, 2e clic agit
+function sure(btn, label) {
+  if (btn.dataset.sure) return true;
+  btn.dataset.sure = "1"; btn.dataset.label = btn.textContent; btn.textContent = label; btn.classList.add("sure");
+  setTimeout(() => { if (btn.isConnected) { delete btn.dataset.sure; btn.textContent = btn.dataset.label; btn.classList.remove("sure"); } }, 4000);
+  return false;
+}
 const closedHTML = (name) => `<div class="wrap page">${head("Bientôt · 準備中", name)}${empty("Cette partie du jeu n'est pas encore ouverte. Billy l'annoncera au QG.")}</div>`;
 // ===== Boutique Arcanique =====
 function viewBoutique() {
@@ -4266,7 +4275,7 @@ function viewDefile() {
         <div class="def-e-t"><b>${esc(e.name)}</b>${phase === "clos" ? `<small>${e.votes} vote${e.votes > 1 ? "s" : ""}</small>` : ""}</div>
         ${phase === "votes" && e.uid !== ME ? `<button class="btn sm ${d.myVote === e.uid ? "gold" : ""}" type="button" data-defvote="${e.uid}" ${DEF.canVote ? "" : "disabled"}>${d.myVote === e.uid ? "★ Ton vote" : "Voter"}</button>` : ""}
         ${phase === "votes" && e.uid === ME ? `<span class="note">Ta carte</span>` : ""}
-        ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
+        ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>${DEF.rm === e.uid ? `<div class="def-rm cf-keep"><input type="text" id="defRmWhy" maxlength="200" class="gal-note" placeholder="Motif envoyé au joueur"><button class="btn sm acc" type="button" data-defrmgo="${e.uid}">Retirer l'inscription</button></div>` : ""}` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
   }
   const admin = IS_ADMIN ? `<section class="sec def-admin"><p class="eyebrow">Admin</p><h2>Gérer le Défilé</h2>
     <div class="row">${!d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px"><button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions</button>` : ""}
@@ -4282,13 +4291,14 @@ VIEWS.defile = viewDefile;
 document.addEventListener("click", (e) => {
   const t = e.target;
   const v = t.closest("[data-defvote]"); if (v) return defAct("defile/vote", { entry: v.dataset.defvote }, "Vote enregistré.");
-  const rm = t.closest("[data-defrm]"); if (rm) { const reason = prompt("Motif du retrait (envoyé au joueur) :"); if (reason) defAct("defile/admin", { action: "remove", uid: rm.dataset.defrm, reason }, "Inscription retirée."); return; }
+  const rm = t.closest("[data-defrm]"); if (rm) { DEF.rm = DEF.rm === rm.dataset.defrm ? null : rm.dataset.defrm; return draw(); }
+  const rmGo = t.closest("[data-defrmgo]"); if (rmGo) { const reason = ($("defRmWhy")?.value || "").trim(); if (!reason) return toast("Indique un motif : il est envoyé au joueur."); DEF.rm = null; return defAct("defile/admin", { action: "remove", uid: rmGo.dataset.defrmgo, reason }, "Inscription retirée."); }
   const a = t.closest("[data-act]")?.dataset.act; if (!a || !a.startsWith("def-")) return;
   if (a === "def-enter") return defAct("defile/enter", { card: DEF.pick }, "Ta carte défile !");
   if (a === "def-withdraw") return defAct("defile/withdraw", {}, "Inscription retirée.");
   if (a === "def-new") return defAct("defile/admin", { action: "new", title: $("defTitle")?.value || "" }, "Défilé ouvert.");
   if (a === "def-votes") return defAct("defile/admin", { action: "votes" }, "Votes ouverts.");
-  if (a === "def-close" && confirm("Clore le Défilé et verser les récompenses ?")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
+  if (a === "def-close" && sure(t.closest("[data-act]"), "Confirmer : clore et récompenser")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
 });
 document.addEventListener("change", (e) => { if (e.target.id === "defPick") { DEF.pick = e.target.value; draw(); } });
 
@@ -4440,7 +4450,7 @@ document.addEventListener("click", (e) => {
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
-  if (act === "cf-abandon" && confirm("Abandonner la partie ?")) return cfAct({ type: "abandon" });
+  if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });
 // compte à rebours du délai de réponse

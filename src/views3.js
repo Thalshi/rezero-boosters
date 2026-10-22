@@ -32,6 +32,13 @@ async function zFeature(id) {
   catch (e) { toast(e.message); }
 }
 
+// confirmation dans la page (le lecteur de claude.ai bloque confirm et prompt) : 1er clic arme le bouton, 2e clic agit
+function sure(btn, label) {
+  if (btn.dataset.sure) return true;
+  btn.dataset.sure = "1"; btn.dataset.label = btn.textContent; btn.textContent = label; btn.classList.add("sure");
+  setTimeout(() => { if (btn.isConnected) { delete btn.dataset.sure; btn.textContent = btn.dataset.label; btn.classList.remove("sure"); } }, 4000);
+  return false;
+}
 const closedHTML = (name) => `<div class="wrap page">${head("Bientôt · 準備中", name)}${empty("Cette partie du jeu n'est pas encore ouverte. Billy l'annoncera au QG.")}</div>`;
 // ===== Boutique Arcanique =====
 function viewBoutique() {

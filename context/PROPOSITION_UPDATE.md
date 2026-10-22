@@ -31,7 +31,10 @@ Tu m'as demandé de te montrer le contenu exact avant d'appliquer /update. Voici
 ### Section « Technique et pièges », ajouter
 - Tests dans `tests/` (`node tests/run-all.mjs`), serveur local isolé avec `wrangler dev --local`. Simulation d'économie : `node tests/simulation-economie.mjs`.
 - `worker/game.js` reçoit ses exports via une regex : une constante par ligne au premier niveau de `src/game.js`.
-- Sources de l'interface : ajouter `src/views3.js` (Boutique, Atelier, Sanctuaire).
+- Sources de l'interface : ajouter `src/views3.js` (Boutique, Atelier, Sanctuaire), `views4.js` (Galerie, Labo), `views5.js` (Défilé), `views6.js` (Confrontation), `coffre.js` (coffre et scénarios).
+- Serveur : ajouter `worker/lab-api.js`, `worker/defile-api.js`, `worker/confront-api.js` et le moteur `worker/confront/`. `worker/confront/branches-proposees.mjs` ne doit jamais partir au navigateur (spoils).
+- Synchro : le navigateur appelle `/api/sync` toutes les 6 s et ne recharge que les sections changées.
+- Interrupteurs des nouveautés : Admin → « Nouveautés ouvertes aux joueurs » (`config/game.features`).
 
 ## 2. HISTORY.md (en haut)
 
@@ -43,6 +46,8 @@ Tu m'as demandé de te montrer le contenu exact avant d'appliquer /update. Voici
 - Catalogue de l'épisode 1 enrichi : 25 persos (ogres, soldats, habitants de la forêt, « ??? »), 161 cartes.
 - Prototype de l'Invocation validé : Portail scellé B + C, main qui touche, feinte de rareté, ×5 en cartes face cachée.
 - Lancement de la réalisation complète du cahier des charges sur dev/re-zero-complet, checklist dans docs/CHECKLIST.md.
+- Réalisé sur la branche (rien en production) : Boutique Arcanique, Sanctuaire des Invocations, Atelier, carte vedette ; coffre 3D et 30 scénarios ; galerie et labo admin ; Défilé des Légendes ; vente avec design ; Re Zéro Confrontation (moteur, salons, table) ; synchro étape 2 (95 → 25 requêtes/min) ; interrupteurs par nouveauté.
+- Plan de mise en production dans docs/MISE_EN_PRODUCTION.md, décisions en attente dans docs/DECISIONS.md.
 ```
 
 Tu valides ?

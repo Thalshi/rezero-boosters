@@ -79,13 +79,14 @@ async function finir(page) {
   else if (await page.locator("#pack").count()) { await page.click("#pack"); await page.waitForTimeout(900); }
   if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]').catch(() => {});
   await page.waitForTimeout(300);
-  await page.click('#stage [data-act="stage-close"]').catch(() => {});
+  await closeStage(page);
   await page.waitForTimeout(300);
 }
 const deco = async (page, scope) => page.locator(`${scope} .cz-cadre, ${scope} .cz-aura, ${scope} .cz-holo, ${scope} .cz-part, ${scope} .cz-orn, ${scope} .cz-pres, ${scope} [class*="cz-fond"]`).count().catch(() => 0);
 const decoOf = async (page, scope) => (await page.locator(scope).count()) ? await page.evaluate((sel) => { const el = document.querySelector(sel); return !!el && (el.className.includes("cz-") || !!el.querySelector('[class*="cz-"]') || (el.getAttribute("style") || "").includes("--z")); }, scope) : false;
 const same = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
-const closeStage = (page) => page.click('#stage [data-act="stage-close"]').catch(() => page.click('#stage [data-act="lab-back"]').catch(() => {}));
+// fermer l'ouverture, puis la fenêtre « Titre débloqué » si un titre vient d'être gagné
+const closeStage = async (page) => { await page.click('#stage [data-act="stage-close"]').catch(() => page.click('#stage [data-act="lab-back"]').catch(() => {})); await page.waitForTimeout(250); if (await page.locator(".ttl-sheet").count()) await page.click('.ttl-sheet [data-act="close"] >> nth=-1').catch(() => {}); };
 
 let A, P, Q, R, solo, inst, firstBuy, lst, sk;
 async function etape(name, fn) { t.section(name); try { await fn(); } catch (e) { t.check(`${name} : l'étape va jusqu'au bout`, false, String(e.message || e).slice(0, 500)); for (const J of [A, P, Q, R].filter(Boolean)) await shot(J.page, `echec-${name.slice(0, 2).trim()}-${J.name.replace(/\W+/g, "-")}`); } }
@@ -208,19 +209,19 @@ try {
   t.check("Sanctuaire ×5 : double clic, une seule invocation (5 objets, un débit)", sa.chakra === sb.chakra - G.summonCost(5) && sa.cos.inst.length === (sb.cos?.inst?.length || 0) + 5, { débit: sb.chakra - sa.chakra, objets: sa.cos.inst.length });
   await P.page.click("#pack"); await P.page.waitForTimeout(900); await P.page.click('[data-act="skip"]'); await P.page.waitForTimeout(300);
   t.check("Sanctuaire ×5 : la pochette mène au récapitulatif des 5 objets", (await P.page.locator(".summary .ocos").count()) === 5);
-  await P.page.click('[data-act="stage-close"]').catch(() => {});
+  await closeStage(P.page);
   sb = sa;
   await P.page.dblclick('[data-zsum="10"]'); await P.page.waitForTimeout(800);
   sa = await P.state();
   t.check("Sanctuaire ×10 : double clic, une seule invocation (10 objets, un débit), ouverte dans le coffre", sa.chakra === sb.chakra - G.summonCost(10) && sa.cos.inst.length === sb.cos.inst.length + 10 && (await P.page.locator("#cfChest").count()) === 1);
   await P.page.click("#cfKey", { force: true }); await P.page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
   t.check("Sanctuaire ×10 : après le scénario, les 10 objets se dévoilent un par un", (await P.page.locator("#stage .pdots i").count()) === 10 && (await P.page.locator("#revealBtn").count()) === 1);
-  await P.page.click('[data-act="skip"]').catch(() => {}); await P.page.click('[data-act="stage-close"]').catch(() => {});
+  await P.page.click('[data-act="skip"]').catch(() => {}); await closeStage(P.page);
   sb = sa;
   await P.page.check("#zSkip"); await P.page.dblclick('[data-zsum="1"]'); await P.page.waitForTimeout(1500);
   sa = await P.state();
   t.check("Sanctuaire ×1 sans animation : double clic, un seul débit", sa.chakra === sb.chakra - G.summonCost(1) && sa.cos.inst.length === sb.cos.inst.length + 1);
-  await P.page.click('[data-act="stage-close"]').catch(() => {});
+  await closeStage(P.page);
   // design avec un objet de compte + une instance, sur une carte possédée en un exemplaire
   solo = Object.keys(sa.owned).find((id) => sa.owned[id].n === 1 && !sa.owned[id].gold && !G.CARD_BY_ID[id].skin);
   inst = sa.cos.inst.find((x) => G.COS_BY_ID[x.c].slot !== G.COS_BY_ID[firstBuy].slot);

@@ -80,11 +80,11 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 |---|---|---|---|
 | 5.1 | Profil public, vitrine de 4 cartes | ✅ | |
 | 5.2 | Carte vedette avec son design ; retrait auto si vendue | ✅ | testé côté serveur (vente au marché) |
-| 5.3 | Défilé hebdomadaire/mensuel : inscription volontaire, snapshot figé | ⬜ | ⛔ fréquence |
-| 5.4 | Votes sans auto-vote, anti-sybil, égalités | ⬜ | |
-| 5.5 | Modération (retrait d'une inscription, motif) | ⬜ | |
-| 5.6 | Récompenses modérées (essence, titres, badges, cosmétiques) | ⬜ | ⛔ montants |
-| 5.7 | Gagnant mensuel à l'accueil une semaine, archives | ⬜ | |
+| 5.3 | Défilé hebdomadaire/mensuel : inscription volontaire, snapshot figé | ✅ | Billy ouvre et ferme (`#/defile`) ; ⛔ fréquence à décider |
+| 5.4 | Votes sans auto-vote, anti-sybil, égalités | ✅ | membre + 10 boosters + compte de 3 jours ; vote secret et modifiable ; égalité → inscription la plus ancienne |
+| 5.5 | Modération (retrait d'une inscription, motif) | ✅ | motif envoyé au joueur, votes annulés |
+| 5.6 | Récompenses modérées (essence, titres, badges, cosmétiques) | ✅ | ⛔ montants provisoires 300/150/75 + 20 ◆, 3 titres ; versées une seule fois |
+| 5.7 | Gagnant mensuel à l'accueil une semaine, archives | ✅ | `tests/defile.mjs` |
 
 ## 6. Marché et échanges (dossier §6)
 | # | Élément | État | Notes |
@@ -94,7 +94,7 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 | 6.3 | Vendre une carte nue ou avec son design (liste des cosmétiques transférables inclus) | ⬜ | |
 | 6.4 | Effets de compte en aperçu seulement, jamais transférés | ⬜ | |
 | 6.5 | Frais de vente | ⛔ | option 5 % |
-| 6.6 | Badges et titres personnels jamais transférés | ⬜ | |
+| 6.6 | Badges et titres personnels jamais transférés | ✅ | `s.titles` reste au joueur ; rien dans le marché ni les échanges |
 
 ## 7. Invocation (dossier §7, 03 + décisions)
 | # | Élément | État | Notes |

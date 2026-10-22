@@ -985,4 +985,29 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .lab-picks select { width: 100%; }
 .lab-sanct .sanctum-host { max-height: 360px; }
 .lab-pill { color: var(--warn); border-color: var(--warn); font-size: 13px; }
+
+/* ===== Défilé des Légendes ===== */
+.def-hall { margin: 8px 0 28px; }
+.def-hall-in { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr); gap: 22px; align-items: center; padding: 18px; border-radius: var(--r-xl); border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); background: radial-gradient(80% 120% at 0% 50%, var(--gold-soft), transparent 70%), var(--panel); }
+.def-hall h2 { margin: 4px 0 6px; }
+@media (max-width: 560px) { .def-hall-in { grid-template-columns: 1fr; justify-items: center; text-align: center; } .def-hall-card { width: 170px; } .def-hall .row { justify-content: center; } }
+.def-pick { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr); gap: 22px; align-items: center; }
+@media (max-width: 640px) { .def-pick { grid-template-columns: 1fr; } .def-pick-card { width: 200px; margin: 0 auto; } }
+.def-pick-side { display: flex; flex-direction: column; gap: 12px; }
+.def-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (min-width: 700px) { .def-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.def-e { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--panel); }
+.def-e.voted { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.def-e-t { display: flex; justify-content: space-between; gap: 6px; font-size: 14px; }
+.def-e-t small { color: var(--mut); font-family: var(--mono); }
+.def-e .btn { width: 100%; }
+.def-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: end; max-width: 720px; }
+.def-pod { display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; font-size: 14px; }
+.def-pod.p1 { order: 2; } .def-pod.p2 { order: 1; transform: scale(.9); } .def-pod.p3 { order: 3; transform: scale(.82); }
+.def-pod small { color: var(--mut); }
+.def-place { font: 700 13px var(--mono); color: var(--gold); }
+.def-admin { padding: 16px; border-radius: var(--r-lg); border: 1px dashed var(--line3); }
+.def-arch { display: flex; flex-direction: column; gap: 12px; }
+.def-arch-i { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: var(--r-lg); background: var(--panel); border: 1px solid var(--line); }
+.def-titles { margin: 4px 0 8px; }
 </style>

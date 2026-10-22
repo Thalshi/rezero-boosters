@@ -3,6 +3,7 @@
 import * as G from "./game.js";
 import { bumpRev } from "./sync.js";
 import { labRoute } from "./lab-api.js";
+import { defileRoute } from "./defile-api.js";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, message, extra = {}) => json({ error: message, ...extra }, status);
@@ -261,6 +262,8 @@ export async function gameRoute(req, env, user, path) {
     const cfg = await getConfig(env);
     const labRes = await labRoute(env, user, path, body, cfg);
     if (labRes) return labRes;
+    const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow });
+    if (defRes) return defRes;
 
     if (path === "/api/game/open") {
       const r = await mutate(env, user.id, (s, now) => {
@@ -476,7 +479,7 @@ export async function gameRoute(req, env, user, path) {
       // designs visibles des cartes exposées (vitrine et carte vedette) ; rien d'autre de l'inventaire n'est public
       const shown = [...new Set([...(s.showcase || []), ...(s.featured ? [s.featured] : [])])];
       const designs = Object.fromEntries(shown.map((id) => [id, G.designOfS(s, id)]).filter(([, d]) => d));
-      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs });
+      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs, titles: s.titles || [] });
     }
     if (path === "/api/game/showcase") {
       const ids = (Array.isArray(body.ids) ? body.ids : []).filter((id) => G.CARD_BY_ID[id]).slice(0, 4);

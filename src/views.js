@@ -87,7 +87,7 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? ["神", "Légende"] : u
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
-  ["missions", "務", "Missions", toClaim()], ["boutique", "店", "Boutique"], ["sanctuaire", "召", "Sanctuaire"], ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
+  ["missions", "務", "Missions", toClaim()], ["defile", "華", "Défilé"], ["boutique", "店", "Boutique"], ["sanctuaire", "召", "Sanctuaire"], ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
   ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
@@ -270,6 +270,7 @@ function viewBoosters() {
   return `<div class="wrap page">
     ${heroHTML()}
     ${qsHTML()}
+    ${hallHTML()}
     <div class="steps">
       <div><b>01</b><h3>Ouvre tes boosters</h3><p>Des boosters gratuits se rechargent toute la journée. L'essence en débloque d'autres, et le pack du jour est offert.</p></div>
       <div><b>02</b><h3>Complète les factions</h3><p>Chaque faction de l'anime est un album. Les doublons s'échangent au marché ou se recyclent en essence.</p></div>

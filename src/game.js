@@ -882,3 +882,19 @@ function labSummonForcedS(s, rars, rng, now = Date.now()) {
   const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
   return { got, cost: 0 };
 }
+
+// ===== Défilé des Légendes =====
+// Billy ouvre les inscriptions, puis les votes, puis clôt. Valeurs provisoires, en attente de validation.
+const DEFILE_REWARDS = [300, 150, 75];         // essence des 3 premiers (provisoire)
+const DEFILE_PARTICIPATION = 20;               // essence de participation (provisoire)
+const DEFILE_TITLES = ["Légende du Défilé", "Étoile du Défilé", "Éclat du Défilé"]; // titres personnels, jamais transférés
+const DEFILE_VOTE_MIN_OPENED = 10;             // anti-comptes jetables : boosters ouverts pour voter
+const DEFILE_VOTE_MIN_DAYS = 3;                // et ancienneté du compte
+const DEFILE_HALL_DAYS = 7;                    // le gagnant reste à l'accueil une semaine
+const defileCanVote = (s, member, now = Date.now()) => !!member && s.opened >= DEFILE_VOTE_MIN_OPENED && now - (s.created || now) >= DEFILE_VOTE_MIN_DAYS * 86400e3;
+// classement : plus de votes d'abord ; à égalité, l'inscription la plus ancienne passe devant
+function defileRank(d) {
+  const n = {}; for (const e of Object.values(d.votes || {})) n[e] = (n[e] || 0) + 1;
+  return Object.entries(d.entries || {}).filter(([, e]) => !e.removed).map(([uid, e]) => ({ uid, votes: n[uid] || 0, t: e.t }))
+    .sort((a, b) => b.votes - a.votes || a.t - b.t);
+}

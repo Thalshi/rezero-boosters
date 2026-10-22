@@ -47,7 +47,7 @@ function allowed(user, segs, op) {
   const top = segs[0];
   if (SERVER_ONLY.includes(top)) return !write;
   // labo admin et contrôle qualité : seulement par leurs routes (/api/game/lab, /api/game/qa), jamais par l'API des documents
-  if (top === "lab" || top === "qa") return false;
+  if (top === "lab" || top === "qa" || top === "defile") return false;
   // ancienne sauvegarde du compte : lisible par son joueur, plus modifiable (le serveur tient la partie)
   if (top === "data" && segs[1] === "users") return segs.length >= 3 && segs[2] === user.id && !write;
   // votes : écrits seulement par le serveur (/api/game/vote vérifie que la question est ouverte)

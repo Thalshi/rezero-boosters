@@ -252,7 +252,7 @@ function selfProfile() {
   const owned = Object.fromEntries(Object.entries(save.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
   const featured = save.featured && has(save.featured) ? save.featured : null;
   const designs = Object.fromEntries([...(save.showcase || []), ...(featured ? [featured] : [])].map((id) => [id, myDesign(id)]).filter(([, d]) => d));
-  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs };
+  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs, titles: save.titles || [] };
 }
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;
@@ -270,6 +270,7 @@ function viewProfil() {
       <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
       <p class="eyebrow">Collectionneur · コレクター</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
+      ${p.titles?.length ? `<div class="row def-titles">${p.titles.map((x) => `<span class="pill out" style="border-color:var(--gold);color:var(--gold)">華 ${esc(x)}</span>`).join("")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
       <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>

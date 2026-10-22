@@ -4,6 +4,7 @@ import * as G from "./game.js";
 import { bumpRev } from "./sync.js";
 import { labRoute } from "./lab-api.js";
 import { defileRoute } from "./defile-api.js";
+import { confrontRoute, confrontLocked } from "./confront-api.js";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, message, extra = {}) => json({ error: message, ...extra }, status);
@@ -264,6 +265,8 @@ export async function gameRoute(req, env, user, path) {
     if (labRes) return labRes;
     const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
     if (defRes) return defRes;
+    const cfRes = await confrontRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
+    if (cfRes) return cfRes;
 
     if (path === "/api/game/open") {
       const r = await mutate(env, user.id, (s, now) => {
@@ -289,6 +292,7 @@ export async function gameRoute(req, env, user, path) {
     if (path === "/api/game/disenchant") {
       const r = await mutate(env, user.id, (s, now) => {
         if (G.ownOf(s, body.id)[body.gold ? "gold" : "n"] <= (body.keepLast ? 1 : 0)) return { abort: true, error: "Tu n'as plus d'exemplaire à désenchanter." };
+        if (confrontLocked(s, body.id)) return { abort: true, error: "Cette carte est engagée dans une partie de Confrontation en cours." };
         const v = G.disenchantS(s, body.id, !!body.gold, now);
         return v ? { value: v } : { abort: true, error: "Carte introuvable." };
       });
@@ -373,6 +377,7 @@ export async function gameRoute(req, env, user, path) {
       const r = await mutate(env, user.id, (s, now) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
         if (!G.CARD_BY_ID[body.id] || !G.hasCard(s, body.id)) return { abort: true, error: "Tu n'as plus cette carte." };
+        if (confrontLocked(s, body.id)) return { abort: true, error: "Cette carte est engagée dans une partie de Confrontation en cours." };
         // avec son design : les instances uniques partent sous séquestre avec la carte
         const dz = body.withDesign && G.featureOn(cfg, "marcheDesign") ? G.takeDesignForSaleS(s, body.id) : null;
         if (!G.removeCardS(s, body.id, !!body.gold)) return { abort: true, error: "Tu n'as plus cette carte." };
@@ -437,6 +442,7 @@ export async function gameRoute(req, env, user, path) {
       const r = await mutate(env, user.id, (s) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
         if (s.chakra < chakra) return { abort: true, error: "Pas assez d'essence." };
+        for (const it of give) { if (confrontLocked(s, it.id)) return { abort: true, error: "Une de ces cartes est engagée dans une partie de Confrontation en cours." }; }
         for (const it of give) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
         s.chakra -= chakra;
         return { tid };
@@ -467,6 +473,7 @@ export async function gameRoute(req, env, user, path) {
       }
       const r = await mutate(env, user.id, (s, now) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
+        for (const it of t.want) { if (confrontLocked(s, it.id)) return { abort: true, error: "Une de ces cartes est engagée dans une partie de Confrontation en cours." }; }
         for (const it of t.want) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
         for (const it of t.give) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now);
         s.chakra += t.chakra; s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now);

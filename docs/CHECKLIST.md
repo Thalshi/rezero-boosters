@@ -20,19 +20,19 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 |---|---|---|---|
 | 1.1 | 5 cartes par booster, raretés C/PC/R/E/L/M, table par emplacement | ✅ | `src/game.js` SLOT/LAST |
 | 1.2 | Tirage serveur avant animation | ✅ | `worker/game-api.js` /open |
-| 1.3 | Rareté tirée d'abord, jamais au-dessus, thème complété par le Mix | ✅ branche | tests `tests/boosters.mjs` |
-| 1.4 | Aucun booster vide, ouverture des thèmes selon le catalogue | ✅ branche | seuil provisoire 5 persos + C/PC/R (⛔ seuil à valider) |
-| 1.5 | Pack du jour : rotation sur les boosters ouverts, secours Mix | ✅ branche | |
-| 1.6 | Pity Mythique correct (compte seulement si Mythique possible) | ✅ branche | |
+| 1.3 | Rareté tirée d'abord, jamais au-dessus, thème complété par le Mix | ✅ | tests `tests/boosters.mjs` |
+| 1.4 | Aucun booster vide, ouverture des thèmes selon le catalogue | ✅ | seuil provisoire 5 persos + C/PC/R (⛔ seuil à valider) |
+| 1.5 | Pack du jour : rotation sur les boosters ouverts, secours Mix | ✅ | |
+| 1.6 | Pity Mythique correct (compte seulement si Mythique possible) | ✅ | |
 | 1.7 | Variantes dorées 2 % + garantie tous les 10 | ✅ | |
-| 1.8 | Saison 1 non achetable par l'API | ✅ branche | ⛔ sort de Saison 1 (×2 L/M) à décider |
-| 1.9 | Catalogue épisode 1 enrichi (25 persos secondaires) | ✅ branche | ⛔ noms définitifs (???, Ogre 1…) à donner par Billy |
-| 1.10 | Chances affichées exactes (pack du jour compris) | ✅ branche | |
+| 1.8 | Saison 1 non achetable par l'API | ✅ | ⛔ sort de Saison 1 (×2 L/M) à décider |
+| 1.9 | Catalogue épisode 1 enrichi (25 persos secondaires) | ✅ | ⛔ noms définitifs (???, Ogre 1…) à donner par Billy |
+| 1.10 | Chances affichées exactes (pack du jour compris) | ✅ | |
 | 1.11 | Valeurs économiques (réserve, recharge, prix, recyclage) | ⛔ | provisoire : 3 / 2 h / 100 ◆ / 1-2-5-15-40-100 ; scénarios 30/45/60 j à trancher |
 | 1.12 | Simulation 7/30/90/180 j, 3 profils | ✅ | `tests/simulation-economie.mjs` ; à étendre aux cosmétiques |
 | 1.13 | Commissions du marché (puits d'essence) | ⛔ | option : 5 % ; réglable |
 | 1.14 | Coût et récompenses des cosmétiques dans l'économie | ⛔ | prix provisoires réglables par l'admin |
-| 1.15 | Export `MYTHIC_PITY` et constantes vers le serveur | ✅ branche | |
+| 1.15 | Export `MYTHIC_PITY` et constantes vers le serveur | ✅ | |
 
 ## 2. Coffre hextech / arcanique (dossier §3)
 | # | Élément | État | Notes |
@@ -107,17 +107,17 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 ## 8. Confrontation (dossier §8 à §12, 04)
 | # | Élément | État | Notes |
 |---|---|---|---|
-| 8.1 | Livre de règles complet (2, 3, 4–7), partie fictive commentée | ✅ branche | `docs/confrontation/REGLES.md` (branche `dev/confrontation-moteur`), adaptation originale, partie à 5 tour par tour |
-| 8.2 | Catalogue original des cartes d'action avec quantités | ✅ branche | `docs/confrontation/CARTES.md`, 82 cartes, `worker/confront/cards.mjs` |
-| 8.3 | Modes : Duel 2, Trio 3 sans rôles, classique 4–7 avec rôles | ✅ branche | moteur `worker/confront/engine.mjs` |
-| 8.4 | 8 branches (Assaut, Défense, Stratège, Voleur, Précision, Résistance, Survie, Chance) | ✅ branche | `branches.mjs` ; ⛔ répartition des persos `branches-proposees.mjs` à valider par Billy |
-| 8.5 | Contributions (une carte par branche), prêts, réserve commune, 2 propositions, choix | ✅ branche | moteur ; blocage des instances pendant la partie à faire côté serveur |
+| 8.1 | Livre de règles complet (2, 3, 4–7), partie fictive commentée | ✅ | `docs/confrontation/REGLES.md` (branche `dev/confrontation-moteur`), adaptation originale, partie à 5 tour par tour |
+| 8.2 | Catalogue original des cartes d'action avec quantités | ✅ | `docs/confrontation/CARTES.md`, 82 cartes, `worker/confront/cards.mjs` |
+| 8.3 | Modes : Duel 2, Trio 3 sans rôles, classique 4–7 avec rôles | ✅ | moteur `worker/confront/engine.mjs` |
+| 8.4 | 8 branches (Assaut, Défense, Stratège, Voleur, Précision, Résistance, Survie, Chance) | ✅ | `branches.mjs` ; ⛔ répartition des persos `branches-proposees.mjs` à valider par Billy |
+| 8.5 | Contributions (une carte par branche), prêts, réserve commune, 2 propositions, choix | ✅ | contributions vérifiées sur la vraie collection, branche donnée par le serveur |
 | 8.6 | Moteur serveur : tours, pioche, actions, réactions, délais, défausse, PV, portée, distance, armes, équipements | 🟡 | moteur pur fini et testé ; intégration dans `worker/game-api.js` (stockage D1, routes) ⬜ |
-| 8.7 | Informations secrètes filtrées, anti-triche, reconnexion, abandon, journal | 🟡 | `viewFor`, `eventsFor`, nonce/rev/promptId testés ; archivage du journal et diffusion côté serveur ⬜ |
-| 8.8 | Salons privés/publics, invitations, prêt, chronomètres, spectateurs | ⬜ | le moteur gère le salon minimal (rejoindre, lancer) et la vue spectateur ; le reste est serveur |
-| 8.9 | Interface : lobby, contribution, mélange, choix, table 2/3/7, main privée, réactions, résultats | ⬜ | mobile |
-| 8.10 | Simulations 2–7 joueurs, matrice d'équilibrage | ✅ branche | `tests/confront-sim.mjs` (20 400 parties), `docs/confrontation/EQUILIBRAGE.md`, 8 corrections limitées appliquées et réversibles |
-| 8.11 | Scénarios de tests obligatoires (04 §4) | ✅ branche | `tests/confront-engine.mjs` : 130 vérifications |
+| 8.7 | Informations secrètes filtrées, anti-triche, reconnexion, abandon, journal | ✅ | `viewFor` par joueur ; partie fermée à l'API des documents ; reprise à tout moment |
+| 8.8 | Salons privés/publics, invitations, prêt, chronomètres, spectateurs | ✅ | code à 4 lettres, bots pour tester seul, délais appliqués à chaque consultation, cartes apportées verrouillées pendant la partie |
+| 8.9 | Interface : lobby, contribution, mélange, choix, table 2/3/7, main privée, réactions, résultats | ✅ | `#/confront` (ordi et téléphone) ; `tests/confront-api.mjs` (partie complète par l'API) |
+| 8.10 | Simulations 2–7 joueurs, matrice d'équilibrage | ✅ | `tests/confront-sim.mjs` (20 400 parties), `docs/confrontation/EQUILIBRAGE.md`, 8 corrections limitées appliquées et réversibles |
+| 8.11 | Scénarios de tests obligatoires (04 §4) | ✅ | `tests/confront-engine.mjs` : 130 vérifications |
 | 8.12 | Valeurs : PV 6/5/4, bonus Gardien/Errant par table, limite de main | ⛔ | provisoires dans `worker/confront/config.mjs` ; proposition duel à 5 PV (voir EQUILIBRAGE.md) |
 | 8.13 | Récompenses de partie, anti-farm | ⛔ | le moteur calcule l'éligibilité ; montants et plafonds serveur à décider |
 

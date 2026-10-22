@@ -320,7 +320,7 @@ function viewCollection() {
     <div class="flt"><label>Faction<select class="in" data-sel="colFac"><option value="">Toutes</option>${FACS().map((f) => `<option value="${f}" ${col.fac === f ? "selected" : ""}>${facLabel(f)}</option>`).join("")}</select></label>
       <label>Cartes<select class="in" data-sel="colOwn">${[["own", "Possédées"], ["missing", "Manquantes"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${col.own === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       <label>Tri<select class="in" data-sel="colSort">${[["num", "Numéro"], ["rar", "Rareté"], ["name", "Nom"]].map(([k, l]) => `<option value="${k}" ${col.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
-    ${list.length ? `<p class="mono mut" style="margin:0;font-size:13px">${list.length} carte${list.length > 1 ? "s" : ""}</p><div class="cgrid">${list.map((c) => { const o = own(c.id); return cardHTML(c, { soon: !visible(c), locked: !has(c.id), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true }); }).join("")}</div>`
+    ${list.length ? `<p class="mono mut" style="margin:0;font-size:13px">${list.length} carte${list.length > 1 ? "s" : ""}</p><div class="cgrid">${list.map((c) => { const o = own(c.id); return cardHTML(c, { soon: !visible(c), locked: !has(c.id), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true, design: myDesign(c.id) }); }).join("")}</div>`
       : empty(col.own === "own" && !stats().unique ? "Aucune carte pour l'instant. Ouvre ton premier booster !" : "Aucune carte ne correspond à ces filtres.", `<button class="btn sq" type="button" data-act="reset-col">Réinitialiser les filtres</button>`)}`}
   </div>`;
 }

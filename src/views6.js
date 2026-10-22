@@ -114,13 +114,20 @@ function cfHand(v, me, pr, acts) {
 }
 const EVT = {
   debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}.`,
-  degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, esquive: (e) => `${cfName(e.pid)} esquive.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
+  degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
-  presage: (e) => `Présage : ${cfSigne(e.carte?.signe || e.signe).nom} ${e.carte?.rang || ""}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
+  presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
   pioche: (e) => `Tu pioches ${e.n || e.cartes?.length || ""} carte(s).`, pioche_publique: (e) => `${cfName(e.pid)} pioche ${e.n || ""} carte(s).`, delai_expire: (e) => `${cfName(e.pid)} n'a pas répondu à temps.`,
   rejoint: (e) => `${cfName(e.pid)} rejoint la table.`, quitte: (e) => `${cfName(e.pid)} quitte la table.`, contribution: (e) => `${cfName(e.pid)} a apporté ses cartes.`, choix: (e) => `${cfName(e.pid)} a choisi son perso.`,
-  sauvetage: (e) => `${cfName(e.pid)} se sauve de justesse.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
+  sauvetage: (e) => `${cfName(e.pid)} se sauve de justesse.`,
+  defi_relance: (e) => `${cfName(e.pid)} relance le défi.`, defi_perdu: (e) => `${cfName(e.pid)} perd le défi.`, onde_evitee: (e) => `${cfName(e.pid)} évite l'onde de choc.`,
+  reprise: (e) => `${cfName(e.pid)} reprend sa Frappe.`, remelange: () => "La défausse est remélangée dans la pioche.", effondrement: (e) => `Effondrement : ${cfName(e.pid)} perd 1 PV.`,
+  orbe_explose: (e) => `L'Orbe instable explose sur ${cfName(e.pid)} !`, orbe_passe: (e) => `L'Orbe instable passe à ${cfName(e.cible || e.pid)}.`, kanji_absorbe: (e) => `${cfName(e.pid)} absorbe les dégâts (Kanji de garde).`,
+  penalite_gardien: (e) => `${cfName(e.pid)} a éliminé une Sentinelle : il perd sa main et son équipement.`, propositions: () => "Les personnages sont proposés.", reserve: () => "La réserve commune est mélangée.",
+  etal: (e) => `${cfName(e.pid)} ouvre l'Étal du marché.`, etal_pris: (e) => `${cfName(e.pid)} prend une carte de l'Étal.`, etal_fin: () => "L'Étal est vidé.", arme_remplacee: (e) => `${cfName(e.pid)} change d'arme.`,
+  choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
+const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr" };
 const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
@@ -136,6 +143,8 @@ function cfSelect(uid) {
   draw();
 }
 VIEWS.confront = viewConfront;
+// la liste des salons change sans cesse : rechargée à chaque arrivée sur la page des salons
+addEventListener("hashchange", () => { if (location.hash === "#/confront") { CF.list = null; cfLoadList(); } });
 document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));

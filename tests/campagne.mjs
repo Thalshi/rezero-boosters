@@ -22,6 +22,8 @@ const shot = (page, name) => page.screenshot({ path: join(OUT, name + ".png"), f
 async function joueur(id, name, { vp = "mobile", reduced = false } = {}) {
   const api = await player(srv.base, id, name); await api.api("state");
   const ctx = await browser.newContext({ viewport: VIEW[vp], reducedMotion: reduced ? "reduce" : "no-preference", hasTouch: vp === "mobile" });
+  // filet : un message montré au joueur ne doit jamais contenir une erreur technique
+  await ctx.addInitScript(() => { window.__toasts = []; new MutationObserver(() => { const t = document.getElementById("toast"); if (t && !t.hidden && t.textContent) window.__toasts.push(t.textContent); }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden"] }); });
   const page = await ctx.newPage(), errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("dialog", (d) => { errors.push("boîte de dialogue : " + d.message()); d.dismiss(); });
@@ -33,9 +35,11 @@ async function joueur(id, name, { vp = "mobile", reduced = false } = {}) {
 // ouvre un booster ou un coffre par l'interface ; renvoie ce que le serveur a tiré et ce que l'écran a montré
 async function ouvrir(J, selector, { label = "", flipAll = false } = {}) {
   const { page } = J;
-  const resP = page.waitForResponse((r) => r.url().includes("/api/game/open") || r.url().includes("/api/game/lab/open"), { timeout: 15000 });
-  await page.click(selector);
-  const res = await (await resP).json();
+  const resP = page.waitForResponse((r) => r.url().includes("/api/game/open") || r.url().includes("/api/game/lab/open"), { timeout: 15000 }).catch((e) => e);
+  await page.click(selector, { timeout: 10000 });
+  const resp = await resP;
+  if (resp instanceof Error) throw new Error(`aucune réponse du serveur après le clic sur ${selector}`);
+  const res = await resp.json();
   await page.waitForTimeout(600);
   const chest = (await page.locator("#cfChest").count()) > 0;
   let leaked = 0;
@@ -64,12 +68,24 @@ async function choisir(page, packId, paid = false) {
   await page.click(`[data-pick="${packId}"] >> visible=true`).catch(() => {}); await page.waitForTimeout(250);
   return `[data-act="open-pack"][data-p="${packId}"]${paid ? "[data-paid]" : ":not([data-paid])"} >> visible=true`;
 }
+async function finir(page) {
+  if (await page.locator("#cfKey").count()) { await page.click("#cfKey"); await page.waitForSelector(".cf-grid", { timeout: 20000 }).catch(() => {}); }
+  else if (await page.locator("#pack").count()) { await page.click("#pack"); await page.waitForTimeout(900); }
+  if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]').catch(() => {});
+  await page.waitForTimeout(300);
+  await page.click('#stage [data-act="stage-close"]').catch(() => {});
+  await page.waitForTimeout(300);
+}
+const deco = async (page, scope) => page.locator(`${scope} .cz-cadre, ${scope} .cz-aura, ${scope} .cz-holo, ${scope} .cz-part, ${scope} .cz-orn, ${scope} .cz-pres, ${scope} [class*="cz-fond"]`).count().catch(() => 0);
+const decoOf = async (page, scope) => (await page.locator(scope).count()) ? await page.evaluate((sel) => { const el = document.querySelector(sel); return !!el && (el.className.includes("cz-") || !!el.querySelector('[class*="cz-"]') || (el.getAttribute("style") || "").includes("--z")); }, scope) : false;
 const same = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort());
 const closeStage = (page) => page.click('#stage [data-act="stage-close"]').catch(() => page.click('#stage [data-act="lab-back"]').catch(() => {}));
 
+let A, P, Q, R, solo, inst, firstBuy, lst, sk;
+async function etape(name, fn) { t.section(name); try { await fn(); } catch (e) { t.check(`${name} : l'étape va jusqu'au bout`, false, String(e.message || e).slice(0, 500)); for (const J of [A, P, Q, R].filter(Boolean)) await shot(J.page, `echec-${name.slice(0, 2).trim()}-${J.name.replace(/\W+/g, "-")}`); } }
 try {
   // =====================================================================================
-  t.section("1. Parcours joueur : boosters, coffre, économie (téléphone, ordi, animations réduites)");
+  await etape("1. Parcours joueur : boosters, coffre, économie (téléphone, ordi, animations réduites)", async () => {
   for (const [k, conf] of [["mobile", { vp: "mobile" }], ["ordi", { vp: "ordi" }], ["réduit", { vp: "mobile", reduced: true }]]) {
     const pid = { mobile: IDS.p1, ordi: IDS.p2, "réduit": IDS.p3 }[k];
     const J = await joueur(pid, "Joueur " + k, conf);
@@ -107,7 +123,8 @@ try {
     await J.page.waitForTimeout(1500);
     s1 = await J.state();
     t.check(`${k} · achat en double clic : un seul booster, ${G.PRICE} ◆ débités une fois`, s1.chakra === s0.chakra - G.PRICE && s1.opened === s0.opened + 1, { avant: s0.chakra, après: s1.chakra });
-    await closeStage(J.page);
+    await finir(J.page);
+    t.check(`${k} · l'ouverture achetée se termine et se ferme`, (await J.page.locator("#stage:not([hidden])").count()) === 0);
     // missions : « Tout réclamer » verse exactement ce que les règles prévoient
     await J.go("missions");
     const before = await J.state(), exp = JSON.parse(JSON.stringify(before));
@@ -126,11 +143,13 @@ try {
     await J.close();
   }
 
+  });
   // =====================================================================================
-  t.section("2. Les 30 scénarios du coffre par le serveur (labo) : la feinte ne change jamais les cartes");
-  const A = await joueur(IDS.admin, "Billy", { vp: "ordi" });
+
+  await etape("2. Les 30 scénarios du coffre par le serveur (labo) : la feinte ne change jamais les cartes", async () => {
+  A = await joueur(IDS.admin, "Billy", { vp: "ordi" });
   await A.go("labo"); await A.page.waitForTimeout(1200);
-  const sk = (r, i = 0, who) => G.SKINS.filter((c) => c.rar === r && (!who || c.who === who))[i].id;
+  sk = (r, i = 0, who) => G.SKINS.filter((c) => c.rar === r && (!who || c.who === who))[i].id;
   const SETS = { "tr-jumeaux": [["m", 0], ["m", 1], ["c", 0], ["c", 1], ["c", 2]], "tr-couronne": [["l", 0], ["l", 1], ["c", 0], ["c", 1], ["c", 2]], "tr-trinite": [["e", 0], ["e", 1], ["c", 0], ["c", 1], ["c", 2]],
     "se-miroir": [["e", 0], ["e", 0], ["c", 0], ["c", 1], ["c", 2]], "se-createur": [["e", 0, "billy"], ["c", 0], ["c", 1], ["c", 2], ["c", 3]], "se-arcenciel": [["c", 0], ["pc", 0], ["r", 0], ["e", 0], ["l", 0]] };
   let bad30 = [], stuck30 = [];
@@ -157,15 +176,17 @@ try {
   t.check("feinte « faux redémarrage » sur une Mythique : passe par des teintes plus basses puis finit rouge", tints.size >= 2, [...tints]);
   await A.page.click('#stage [data-act="skip"]').catch(() => {}); await A.page.click('#stage [data-act="lab-back"]').catch(() => {});
 
+  });
   // =====================================================================================
-  t.section("3. Boutique, invocations, Atelier : pas de double débit, affichage partout");
-  const P = await joueur(IDS.p1, "Joueur mobile", { vp: "mobile" });
+
+  await etape("3. Boutique, invocations, Atelier : pas de double débit, affichage partout", async () => {
+  P = await joueur(IDS.p1, "Joueur mobile", { vp: "mobile" });
   grant(srv, [P.api], { chakra: 6000, free: 12 });
   for (let i = 0; i < 10; i++) await P.api.api("open", { pack: "mix" });
   await P.page.reload(); await P.page.waitForTimeout(2000);
   await P.go("boutique");
   let sb = await P.state();
-  const firstBuy = await P.page.getAttribute("[data-zbuy]", "data-zbuy");
+  firstBuy = await P.page.getAttribute("[data-zbuy]", "data-zbuy");
   await P.page.dblclick(`[data-zbuy="${firstBuy}"]`); await P.page.waitForTimeout(1200);
   let sa = await P.state();
   t.check("Boutique : double clic sur Acheter, un seul débit", sa.chakra === sb.chakra - G.COS_PRICE[G.COS_BY_ID[firstBuy].rar] && sa.cos.own[firstBuy], { avant: sb.chakra, après: sa.chakra });
@@ -181,8 +202,8 @@ try {
   sa = await P.state();
   t.check("Sanctuaire ×1 sans animation : double clic, un seul débit", sa.chakra === sb.chakra - G.summonCost(1) && sa.cos.inst.length === sb.cos.inst.length + 1);
   // design avec un objet de compte + une instance, sur une carte possédée en un exemplaire
-  const solo = Object.keys(sa.owned).find((id) => sa.owned[id].n === 1 && !sa.owned[id].gold && !G.CARD_BY_ID[id].skin);
-  const inst = sa.cos.inst.find((x) => G.COS_BY_ID[x.c].slot !== G.COS_BY_ID[firstBuy].slot);
+  solo = Object.keys(sa.owned).find((id) => sa.owned[id].n === 1 && !sa.owned[id].gold && !G.CARD_BY_ID[id].skin);
+  inst = sa.cos.inst.find((x) => G.COS_BY_ID[x.c].slot !== G.COS_BY_ID[firstBuy].slot);
   await P.go("atelier/" + solo);
   await P.page.click(`[data-zset][data-ref="a:${firstBuy}"]`); await P.page.waitForTimeout(150);
   await P.page.click(`[data-zset][data-ref="i:${inst.i}"]`); await P.page.waitForTimeout(150);
@@ -190,8 +211,6 @@ try {
   await P.page.click("[data-zfeat]"); await P.page.waitForTimeout(800);
   sa = await P.state();
   t.check("Atelier : design (compte + instance) et vedette enregistrés par le serveur", Object.keys(sa.cos.designs[solo] || {}).length === 2 && sa.featured === solo);
-  const deco = async (page, scope) => page.locator(`${scope} .cz-cadre, ${scope} .cz-aura, ${scope} .cz-holo, ${scope} .cz-part, ${scope} .cz-orn, ${scope} .cz-pres, ${scope} [class*="cz-fond"]`).count().catch(() => 0);
-  const decoOf = async (page, scope) => (await page.locator(scope).count()) ? await page.evaluate((sel) => { const el = document.querySelector(sel); return !!el && (el.className.includes("cz-") || !!el.querySelector('[class*="cz-"]') || (el.getAttribute("style") || "").includes("--z")); }, scope) : false;
   await P.go("collection"); await P.page.waitForTimeout(500);
   await P.page.fill("#colQ, input[type=search]", G.PEOPLE[G.CARD_BY_ID[solo].who].name).catch(() => {}); await P.page.waitForTimeout(500);
   const inCol = await decoOf(P.page, `.kcw[data-card="${solo}"]`);
@@ -204,17 +223,19 @@ try {
   t.check("cosmétiques affichés : fiche de la carte", inSheet);
   t.check("cosmétiques affichés : carte vedette du profil", inFeat);
   t.check("cosmétiques affichés : vitrine du profil", inVit);
-  const Q = await joueur(IDS.p2, "Joueur ordi", { vp: "ordi" });
+  Q = await joueur(IDS.p2, "Joueur ordi", { vp: "ordi" });
   const prof = await Q.api.api("profile", { uid: P.id });
   await Q.go("profil/" + P.id); await Q.page.waitForTimeout(1500);
   t.check("cosmétiques affichés : profil vu par un autre joueur (vedette)", (await decoOf(Q.page, ".zfeat .kcw")) && prof.featured === solo);
 
+  });
   // =====================================================================================
-  t.section("4. Marché : vente avec design entre deux joueurs, notification");
+
+  await etape("4. Marché : vente avec design entre deux joueurs, notification", async () => {
   await P.go("carte/" + solo); await P.page.click(`[data-sell="${solo}"]`); await P.page.waitForTimeout(400);
   t.check("formulaire de vente : option « avec son design » et liste de ce qui part", (await P.page.locator("#sellDz").count()) === 1 && (await P.page.locator("#sellForm .dz-box").count()) === 1);
   await P.page.fill("#sellPrice", "25"); await P.page.click('#sellForm button[type="submit"]'); await P.page.waitForTimeout(1500);
-  const lst = (await Q.api.coll("GET", "market")).body.docs.find((d) => d.data.card === solo && d.data.status === "open");
+  lst = (await Q.api.coll("GET", "market")).body.docs.find((d) => d.data.card === solo && d.data.status === "open");
   t.check("annonce créée avec son design (instance sous séquestre)", !!lst && lst.data.dz?.inst?.length === 1);
   grant(srv, [Q.api], { chakra: 500, free: 12 }); for (let i = 0; i < 10; i++) await Q.api.api("open", { pack: "mix" });
   await Q.page.reload(); await Q.page.waitForTimeout(2500); await Q.go("market"); await Q.page.waitForTimeout(1500);
@@ -230,17 +251,19 @@ try {
   await P.page.reload(); await P.page.waitForTimeout(2500);
   t.check("le vendeur reçoit la notification de vente", await P.page.evaluate(() => notif.items.some((n) => n.kind === "sold")));
 
+  });
   // =====================================================================================
-  t.section("5. Défilé des Légendes à plusieurs (admin, 3 joueurs, mobile)");
+
+  await etape("5. Défilé des Légendes à plusieurs (admin, 3 joueurs, mobile)", async () => {
   await A.go("defile"); await A.page.waitForTimeout(1200);
   if (await A.page.locator("#defTitle").count()) { await A.page.fill("#defTitle", "Défilé de la campagne"); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1200); }
   for (const J of [P, Q]) { await J.page.reload(); await J.page.waitForTimeout(2000); await J.go("defile"); await J.page.waitForTimeout(1500); await J.page.click('[data-act="def-enter"]'); await J.page.waitForTimeout(1200); }
-  const R = await joueur(IDS.p3, "Joueur réduit", { vp: "mobile", reduced: true });
+  R = await joueur(IDS.p3, "Joueur réduit", { vp: "mobile", reduced: true });
   await R.go("defile"); await R.page.waitForTimeout(1500); await R.page.click('[data-act="def-enter"]'); await R.page.waitForTimeout(1200);
   t.check("3 inscriptions par l'interface", (await A.api.api("defile/state")).current.entries.length === 3);
   await A.page.reload(); await A.page.waitForTimeout(2000); await A.go("defile"); await A.page.waitForTimeout(1200);
   await A.page.click('[data-act="def-votes"]'); await A.page.waitForTimeout(1200);
-  for (const J of [P, Q, R]) { veteran(J.api); grant(srv, [J.api], {}); }
+  for (const J of [P, Q, R]) veteran(J.api);
   sql(`UPDATE players SET data = json_set(data, '$.opened', 20) WHERE uid IN ('${P.id}','${Q.id}','${R.id}')`);
   for (const [J, to] of [[P, Q], [Q, P], [R, P]]) { await J.page.reload(); await J.page.waitForTimeout(2000); await J.go("defile"); await J.page.waitForTimeout(1500); await J.page.click(`[data-defvote="${to.id}"]`); await J.page.waitForTimeout(1000); }
   t.check("pas de bouton pour voter pour soi", (await P.page.locator(`[data-defvote="${P.id}"]`).count()) === 0);
@@ -264,8 +287,10 @@ try {
   await A.page.fill("#defRmWhy", "carte en double"); await A.page.click(`[data-defrmgo="${R.id}"]`); await A.page.waitForTimeout(1200);
   t.check("modération : retrait avec motif depuis la page", (await R.api.api("defile/state")).current.entries.find((e) => e.uid === R.id)?.reason === "carte en double");
 
+  });
   // =====================================================================================
-  t.section("6. Confrontation : 2 humains + 1 bot par l'interface, jusqu'à la fin");
+
+  await etape("6. Confrontation : 2 humains + 1 bot par l'interface, jusqu'à la fin", async () => {
   const cr = await P.api.api("confront/create", { nom: "Campagne", public: true });
   const gid = cr.gid;
   await Q.api.api("confront/act", { gid, action: { type: "rejoindre" } });
@@ -296,8 +321,11 @@ try {
   await shot(P.page, "6-confront-fin-mobile");
   t.check("partie à 3 (2 humains + 1 bot) terminée sans blocage", phase === "fin", { phase, actions: acts, secondes: Math.round((Date.now() - t0) / 1000) });
   t.check("verrous levés en fin de partie", !(await P.state()).confront && !(await Q.state()).confront);
+  const journal = await P.page.evaluate(() => (CF.table?.vue?.journal || []).map((e) => [e.type, !!EVT[e.type] || ["attente", "attente_annulee", "phase"].includes(e.type), cfEvent(e)]));
+  t.check("journal : chaque événement a un texte en français, jamais « undefined »", journal.every(([, ok, txt]) => ok && !/undefined/.test(txt)), journal.filter(([, ok, txt]) => !ok || /undefined/.test(txt)).slice(0, 5));
+  });
 
-  t.section("7. Confrontation : 2 à 7 joueurs (humains et bots) par l'API, toutes les tables se terminent");
+  await etape("7. Confrontation : 2 à 7 joueurs (humains et bots) par l'API, toutes les tables se terminent", async () => {
   const extra = await Promise.all(["700000000000000001", "700000000000000002", "700000000000000003", "700000000000000004"].map((id, i) => player(srv.base, id, "H" + i)));
   for (const e of extra) await e.api("state");
   for (const n of [2, 3, 4, 5, 6, 7]) {
@@ -314,8 +342,9 @@ try {
     }
     t.check(`${n} joueurs (${humans.length} humains, ${n - humans.length} bots) : partie terminée`, ph === "fin", { phase: ph, actions: steps });
   }
+  });
 
-  t.section("8. Admin : interrupteurs, annonces, épisodes");
+  await etape("8. Admin : interrupteurs, annonces, épisodes", async () => {
   await A.go("admin"); await A.page.waitForTimeout(1000);
   await A.page.uncheck('[data-feat="sanctuaire"]'); await A.page.waitForTimeout(1800);
   await R.page.reload(); await R.page.waitForTimeout(2500);
@@ -329,8 +358,11 @@ try {
     const pul = await R.api.api("pulse", { after: null });
     t.check("annonce envoyée à tout le QG", JSON.stringify(pul.body || pul).includes("Test de la campagne"));
   }
+  });
 
-  t.section("9. Bilan des erreurs dans les navigateurs");
+  await etape("9. Bilan des erreurs dans les navigateurs", async () => {
   for (const J of [A, P, Q, R]) t.check(`${J.name} : aucune erreur JavaScript ni boîte de dialogue`, J.errors.length === 0, J.errors.slice(0, 5));
+  for (const J of [A, P, Q, R]) { const bad = (await J.page.evaluate(() => window.__toasts || [])).filter((x) => /is not defined|undefined|TypeError|Cannot read|null\b|NaN/.test(x)); t.check(`${J.name} : aucun message d'erreur technique montré au joueur`, bad.length === 0, [...new Set(bad)].slice(0, 5)); }
+  });
 } catch (e) { t.check("exécution sans erreur", false, String(e.stack || e)); }
 finally { t.done(); await browser.close(); await srv.stop(); }

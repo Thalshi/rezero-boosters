@@ -2567,7 +2567,7 @@ async function sendTrade() {
 async function toggleWish(id) {
   if (!SRV) return toast(offlineMsg("garder une liste d'envies").replace(/<[^>]+>/g, ""));
   const on = wishSet().has(id);
-  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); openSheet(id); }
+  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); draw(); }
   catch (e) { toast(e.message); }
 }
 async function wishAllMissing() {
@@ -2577,7 +2577,7 @@ async function wishAllMissing() {
 async function toggleShowcase(id) {
   const cur = (save.showcase || []).filter((x) => has(x));
   const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id].slice(-4);
-  try { await srv("showcase", { ids: next }); toast(cur.includes(id) ? "Retirée de ta vitrine." : "Ajoutée à ta vitrine."); openSheet(id); } catch (e) { toast(e.message); }
+  try { await srv("showcase", { ids: next }); toast(cur.includes(id) ? "Retirée de ta vitrine." : "Ajoutée à ta vitrine."); draw(); } catch (e) { toast(e.message); }
 }
 // alerte quand une carte de tes envies arrive au marché
 let seenListings = null;
@@ -3223,7 +3223,7 @@ function viewCollection() {
     <div class="flt"><label>Faction<select class="in" data-sel="colFac"><option value="">Toutes</option>${FACS().map((f) => `<option value="${f}" ${col.fac === f ? "selected" : ""}>${facLabel(f)}</option>`).join("")}</select></label>
       <label>Cartes<select class="in" data-sel="colOwn">${[["own", "Possédées"], ["missing", "Manquantes"], ["all", "Toutes"]].map(([k, l]) => `<option value="${k}" ${col.own === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
       <label>Tri<select class="in" data-sel="colSort">${[["num", "Numéro"], ["rar", "Rareté"], ["name", "Nom"]].map(([k, l]) => `<option value="${k}" ${col.sort === k ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
-    ${list.length ? `<p class="mono mut" style="margin:0;font-size:13px">${list.length} carte${list.length > 1 ? "s" : ""}</p><div class="cgrid">${list.map((c) => { const o = own(c.id); return cardHTML(c, { soon: !visible(c), locked: !has(c.id), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true }); }).join("")}</div>`
+    ${list.length ? `<p class="mono mut" style="margin:0;font-size:13px">${list.length} carte${list.length > 1 ? "s" : ""}</p><div class="cgrid">${list.map((c) => { const o = own(c.id); return cardHTML(c, { soon: !visible(c), locked: !has(c.id), gold: !o.n && o.gold > 0, count: o.n + o.gold, click: true, design: myDesign(c.id) }); }).join("")}</div>`
       : empty(col.own === "own" && !stats().unique ? "Aucune carte pour l'instant. Ouvre ton premier booster !" : "Aucune carte ne correspond à ces filtres.", `<button class="btn sq" type="button" data-act="reset-col">Réinitialiser les filtres</button>`)}`}
   </div>`;
 }
@@ -3350,7 +3350,7 @@ function viewMarket() {
     body = mine.length ? `<div class="mk-grid">${mine.map((l) => lsHTML(l, true)).join("")}</div>` : empty("Tu n'as rien mis en vente.", `<button class="btn" type="button" data-seg="mTab" data-v="sell">Vendre une carte</button>`);
   } else if (marketTab === "sell") {
     const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => (own(b.id).n + own(b.id).gold) - (own(a.id).n + own(a.id).gold) || RAR[b.rar].rank - RAR[a.rar].rank);
-    body = `<p class="note">Touche une carte pour la mettre en vente. Tes doublons sont en premier.</p>${mine.length ? `<div class="cgrid">${mine.map((c) => { const o = own(c.id); return `<div class="cell" data-sell="${c.id}" role="button" tabindex="0">${cardHTML(c, { gold: !o.n && o.gold > 0, count: o.n + o.gold })}<span class="cap"><span>${o.n + o.gold > 1 ? "Doublon" : "Dernier exemplaire"}</span><span>${cote(c.id) ? `~${cote(c.id)} ◆` : ""}</span></span></div>`; }).join("")}</div>` : empty("Ouvre des boosters pour avoir des cartes à vendre.")}`;
+    body = `<p class="note">Touche une carte pour la mettre en vente. Tes doublons sont en premier.</p>${mine.length ? `<div class="cgrid">${mine.map((c) => { const o = own(c.id); return `<div class="cell" data-sell="${c.id}" role="button" tabindex="0">${cardHTML(c, { gold: !o.n && o.gold > 0, count: o.n + o.gold, design: myDesign(c.id) })}<span class="cap"><span>${o.n + o.gold > 1 ? "Doublon" : "Dernier exemplaire"}</span><span>${cote(c.id) ? `~${cote(c.id)} ◆` : ""}</span></span></div>`; }).join("")}</div>` : empty("Ouvre des boosters pour avoir des cartes à vendre.")}`;
   } else {
     const q = mk.q.trim().toLowerCase(), w = wishSet();
     let open = shared.market.filter((l) => l.status === "open" && byId[l.card] && l.seller !== ME)
@@ -3423,7 +3423,7 @@ function openSell(id) {
   const suggest = cote(id) || RAR[c.rar].chakra * 3;
   $("overlay").innerHTML = `<form class="sheet" id="sellForm" data-id="${id}" data-gold="${gold ? 1 : ""}" aria-label="Vendre ${esc(p.name)}">
     <div class="sheet-h"><h2>Vendre ${esc(p.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b">${cardHTML(c, { gold })}
+    <div class="sheet-b">${cardHTML(c, { gold, design: myDesign(c.id) })}
       <p class="note" style="text-align:center">Tu en as ${gold ? o.gold : o.n}. La carte quitte ta collection pendant la vente. Tu touches l'essence dès qu'un joueur l'achète.</p>
       <div class="kv3"><div><small>Cote (médiane 30 j)</small><b>${cote(id) ? `${fmtN(cote(id))} ◆` : "—"}</b></div><div><small>Recyclage</small><b>${RAR[c.rar].chakra} ◆</b></div></div>
       ${sellDesignHTML(id)}
@@ -3812,7 +3812,7 @@ function drawOpening() {
   const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
   el.innerHTML = `${top}<section class="stage">
     <p class="eyebrow gold">Résultat</p><h2>${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true })).join("")}</div>
+    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
     <div class="row" style="justify-content:center">
       ${o.lab ? `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button><button class="btn big" type="button" data-act="lab-back">Retour au labo</button>` : o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
       ${o.lab ? "" : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
@@ -4347,7 +4347,7 @@ const DEF = { loaded: false, loading: false, current: null, hall: null, archives
 async function defLoad(force) {
   if (!SRV || DEF.loading || (DEF.loaded && !force)) return;
   DEF.loading = true;
-  try { Object.assign(DEF, await srv("defile/state"), { loaded: true }); } catch (e) { DEF.loaded = true; }
+  try { Object.assign(DEF, await srv("defile/state"), { loaded: true, t: Date.now() }); } catch (e) { DEF.loaded = true; DEF.t = Date.now(); }
   DEF.loading = false;
   if ((view === "defile" || view === "boosters") && !opening) draw();
 }
@@ -4368,7 +4368,9 @@ function hallHTML() {
 function viewDefile() {
   if (!featureOn(CONFIG, "defile") && !IS_ADMIN) return closedHTML("Défilé des Légendes");
   if (!SRV) return `<div class="wrap page">${head("Défilé · 華", "Défilé des Légendes")}${empty("Le Défilé se joue sur le site du QG, avec ton compte Discord.")}</div>`;
+  // l'état du Défilé change pendant qu'on joue (Billy ouvre, les votes s'ouvrent) : on le recharge en arrivant, puis toutes les 20 s
   defLoad();
+  clearTimeout(DEF.timer); DEF.timer = setTimeout(() => { if (view === "defile" && !document.activeElement?.closest?.(".cf-keep")) defLoad(true); }, 20000);
   const d = DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
   const PH = { inscriptions: "Inscriptions ouvertes", votes: "Votes ouverts", clos: "Terminé" };
   const mineCards = [...CARDS, ...SKINS].filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
@@ -4405,6 +4407,8 @@ function viewDefile() {
     ${body}${admin}${arch}</div>`;
 }
 VIEWS.defile = viewDefile;
+// à chaque arrivée sur la page, on recharge l'état du Défilé (il a pu s'ouvrir ou passer aux votes entre-temps)
+addEventListener("hashchange", () => { if (location.hash.startsWith("#/defile")) { DEF.t = 0; defLoad(true); } });
 document.addEventListener("click", (e) => {
   const t = e.target;
   const v = t.closest("[data-defvote]"); if (v) return defAct("defile/vote", { entry: v.dataset.defvote }, "Vote enregistré.");
@@ -4535,13 +4539,20 @@ function cfHand(v, me, pr, acts) {
 }
 const EVT = {
   debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}.`,
-  degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, esquive: (e) => `${cfName(e.pid)} esquive.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
+  degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
-  presage: (e) => `Présage : ${cfSigne(e.carte?.signe || e.signe).nom} ${e.carte?.rang || ""}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
+  presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
   pioche: (e) => `Tu pioches ${e.n || e.cartes?.length || ""} carte(s).`, pioche_publique: (e) => `${cfName(e.pid)} pioche ${e.n || ""} carte(s).`, delai_expire: (e) => `${cfName(e.pid)} n'a pas répondu à temps.`,
   rejoint: (e) => `${cfName(e.pid)} rejoint la table.`, quitte: (e) => `${cfName(e.pid)} quitte la table.`, contribution: (e) => `${cfName(e.pid)} a apporté ses cartes.`, choix: (e) => `${cfName(e.pid)} a choisi son perso.`,
-  sauvetage: (e) => `${cfName(e.pid)} se sauve de justesse.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
+  sauvetage: (e) => `${cfName(e.pid)} se sauve de justesse.`,
+  defi_relance: (e) => `${cfName(e.pid)} relance le défi.`, defi_perdu: (e) => `${cfName(e.pid)} perd le défi.`, onde_evitee: (e) => `${cfName(e.pid)} évite l'onde de choc.`,
+  reprise: (e) => `${cfName(e.pid)} reprend sa Frappe.`, remelange: () => "La défausse est remélangée dans la pioche.", effondrement: (e) => `Effondrement : ${cfName(e.pid)} perd 1 PV.`,
+  orbe_explose: (e) => `L'Orbe instable explose sur ${cfName(e.pid)} !`, orbe_passe: (e) => `L'Orbe instable passe à ${cfName(e.cible || e.pid)}.`, kanji_absorbe: (e) => `${cfName(e.pid)} absorbe les dégâts (Kanji de garde).`,
+  penalite_gardien: (e) => `${cfName(e.pid)} a éliminé une Sentinelle : il perd sa main et son équipement.`, propositions: () => "Les personnages sont proposés.", reserve: () => "La réserve commune est mélangée.",
+  etal: (e) => `${cfName(e.pid)} ouvre l'Étal du marché.`, etal_pris: (e) => `${cfName(e.pid)} prend une carte de l'Étal.`, etal_fin: () => "L'Étal est vidé.", arme_remplacee: (e) => `${cfName(e.pid)} change d'arme.`,
+  choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
+const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr" };
 const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
@@ -4557,6 +4568,8 @@ function cfSelect(uid) {
   draw();
 }
 VIEWS.confront = viewConfront;
+// la liste des salons change sans cesse : rechargée à chaque arrivée sur la page des salons
+addEventListener("hashchange", () => { if (location.hash === "#/confront") { CF.list = null; cfLoadList(); } });
 document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));

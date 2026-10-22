@@ -31,7 +31,7 @@ function viewMarket() {
     body = mine.length ? `<div class="mk-grid">${mine.map((l) => lsHTML(l, true)).join("")}</div>` : empty("Tu n'as rien mis en vente.", `<button class="btn" type="button" data-seg="mTab" data-v="sell">Vendre une carte</button>`);
   } else if (marketTab === "sell") {
     const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => (own(b.id).n + own(b.id).gold) - (own(a.id).n + own(a.id).gold) || RAR[b.rar].rank - RAR[a.rar].rank);
-    body = `<p class="note">Touche une carte pour la mettre en vente. Tes doublons sont en premier.</p>${mine.length ? `<div class="cgrid">${mine.map((c) => { const o = own(c.id); return `<div class="cell" data-sell="${c.id}" role="button" tabindex="0">${cardHTML(c, { gold: !o.n && o.gold > 0, count: o.n + o.gold })}<span class="cap"><span>${o.n + o.gold > 1 ? "Doublon" : "Dernier exemplaire"}</span><span>${cote(c.id) ? `~${cote(c.id)} ◆` : ""}</span></span></div>`; }).join("")}</div>` : empty("Ouvre des boosters pour avoir des cartes à vendre.")}`;
+    body = `<p class="note">Touche une carte pour la mettre en vente. Tes doublons sont en premier.</p>${mine.length ? `<div class="cgrid">${mine.map((c) => { const o = own(c.id); return `<div class="cell" data-sell="${c.id}" role="button" tabindex="0">${cardHTML(c, { gold: !o.n && o.gold > 0, count: o.n + o.gold, design: myDesign(c.id) })}<span class="cap"><span>${o.n + o.gold > 1 ? "Doublon" : "Dernier exemplaire"}</span><span>${cote(c.id) ? `~${cote(c.id)} ◆` : ""}</span></span></div>`; }).join("")}</div>` : empty("Ouvre des boosters pour avoir des cartes à vendre.")}`;
   } else {
     const q = mk.q.trim().toLowerCase(), w = wishSet();
     let open = shared.market.filter((l) => l.status === "open" && byId[l.card] && l.seller !== ME)
@@ -104,7 +104,7 @@ function openSell(id) {
   const suggest = cote(id) || RAR[c.rar].chakra * 3;
   $("overlay").innerHTML = `<form class="sheet" id="sellForm" data-id="${id}" data-gold="${gold ? 1 : ""}" aria-label="Vendre ${esc(p.name)}">
     <div class="sheet-h"><h2>Vendre ${esc(p.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b">${cardHTML(c, { gold })}
+    <div class="sheet-b">${cardHTML(c, { gold, design: myDesign(c.id) })}
       <p class="note" style="text-align:center">Tu en as ${gold ? o.gold : o.n}. La carte quitte ta collection pendant la vente. Tu touches l'essence dès qu'un joueur l'achète.</p>
       <div class="kv3"><div><small>Cote (médiane 30 j)</small><b>${cote(id) ? `${fmtN(cote(id))} ◆` : "—"}</b></div><div><small>Recyclage</small><b>${RAR[c.rar].chakra} ◆</b></div></div>
       ${sellDesignHTML(id)}
@@ -493,7 +493,7 @@ function drawOpening() {
   const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
   el.innerHTML = `${top}<section class="stage">
     <p class="eyebrow gold">Résultat</p><h2>${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true })).join("")}</div>
+    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
     <div class="row" style="justify-content:center">
       ${o.lab ? `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button><button class="btn big" type="button" data-act="lab-back">Retour au labo</button>` : o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
       ${o.lab ? "" : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}

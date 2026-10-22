@@ -413,7 +413,7 @@ async function sendTrade() {
 async function toggleWish(id) {
   if (!SRV) return toast(offlineMsg("garder une liste d'envies").replace(/<[^>]+>/g, ""));
   const on = wishSet().has(id);
-  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); openSheet(id); }
+  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); draw(); }
   catch (e) { toast(e.message); }
 }
 async function wishAllMissing() {
@@ -423,7 +423,7 @@ async function wishAllMissing() {
 async function toggleShowcase(id) {
   const cur = (save.showcase || []).filter((x) => has(x));
   const next = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id].slice(-4);
-  try { await srv("showcase", { ids: next }); toast(cur.includes(id) ? "Retirée de ta vitrine." : "Ajoutée à ta vitrine."); openSheet(id); } catch (e) { toast(e.message); }
+  try { await srv("showcase", { ids: next }); toast(cur.includes(id) ? "Retirée de ta vitrine." : "Ajoutée à ta vitrine."); draw(); } catch (e) { toast(e.message); }
 }
 // alerte quand une carte de tes envies arrive au marché
 let seenListings = null;

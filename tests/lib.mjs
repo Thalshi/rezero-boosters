@@ -40,6 +40,9 @@ export const IDS = {
  * (ex. tests/instrumented-worker.mjs pour la mesure) sans modifier le code du jeu.
  */
 export async function startServer({ port, script = null, root = ROOT, persist = null, keep = false } = {}) {
+  // un ancien serveur encore lancé sur ce port fausserait tout (vieille base) : on refuse de démarrer
+  const busy = await fetch(`http://localhost:${port}/api/me`).then(() => true).catch(() => false);
+  if (busy) throw new Error(`Le port ${port} est déjà utilisé (un ancien serveur de test tourne encore ?). Arrête-le avant de relancer.`);
   persist = persist || mkdtempSync(join(tmpdir(), "rezero-test-"));
   const args = ["dev", ...(script ? [script] : []), "--local", "--port", String(port), "--persist-to", persist,
     "--var", "DEV_LOGIN:1", "--var", `ADMIN_IDS:${IDS.admin}`, "--var", `DEV_IDS:${IDS.dev}`];

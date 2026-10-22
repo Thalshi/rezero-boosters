@@ -6,7 +6,7 @@ const DEF = { loaded: false, loading: false, current: null, hall: null, archives
 async function defLoad(force) {
   if (!SRV || DEF.loading || (DEF.loaded && !force)) return;
   DEF.loading = true;
-  try { Object.assign(DEF, await srv("defile/state"), { loaded: true }); } catch (e) { DEF.loaded = true; }
+  try { Object.assign(DEF, await srv("defile/state"), { loaded: true, t: Date.now() }); } catch (e) { DEF.loaded = true; DEF.t = Date.now(); }
   DEF.loading = false;
   if ((view === "defile" || view === "boosters") && !opening) draw();
 }
@@ -27,7 +27,9 @@ function hallHTML() {
 function viewDefile() {
   if (!featureOn(CONFIG, "defile") && !IS_ADMIN) return closedHTML("Défilé des Légendes");
   if (!SRV) return `<div class="wrap page">${head("Défilé · 華", "Défilé des Légendes")}${empty("Le Défilé se joue sur le site du QG, avec ton compte Discord.")}</div>`;
+  // l'état du Défilé change pendant qu'on joue (Billy ouvre, les votes s'ouvrent) : on le recharge en arrivant, puis toutes les 20 s
   defLoad();
+  clearTimeout(DEF.timer); DEF.timer = setTimeout(() => { if (view === "defile" && !document.activeElement?.closest?.(".cf-keep")) defLoad(true); }, 20000);
   const d = DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
   const PH = { inscriptions: "Inscriptions ouvertes", votes: "Votes ouverts", clos: "Terminé" };
   const mineCards = [...CARDS, ...SKINS].filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
@@ -64,6 +66,8 @@ function viewDefile() {
     ${body}${admin}${arch}</div>`;
 }
 VIEWS.defile = viewDefile;
+// à chaque arrivée sur la page, on recharge l'état du Défilé (il a pu s'ouvrir ou passer aux votes entre-temps)
+addEventListener("hashchange", () => { if (location.hash.startsWith("#/defile")) { DEF.t = 0; defLoad(true); } });
 document.addEventListener("click", (e) => {
   const t = e.target;
   const v = t.closest("[data-defvote]"); if (v) return defAct("defile/vote", { entry: v.dataset.defvote }, "Vote enregistré.");

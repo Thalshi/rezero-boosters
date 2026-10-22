@@ -114,6 +114,12 @@ export async function confrontRoute(env, user, path, body, h) {
   if (!G.featureOn(h.cfg, "confrontation") && !user.admin) return fail(403, "Re Zéro : Confrontation n'est pas encore ouvert.");
   const a = path.slice("/api/game/confront/".length);
   if (a === "catalogue") return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES });
+  // le style (branche) de chacune de MES cartes, pour l'afficher dans la collection et sur les fiches ;
+  // jamais celles des cartes qu'on n'a pas (pas de spoil)
+  if (a === "mes-styles") {
+    const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
+    return json({ cartes: s ? Object.fromEntries(myCards(s, await branchChoices(env)).map((c) => [c.cardId, c.branch])) : {} });
+  }
   // admin : la branche de chaque carte (proposition et choix de Billy), et la modifier
   if (a === "branches" || a === "branches/set") {
     if (!user.admin) return fail(403, "Réservé à l'admin.");

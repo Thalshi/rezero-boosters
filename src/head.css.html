@@ -1494,4 +1494,9 @@ button.ttl-i { cursor: pointer; transition: transform .15s, box-shadow .15s; } b
 .ttl-i.won { animation: ttlWon 1.6s ease-out both; } .ttl-i.won .ttl-t small:first-child { font: 700 10px var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--tc); }
 @keyframes ttlWon { 0% { opacity: 0; transform: scale(.9); box-shadow: 0 0 0 transparent; } 30% { opacity: 1; transform: scale(1.03); box-shadow: 0 0 40px var(--tc); } 100% { transform: none; box-shadow: 0 0 14px color-mix(in srgb, var(--tc) 30%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .ttl-i.won { animation: none; } }
+
+/* style de Confrontation sur mes cartes */
+.kc-br { position: absolute; right: 3cqw; bottom: 2.5cqw; width: 13cqw; height: 13cqw; border-radius: 50%; display: grid; place-items: center; background: #0b0916cc; border: 1px solid var(--line3); z-index: 3; }
+.kc-br .cf-emb.sm { width: 10cqw; height: 10cqw; } .kc-br b { font-size: 6cqw; color: var(--gold); }
+.kc-brd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 </style>

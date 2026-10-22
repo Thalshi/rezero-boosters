@@ -1494,6 +1494,11 @@ button.ttl-i { cursor: pointer; transition: transform .15s, box-shadow .15s; } b
 .ttl-i.won { animation: ttlWon 1.6s ease-out both; } .ttl-i.won .ttl-t small:first-child { font: 700 10px var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--tc); }
 @keyframes ttlWon { 0% { opacity: 0; transform: scale(.9); box-shadow: 0 0 0 transparent; } 30% { opacity: 1; transform: scale(1.03); box-shadow: 0 0 40px var(--tc); } 100% { transform: none; box-shadow: 0 0 14px color-mix(in srgb, var(--tc) 30%, transparent); } }
 @media (prefers-reduced-motion: reduce) { .ttl-i.won { animation: none; } }
+
+/* style de Confrontation sur mes cartes */
+.kc-br { position: absolute; right: 3cqw; bottom: 2.5cqw; width: 13cqw; height: 13cqw; border-radius: 50%; display: grid; place-items: center; background: #0b0916cc; border: 1px solid var(--line3); z-index: 3; }
+.kc-br .cf-emb.sm { width: 10cqw; height: 10cqw; } .kc-br b { font-size: 6cqw; color: var(--gold); }
+.kc-brd { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 </style>
 <header class="hd">
   <div class="wrap hd-in">
@@ -3453,7 +3458,7 @@ function cardHTML(c, o = {}) {
     style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
+    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span>${soon || locked ? "" : brTag(c.id)}</div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}
@@ -3505,7 +3510,15 @@ async function loadAccount() {
   if (window.DISCORD_LOGIN) ACCT = await window.discordMe();
   else if (USER) { const m = await USER.me().catch(() => null); ACCT = m ? { id: m.id, name: m.name, avatar: m.avatarUrl, admin: IS_ADMIN, member: canShare } : null; }
   drawAvatar(); if (menuOpen) drawMenu();
+  loadStyles();
 }
+// style de Confrontation de chacune de mes cartes (le serveur ne donne que celles que j'ai)
+let MY_BR = {};
+async function loadStyles() {
+  if (!SRV || !featureOn(CONFIG, "confrontation")) return;
+  try { await cfCat(); MY_BR = (await srv("confront/mes-styles")).cartes || {}; if (!opening) draw(); } catch (e) {}
+}
+const brTag = (id) => { const b = MY_BR[id]; return b ? `<span class="kc-br" title="Style en Confrontation : ${esc(cfBranch(b).nom)}">${cfEmb(b, "sm")}</span>` : ""; };
 function drawAvatar() {
   const a = ACCT;
   $("avImg").outerHTML = a?.avatar ? `<img id="avImg" src="${esc(a.avatar)}" alt="">` : `<span id="avImg">${a?.name ? esc(a.name[0].toUpperCase()) : "I"}</span>`;
@@ -3804,6 +3817,7 @@ function viewCard() {
         </div></div>
       <div class="sec">
         ${got ? `<div class="card"><dl class="facts">
+          ${MY_BR[c.id] ? `<dt>Style en Confrontation</dt><dd class="kc-brd">${cfEmb(MY_BR[c.id], "sm")} <b>${esc(cfBranch(MY_BR[c.id]).nom)}</b> · ${esc(cfBranch(MY_BR[c.id]).pouvoir || "")}</dd>` : ""}
           ${row("Pouvoir", esc(p.power))}${row("Apparence", esc(p.look))}${row("Caractère", esc(p.mood))}
           <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re Zéro : LoL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
           ${quotes.length ? `<dt>Citations</dt><dd class="quotes">${quotes.map((q) => `<q>${esc(q)}</q>`).join("")}</dd>` : ""}
@@ -4389,7 +4403,7 @@ async function tearPack() {
   }
   opening.phase = "cards"; drawOpening();
 }
-function closeStage() { Coffre.stop(); Reveal.stop(); opening = null; setTimeout(flushTitles, 0); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
+function closeStage() { Coffre.stop(); Reveal.stop(); opening = null; setTimeout(flushTitles, 0); loadStyles(); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
   const c = byId[x.id];
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Objet déverrouillé"><div class="sheet-h"><h2>Objet déverrouillé !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>

@@ -211,7 +211,7 @@ function packsForTab() {
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
-  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${PACK} cartes</span></div>`;
+  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
 }
 function selPack() {
   const list = packsForTab();
@@ -230,6 +230,10 @@ function boosterZone() {
   else if (pk.daily) btn = `<button class="bigopen" type="button" data-act="open-day" ${dayDone ? "disabled" : ""}><b>Ouvrir</b><span>${dayDone ? "Déjà ouvert · reviens demain" : "Gratuit · 1 par jour"}</span></button>`;
   else if (shop) btn = `<button class="bigopen acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}><b>Acheter</b><span>${PRICE} ◆ · tu as ${fmtN(save.chakra)} ◆</span></button>`;
   else btn = `<button class="bigopen" type="button" data-act="open-pack" data-p="${pk.id}" ${save.free ? "" : "disabled"}><b>Ouvrir</b><span>${save.free ? `Gratuit · ${save.free} restant${save.free > 1 ? "s" : ""}` : `Prochain dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}`}</span></button>`;
+  // 2 boosters d'un coup : 10 cartes dans le coffre
+  if (packOpen(pk) && !pk.daily && !(shop && pk.limited)) btn += shop
+    ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="2" ${save.chakra < PRICE * 2 ? "disabled" : ""}><b>Acheter 2 · coffre</b><span>${fmtN(PRICE * 2)} ◆ · 10 cartes</span></button>`
+    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`;
   return `<section class="sec" id="boosters">
     <div class="sec-h"><h2>Choisis ton booster</h2></div>
     ${seg("packTab", [["free", "Gratuits"], ["day", "Du jour & limités", save.dailyPack !== dayKey()], ["shop", "Boutique"]], packTab, "gold")}

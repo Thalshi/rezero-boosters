@@ -92,10 +92,9 @@ function viewLabo() {
       <div class="row"><button class="btn gold" type="button" data-act="lab-open" ${lab.loading || (forced && forced < PACK) ? "disabled" : ""}>Ouvrir dans le labo</button>${lab.last ? `<button class="btn" type="button" data-act="lab-replay">Rejouer la dernière ouverture</button>` : ""}<button class="btn" type="button" data-act="lab-clear">Vider les cartes imposées</button></div>
       ${lab.last ? `<p class="note">Dernière : ${esc(packOf(lab.last.pack).name)} · scénario ${lab.last.scenario ? `<b>${esc(CHEST_BY_ID[lab.last.scenario].name)}</b>${lab.last.compatible ? "" : " (imposé, incompatible avec ces cartes : jamais choisi en vrai)"}` : "aucun (booster)"}</p>` : ""}</section>
     <section class="sec"><h2>Tester une invocation</h2>
-      <div class="lab-form"><label>Raretés imposées <input type="text" id="labRars" value="${esc(lab.summonRars)}" placeholder="vide = tirage normal ; ex. m ou c,pc,r,e,m"></label></div>
-      <div class="zsanct lab-sanct"><div id="labSanctum" class="sanctum-host"></div>
-        <div class="zs-side"><button class="btn gold" type="button" data-act="lab-sum" data-n="1">Invoquer ×1 (labo)</button><button class="btn acc" type="button" data-act="lab-sum" data-n="5">Invoquer ×5 (labo)</button>
-        ${lab.sum ? `<p class="note">Résultat : ${lab.sum.map((x) => `<b style="color:${RAR[x.rar].color}">${esc(COS_BY_ID[x.id].name)}</b>`).join(", ")}</p>` : ""}</div></div></section>
+      <div class="lab-form"><label>Raretés imposées <input type="text" id="labRars" value="${esc(lab.summonRars)}" placeholder="vide = tirage normal ; 1, 5 ou 10 raretés, ex. m ou c,pc,r,e,m"></label></div>
+      <div class="row"><button class="btn gold" type="button" data-act="lab-sum" data-n="1">Invoquer ×1 (labo)</button><button class="btn acc" type="button" data-act="lab-sum" data-n="5">×5 · pochette</button><button class="btn acc" type="button" data-act="lab-sum" data-n="10">×10 · coffre</button></div>
+      ${lab.sum ? `<p class="note">Résultat : ${lab.sum.map((x) => `<b style="color:${RAR[x.rar].color}">${esc(COS_BY_ID[x.id].name)}</b>`).join(", ")}</p>` : ""}</section>
   </div>`;
 }
 async function labOpen(replay) {
@@ -114,8 +113,8 @@ async function labOpen(replay) {
 async function labSummon(n) {
   const rars = lab.summonRars.split(/[\s,]+/).filter(Boolean);
   const r = await labCall("summon", rars.length ? { rars } : { n }); if (!r) return;
-  lab.sum = r.got; draw();
-  if (!reduced) { Portal.attach($("labSanctum")); Portal.play(zBest(r.got), () => { Portal.reset(); draw(); }); }
+  lab.sum = r.got;
+  summonOpening(r.got, r.scenario, { lab: true });
 }
 VIEWS.galerie = viewGalerie; VIEWS.labo = viewLabo;
 const ADMIN_SEG = { galRar: (v) => { gal.rar = v; gal.n = 60; } };

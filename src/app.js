@@ -464,26 +464,44 @@ const dupesValue = () => dupesValueS(save);
 // ===== Ouverture =====
 // couleur de la lueur du coffre : celle de la meilleure carte, comme les coffres de LoL
 let busy = false;
-async function startOpening(paid, packId) {
+// n = 1 : une pochette (5 cartes) ; n = 2 : 10 cartes dans le coffre
+async function startOpening(paid, packId, n = 1) {
   if (busy) return;
   busy = true;
   let r;
   try {
     const pack = packId || save.pack;
-    if (SRV) r = await srv("open", { pack, paid });
-    else { r = takeAndOpenS(save, pack, paid, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
+    if (SRV) r = await srv("open", n > 1 ? { pack, paid, n } : { pack, paid });
+    else { r = openManyS(save, pack, paid, n, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
   } catch (e) { toast(e.message); header(); return; }
   finally { busy = false; }
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
-  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine, scenario: r.scenario };
+  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, n, divine: r.divine, scenario: r.scenario };
   closeMenu(); $("overlay").hidden = true;
   draw();
+}
+// Invocation du Sanctuaire, déjà tirée par le serveur : ×1 une carte qui se retourne seule, ×5 une pochette, ×10 le coffre
+const SUMMON_PK = { 1: "Invocation", 5: "Pochette du Sanctuaire", 10: "Coffre du Sanctuaire" };
+function summonOpening(got, scenario, extra = {}) {
+  const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "召", color: "#b072ff", count: n };
+  const cards = got.map((x) => ({ c: { id: x.id, rar: x.rar }, cos: COS_BY_ID[x.id], gold: false, isNew: !!x.isNew }));
+  opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, ...extra };
+  closeMenu(); $("overlay").hidden = true; $("stage").dataset.cf = "";
+  draw();
+  if (n === 1) { const o = opening; setTimeout(() => { if (opening === o && !o.flipped) { o.flipped = true; drawOpening(); } }, reduced ? 0 : 650); }
+}
+// une ouverture contient des cartes (boosters) ou des cosmétiques (Sanctuaire)
+const itemName = (x) => (x.cos ? x.cos.name : nameOf(x.c));
+function itemHTML(x, opts = {}) {
+  if (!x.cos) return cardHTML(x.c, { gold: x.gold, isNew: x.isNew, ...opts });
+  const c = x.cos;
+  return `<div class="ocos r-${c.rar}">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: true })}<span class="ocos-t"><b>${esc(c.name)}</b><i style="color:${RAR[c.rar].color}">${RAR[c.rar].label} · ${COS_SLOT_LABEL[c.slot]}</i></span>${x.isNew ? `<span class="ocos-new">Nouveau</span>` : ""}</div>`;
 }
 function advance() {
   const o = opening;
   if (!o.flipped) { o.flipped = true; return draw(); }
-  if (o.i < PACK - 1) { o.i++; o.flipped = false; return draw(); }
+  if (o.i < o.cards.length - 1) { o.i++; o.flipped = false; return draw(); }
   o.phase = "done"; draw();
 }
 

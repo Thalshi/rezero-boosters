@@ -575,6 +575,20 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   if (pk.skins) { trackS(s, "coffre", 1, now); r.scenario = pickScenarioS(r.cards, rng, now); }
   return { pack: pk.id, ...r };
 }
+// Ouvre 1 ou 2 boosters d'un coup. 2 boosters = 10 cartes = un coffre (avec scénario).
+// Tout est vérifié avant de prendre quoi que ce soit : jamais un seul des deux débité.
+function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
+  n = n === 2 ? 2 : 1;
+  if (n === 1) return takeAndOpenS(s, packId, paid, cfg, uid, rng, now);
+  if (packId === "jour") return { error: "Le pack du jour s'ouvre un seul à la fois." };
+  regenS(s, now);
+  if (paid && s.chakra < PRICE * n) return { error: `Il te faut ${PRICE * n} ◆ (tu en as ${s.chakra}).` };
+  if (!paid && (s.free || 0) < n) return { error: `Il te faut ${n} boosters gratuits (tu en as ${s.free || 0}).` };
+  const runs = [];
+  for (let k = 0; k < n; k++) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (r.error) return r; runs.push(r); }
+  const cards = runs.flatMap((r) => r.cards);
+  return { pack: runs[0].pack, n, cards, divine: runs.some((r) => r.divine), scenario: pickScenarioS(cards, rng, now) };
+}
 function packChance(rar, k = 1, last = LAST) {
   const a = boosted(SLOT, k), b = boosted(last, k);
   const p1 = (a[rar] || 0) / Object.values(a).reduce((x, y) => x + y, 0);
@@ -731,8 +745,10 @@ const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce p
 const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
 const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
 const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
-const SUMMON_5_FLOOR = "r";           // ×5 : au moins une Rare ou mieux
-const summonCost = (n) => (n === 5 ? Math.round(SUMMON_COST * 5 * (1 - SUMMON_DISCOUNT_5)) : SUMMON_COST * n);
+const SUMMON_5_FLOOR = "r";           // ×5 et ×10 : au moins une Rare ou mieux
+const SUMMON_10_FLOOR = "e";          // ×10 : au moins une Épique ou mieux
+const SUMMON_COUNTS = [1, 5, 10];     // ×1 : une carte ; ×5 : une pochette ; ×10 : le coffre
+const summonCost = (n) => (n >= 5 ? Math.round(SUMMON_COST * n * (1 - SUMMON_DISCOUNT_5)) : SUMMON_COST * n);
 function cosOf(s) {
   const c = s.cos && typeof s.cos === "object" ? s.cos : (s.cos = {});
   if (!c.own || typeof c.own !== "object") c.own = {};
@@ -767,17 +783,20 @@ function buyCosmeticS(s, id) {
 }
 const SUMMON_POOL = (rar) => COSMETICS.filter((c) => c.rar === rar);
 function summonS(s, n, rng, now = Date.now()) {
-  if (n !== 1 && n !== 5) return { error: "On invoque 1 ou 5 objets à la fois." };
+  if (!SUMMON_COUNTS.includes(n)) return { error: "On invoque 1, 5 ou 10 objets à la fois." };
   const cost = summonCost(n), cos = cosOf(s);
   if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
   for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
   // ×5 : au moins une Rare ou mieux
-  if (n === 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
-  const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
+  if (n >= 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
+  if (n === 10 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_10_FLOOR))) rars[n - 2] = SUMMON_10_FLOOR;
+  const had = new Set([...Object.keys(cos.own || {}), ...cos.inst.map((x) => x.c)]);
+  const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); const isNew = !had.has(c.id); had.add(c.id); return { i, id: c.id, rar: r, isNew }; });
   trackS(s, "summon", n, now);
-  return { got, cost };
+  // ×10 : ouvert dans le coffre, avec un scénario choisi ici comme pour les boosters
+  return n === 10 ? { got, cost, scenario: pickScenarioS(got, rng, now) } : { got, cost };
 }
 // enregistre le design d'une carte ; une instance ne peut être que sur une carte à la fois (elle quitte l'ancienne)
 function saveDesignS(s, cardId, design) {
@@ -849,13 +868,15 @@ const CHEST_BY_ID = Object.fromEntries(CHEST_SCENARIOS.map((x) => [x.id, x]));
 // probabilités provisoires : un secret possible sort toujours ; une transformation possible sort 3 fois sur 4 ;
 // sinon feinte 25 %, spectacle 35 % (si possibles), classique le reste
 const CHEST_W = { transfo: 0.75, fake: 0.25, spectacle: 0.35 };
+// un coffre peut contenir des cartes (boosters) ou des cosmétiques (Sanctuaire ×10)
+const chestItem = (id) => CARD_BY_ID[id] || COS_BY_ID[id];
 function chestCtx(cards, now = Date.now()) {
-  const rars = cards.map((x) => CARD_BY_ID[x.id].rar), n = Object.fromEntries(RANKS.map((r) => [r, rars.filter((x) => x === r).length]));
+  const rars = cards.map((x) => chestItem(x.id).rar), n = Object.fromEntries(RANKS.map((r) => [r, rars.filter((x) => x === r).length]));
   const best = rars.reduce((a, r) => (RANKS.indexOf(r) > RANKS.indexOf(a) ? r : a), "c"), rank = RANKS.indexOf(best);
   let hour = new Date(now).getUTCHours();
   try { hour = +new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now)).find((p) => p.type === "hour").value; } catch (e) {}
-  return { best, rank, n, rars, gold: cards.filter((x) => x.gold).length, news: cards.filter((x) => x.isNew).length, newTop: cards.some((x) => x.isNew && CARD_BY_ID[x.id].rar === best),
-    who: cards.map((x) => CARD_BY_ID[x.id].who), ids: cards.map((x) => x.id), list: cards.map((x) => ({ id: x.id, who: CARD_BY_ID[x.id].who, rar: CARD_BY_ID[x.id].rar })), hour };
+  return { best, rank, n, rars, gold: cards.filter((x) => x.gold).length, news: cards.filter((x) => x.isNew).length, newTop: cards.some((x) => x.isNew && chestItem(x.id).rar === best),
+    who: cards.map((x) => chestItem(x.id).who), ids: cards.map((x) => x.id), list: cards.map((x) => ({ id: x.id, who: chestItem(x.id).who, rar: chestItem(x.id).rar })), hour };
 }
 const chestEligible = (ctx) => CHEST_SCENARIOS.filter((x) => x.when(ctx));
 function pickWeighted(list, rng) { const tot = list.reduce((a, x) => a + x.w, 0); let v = rng() * tot; for (const x of list) { v -= x.w; if (v < 0) return x; } return list[list.length - 1]; }
@@ -880,10 +901,10 @@ function labForcedOpenS(s, picks, now = Date.now()) {
 }
 function labSummonForcedS(s, rars, rng, now = Date.now()) {
   const list = (Array.isArray(rars) ? rars : []).filter((r) => RANKS.includes(r));
-  if (list.length !== 1 && list.length !== 5) return { error: "Choisis 1 ou 5 raretés." };
+  if (!SUMMON_COUNTS.includes(list.length)) return { error: "Choisis 1, 5 ou 10 raretés." };
   const cos = cosOf(s);
-  const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
-  return { got, cost: 0 };
+  const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r, isNew: false }; });
+  return list.length === 10 ? { got, cost: 0, scenario: pickScenarioS(got, rng, now) } : { got, cost: 0 };
 }
 
 // ===== Défilé des Légendes =====
@@ -928,4 +949,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openManyS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

@@ -350,6 +350,9 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .bigopen span { font: 500 13px var(--mono); padding-left: 16px; border-left: 1px solid rgba(0,0,0,.3); }
 .bigopen:disabled { opacity: .5; cursor: default; }
 .bigopen.acc { background: var(--acc); color: #1a0c0a; }
+.bigopen.two { margin-top: 10px; background: transparent; color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); }
+.bigopen.two.acc { color: var(--acc); box-shadow: inset 0 0 0 2px var(--acc); }
+.bigopen.two span { border-left-color: currentColor; opacity: .85; }
 .sec > .seg { align-self: flex-start; }
 /* ordi : les boosters en grille de 3 à gauche (plus de carte coupée ni de vide), le détail à droite */
 @media (min-width: 900px) {
@@ -786,8 +789,6 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .zgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
 @media (min-width: 700px) { .zgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .zgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-.zgrid.one { grid-template-columns: minmax(0, 240px); }
-@media (min-width: 700px) { .zgrid.five { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .zt { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); height: 100%; box-sizing: border-box; }
 .zt-prev { padding: 6px 10%; }
 .zt-t { display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 1.3; flex: 1; }
@@ -811,33 +812,42 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .zopt:not([data-ref]).on, .zopt[data-ref=""].on { --c: var(--acc); }
 .zopt-line { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--fg2); cursor: pointer; }
 .zopt-line input { width: 18px; height: 18px; accent-color: var(--acc); }
-.zsanct { display: grid; gap: 20px; }
-@media (min-width: 900px) { .zsanct { grid-template-columns: minmax(0, 1fr) 320px; align-items: center; } }
-.sanctum-host { position: relative; aspect-ratio: 1 / 1; max-height: 70vh; width: 100%; margin: 0 auto; border-radius: var(--r-xl); background: radial-gradient(circle at 50% 50%, #1c1626, var(--bg) 70%); border: 1px solid var(--line); overflow: hidden; }
-.sanctum-host.glowing { animation: zglow 1.2s ease-out; }
-@keyframes zglow { 0% { box-shadow: 0 0 0 0 var(--glow); } 30% { box-shadow: 0 0 60px 10px var(--glow); } 100% { box-shadow: 0 0 0 0 transparent; } }
-.sanctum { position: absolute; inset: 0; cursor: pointer; outline: none; }
-.sanctum:focus-visible { box-shadow: inset 0 0 0 2px var(--acc); border-radius: var(--r-xl); }
-.sanctum.busy { cursor: default; }
-.sanctum canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.sanctum-hand { position: absolute; left: 50%; bottom: 0; width: 18%; transform: translate(-50%, 100%); pointer-events: none; opacity: 0; }
-.sanctum-hand svg { display: block; width: 100%; }
-.sanctum-hand.touch { animation: zreach 1.3s cubic-bezier(.3,.7,.3,1) forwards; }
-@keyframes zreach { 0% { transform: translate(-50%, 100%); opacity: 0; } 25% { opacity: 1; } 55% { transform: translate(-50%, calc(-1 * var(--reach, 120px))); opacity: 1; } 100% { transform: translate(-50%, calc(-1 * var(--reach, 120px) + 20px)); opacity: 0; } }
-.sanctum-hint { position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; text-align: center; font: 500 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg2); pointer-events: none; }
-.sanctum.busy .sanctum-hint { opacity: 0; }
 .zs-side { display: flex; flex-direction: column; gap: 12px; }
-.zs-side .btn { width: 100%; }
+/* Sanctuaire : trois offres (×1 une carte, ×5 une pochette, ×10 le coffre) */
+.zoffers { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 22px; }
+@media (max-width: 640px) { .zoffers { grid-template-columns: 1fr; } }
+.zoffer { position: relative; display: grid; justify-items: center; gap: 4px; padding: 18px 14px 16px; border-radius: var(--r-xl); border: 1px solid var(--line2); background: radial-gradient(120% 80% at 50% 0%, #b072ff22, transparent 70%), var(--bg2); color: var(--fg); cursor: pointer; transition: transform .15s, border-color .15s; }
+.zoffer:hover:not(:disabled) { transform: translateY(-3px); border-color: #b072ff; }
+.zoffer:disabled { opacity: .5; cursor: default; }
+.zoffer.n10 { border-color: #f5c51866; background: radial-gradient(120% 80% at 50% 0%, #f5c51826, transparent 70%), var(--bg2); }
+.zo-art { height: 110px; display: grid; place-items: center; }
+.zo-card, .zo-pouch, .zo-chest { display: grid; place-items: center; font: 700 30px/1 "Zen Kaku Gothic New", sans-serif; color: #fff; }
+.zo-card { width: 64px; height: 92px; border-radius: 8px; border: 2px solid #b072ff; background: repeating-linear-gradient(135deg, #1a1622 0 8px, #221b2e 8px 16px); box-shadow: 0 0 18px #b072ff55; }
+.zo-pouch { width: 78px; height: 104px; border-radius: 10px 10px 14px 14px; background: linear-gradient(160deg, #6a3cc8, #2a1450); border: 2px solid #c8a4ff; box-shadow: 0 0 22px #b072ff66; clip-path: polygon(0 6%, 12% 0, 24% 6%, 36% 0, 48% 6%, 60% 0, 72% 6%, 84% 0, 100% 6%, 100% 100%, 0 100%); }
+.zo-chest { position: relative; width: 112px; height: 84px; margin-top: 18px; border-radius: 10px; background: linear-gradient(180deg, #4a2a10, #24140a); border: 3px solid #e2b54a; box-shadow: 0 0 26px #f5c51855; color: #ffe9a0; }
+.zo-chest i { position: absolute; left: -3px; right: -3px; top: -24px; height: 26px; border-radius: 12px 12px 4px 4px; background: linear-gradient(180deg, #6a3c18, #3a2210); border: 3px solid #e2b54a; }
+.zo-n { font: 700 13px var(--mono); color: var(--mut); }
+.zo-t { font: 700 20px var(--disp); }
+.zo-s { font-size: 13px; color: var(--fg2); }
+.zo-p { margin-top: 8px; padding: 6px 16px; border-radius: 999px; background: var(--gold); color: #1a1406; font: 700 14px var(--mono); }
+.zo-p s { opacity: .55; font-weight: 500; margin-left: 4px; }
+.zoffer.n1 .zo-p { background: #b072ff; color: #fff; }
+/* objet cosmétique dans l'ouverture (carte d'exemple portant l'objet + nom) */
+.ocos { position: relative; display: grid; gap: 6px; }
+.ocos-t { display: grid; gap: 1px; text-align: center; line-height: 1.2; }
+.ocos-t b { font-size: 13px; }
+.ocos-t i { font: 500 11px var(--mono); font-style: normal; }
+.ocos-new { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); white-space: nowrap; z-index: 3; padding: 2px 7px; border-radius: 999px; background: var(--acc); color: #1a0c0a; font: 700 10px var(--mono); }
+.stage .reveal-card .ocos-t, .cf .slot .ocos-t { display: none; }
+.cf .multi.ten { grid-template-columns: repeat(5, minmax(0, 128px)); }
+@media (max-width: 700px) { .cf .multi.ten { grid-template-columns: repeat(4, minmax(0, 84px)); gap: 8px; } }
+.summary.ten { grid-template-columns: repeat(4, minmax(0, 88px)); }
+@media (min-width: 700px) { .summary.ten { grid-template-columns: repeat(5, minmax(0, 140px)); } }
 .zrates { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 12px var(--mono); color: var(--fg2); }
 .zrates i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-.zresults { margin-top: 28px; }
-.zres { display: block; height: 100%; }
-.zback { display: grid; place-items: center; min-height: 220px; width: 100%; border-radius: var(--r-lg); border: 1px solid var(--line2); background: repeating-linear-gradient(135deg, #1a1622 0 10px, #15121c 10px 20px); color: var(--gold); font: 700 44px var(--body); cursor: pointer; text-shadow: 0 0 18px #f5c51866; }
-.zback:hover { border-color: var(--gold); }
 .zfeat-row { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; align-items: center; }
 .zfeat-row h2 { margin: 0 0 6px; }
 @media (max-width: 560px) { .zfeat-row { grid-template-columns: 1fr; justify-items: center; text-align: center; } .zfeat-row > .kcw { --w: 200px; } }
-@media (prefers-reduced-motion: reduce) { .sanctum-hand.touch { animation: none; } }
 
 /* ===== Coffre arcanique : coffre 3D, clé, runes, cristal, temps forts des scénarios ===== */
 @property --rare { syntax: "<color>"; inherits: true; initial-value: #b5b1bb; }
@@ -1008,7 +1018,6 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .lab-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
 .lab-picks > div { display: flex; flex-direction: column; gap: 6px; }
 .lab-picks select { width: 100%; }
-.lab-sanct .sanctum-host { max-height: 360px; }
 .lab-pill { color: var(--warn); border-color: var(--warn); font-size: 13px; }
 
 /* ===== Défilé des Légendes ===== */

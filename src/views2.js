@@ -471,9 +471,9 @@ function drawOpening() {
       ${chest ? `<button class="chest" type="button" id="pack" aria-label="Ouvrir le coffre"><span class="lid"></span><span class="box"></span><span class="gem"></span></button>`
         : `<div id="pack" role="button" tabindex="0" aria-label="Ouvrir le booster">${bstHTML(o.pk)}</div>`}
       <div class="floor"></div>
-      <p class="hint">${o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
-      <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : "Tire le booster vers le haut (ou touche-le)"}</p>
-      <p class="sub">Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus</p></section>`;
+      <p class="hint">${o.pk.cos ? `<b>${o.pk.name}</b> · ${o.cards.length} objets` : o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
+      <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : o.pk.cos ? "Tire la pochette vers le haut (ou touche-la)" : "Tire le booster vers le haut (ou touche-le)"}</p>
+      <p class="sub">${o.pk.cos ? `Mythique garantie dans ${Math.max(0, SUMMON_PITY_M - cosOf(save).sinceM)} invocations au plus` : `Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus`}</p></section>`;
     const p = $("pack"); if (!chest) bindPull(p);
     return;
   }
@@ -485,20 +485,29 @@ function drawOpening() {
       <div class="reveal ${o.flipped ? "on" : ""} ${big ? "big" : ""}" style="--rc:${rc};position:relative"><span class="rays"></span>
         <button class="reveal-card ${o.flipped ? "on" : ""}" type="button" id="revealBtn" aria-label="${o.flipped ? "Carte suivante" : "Retourner la carte"}"><div class="in">
           <div class="face"><div class="cardback"></div></div>
-          <div class="face front">${o.flipped ? cardHTML(x.c, { gold: x.gold, isNew: x.isNew }) : ""}</div></div></button></div>
-      <p class="hint">${o.flipped ? `<b style="color:${rc}">${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `Carte ${o.i + 1} sur ${PACK} — touche pour retourner`}</p>
+          <div class="face front">${o.flipped ? itemHTML(x) : ""}</div></div></button></div>
+      <p class="hint">${o.flipped ? `<b style="color:${rc}">${x.cos ? `${esc(x.cos.name)} · ` : ""}${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `${o.pk.cos ? "Objet" : "Carte"} ${o.i + 1} sur ${o.cards.length} — touche pour retourner`}</p>
       <button class="btn" type="button" data-act="skip">Tout voir</button></section>`;
     return;
   }
   const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
   el.innerHTML = `${top}<section class="stage">
-    <p class="eyebrow gold">Résultat</p><h2>${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
+    <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
     <div class="row" style="justify-content:center">
-      ${o.lab ? `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button><button class="btn big" type="button" data-act="lab-back">Retour au labo</button>` : o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
-      ${o.lab ? "" : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
-      ${!o.lab && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
+      ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
+        : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
+        : o.pk.daily ? "" : againBtn(o)}
+      ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
+      ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
       <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
+}
+// « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
+function againBtn(o) {
+  const n = o.n || 1;
+  if (save.free) { const k = Math.min(n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>`; }
+  const k = n > 1 && save.chakra >= PRICE * 2 ? 2 : 1;
+  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>`;
 }
 function bindPull(p) {
   let y0 = null, dy = 0;

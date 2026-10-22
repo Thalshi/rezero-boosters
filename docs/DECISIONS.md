@@ -16,9 +16,9 @@ Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lance
 | # | Décision | Options | Provisoire | Où |
 |---|---|---|---|---|
 | C1 🔴 | Prix en Boutique | par rareté | C 60, PC 120, R 250, E 500, L 1000, M 2000 ◆ | `COS_PRICE` |
-| C2 🔴 | Coût d'une invocation | ×1 / ×5 | 150 ◆ ; ×5 à 675 ◆ (−10 %) | `SUMMON_COST`, `SUMMON_DISCOUNT_5` |
+| C2 🔴 | Coût d'une invocation | ×1 / ×5 / ×10 | 150 ◆ ; ×5 à 675 ◆ et ×10 à 1 350 ◆ (−10 %) | `SUMMON_COST`, `SUMMON_DISCOUNT_5` |
 | C3 🔴 | Taux d'invocation | | C 38, PC 28, R 20, E 9,5, L 3,7, M 0,8 % | `SUMMON_RATES` |
-| C4 🟠 | Garanties | pity Mythique, plancher ×5 | Mythique garantie à 80, ×5 au moins une Rare | `SUMMON_PITY_M`, `SUMMON_5_FLOOR` |
+| C4 🟠 | Garanties | pity Mythique, planchers ×5 et ×10 | Mythique garantie à 80, ×5 au moins une Rare, ×10 au moins une Épique | `SUMMON_PITY_M`, `SUMMON_5_FLOOR`, `SUMMON_10_FLOOR` |
 | C5 🟠 | Doublons d'invocation | garder (transférables) / convertir en essence | gardés comme instances | `summonS` |
 | C6 🟢 | Objets réservés au Sanctuaire | liste | 6 objets (prisme, écarlate, ailes d'ombre, glitch, runes, orbite) | `COSMETICS[].only` |
 
@@ -26,7 +26,9 @@ Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lance
 | # | Décision | Options | Provisoire | Où |
 |---|---|---|---|---|
 | K1 🟠 | Fréquence des scénarios | | secret toujours si possible ; transformation 75 % ; feinte 25 % ; spectacle 35 % → mesuré : classique 51 %, feinte 20 %, transfo 13 %, spectacle 9 %, secret 8 % | `CHEST_W`, `CHEST_SCENARIOS[].w` |
-| K2 🟢 | Les scénarios aussi pour les boosters (pas seulement le coffre) ? | oui / non | coffre seulement | `Coffre.isChest` |
+| K2 🟢 | Les scénarios aussi pour les boosters (pas seulement le coffre) ? | oui / non | décidé : la forme dépend du nombre (×1 une carte, ×5 une pochette, ×10 le coffre), pour les invocations et les boosters (2 boosters d'un coup = coffre) | `summonOpening`, `openManyS` |
+| K3 🟠 | Le booster « Coffre hextech » seul (5 skins) | coffre / pochette | garde son coffre (c'est son nom) | `Coffre.isChest` |
+| K4 🟢 | Ouvrir plus de 2 boosters d'un coup (×4 = 2 coffres…) | oui / non | non, 2 au plus | `openManyS` |
 
 ## Défilé des Légendes
 | # | Décision | Options | Provisoire | Où |

@@ -129,10 +129,10 @@ const Coffre = (() => {
   function grid(el, o, top) {
     const left = o.flips.filter((x) => !x).length;
     el.innerHTML = `${top}<section class="stage cf cf-grid" style="--rare:${RAR[bestOf(o)].color}">
-      <p class="eyebrow gold">${esc(o.pk.name)}</p><h2>${left ? "Retourne tes cartes" : "Tout est révélé"}</h2>
-      <div class="multi">${o.cards.map((x, i) => `<button class="slot ${o.flips[i] ? "flipped" : ""}" type="button" data-cflip="${i}" style="--i:${i};--rc:${x.gold ? "#f0c860" : RAR[x.c.rar].color}" aria-label="${o.flips[i] ? `${esc(nameOf(x.c))}, ${RAR[x.c.rar].label}${x.gold ? ", dorée" : ""}` : `Retourner la carte ${i + 1}`}">
-        <span class="back"><b>零</b></span><span class="front">${o.flips[i] ? cardHTML(x.c, { gold: x.gold, isNew: x.isNew }) : ""}</span></button>`).join("")}</div>
-      <p class="hint" aria-live="polite">${o.last != null ? `<b style="color:${o.cards[o.last].gold ? "#f0c860" : RAR[o.cards[o.last].c.rar].color}">${esc(nameOf(o.cards[o.last].c))} · ${RAR[o.cards[o.last].c.rar].label}${o.cards[o.last].gold ? " · Dorée" : ""}</b>${o.cards[o.last].isNew ? " · Nouvelle !" : ""}` : "Touche une carte pour la retourner"}</p>
+      <p class="eyebrow gold">${esc(o.pk.name)}</p><h2>${left ? (o.pk.cos ? "Retourne tes objets" : "Retourne tes cartes") : "Tout est révélé"}</h2>
+      <div class="multi ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x, i) => `<button class="slot ${o.flips[i] ? "flipped" : ""}" type="button" data-cflip="${i}" style="--i:${i};--rc:${x.gold ? "#f0c860" : RAR[x.c.rar].color}" aria-label="${o.flips[i] ? `${esc(itemName(x))}, ${RAR[x.c.rar].label}${x.gold ? ", dorée" : ""}` : `Retourner la carte ${i + 1}`}">
+        <span class="back"><b>零</b></span><span class="front">${o.flips[i] ? itemHTML(x) : ""}</span></button>`).join("")}</div>
+      <p class="hint" aria-live="polite">${o.last != null ? `<b style="color:${o.cards[o.last].gold ? "#f0c860" : RAR[o.cards[o.last].c.rar].color}">${esc(itemName(o.cards[o.last]))} · ${RAR[o.cards[o.last].c.rar].label}${o.cards[o.last].gold ? " · Dorée" : ""}</b>${o.cards[o.last].isNew ? " · Nouvelle !" : ""}` : "Touche une carte pour la retourner"}</p>
       <div class="row" style="justify-content:center">${left ? `<button class="btn" type="button" data-act="cf-next">Retourner la suivante</button><button class="btn" type="button" data-act="skip">Tout révéler</button>` : `<button class="btn gold big" type="button" data-act="skip">Voir le récapitulatif</button>`}</div>
     </section>`;
     el.dataset.cf = "";

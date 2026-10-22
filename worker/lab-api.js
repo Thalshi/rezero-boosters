@@ -64,7 +64,7 @@ export async function labRoute(env, user, path, body, cfg) {
     const ok = scenario ? G.CHEST_BY_ID[scenario].when(G.chestCtx(r.cards, now)) : true;
     out = { pack: r.pack || pk?.id || "coffre", cards: r.cards, divine: r.divine, scenario, compatible: ok };
   } else if (path === "/api/game/lab/summon") {
-    const r = Array.isArray(body.rars) && body.rars.length ? G.labSummonForcedS(s, body.rars, rng, now) : G.summonS(s, +body.n === 5 ? 5 : 1, rng, now);
+    const r = Array.isArray(body.rars) && body.rars.length ? G.labSummonForcedS(s, body.rars, rng, now) : G.summonS(s, G.SUMMON_COUNTS.includes(+body.n) ? +body.n : 1, rng, now);
     if (r.error) return fail(400, r.error);
     out = r;
   } else if (path === "/api/game/lab/give") {

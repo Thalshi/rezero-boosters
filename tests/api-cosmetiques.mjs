@@ -25,8 +25,8 @@ try {
   t.check("2 achats simultanés du même objet : un seul débit", par.filter((r) => r.status === 200).length === 1 && after.chakra === b1.state.chakra - G.COS_PRICE.pc, par.map((r) => r.status));
 
   t.section("Sanctuaire des Invocations");
-  for (const n of [0, 2, 10, -5, "5x"]) { const r = await A.api("summon", { n }); if (r.status !== 400) t.check(`invocation ×${n} refusée`, false, r.status); }
-  t.check("seules les invocations ×1 et ×5 existent", true);
+  for (const n of [0, 2, 3, 20, -5, "5x"]) { const r = await A.api("summon", { n }); if (r.status !== 400) t.check(`invocation ×${n} refusée`, false, r.status); }
+  t.check("seules les invocations ×1, ×5 et ×10 existent", true);
   const s1 = (await A.api("state")).state;
   const one = await A.api("summon", { n: 1 });
   t.check("×1 : un objet, coût du serveur", one.status === 200 && one.got.length === 1 && one.state.chakra === s1.chakra - G.summonCost(1));
@@ -36,6 +36,11 @@ try {
   t.check("aucune invocation ne donne de personnage", [...one.got, ...five.got].every((x) => G.COS_BY_ID[x.id] && !G.CARD_BY_ID[x.id]));
   const ids = five.state.cos.inst.map((x) => x.i);
   t.check("chaque objet invoqué est une instance unique", ids.length === 6 && new Set(ids).size === 6);
+  const c10 = five.state.chakra, ten = await A.api("summon", { n: 10 });
+  t.check("×10 : dix objets, remise du serveur", ten.status === 200 && ten.got.length === 10 && ten.state.chakra === c10 - G.summonCost(10), { coût: G.summonCost(10) });
+  t.check("×10 : au moins une Épique ou mieux", ten.got.some((x) => G.RANKS.indexOf(x.rar) >= G.RANKS.indexOf("e")));
+  t.check("×10 : un scénario de coffre permis par ces objets", !!G.CHEST_BY_ID[ten.scenario] && G.CHEST_BY_ID[ten.scenario].when(G.chestCtx(ten.got)), ten.scenario);
+  t.check("×1 et ×5 : pas de coffre", !one.scenario && !five.scenario);
   grant(srv, [B], { chakra: 100 });
   t.check("pas assez d'essence : refusé, rien n'est débité", (await B.api("summon", { n: 1 })).status === 400 && (await B.api("state")).state.chakra === 100);
 

@@ -350,6 +350,9 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .bigopen span { font: 500 13px var(--mono); padding-left: 16px; border-left: 1px solid rgba(0,0,0,.3); }
 .bigopen:disabled { opacity: .5; cursor: default; }
 .bigopen.acc { background: var(--acc); color: #1a0c0a; }
+.bigopen.two { margin-top: 10px; background: transparent; color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); }
+.bigopen.two.acc { color: var(--acc); box-shadow: inset 0 0 0 2px var(--acc); }
+.bigopen.two span { border-left-color: currentColor; opacity: .85; }
 .sec > .seg { align-self: flex-start; }
 /* ordi : les boosters en grille de 3 à gauche (plus de carte coupée ni de vide), le détail à droite */
 @media (min-width: 900px) {
@@ -786,8 +789,6 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .zgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
 @media (min-width: 700px) { .zgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .zgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-.zgrid.one { grid-template-columns: minmax(0, 240px); }
-@media (min-width: 700px) { .zgrid.five { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .zt { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); height: 100%; box-sizing: border-box; }
 .zt-prev { padding: 6px 10%; }
 .zt-t { display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 1.3; flex: 1; }
@@ -811,33 +812,42 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .zopt:not([data-ref]).on, .zopt[data-ref=""].on { --c: var(--acc); }
 .zopt-line { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--fg2); cursor: pointer; }
 .zopt-line input { width: 18px; height: 18px; accent-color: var(--acc); }
-.zsanct { display: grid; gap: 20px; }
-@media (min-width: 900px) { .zsanct { grid-template-columns: minmax(0, 1fr) 320px; align-items: center; } }
-.sanctum-host { position: relative; aspect-ratio: 1 / 1; max-height: 70vh; width: 100%; margin: 0 auto; border-radius: var(--r-xl); background: radial-gradient(circle at 50% 50%, #1c1626, var(--bg) 70%); border: 1px solid var(--line); overflow: hidden; }
-.sanctum-host.glowing { animation: zglow 1.2s ease-out; }
-@keyframes zglow { 0% { box-shadow: 0 0 0 0 var(--glow); } 30% { box-shadow: 0 0 60px 10px var(--glow); } 100% { box-shadow: 0 0 0 0 transparent; } }
-.sanctum { position: absolute; inset: 0; cursor: pointer; outline: none; }
-.sanctum:focus-visible { box-shadow: inset 0 0 0 2px var(--acc); border-radius: var(--r-xl); }
-.sanctum.busy { cursor: default; }
-.sanctum canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.sanctum-hand { position: absolute; left: 50%; bottom: 0; width: 18%; transform: translate(-50%, 100%); pointer-events: none; opacity: 0; }
-.sanctum-hand svg { display: block; width: 100%; }
-.sanctum-hand.touch { animation: zreach 1.3s cubic-bezier(.3,.7,.3,1) forwards; }
-@keyframes zreach { 0% { transform: translate(-50%, 100%); opacity: 0; } 25% { opacity: 1; } 55% { transform: translate(-50%, calc(-1 * var(--reach, 120px))); opacity: 1; } 100% { transform: translate(-50%, calc(-1 * var(--reach, 120px) + 20px)); opacity: 0; } }
-.sanctum-hint { position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; text-align: center; font: 500 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg2); pointer-events: none; }
-.sanctum.busy .sanctum-hint { opacity: 0; }
 .zs-side { display: flex; flex-direction: column; gap: 12px; }
-.zs-side .btn { width: 100%; }
+/* Sanctuaire : trois offres (×1 une carte, ×5 une pochette, ×10 le coffre) */
+.zoffers { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 18px 0 22px; }
+@media (max-width: 640px) { .zoffers { grid-template-columns: 1fr; } }
+.zoffer { position: relative; display: grid; justify-items: center; gap: 4px; padding: 18px 14px 16px; border-radius: var(--r-xl); border: 1px solid var(--line2); background: radial-gradient(120% 80% at 50% 0%, #b072ff22, transparent 70%), var(--bg2); color: var(--fg); cursor: pointer; transition: transform .15s, border-color .15s; }
+.zoffer:hover:not(:disabled) { transform: translateY(-3px); border-color: #b072ff; }
+.zoffer:disabled { opacity: .5; cursor: default; }
+.zoffer.n10 { border-color: #f5c51866; background: radial-gradient(120% 80% at 50% 0%, #f5c51826, transparent 70%), var(--bg2); }
+.zo-art { height: 110px; display: grid; place-items: center; }
+.zo-card, .zo-pouch, .zo-chest { display: grid; place-items: center; font: 700 30px/1 "Zen Kaku Gothic New", sans-serif; color: #fff; }
+.zo-card { width: 64px; height: 92px; border-radius: 8px; border: 2px solid #b072ff; background: repeating-linear-gradient(135deg, #1a1622 0 8px, #221b2e 8px 16px); box-shadow: 0 0 18px #b072ff55; }
+.zo-pouch { width: 78px; height: 104px; border-radius: 10px 10px 14px 14px; background: linear-gradient(160deg, #6a3cc8, #2a1450); border: 2px solid #c8a4ff; box-shadow: 0 0 22px #b072ff66; clip-path: polygon(0 6%, 12% 0, 24% 6%, 36% 0, 48% 6%, 60% 0, 72% 6%, 84% 0, 100% 6%, 100% 100%, 0 100%); }
+.zo-chest { position: relative; width: 112px; height: 84px; margin-top: 18px; border-radius: 10px; background: linear-gradient(180deg, #4a2a10, #24140a); border: 3px solid #e2b54a; box-shadow: 0 0 26px #f5c51855; color: #ffe9a0; }
+.zo-chest i { position: absolute; left: -3px; right: -3px; top: -24px; height: 26px; border-radius: 12px 12px 4px 4px; background: linear-gradient(180deg, #6a3c18, #3a2210); border: 3px solid #e2b54a; }
+.zo-n { font: 700 13px var(--mono); color: var(--mut); }
+.zo-t { font: 700 20px var(--disp); }
+.zo-s { font-size: 13px; color: var(--fg2); }
+.zo-p { margin-top: 8px; padding: 6px 16px; border-radius: 999px; background: var(--gold); color: #1a1406; font: 700 14px var(--mono); }
+.zo-p s { opacity: .55; font-weight: 500; margin-left: 4px; }
+.zoffer.n1 .zo-p { background: #b072ff; color: #fff; }
+/* objet cosmétique dans l'ouverture (carte d'exemple portant l'objet + nom) */
+.ocos { position: relative; display: grid; gap: 6px; }
+.ocos-t { display: grid; gap: 1px; text-align: center; line-height: 1.2; }
+.ocos-t b { font-size: 13px; }
+.ocos-t i { font: 500 11px var(--mono); font-style: normal; }
+.ocos-new { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); white-space: nowrap; z-index: 3; padding: 2px 7px; border-radius: 999px; background: var(--acc); color: #1a0c0a; font: 700 10px var(--mono); }
+.stage .reveal-card .ocos-t, .cf .slot .ocos-t { display: none; }
+.cf .multi.ten { grid-template-columns: repeat(5, minmax(0, 128px)); }
+@media (max-width: 700px) { .cf .multi.ten { grid-template-columns: repeat(4, minmax(0, 84px)); gap: 8px; } }
+.summary.ten { grid-template-columns: repeat(4, minmax(0, 88px)); }
+@media (min-width: 700px) { .summary.ten { grid-template-columns: repeat(5, minmax(0, 140px)); } }
 .zrates { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 12px var(--mono); color: var(--fg2); }
 .zrates i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-.zresults { margin-top: 28px; }
-.zres { display: block; height: 100%; }
-.zback { display: grid; place-items: center; min-height: 220px; width: 100%; border-radius: var(--r-lg); border: 1px solid var(--line2); background: repeating-linear-gradient(135deg, #1a1622 0 10px, #15121c 10px 20px); color: var(--gold); font: 700 44px var(--body); cursor: pointer; text-shadow: 0 0 18px #f5c51866; }
-.zback:hover { border-color: var(--gold); }
 .zfeat-row { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; align-items: center; }
 .zfeat-row h2 { margin: 0 0 6px; }
 @media (max-width: 560px) { .zfeat-row { grid-template-columns: 1fr; justify-items: center; text-align: center; } .zfeat-row > .kcw { --w: 200px; } }
-@media (prefers-reduced-motion: reduce) { .sanctum-hand.touch { animation: none; } }
 
 /* ===== Coffre arcanique : coffre 3D, clé, runes, cristal, temps forts des scénarios ===== */
 @property --rare { syntax: "<color>"; inherits: true; initial-value: #b5b1bb; }
@@ -1008,7 +1018,6 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .lab-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
 .lab-picks > div { display: flex; flex-direction: column; gap: 6px; }
 .lab-picks select { width: 100%; }
-.lab-sanct .sanctum-host { max-height: 360px; }
 .lab-pill { color: var(--warn); border-color: var(--warn); font-size: 13px; }
 
 /* ===== Défilé des Légendes ===== */
@@ -1818,6 +1827,20 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   if (pk.skins) { trackS(s, "coffre", 1, now); r.scenario = pickScenarioS(r.cards, rng, now); }
   return { pack: pk.id, ...r };
 }
+// Ouvre 1 ou 2 boosters d'un coup. 2 boosters = 10 cartes = un coffre (avec scénario).
+// Tout est vérifié avant de prendre quoi que ce soit : jamais un seul des deux débité.
+function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
+  n = n === 2 ? 2 : 1;
+  if (n === 1) return takeAndOpenS(s, packId, paid, cfg, uid, rng, now);
+  if (packId === "jour") return { error: "Le pack du jour s'ouvre un seul à la fois." };
+  regenS(s, now);
+  if (paid && s.chakra < PRICE * n) return { error: `Il te faut ${PRICE * n} ◆ (tu en as ${s.chakra}).` };
+  if (!paid && (s.free || 0) < n) return { error: `Il te faut ${n} boosters gratuits (tu en as ${s.free || 0}).` };
+  const runs = [];
+  for (let k = 0; k < n; k++) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (r.error) return r; runs.push(r); }
+  const cards = runs.flatMap((r) => r.cards);
+  return { pack: runs[0].pack, n, cards, divine: runs.some((r) => r.divine), scenario: pickScenarioS(cards, rng, now) };
+}
 function packChance(rar, k = 1, last = LAST) {
   const a = boosted(SLOT, k), b = boosted(last, k);
   const p1 = (a[rar] || 0) / Object.values(a).reduce((x, y) => x + y, 0);
@@ -1974,8 +1997,10 @@ const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce p
 const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
 const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
 const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
-const SUMMON_5_FLOOR = "r";           // ×5 : au moins une Rare ou mieux
-const summonCost = (n) => (n === 5 ? Math.round(SUMMON_COST * 5 * (1 - SUMMON_DISCOUNT_5)) : SUMMON_COST * n);
+const SUMMON_5_FLOOR = "r";           // ×5 et ×10 : au moins une Rare ou mieux
+const SUMMON_10_FLOOR = "e";          // ×10 : au moins une Épique ou mieux
+const SUMMON_COUNTS = [1, 5, 10];     // ×1 : une carte ; ×5 : une pochette ; ×10 : le coffre
+const summonCost = (n) => (n >= 5 ? Math.round(SUMMON_COST * n * (1 - SUMMON_DISCOUNT_5)) : SUMMON_COST * n);
 function cosOf(s) {
   const c = s.cos && typeof s.cos === "object" ? s.cos : (s.cos = {});
   if (!c.own || typeof c.own !== "object") c.own = {};
@@ -2010,17 +2035,20 @@ function buyCosmeticS(s, id) {
 }
 const SUMMON_POOL = (rar) => COSMETICS.filter((c) => c.rar === rar);
 function summonS(s, n, rng, now = Date.now()) {
-  if (n !== 1 && n !== 5) return { error: "On invoque 1 ou 5 objets à la fois." };
+  if (!SUMMON_COUNTS.includes(n)) return { error: "On invoque 1, 5 ou 10 objets à la fois." };
   const cost = summonCost(n), cos = cosOf(s);
   if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
   for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
   // ×5 : au moins une Rare ou mieux
-  if (n === 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
-  const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
+  if (n >= 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
+  if (n === 10 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_10_FLOOR))) rars[n - 2] = SUMMON_10_FLOOR;
+  const had = new Set([...Object.keys(cos.own || {}), ...cos.inst.map((x) => x.c)]);
+  const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); const isNew = !had.has(c.id); had.add(c.id); return { i, id: c.id, rar: r, isNew }; });
   trackS(s, "summon", n, now);
-  return { got, cost };
+  // ×10 : ouvert dans le coffre, avec un scénario choisi ici comme pour les boosters
+  return n === 10 ? { got, cost, scenario: pickScenarioS(got, rng, now) } : { got, cost };
 }
 // enregistre le design d'une carte ; une instance ne peut être que sur une carte à la fois (elle quitte l'ancienne)
 function saveDesignS(s, cardId, design) {
@@ -2092,13 +2120,15 @@ const CHEST_BY_ID = Object.fromEntries(CHEST_SCENARIOS.map((x) => [x.id, x]));
 // probabilités provisoires : un secret possible sort toujours ; une transformation possible sort 3 fois sur 4 ;
 // sinon feinte 25 %, spectacle 35 % (si possibles), classique le reste
 const CHEST_W = { transfo: 0.75, fake: 0.25, spectacle: 0.35 };
+// un coffre peut contenir des cartes (boosters) ou des cosmétiques (Sanctuaire ×10)
+const chestItem = (id) => CARD_BY_ID[id] || COS_BY_ID[id];
 function chestCtx(cards, now = Date.now()) {
-  const rars = cards.map((x) => CARD_BY_ID[x.id].rar), n = Object.fromEntries(RANKS.map((r) => [r, rars.filter((x) => x === r).length]));
+  const rars = cards.map((x) => chestItem(x.id).rar), n = Object.fromEntries(RANKS.map((r) => [r, rars.filter((x) => x === r).length]));
   const best = rars.reduce((a, r) => (RANKS.indexOf(r) > RANKS.indexOf(a) ? r : a), "c"), rank = RANKS.indexOf(best);
   let hour = new Date(now).getUTCHours();
   try { hour = +new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now)).find((p) => p.type === "hour").value; } catch (e) {}
-  return { best, rank, n, rars, gold: cards.filter((x) => x.gold).length, news: cards.filter((x) => x.isNew).length, newTop: cards.some((x) => x.isNew && CARD_BY_ID[x.id].rar === best),
-    who: cards.map((x) => CARD_BY_ID[x.id].who), ids: cards.map((x) => x.id), list: cards.map((x) => ({ id: x.id, who: CARD_BY_ID[x.id].who, rar: CARD_BY_ID[x.id].rar })), hour };
+  return { best, rank, n, rars, gold: cards.filter((x) => x.gold).length, news: cards.filter((x) => x.isNew).length, newTop: cards.some((x) => x.isNew && chestItem(x.id).rar === best),
+    who: cards.map((x) => chestItem(x.id).who), ids: cards.map((x) => x.id), list: cards.map((x) => ({ id: x.id, who: chestItem(x.id).who, rar: chestItem(x.id).rar })), hour };
 }
 const chestEligible = (ctx) => CHEST_SCENARIOS.filter((x) => x.when(ctx));
 function pickWeighted(list, rng) { const tot = list.reduce((a, x) => a + x.w, 0); let v = rng() * tot; for (const x of list) { v -= x.w; if (v < 0) return x; } return list[list.length - 1]; }
@@ -2123,10 +2153,10 @@ function labForcedOpenS(s, picks, now = Date.now()) {
 }
 function labSummonForcedS(s, rars, rng, now = Date.now()) {
   const list = (Array.isArray(rars) ? rars : []).filter((r) => RANKS.includes(r));
-  if (list.length !== 1 && list.length !== 5) return { error: "Choisis 1 ou 5 raretés." };
+  if (!SUMMON_COUNTS.includes(list.length)) return { error: "Choisis 1, 5 ou 10 raretés." };
   const cos = cosOf(s);
-  const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
-  return { got, cost: 0 };
+  const got = list.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = "lab" + Math.floor(rng() * 1e9).toString(36); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r, isNew: false }; });
+  return list.length === 10 ? { got, cost: 0, scenario: pickScenarioS(got, rng, now) } : { got, cost: 0 };
 }
 
 // ===== Défilé des Légendes =====
@@ -2688,26 +2718,44 @@ const dupesValue = () => dupesValueS(save);
 // ===== Ouverture =====
 // couleur de la lueur du coffre : celle de la meilleure carte, comme les coffres de LoL
 let busy = false;
-async function startOpening(paid, packId) {
+// n = 1 : une pochette (5 cartes) ; n = 2 : 10 cartes dans le coffre
+async function startOpening(paid, packId, n = 1) {
   if (busy) return;
   busy = true;
   let r;
   try {
     const pack = packId || save.pack;
-    if (SRV) r = await srv("open", { pack, paid });
-    else { r = takeAndOpenS(save, pack, paid, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
+    if (SRV) r = await srv("open", n > 1 ? { pack, paid, n } : { pack, paid });
+    else { r = openManyS(save, pack, paid, n, CONFIG, ME, Math.random); if (r.error) throw new Error(r.error); postFeed(r.cards); persist(); }
   } catch (e) { toast(e.message); header(); return; }
   finally { busy = false; }
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
-  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine, scenario: r.scenario };
+  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, n, divine: r.divine, scenario: r.scenario };
   closeMenu(); $("overlay").hidden = true;
   draw();
+}
+// Invocation du Sanctuaire, déjà tirée par le serveur : ×1 une carte qui se retourne seule, ×5 une pochette, ×10 le coffre
+const SUMMON_PK = { 1: "Invocation", 5: "Pochette du Sanctuaire", 10: "Coffre du Sanctuaire" };
+function summonOpening(got, scenario, extra = {}) {
+  const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "召", color: "#b072ff", count: n };
+  const cards = got.map((x) => ({ c: { id: x.id, rar: x.rar }, cos: COS_BY_ID[x.id], gold: false, isNew: !!x.isNew }));
+  opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, ...extra };
+  closeMenu(); $("overlay").hidden = true; $("stage").dataset.cf = "";
+  draw();
+  if (n === 1) { const o = opening; setTimeout(() => { if (opening === o && !o.flipped) { o.flipped = true; drawOpening(); } }, reduced ? 0 : 650); }
+}
+// une ouverture contient des cartes (boosters) ou des cosmétiques (Sanctuaire)
+const itemName = (x) => (x.cos ? x.cos.name : nameOf(x.c));
+function itemHTML(x, opts = {}) {
+  if (!x.cos) return cardHTML(x.c, { gold: x.gold, isNew: x.isNew, ...opts });
+  const c = x.cos;
+  return `<div class="ocos r-${c.rar}">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: true })}<span class="ocos-t"><b>${esc(c.name)}</b><i style="color:${RAR[c.rar].color}">${RAR[c.rar].label} · ${COS_SLOT_LABEL[c.slot]}</i></span>${x.isNew ? `<span class="ocos-new">Nouveau</span>` : ""}</div>`;
 }
 function advance() {
   const o = opening;
   if (!o.flipped) { o.flipped = true; return draw(); }
-  if (o.i < PACK - 1) { o.i++; o.flipped = false; return draw(); }
+  if (o.i < o.cards.length - 1) { o.i++; o.flipped = false; return draw(); }
   o.phase = "done"; draw();
 }
 
@@ -3184,7 +3232,7 @@ function packsForTab() {
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
-  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${PACK} cartes</span></div>`;
+  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
 }
 function selPack() {
   const list = packsForTab();
@@ -3203,6 +3251,10 @@ function boosterZone() {
   else if (pk.daily) btn = `<button class="bigopen" type="button" data-act="open-day" ${dayDone ? "disabled" : ""}><b>Ouvrir</b><span>${dayDone ? "Déjà ouvert · reviens demain" : "Gratuit · 1 par jour"}</span></button>`;
   else if (shop) btn = `<button class="bigopen acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}><b>Acheter</b><span>${PRICE} ◆ · tu as ${fmtN(save.chakra)} ◆</span></button>`;
   else btn = `<button class="bigopen" type="button" data-act="open-pack" data-p="${pk.id}" ${save.free ? "" : "disabled"}><b>Ouvrir</b><span>${save.free ? `Gratuit · ${save.free} restant${save.free > 1 ? "s" : ""}` : `Prochain dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}`}</span></button>`;
+  // 2 boosters d'un coup : 10 cartes dans le coffre
+  if (packOpen(pk) && !pk.daily && !(shop && pk.limited)) btn += shop
+    ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="2" ${save.chakra < PRICE * 2 ? "disabled" : ""}><b>Acheter 2 · coffre</b><span>${fmtN(PRICE * 2)} ◆ · 10 cartes</span></button>`
+    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`;
   return `<section class="sec" id="boosters">
     <div class="sec-h"><h2>Choisis ton booster</h2></div>
     ${seg("packTab", [["free", "Gratuits"], ["day", "Du jour & limités", save.dailyPack !== dayKey()], ["shop", "Boutique"]], packTab, "gold")}
@@ -3863,9 +3915,9 @@ function drawOpening() {
       ${chest ? `<button class="chest" type="button" id="pack" aria-label="Ouvrir le coffre"><span class="lid"></span><span class="box"></span><span class="gem"></span></button>`
         : `<div id="pack" role="button" tabindex="0" aria-label="Ouvrir le booster">${bstHTML(o.pk)}</div>`}
       <div class="floor"></div>
-      <p class="hint">${o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
-      <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : "Tire le booster vers le haut (ou touche-le)"}</p>
-      <p class="sub">Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus</p></section>`;
+      <p class="hint">${o.pk.cos ? `<b>${o.pk.name}</b> · ${o.cards.length} objets` : o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
+      <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : o.pk.cos ? "Tire la pochette vers le haut (ou touche-la)" : "Tire le booster vers le haut (ou touche-le)"}</p>
+      <p class="sub">${o.pk.cos ? `Mythique garantie dans ${Math.max(0, SUMMON_PITY_M - cosOf(save).sinceM)} invocations au plus` : `Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus`}</p></section>`;
     const p = $("pack"); if (!chest) bindPull(p);
     return;
   }
@@ -3877,20 +3929,29 @@ function drawOpening() {
       <div class="reveal ${o.flipped ? "on" : ""} ${big ? "big" : ""}" style="--rc:${rc};position:relative"><span class="rays"></span>
         <button class="reveal-card ${o.flipped ? "on" : ""}" type="button" id="revealBtn" aria-label="${o.flipped ? "Carte suivante" : "Retourner la carte"}"><div class="in">
           <div class="face"><div class="cardback"></div></div>
-          <div class="face front">${o.flipped ? cardHTML(x.c, { gold: x.gold, isNew: x.isNew }) : ""}</div></div></button></div>
-      <p class="hint">${o.flipped ? `<b style="color:${rc}">${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `Carte ${o.i + 1} sur ${PACK} — touche pour retourner`}</p>
+          <div class="face front">${o.flipped ? itemHTML(x) : ""}</div></div></button></div>
+      <p class="hint">${o.flipped ? `<b style="color:${rc}">${x.cos ? `${esc(x.cos.name)} · ` : ""}${RAR[x.c.rar].label}${x.gold ? " · Dorée" : ""}</b>${x.isNew ? " · Nouvelle !" : ""} — touche pour continuer` : `${o.pk.cos ? "Objet" : "Carte"} ${o.i + 1} sur ${o.cards.length} — touche pour retourner`}</p>
       <button class="btn" type="button" data-act="skip">Tout voir</button></section>`;
     return;
   }
   const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
   el.innerHTML = `${top}<section class="stage">
-    <p class="eyebrow gold">Résultat</p><h2>${news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    <div class="summary">${o.cards.map((x) => cardHTML(x.c, { gold: x.gold, isNew: x.isNew, click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
+    <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
     <div class="row" style="justify-content:center">
-      ${o.lab ? `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button><button class="btn big" type="button" data-act="lab-back">Retour au labo</button>` : o.pk.daily ? "" : save.free ? `<button class="btn gold big" type="button" data-act="again">Encore un · ${save.free}</button>` : `<button class="btn acc big" type="button" data-act="again" data-paid="1" ${save.chakra < PRICE ? "disabled" : ""}>Acheter · ${PRICE} ◆</button>`}
-      ${o.lab ? "" : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
-      ${!o.lab && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
+      ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
+        : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
+        : o.pk.daily ? "" : againBtn(o)}
+      ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
+      ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
       <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
+}
+// « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
+function againBtn(o) {
+  const n = o.n || 1;
+  if (save.free) { const k = Math.min(n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>`; }
+  const k = n > 1 && save.chakra >= PRICE * 2 ? 2 : 1;
+  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>`;
 }
 function bindPull(p) {
   let y0 = null, dy = 0;
@@ -4130,160 +4191,42 @@ function zInventory() {
     ${items.length ? `<div class="zgrid">${items.map((x) => zTile(x.c, "", ` · ${x.kind}`)).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
 }
 
-// ===== Sanctuaire des Invocations : Portail scellé (B + C) =====
-// Le tirage est fait par le serveur AVANT l'animation ; l'animation ne fait que le révéler.
-const ZR = { results: null, flipped: [], status: "idle" };
+// ===== Sanctuaire des Invocations =====
+// Le tirage est fait par le serveur AVANT l'animation ; l'ouverture ne fait que le révéler.
+// ×1 : une carte qui se retourne seule ; ×5 : une pochette ; ×10 : le coffre (avec ses scénarios).
+let zBusy = false;
+const Z_OFFERS = [[1, "Une carte", "Se retourne toute seule", "召"], [5, "Une pochette", "Au moins une Rare", "封"], [10, "Le coffre", "Au moins une Épique", "匣"]];
 function viewSanctuaire() {
   if (!featureOn(CONFIG, "sanctuaire")) return closedHTML("Sanctuaire des Invocations");
   const cos = cosOf(save);
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
-  return `<div class="wrap page">${head("Sanctuaire des Invocations · 召", "Sanctuaire des Invocations", "Touche le portail scellé pour invoquer des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
+  return `<div class="wrap page">${head("Sanctuaire des Invocations · 召", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
     <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Mythique garantie dans <b>${Math.max(0, SUMMON_PITY_M - cos.sinceM)}</b> invocations</span></div>
-    <div class="zsanct"><div id="sanctumHost" class="sanctum-host"></div>
-      <div class="zs-side">
-        <button class="btn gold big" type="button" data-zsum="1" ${save.chakra < summonCost(1) || ZR.status === "running" ? "disabled" : ""}>Invoquer ×1 · ${fmtN(summonCost(1))} ◆</button>
-        <button class="btn acc big" type="button" data-zsum="5" ${save.chakra < summonCost(5) || ZR.status === "running" ? "disabled" : ""}>Invoquer ×5 · ${fmtN(summonCost(5))} ◆</button>
-        <p class="note">×5 : au moins une Rare ou mieux. Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte.</p>
-        <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
-        <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
-      </div></div>
-    ${ZR.results && ZR.status === "done" ? zResultsHTML() : ""}</div>`;
+    <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${save.chakra < summonCost(n) || zBusy ? "disabled" : ""}>
+      <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${k}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${k}</b></span>` : `<span class="zo-card"><b>${k}</b></span>`}</span>
+      <span class="zo-n">×${n}</span><b class="zo-t">${t}</b><span class="zo-s">${sub}</span>
+      <span class="zo-p">${fmtN(summonCost(n))} ◆${n > 1 ? ` <s>${fmtN(SUMMON_COST * n)}</s>` : ""}</span></button>`).join("")}</div>
+    <div class="zs-side">
+      <p class="note">Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte. ×5 et ×10 : 10 % moins cher.</p>
+      <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
+      <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
+    </div></div>`;
 }
 let zSkipAnim = false;
 try { zSkipAnim = localStorage.getItem("rz-skip-summon") === "1"; } catch (e) {}
-const zBest = (got) => got.reduce((a, x) => (RANKS.indexOf(x.rar) > RANKS.indexOf(a) ? x.rar : a), "c");
-function zResultsHTML() {
-  const got = ZR.results, multi = got.length > 1;
-  const tiles = got.map((x, i) => { const c = COS_BY_ID[x.id], open = !multi || ZR.flipped[i];
-    return open ? `<div class="zres" data-i="${i}">${zTile(c, "", " · instance unique")}</div>` : `<button class="zres zback" type="button" data-zflip="${i}" aria-label="Retourner l'objet ${i + 1}"><b>封</b></button>`; }).join("");
-  const left = got.filter((_, i) => multi && !ZR.flipped[i]).length;
-  return `<section class="sec zresults"><p class="eyebrow gold">${multi ? "Invocation ×5" : "Invocation"}</p><h2>${left ? "Retourne tes objets" : "Ajouté à ton inventaire"}</h2>
-    <div class="zgrid ${multi ? "five" : "one"}">${tiles}</div>
-    <div class="row">${left ? `<button class="btn" type="button" data-zflipnext>Retourner le suivant</button><button class="btn" type="button" data-zflipall>Tout révéler</button>` : `<button class="btn gold" type="button" data-nav="atelier">Équiper à l'Atelier</button>`}</div></section>`;
-}
 async function zSummon(n) {
-  if (ZR.status === "running") return; // pas de double invocation
-  ZR.status = "running"; draw();
+  if (zBusy) return; // pas de double invocation
+  zBusy = true; draw();
   let r;
   try { r = await zCall("summon", { n }, () => summonS(save, n, Math.random)); }
-  catch (e) { ZR.status = "idle"; toast(e.message); return draw(); }
-  ZR.results = r.got; ZR.flipped = r.got.map(() => false);
-  const done = () => { ZR.status = "done"; Portal.reset(); draw(); document.querySelector(".zresults")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
-  if (zSkipAnim || matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
-  Portal.play(zBest(r.got), done);
+  catch (e) { toast(e.message); return draw(); }
+  finally { zBusy = false; }
+  summonOpening(r.got, r.scenario, zSkipAnim ? { phase: "done", flipped: true } : {});
 }
-function zFlip(i) {
-  if (ZR.flipped[i]) return; ZR.flipped[i] = true;
-  const r = ZR.results[i].rar;
-  if (r === "l" || r === "m") { const h = $("sanctumHost"); h?.style.setProperty("--glow", RAR[r].color); h?.classList.remove("glowing"); void h?.offsetWidth; h?.classList.add("glowing"); }
-  draw();
-}
-
-// --- le Portail scellé : canvas persistant, raccroché à la page après chaque rendu ---
-const Portal = (() => {
-  const host = document.createElement("div"); host.className = "sanctum"; host.tabIndex = 0; host.setAttribute("role", "button"); host.setAttribute("aria-label", "Toucher le portail pour invoquer");
-  host.innerHTML = `<canvas></canvas><div class="sanctum-hand" aria-hidden="true"><svg viewBox="0 0 100 172"><defs><linearGradient id="zhg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".6" stop-color="var(--rare)" stop-opacity=".55"/><stop offset="1" stop-color="var(--rare)" stop-opacity="0"/></linearGradient></defs><g fill="url(#zhg)"><rect x="41" y="2" width="17" height="80" rx="8.5"/><rect x="58" y="44" width="16" height="46" rx="8"/><rect x="73" y="50" width="15" height="42" rx="7.5"/><rect x="86" y="58" width="12" height="36" rx="6"/><path d="M36 72h58q4 0 4 6v34q0 30-26 38H50q-22-4-24-30z"/><rect x="16" y="78" width="15" height="46" rx="7.5" transform="rotate(-32 23 100)"/><rect x="44" y="140" width="42" height="32" rx="6"/></g></svg></div><p class="sanctum-hint">Touche le portail</p>`;
-  const cv = host.querySelector("canvas"), ctx = cv.getContext("2d"), hand = host.querySelector(".sanctum-hand");
-  const RC = { c: "#b5b1bb", pc: "#3fbf7f", r: "#4d9bff", e: "#b072ff", l: "#f5c518", m: "#ff4d2e" };
-  const TIER = { c: { k: .8 }, pc: { k: .8 }, r: { k: 1 }, e: { k: 1, ring: 1 }, l: { k: 1.12, ring: 1, rays: 1 }, m: { k: 1.35, ring: 2, rays: 1, shake: 1, burst: 2 } };
-  const GL = ["召", "喚", "零", "界", "悪", "友", "匠", "季", "混", "神", "魂", "門"];
-  const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x)), sg = (e, a, b) => cl((e - a) / (b - a)), eo = (t) => 1 - Math.pow(1 - t, 3), ei = (t) => t * t * t, mx = (a, b, t) => a + (b - a) * t;
-  const hx = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)], ra = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`, lr = (a, b, t) => a.map((v, i) => Math.round(mx(v, b[i], t)));
-  const WH = [255, 255, 255]; let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const stars = Array.from({ length: 90 }, () => ({ a: rnd() * Math.PI * 2, z: rnd() }));
-  let W = 0, H = 0, parts = [], shards = [], cracks = [], run = null, raf = 0;
-  const makeCracks = () => { cracks = Array.from({ length: 8 }, (_, k) => { let x = 0, y = 0; const pts = [[0, 0]], a0 = k / 8 * Math.PI * 2 + rnd() * .5; for (let i = 0; i < 4; i++) { const a = a0 + (rnd() - .5) * .9; x += Math.cos(a) * .27; y += Math.sin(a) * .27; pts.push([x, y]); } return pts; }); };
-  makeCracks();
-  const spawn = (n, f) => { for (let i = 0; i < n && parts.length < 200; i++) parts.push(f()); };
-  const step = (cx, cy, col, pull) => { for (const p of parts) { if (pull) { const dx = cx - p.x, dy = cy - p.y, d = Math.hypot(dx, dy) + 1; p.vx += dx / d * pull / 60; p.vy += dy / d * pull / 60; if (d < 8) p.life = 0; } p.x += p.vx / 60; p.y += p.vy / 60; p.life -= 1 / 60; } parts = parts.filter((p) => p.life > 0); for (const p of parts) { ctx.fillStyle = ra(col, cl(p.life / p.max) * .9); ctx.fillRect(p.x, p.y, p.s, p.s); } };
-  const flash = (a, c = WH) => { if (a > 0) { ctx.fillStyle = ra(c, a); ctx.fillRect(0, 0, W, H); } };
-  function portalAt(cx, cy, open, rh, c, t, speed) {
-    if (open < 2) return;
-    ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, open, rh, 0, 0, Math.PI * 2); ctx.clip(); ctx.fillStyle = "#050409"; ctx.fillRect(0, 0, W, H);
-    for (let k = 0; k < 7; k++) { const z = (k / 7 + t * speed * .4) % 1; ctx.strokeStyle = ra(c, z * .55); ctx.lineWidth = 1 + z * 2; ctx.beginPath(); ctx.ellipse(cx, cy, open * z * 1.1, rh * z * 1.1, 0, 0, Math.PI * 2); ctx.stroke(); }
-    for (const s of stars) { const z = (s.z + t * speed * .5) % 1, r = z * z * Math.max(open, rh) * 1.3; ctx.fillStyle = ra(lr(c, WH, .4), z); ctx.fillRect(cx + Math.cos(s.a) * r * (open / rh), cy + Math.sin(s.a) * r, 1 + z * 2, 1 + z * 2); }
-    ctx.restore(); ctx.strokeStyle = ra(c, .95); ctx.lineWidth = 3; ctx.shadowColor = ra(c, 1); ctx.shadowBlur = 24; ctx.beginPath(); ctx.ellipse(cx, cy, open, rh, 0, 0, Math.PI * 2); ctx.stroke(); ctx.shadowBlur = 0;
-  }
-  function makeShards(cx, cy, rx, ry) {
-    const out = []; for (let i = 0; i < 12; i++) { const a0 = i / 12 * Math.PI * 2, a1 = (i + 1) / 12 * Math.PI * 2, am = (a0 + a1) / 2, P = (a, r) => [cx + Math.cos(a) * rx * r, cy + Math.sin(a) * ry * r];
-      for (const [r0, r1] of [[0, .55], [.55, 1]]) { const pts = r0 ? [P(a0, r0), P(a0, r1), P(am, r1 * 1.02), P(a1, r1), P(a1, r0)] : [[cx, cy], P(a0, r1), P(am, r1), P(a1, r1)];
-        const gx = pts.reduce((s, q) => s + q[0], 0) / pts.length, gy = pts.reduce((s, q) => s + q[1], 0) / pts.length, v = (r0 ? 300 : 180) + rnd() * 180;
-        out.push({ pts: pts.map(([x, y]) => [x - gx, y - gy]), x: gx, y: gy, vx: Math.cos(am) * v, vy: Math.sin(am) * v - 40, vr: (rnd() - .5) * 8, inner: !r0 }); } }
-    return out;
-  }
-  const HAND = .7, SW = 1.95;
-  // une erreur de dessin ne doit jamais bloquer l'invocation : on passe directement au résultat
-  function frame(nowMs) {
-    try { draw1(nowMs); } catch (err) { raf = 0; ctx.setTransform(1, 0, 0, 1, 0, 0); if (run) { const cb = run.done; run = null; cb(); } }
-  }
-  function draw1(nowMs) {
-    raf = 0;
-    if (!host.isConnected || document.hidden) { if (run) raf = requestAnimationFrame(frame); return; }
-    const r = host.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-    if (Math.round(r.width * dpr) !== cv.width || Math.round(r.height * dpr) !== cv.height) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
-    W = r.width; H = r.height; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
-    const now = nowMs / 1000, rar = run ? run.rar : "r", T = TIER[rar], k = T.k, real = hx(RC[rar]);
-    const eRun = run ? Math.max(0, now - run.t0) : null, idle = eRun == null, e = idle ? now : eRun;
-    const cx0 = W / 2, cy0 = H / 2, R = Math.min(W, H) * .4, rh = R * .95, rx = R * .62;
-    const t = idle || eRun < HAND ? .45 : .45 + (eRun - HAND) / k;
-    // feinte : une Mythique se charge en violet, une Légendaire en bleu, puis tout bascule pendant la tension
-    const fakeR = run && { m: "e", l: "r" }[rar]; let col = idle ? hx("#f5c518") : real, Tv = T;
-    if (fakeR) { const q = sg(t, SW, SW + .12); col = lr(hx(RC[fakeR]), real, q); if (q < 1) Tv = { ...TIER[fakeR], k }; }
-    host.style.setProperty("--rare", `rgb(${col.join(",")})`);
-    if (fakeR && t > SW && t < SW + .3) ctx.translate((rnd() - .5) * 10, (rnd() - .5) * 10);
-    const charge = sg(t, .45, 1.5), cracksP = sg(t, 1.2, 2), tension = sg(t, 1.8, 2.3), light = lr(col, WH, .6);
-    if (Tv.shake && tension > 0 && t < 2.5) ctx.translate((rnd() - .5) * tension * 7, (rnd() - .5) * tension * 7);
-    const sh = tension * 7 * (Tv.shake ? 1.8 : 1) + charge * 1.2, cx = cx0 + (rnd() - .5) * sh, cy = cy0 + (rnd() - .5) * sh;
-    if (t < 2.3) {
-      portalAt(cx, cy, rx, rh, col, e, mx(.5, 3, charge));
-      ctx.save(); ctx.font = `700 ${R * .42}px "Zen Kaku Gothic New", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.shadowColor = ra(col, 1); ctx.shadowBlur = 8 + charge * 30; ctx.fillStyle = ra(light, .25 + charge * .75); ctx.fillText("封", cx, cy); ctx.restore();
-      for (let ri = 0; ri <= (Tv.ring || 0); ri++) { const n = 8 - ri * 2, ox = rx * (1.45 + ri * .22), oy = rh * (1.05 + ri * .08), sp = mx(.4, 4, ei(charge)) * (ri % 2 ? -1 : 1), al = idle ? .3 : sg(t, .3 + ri * .2, .8 + ri * .2);
-        ctx.font = `700 ${Math.max(13, R * (.11 - ri * .015))}px "Zen Kaku Gothic New", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-        for (let i = 0; i < n; i++) { const a = e * sp + i / n * Math.PI * 2; ctx.fillStyle = ra(ri ? light : col, al * (Math.cos(a) > -.3 ? 1 : .5)); ctx.fillText(GL[(i * 3 + ri * 4) % 12], cx + Math.cos(a) * ox, cy + Math.sin(a) * oy); } }
-      if (cracksP > 0) { ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, rx, rh, 0, 0, Math.PI * 2); ctx.clip(); ctx.strokeStyle = ra(lr(col, WH, .8), .95); ctx.lineWidth = 2; ctx.shadowColor = ra(col, 1); ctx.shadowBlur = 12;
-        cracks.forEach((cr, j) => { const n = Math.floor(cl(cracksP * 1.4 - j * .05) * (cr.length - 1)); if (n < 1) return; ctx.beginPath(); for (let i = 0; i <= n; i++) ctx[i ? "lineTo" : "moveTo"](cx + cr[i][0] * rx * 1.3, cy + cr[i][1] * rh * .95); ctx.stroke(); }); ctx.restore(); }
-      if (t > .5 && t < 2) spawn(3, () => { const a = rnd() * Math.PI * 2, rr = Math.max(W, H) * .55; return { x: cx0 + Math.cos(a) * rr, y: cy0 + Math.sin(a) * rr, vx: 0, vy: 0, life: 1.4, max: 1.4, s: 2 }; });
-      step(cx0, cy0, col, t > .5 && t < 2 ? 380 : 0);
-      if (t > 2.15 && !shards.length) shards = makeShards(cx0, cy0, rx, rh);
-    } else {
-      const u = t - 2.3;
-      if (T.rays) { const a = cl(1 - u / .9); ctx.save(); ctx.translate(cx0, cy0); ctx.rotate(u * .6); for (let i = 0; i < 12; i++) { ctx.rotate(Math.PI / 6); ctx.fillStyle = ra(light, .22 * a); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.max(W, H), -18); ctx.lineTo(Math.max(W, H), 18); ctx.closePath(); ctx.fill(); } ctx.restore(); }
-      for (const s of shards) { const x = s.x + s.vx * u, y = s.y + s.vy * u + 200 * u * u; ctx.save(); ctx.translate(x, y); ctx.rotate(s.vr * u); ctx.globalAlpha = cl(1 - u / 1.1); ctx.fillStyle = s.inner ? "#0a0812" : ra(col, .55); ctx.strokeStyle = ra(light, .9); ctx.lineWidth = 1.4; ctx.beginPath(); s.pts.forEach(([px, py], i) => ctx[i ? "lineTo" : "moveTo"](px, py)); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
-      const burst = (n) => spawn(n, () => { const a = rnd() * Math.PI * 2, v = 120 + rnd() * 340; return { x: cx0, y: cy0, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: .9, max: .9, s: 2.2 }; });
-      if (u < .05) burst(70); if (T.burst === 2 && u > .14 && u < .2) burst(70);
-      step(cx0, cy0, col, 0);
-    }
-    if (idle) { const q = (now * .6) % 1; ctx.strokeStyle = ra(col, .5 * (1 - q)); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx0, cy0, mx(R * .12, R * .45, q), 0, Math.PI * 2); ctx.stroke(); }
-    else if (eRun > .5 && eRun < 1.3) { const q = sg(eRun, .5, 1.3); for (const d of [0, .18]) { const qq = cl(q - d); if (qq <= 0) continue; ctx.strokeStyle = ra(lr(col, WH, .6), .9 * (1 - qq)); ctx.lineWidth = 3 * (1 - qq) + .5; ctx.beginPath(); ctx.ellipse(cx0, cy0, mx(8, rx * 1.5, eo(qq)), mx(8, rh * 1.15, eo(qq)), 0, 0, Math.PI * 2); ctx.stroke(); } }
-    if (fakeR && t > SW && t < SW + .55) { const q = sg(t, SW, SW + .55); ctx.strokeStyle = ra(lr(real, WH, .3), 1 - q); ctx.lineWidth = 6 * (1 - q) + 1; ctx.beginPath(); ctx.ellipse(cx0, cy0, mx(rx * .3, rx * 2.2, eo(q)), mx(rh * .3, rh * 1.6, eo(q)), 0, 0, Math.PI * 2); ctx.stroke(); flash(.3 * (1 - q), real); }
-    if (!idle) flash(t > 2.22 ? Math.sin(sg(t, 2.22, 2.55) * Math.PI) * (T.burst === 2 ? .4 : .85) : 0, T.burst === 2 ? lr(col, WH, .45) : WH);
-    if (run && t >= 2.55 + .15) { const cb = run.done; run = null; cb(); }
-    raf = requestAnimationFrame(frame);
-  }
-  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
-  host.addEventListener("click", () => { if (view === "sanctuaire" && ZR.status !== "running" && save.chakra >= summonCost(1)) zSummon(1); });
-  host.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); host.click(); } });
-  return {
-    host,
-    attach(el) { if (el && host.parentNode !== el) el.appendChild(host); host.classList.toggle("busy", ZR.status === "running"); kick(); },
-    play(rar, done) {
-      parts = []; shards = []; makeCracks();
-      let finished = false; const once = () => { if (!finished) { finished = true; clearTimeout(guard); run = null; done(); } };
-      const guard = setTimeout(once, 9000); // filet : onglet en arrière-plan, appareil très lent
-      run = { rar, t0: performance.now() / 1000, done: once };
-      // la main monte et touche le sceau
-      hand.style.setProperty("--reach", `${hand.offsetHeight - host.clientHeight / 2}px`);
-      hand.classList.remove("touch"); void hand.offsetWidth; hand.classList.add("touch"); kick();
-    },
-    reset() { run = null; parts = []; shards = []; hand.classList.remove("touch"); },
-  };
-})();
 
 // --- branchement : rendu, menu, clics ---
 VIEWS.boutique = viewBoutique; VIEWS.atelier = viewAtelier; VIEWS.sanctuaire = viewSanctuaire;
 function afterViews() {
-  if (view === "sanctuaire") Portal.attach($("sanctumHost"));
-  if (view === "labo" && $("labSanctum")) Portal.attach($("labSanctum"));
 }
 const Z_SEG = { ...ZS_SEG, zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
 document.addEventListener("click", (e) => {
@@ -4296,9 +4239,6 @@ document.addEventListener("click", (e) => {
   if (t.closest("[data-zclear]")) { zDraft = {}; return draw(); }
   const f = t.closest("[data-zfeat]"); if (f) return zFeature(f.dataset.zfeat || null);
   const sm = t.closest("[data-zsum]"); if (sm) return zSummon(+sm.dataset.zsum);
-  const fl = t.closest("[data-zflip]"); if (fl) return zFlip(+fl.dataset.zflip);
-  if (t.closest("[data-zflipnext]")) { const i = ZR.flipped.findIndex((x) => !x); if (i >= 0) zFlip(i); return; }
-  if (t.closest("[data-zflipall]")) { ZR.flipped = ZR.flipped.map(() => true); return draw(); }
 });
 document.addEventListener("change", (e) => {
   if (e.target.id === "zCard") { zDraftCard = e.target.value; zDraft = null; nav("atelier", zDraftCard); }
@@ -4399,10 +4339,9 @@ function viewLabo() {
       <div class="row"><button class="btn gold" type="button" data-act="lab-open" ${lab.loading || (forced && forced < PACK) ? "disabled" : ""}>Ouvrir dans le labo</button>${lab.last ? `<button class="btn" type="button" data-act="lab-replay">Rejouer la dernière ouverture</button>` : ""}<button class="btn" type="button" data-act="lab-clear">Vider les cartes imposées</button></div>
       ${lab.last ? `<p class="note">Dernière : ${esc(packOf(lab.last.pack).name)} · scénario ${lab.last.scenario ? `<b>${esc(CHEST_BY_ID[lab.last.scenario].name)}</b>${lab.last.compatible ? "" : " (imposé, incompatible avec ces cartes : jamais choisi en vrai)"}` : "aucun (booster)"}</p>` : ""}</section>
     <section class="sec"><h2>Tester une invocation</h2>
-      <div class="lab-form"><label>Raretés imposées <input type="text" id="labRars" value="${esc(lab.summonRars)}" placeholder="vide = tirage normal ; ex. m ou c,pc,r,e,m"></label></div>
-      <div class="zsanct lab-sanct"><div id="labSanctum" class="sanctum-host"></div>
-        <div class="zs-side"><button class="btn gold" type="button" data-act="lab-sum" data-n="1">Invoquer ×1 (labo)</button><button class="btn acc" type="button" data-act="lab-sum" data-n="5">Invoquer ×5 (labo)</button>
-        ${lab.sum ? `<p class="note">Résultat : ${lab.sum.map((x) => `<b style="color:${RAR[x.rar].color}">${esc(COS_BY_ID[x.id].name)}</b>`).join(", ")}</p>` : ""}</div></div></section>
+      <div class="lab-form"><label>Raretés imposées <input type="text" id="labRars" value="${esc(lab.summonRars)}" placeholder="vide = tirage normal ; 1, 5 ou 10 raretés, ex. m ou c,pc,r,e,m"></label></div>
+      <div class="row"><button class="btn gold" type="button" data-act="lab-sum" data-n="1">Invoquer ×1 (labo)</button><button class="btn acc" type="button" data-act="lab-sum" data-n="5">×5 · pochette</button><button class="btn acc" type="button" data-act="lab-sum" data-n="10">×10 · coffre</button></div>
+      ${lab.sum ? `<p class="note">Résultat : ${lab.sum.map((x) => `<b style="color:${RAR[x.rar].color}">${esc(COS_BY_ID[x.id].name)}</b>`).join(", ")}</p>` : ""}</section>
   </div>`;
 }
 async function labOpen(replay) {
@@ -4421,8 +4360,8 @@ async function labOpen(replay) {
 async function labSummon(n) {
   const rars = lab.summonRars.split(/[\s,]+/).filter(Boolean);
   const r = await labCall("summon", rars.length ? { rars } : { n }); if (!r) return;
-  lab.sum = r.got; draw();
-  if (!reduced) { Portal.attach($("labSanctum")); Portal.play(zBest(r.got), () => { Portal.reset(); draw(); }); }
+  lab.sum = r.got;
+  summonOpening(r.got, r.scenario, { lab: true });
 }
 VIEWS.galerie = viewGalerie; VIEWS.labo = viewLabo;
 const ADMIN_SEG = { galRar: (v) => { gal.rar = v; gal.n = 60; } };
@@ -4928,10 +4867,10 @@ const Coffre = (() => {
   function grid(el, o, top) {
     const left = o.flips.filter((x) => !x).length;
     el.innerHTML = `${top}<section class="stage cf cf-grid" style="--rare:${RAR[bestOf(o)].color}">
-      <p class="eyebrow gold">${esc(o.pk.name)}</p><h2>${left ? "Retourne tes cartes" : "Tout est révélé"}</h2>
-      <div class="multi">${o.cards.map((x, i) => `<button class="slot ${o.flips[i] ? "flipped" : ""}" type="button" data-cflip="${i}" style="--i:${i};--rc:${x.gold ? "#f0c860" : RAR[x.c.rar].color}" aria-label="${o.flips[i] ? `${esc(nameOf(x.c))}, ${RAR[x.c.rar].label}${x.gold ? ", dorée" : ""}` : `Retourner la carte ${i + 1}`}">
-        <span class="back"><b>零</b></span><span class="front">${o.flips[i] ? cardHTML(x.c, { gold: x.gold, isNew: x.isNew }) : ""}</span></button>`).join("")}</div>
-      <p class="hint" aria-live="polite">${o.last != null ? `<b style="color:${o.cards[o.last].gold ? "#f0c860" : RAR[o.cards[o.last].c.rar].color}">${esc(nameOf(o.cards[o.last].c))} · ${RAR[o.cards[o.last].c.rar].label}${o.cards[o.last].gold ? " · Dorée" : ""}</b>${o.cards[o.last].isNew ? " · Nouvelle !" : ""}` : "Touche une carte pour la retourner"}</p>
+      <p class="eyebrow gold">${esc(o.pk.name)}</p><h2>${left ? (o.pk.cos ? "Retourne tes objets" : "Retourne tes cartes") : "Tout est révélé"}</h2>
+      <div class="multi ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x, i) => `<button class="slot ${o.flips[i] ? "flipped" : ""}" type="button" data-cflip="${i}" style="--i:${i};--rc:${x.gold ? "#f0c860" : RAR[x.c.rar].color}" aria-label="${o.flips[i] ? `${esc(itemName(x))}, ${RAR[x.c.rar].label}${x.gold ? ", dorée" : ""}` : `Retourner la carte ${i + 1}`}">
+        <span class="back"><b>零</b></span><span class="front">${o.flips[i] ? itemHTML(x) : ""}</span></button>`).join("")}</div>
+      <p class="hint" aria-live="polite">${o.last != null ? `<b style="color:${o.cards[o.last].gold ? "#f0c860" : RAR[o.cards[o.last].c.rar].color}">${esc(itemName(o.cards[o.last]))} · ${RAR[o.cards[o.last].c.rar].label}${o.cards[o.last].gold ? " · Dorée" : ""}</b>${o.cards[o.last].isNew ? " · Nouvelle !" : ""}` : "Touche une carte pour la retourner"}</p>
       <div class="row" style="justify-content:center">${left ? `<button class="btn" type="button" data-act="cf-next">Retourner la suivante</button><button class="btn" type="button" data-act="skip">Tout révéler</button>` : `<button class="btn gold big" type="button" data-act="skip">Voir le récapitulatif</button>`}</div>
     </section>`;
     el.dataset.cf = "";
@@ -5001,8 +4940,9 @@ document.addEventListener("click", (e) => {
   const cBtn = t.closest("[data-cancel]"); if (cBtn) { cBtn.disabled = true; return cancelSale(cBtn.dataset.cancel).then(() => { $("overlay").hidden = true; }); }
   const ab = t.closest("[data-act]"), act = ab?.dataset.act;
   if (act === "open-day") return startOpening(false, "jour");
-  if (act === "open-pack") return startOpening(!!ab.dataset.paid, ab.dataset.p);
-  if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack);
+  if (act === "open-pack") return startOpening(!!ab.dataset.paid, ab.dataset.p, +ab.dataset.n || 1);
+  if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack, +ab.dataset.n || 1);
+  if (act === "summon-again") { const n = opening?.n || 1; closeStage(); return zSummon(n); }
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
   if (act === "pool") return openPool(ab.dataset.p);
   if (act === "skip") { Coffre.stop(); opening.phase = "done"; return drawOpening(); }
@@ -5011,6 +4951,7 @@ document.addEventListener("click", (e) => {
   if (act === "stage-back") { if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }
+  if (act === "to-atelier") { closeStage(); return nav("atelier"); }
   if (act === "dev-refresh") { devData.stats = null; devData.audit = null; draw(); return loadDev(true); }
   if (act === "recycle") return recycle();
   if (act === "craft") return craft();
@@ -5027,7 +4968,7 @@ document.addEventListener("click", (e) => {
 function advanceCard() {
   const o = opening;
   if (!o.flipped) { o.flipped = true; return drawOpening(); }
-  if (o.i < PACK - 1) { o.i++; o.flipped = false; return drawOpening(); }
+  if (o.i < o.cards.length - 1) { o.i++; o.flipped = false; return drawOpening(); }
   o.phase = "done"; drawOpening();
 }
 document.addEventListener("submit", (e) => {

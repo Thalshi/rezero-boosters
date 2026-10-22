@@ -197,14 +197,24 @@ try {
   await P.go("sanctuaire");
   sb = await P.state();
   await P.page.dblclick('[data-zsum="5"]'); await P.page.waitForTimeout(500);
-  await P.page.waitForSelector(".zresults", { timeout: 12000 }).catch(() => {});
+  await P.page.waitForSelector("#stage #pack", { timeout: 12000 }).catch(() => {});
   sa = await P.state();
   t.check("Sanctuaire ×5 : double clic, une seule invocation (5 objets, un débit)", sa.chakra === sb.chakra - G.summonCost(5) && sa.cos.inst.length === (sb.cos?.inst?.length || 0) + 5, { débit: sb.chakra - sa.chakra, objets: sa.cos.inst.length });
-  await P.page.click("[data-zflipall]").catch(() => {});
+  await P.page.click("#pack"); await P.page.waitForTimeout(900); await P.page.click('[data-act="skip"]'); await P.page.waitForTimeout(300);
+  t.check("Sanctuaire ×5 : la pochette mène au récapitulatif des 5 objets", (await P.page.locator(".summary .ocos").count()) === 5);
+  await P.page.click('[data-act="stage-close"]').catch(() => {});
+  sb = sa;
+  await P.page.dblclick('[data-zsum="10"]'); await P.page.waitForTimeout(800);
+  sa = await P.state();
+  t.check("Sanctuaire ×10 : double clic, une seule invocation (10 objets, un débit), ouverte dans le coffre", sa.chakra === sb.chakra - G.summonCost(10) && sa.cos.inst.length === sb.cos.inst.length + 10 && (await P.page.locator("#cfChest").count()) === 1);
+  await P.page.click("#cfKey"); await P.page.waitForSelector(".cf-grid", { timeout: 20000 }).catch(() => {});
+  t.check("Sanctuaire ×10 : 10 objets face cachée après le scénario", (await P.page.locator(".cf .slot").count()) === 10);
+  await P.page.click('[data-act="skip"]').catch(() => {}); await P.page.click('[data-act="stage-close"]').catch(() => {});
   sb = sa;
   await P.page.check("#zSkip"); await P.page.dblclick('[data-zsum="1"]'); await P.page.waitForTimeout(1500);
   sa = await P.state();
   t.check("Sanctuaire ×1 sans animation : double clic, un seul débit", sa.chakra === sb.chakra - G.summonCost(1) && sa.cos.inst.length === sb.cos.inst.length + 1);
+  await P.page.click('[data-act="stage-close"]').catch(() => {});
   // design avec un objet de compte + une instance, sur une carte possédée en un exemplaire
   solo = Object.keys(sa.owned).find((id) => sa.owned[id].n === 1 && !sa.owned[id].gold && !G.CARD_BY_ID[id].skin);
   inst = sa.cos.inst.find((x) => G.COS_BY_ID[x.c].slot !== G.COS_BY_ID[firstBuy].slot);

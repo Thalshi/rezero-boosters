@@ -50,10 +50,11 @@ try {
     const id = await page.getAttribute(".zs-tile:has(.zs-price:not(.own):not(.only)) >> nth=0", "data-zitem"); await page.click(`[data-zitem="${id}"] >> nth=0`); await page.waitForTimeout(300); await page.dblclick(`#overlay [data-zbuy="${id}"]`); await page.waitForTimeout(1200); await page.click('#overlay [data-act="close"]').catch(() => {});
     t.check(`${label} · Boutique : achat débité une fois`, (await page.evaluate(() => save.chakra)) === c0 - G.COS_PRICE[G.COS_BY_ID[id].rar]);
     await go("sanctuaire"); const c1 = await page.evaluate(() => save.chakra);
-    await page.click('[data-zsum="5"]'); await page.waitForSelector(".zresults", { timeout: 15000 }).catch(() => {});
-    t.check(`${label} · Sanctuaire ×5 : 5 objets, un débit`, (await page.locator(".zres").count()) === 5 && (await page.evaluate(() => save.chakra)) === c1 - G.summonCost(5));
+    await page.click('[data-zsum="5"]'); await page.waitForSelector("#stage #pack", { timeout: 15000 }).catch(() => {});
+    await page.click("#pack"); await page.waitForTimeout(900); await page.click('[data-act="skip"]'); await page.waitForTimeout(300);
+    t.check(`${label} · Sanctuaire ×5 (pochette) : 5 objets, un débit`, (await page.locator(".summary .ocos").count()) === 5 && (await page.evaluate(() => save.chakra)) === c1 - G.summonCost(5));
     if (label === "mobile") await page.screenshot({ path: join(OUT, "preview-sanctuaire-mobile.png") });
-    await page.click("[data-zflipall]").catch(() => {});
+    await page.click('[data-act="stage-close"]').catch(() => {});
     const card = await page.evaluate(() => Object.keys(save.owned).find((k) => has(k)));
     await go("atelier/" + card);
     await page.click('[data-zset][data-ref^="i:"] >> nth=0'); await page.click("[data-zsave]"); await page.waitForTimeout(800);

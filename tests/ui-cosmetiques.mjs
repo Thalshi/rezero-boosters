@@ -34,24 +34,43 @@ try {
     t.check(`${label} · un objet du Sanctuaire ne s'achète pas`, (await page.evaluate(() => buyCosmeticS(save, "cadre-prisme").error || "")).length > 0);
 
     await go(page, "sanctuaire");
-    t.check(`${label} · le portail est affiché`, (await page.locator("#sanctumHost canvas").count()) === 1);
+    t.check(`${label} · trois offres : carte, pochette, coffre`, (await page.locator(".zoffer").count()) === 3 && (await page.locator("canvas").count()) === 0);
+    await page.screenshot({ path: join(OUT, `cos-sanctuaire-${label}.png`) });
     const before = await page.evaluate(() => save.cos.inst.length);
-    await page.click('[data-zsum="5"]'); await sleep(1400);
-    await page.screenshot({ path: join(OUT, `cos-portail-${label}.png`) });
-    await page.waitForSelector(".zresults", { timeout: 8000 }).catch(() => {});
-    t.check(`${label} · l'animation se termine`, (await page.locator(".zresults").count()) === 1, errors);
+    // ×5 : une pochette qu'on déchire, puis 5 objets un par un
+    await page.click('[data-zsum="5"]'); await sleep(400);
+    t.check(`${label} · ×5 : la pochette s'affiche`, (await page.locator("#stage #pack .bst").count()) === 1);
     t.check(`${label} · invocation ×5 : 5 instances`, (await page.evaluate(() => save.cos.inst.length)) === before + 5);
-    t.check(`${label} · 5 objets face cachée`, (await page.locator(".zback").count()) === 5);
-    await page.click(".zback >> nth=0"); await sleep(200);
-    t.check(`${label} · retourner un objet`, (await page.locator(".zback").count()) === 4);
-    await page.click("[data-zflipall]"); await sleep(200);
+    await page.click("#pack"); await sleep(900);
+    await page.click("#revealBtn"); await sleep(500);
+    t.check(`${label} · retourner un objet`, (await page.locator("#stage .reveal-card.on .ocos").count()) === 1);
+    await page.screenshot({ path: join(OUT, `cos-pochette-${label}.png`) });
+    await page.click('[data-act="skip"]'); await sleep(300);
+    t.check(`${label} · ×5 : récapitulatif des 5 objets`, (await page.locator(".summary .ocos").count()) === 5);
+    t.check(`${label} · ×5 : au moins une Rare`, await page.evaluate(() => opening.cards.some((x) => RANKS.indexOf(x.c.rar) >= RANKS.indexOf("r"))));
     await page.screenshot({ path: join(OUT, `cos-resultats-${label}.png`), fullPage: true });
-    t.check(`${label} · ×5 : au moins une Rare`, await page.evaluate(() => ZR.results.some((x) => RANKS.indexOf(x.rar) >= RANKS.indexOf("r"))));
-
-    // ×1 sans animation
+    await page.click('[data-act="stage-close"]'); await sleep(200);
+    // ×10 : le coffre
+    await page.click('[data-zsum="10"]'); await sleep(500);
+    t.check(`${label} · ×10 : le coffre et sa clé`, (await page.locator("#cfChest").count()) === 1 && (await page.locator("#cfKey").count()) === 1);
+    await page.click("#cfKey");
+    t.check(`${label} · ×10 : 10 objets face cachée`, await page.waitForSelector(".cf-grid", { timeout: 20000 }).then(() => true).catch(() => false) && (await page.locator(".cf .slot").count()) === 10, errors);
+    await page.click('[data-cflip="7"]'); await sleep(200);
+    t.check(`${label} · ×10 : retourner un objet au choix`, (await page.locator(".cf .slot.flipped .ocos").count()) === 1);
+    await page.click('[data-act="skip"]'); await sleep(250);
+    t.check(`${label} · ×10 : récapitulatif`, (await page.locator(".summary .ocos").count()) === 10);
+    await page.click('[data-act="stage-close"]'); await sleep(200);
+    // ×1 : une carte qui se retourne seule
+    await page.click('[data-zsum="1"]'); await sleep(1300);
+    t.check(`${label} · ×1 : la carte se retourne toute seule`, (await page.locator("#stage .reveal-card.on .ocos").count()) === 1);
+    await page.click('[data-act="stage-close"]').catch(() => page.evaluate(() => closeStage())); await sleep(200);
+    t.check(`${label} · 16 objets invoqués au total`, (await page.evaluate(() => save.cos.inst.length)) === before + 16);
+    // ×1 sans animation : directement le résultat
     await page.check("#zSkip");
     await page.click('[data-zsum="1"]'); await sleep(400);
-    t.check(`${label} · invocation ×1 sans animation`, (await page.locator(".zgrid.one").count()) === 1);
+    t.check(`${label} · invocation ×1 sans animation`, (await page.locator(".summary .ocos").count()) === 1);
+    await page.click('[data-act="stage-close"]'); await sleep(200);
+    await page.uncheck("#zSkip");
 
     await go(page, "atelier/billy");
     t.check(`${label} · l'Atelier s'ouvre sur la carte demandée`, (await page.evaluate(() => zDraftCard)) === "billy");
@@ -78,7 +97,7 @@ try {
     await page.evaluate(() => { removeCardS(save, "billy", false); persist(); });
     t.check(`${label} · carte retirée : design effacé`, await page.evaluate(() => !save.cos.designs.billy));
     await page.reload(); await sleep(900);
-    t.check(`${label} · l'inventaire est gardé après rechargement`, (await page.evaluate(() => save.cos.inst.length)) === before + 6);
+    t.check(`${label} · l'inventaire est gardé après rechargement`, (await page.evaluate(() => save.cos.inst.length)) === before + 17);
     t.check(`${label} · aucune erreur JavaScript`, errors.length === 0, errors);
     await page.close();
   }

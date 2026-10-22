@@ -22,6 +22,24 @@ try {
   const canBuy = Math.floor(120 / G.PRICE), expected = [...Array(canBuy).fill(200), 400].slice(0, 3).join();
   t.check(`boosters payants : ${canBuy} acheté(s) avec 120 ◆ à ${G.PRICE} ◆, le suivant refusé`, paidRuns.slice(0, canBuy + 1).join() === expected, paidRuns);
   t.check("Saison 1 (édition limitée) : achat refusé par le serveur", (await Pb.api("open", { pack: "saison1", paid: true })).status === 400);
+
+  t.section("Deux boosters d'un coup (10 cartes dans le coffre)");
+  const D = await player(srv.base, "700000000000000007", "Duo"); await D.api("state");
+  grant(srv, [D], { free: 1, chakra: 150 });
+  t.check("×2 avec 1 seul booster gratuit : refusé, rien n'est pris", (await D.api("open", { pack: "mix", n: 2 })).status === 400 && (await D.api("state")).state.free === 1);
+  t.check("×2 payant sans de quoi payer les deux : refusé, rien n'est débité", (await D.api("open", { pack: "mix", paid: true, n: 2 })).status === 400 && (await D.api("state")).state.chakra === 150);
+  t.check("pack du jour ×2 : refusé", (await D.api("open", { pack: "jour", n: 2 })).status === 400);
+  grant(srv, [D], { free: 3, chakra: 2 * G.PRICE });
+  const d2 = await D.api("open", { pack: "mix", n: 2 });
+  t.check("×2 gratuit : 10 cartes, 2 boosters pris", d2.status === 200 && d2.cards.length === 10 && d2.state.free === 1 && d2.state.opened === 2, { status: d2.status, n: d2.cards?.length, free: d2.state?.free });
+  t.check("×2 : un scénario de coffre choisi par le serveur, permis par ces 10 cartes", !!G.CHEST_BY_ID[d2.scenario] && G.CHEST_BY_ID[d2.scenario].when(G.chestCtx(d2.cards)), d2.scenario);
+  const d3 = await D.api("open", { pack: "mix", paid: true, n: 2 });
+  t.check("×2 payant : 10 cartes, 2 prix débités", d3.status === 200 && d3.cards.length === 10 && d3.state.chakra === 0);
+  t.check("n inconnu (×3) : traité comme un seul booster", (await D.api("open", { pack: "mix", n: 3 })).cards?.length === 5);
+  grant(srv, [D], { free: 4 });
+  const burst = await Promise.all(Array.from({ length: 4 }, () => D.api("open", { pack: "mix", n: 2 })));
+  const sd = (await D.api("state")).state;
+  t.check("4 ouvertures ×2 simultanées avec 4 gratuits : au plus 2 passent, jamais de booster en trop", burst.filter((x) => x.status === 200).length <= 2 && sd.free === 4 - 2 * burst.filter((x) => x.status === 200).length, burst.map((x) => x.status));
   // le marché s'ouvre après 10 boosters : on donne des boosters aux joueurs de test
   grant(srv, [A, R, T], { free: 30 });
   for (let i = 0; i < 10; i++) { await A.api("open", { pack: "mix" }); await R.api("open", { pack: "mix" }); }

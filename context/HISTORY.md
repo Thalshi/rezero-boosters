@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-10-22 — Jeu complet sur une branche
+- Accès Cloudflare D1 en lecture via les secrets réseau ; étapes 0 et 1 de l'optimisation déployées.
+- Audit et correction des boosters (Le Monde, Vilains, recyclage), 25 persos ajoutés à l'épisode 1 (161 cartes).
+- Prototype de l'Invocation validé : Portail scellé B + C, main qui touche, feinte de rareté.
+- Réalisé sur dev/re-zero-complet : Boutique, Sanctuaire, Atelier, carte vedette, coffre à 30 scénarios, galerie et labo admin, Défilé, vente avec design, Re Zéro Confrontation, synchro étape 2, interrupteurs.
+- 18 suites de tests vertes (575 vérifications) ; plan de mise en production et liste des décisions dans docs/.
+
 ## 2026-10-21 — Audit, sécurité et rôles
 - Audit complet du projet : deux failles critiques trouvées (import de sauvegarde falsifiée, votes modifiables après la réponse).
 - Corrigé et déployé : import limité à 50 cartes Communes ou Peu communes, votes validés par le serveur, paiement unique et seulement pour les votes faits à temps.

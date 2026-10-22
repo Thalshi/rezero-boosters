@@ -16,14 +16,18 @@
 - Les joueurs : les membres du serveur Discord QG de Shinjuku.
 
 ## Objectifs en cours
+- Tout le cahier des charges est réalisé sur la branche `dev/re-zero-complet`, rien n'est en production. Suivi : `docs/CHECKLIST.md`, résultats : `docs/RESULTATS.md`.
+- Prochaine étape : trancher les décisions de `docs/DECISIONS.md`, puis déployer par lots selon `docs/MISE_EN_PRODUCTION.md`.
 - Préparer l'épisode 2 : débloquer ses persos, publier les prédictions.
-- Faire tester le site en ligne par le QG.
 
 ## À faire / à vérifier / en attente
 - Tester le site en ligne avec les vrais comptes Discord.
 - Vérifier avec les vrais comptes Discord que Reichi voit la vue Dev et Billy la vue Admin.
 - Lancer le contrôle des comptes (vue Dev) et décider quoi faire des comptes signalés éventuels.
-- Prochaines actions de l'audit : réduire les requêtes (environ 95 par minute par joueur), ne plus effacer la saisie pendant les mises à jour, tests automatiques et migrations D1.
+- Optimisation Cloudflare : étapes 0 et 1 en ligne ; étape 2 (`/api/sync`, 95 → 25 requêtes par minute) prête sur la branche.
+- En attente de Reichi : rythme de l'économie (30, 45 ou 60 jours), prix des cosmétiques, coût et taux d'invocation, récompenses du Défilé, PV de Confrontation, lots à déployer, jeton Cloudflare en écriture pour la sauvegarde.
+- En attente de Billy : noms des nouveaux persos, répartition des persos dans les 8 branches de Confrontation.
+- Reste partiel : le labo admin ne simule pas encore marché, quêtes, concours et parties ; pas de test sur un vrai téléphone bas de gamme ; pas d'audit au lecteur d'écran.
 - Idées en attente : enchères et ordres d'achat au marché, amis et messages privés, score de confiance et signalement de joueurs, suppression de compte.
 
 ## Règles et décisions à respecter
@@ -33,6 +37,12 @@
 - On ne reprend pas de Kyara le parrainage, les langues FR/EN/ES ni la rareté selon AniList.
 - Rien de ce que le navigateur envoie n'est cru pour l'économie : import de sauvegarde limité à 50 cartes Communes ou Peu communes, votes validés par le serveur et refusés après fermeture.
 - Avant un déploiement sensible : travailler sur une branche, tester, puis fusionner dans `main` seulement après accord de Reichi.
+- Pas de déploiement, de migration ni de changement de l'économie réelle sans accord explicite de Reichi.
+- Boosters = persos ; invocations = cosmétiques, jamais de persos.
+- Boutique de skins et Invocation de skins coexistent, avec un inventaire commun et l'Atelier Arcanique pour équiper.
+- L'Invocation utilise le Portail scellé B + C. Le coffre (et ses 30 scénarios) et l'Invocation sont deux systèmes distincts.
+- Pas de paiement réel. Aucun visuel ni texte de BANG! repris.
+- Le jeton Cloudflare passe par les secrets réseau de l'environnement cloud, jamais dans le chat, GitHub ou un fichier.
 
 ## Technique et pièges
 - Dépôt GitHub Thalshi/rezero-boosters. Un push sur `main` déploie sur Cloudflare (https://rezero-boosters.qg-shinjuku.workers.dev). Le déploiement prend parfois plus de 10 minutes.
@@ -40,4 +50,9 @@
 - `python3 build.py` assemble `src/` en `public/index.html` (site), `artifact.html` (version claude.ai) et `worker/game.js` (règles pour le serveur, généré : ne pas le modifier à la main).
 - La version claude.ai (https://claude.ai/artifact/VQWvCstEDhFmTZis9pnn7C) est à republier en même temps que le site.
 - Rôles dans `wrangler.jsonc` : `ADMIN_IDS` (Billy) et `DEV_IDS` (Reichi). Ajouter un rôle seulement dans le tableau de bord Cloudflare ne suffit pas : il est écrasé au déploiement suivant.
-- Sources de l'interface : `src/app.js`, `src/views.js`, `src/views2.js`, `src/boot.js`, `src/shell.html` et `src/head.css.html`.
+- Sources de l'interface : `src/app.js`, `src/views.js` à `src/views6.js`, `src/coffre.js`, `src/boot.js`, `src/shell.html` et `src/head.css.html`.
+- Serveur : `worker/lab-api.js` (galerie, labo), `worker/defile-api.js`, `worker/confront-api.js` et le moteur `worker/confront/`. `worker/confront/branches-proposees.mjs` ne doit jamais partir au navigateur (spoils).
+- Une constante par ligne au premier niveau de `src/game.js` : c'est ainsi que `worker/game.js` les reprend.
+- Tests : `node tests/run-all.mjs` (18 suites, serveur local isolé) ; simulation d'économie : `node tests/simulation-economie.mjs`.
+- Le navigateur appelle `/api/sync` toutes les 6 s et ne recharge que les sections changées.
+- Interrupteurs des nouveautés : Admin → « Nouveautés ouvertes aux joueurs » (`config/game.features`).

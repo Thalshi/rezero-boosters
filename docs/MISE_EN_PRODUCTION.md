@@ -1,7 +1,7 @@
 # Re Zéro : mise en production et retour arrière
 
 Rien de ce document n'est exécuté sans ton accord explicite (Reichi). Branche de travail : `dev/re-zero-complet`.
-En production aujourd'hui : `main` = étapes 0 et 1 (sauvegarde D1, compteurs `sync_rev`).
+En production depuis le 22/10/2026 : tout (`dev/re-zero-complet` fusionnée dans `main`, nouveautés ouvertes). Point de restauration D1 pris juste avant : `0000000e-000000f9-0000510c-c116b22844c0cc2ed9ae514596faa219`.
 
 ## 1. Ce qui partirait en production
 

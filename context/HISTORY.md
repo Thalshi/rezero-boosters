@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-10-22 — Mise en production complète, design Arcane Néon
+- Tout déployé en production (fusion de `dev/re-zero-complet` dans `main`), toutes les nouveautés ouvertes, à la demande de Reichi. Point de restauration D1 noté avant.
+- Design « Arcane Néon » choisi parmi 4 propositions (Arcane, Néon Shinjuku, Encre et sceau, mélange) et appliqué à toute l'app, avec une barre de navigation en bas sur téléphone.
+- Créateur : Billy et Reichi ajoutent ou retouchent persos, cartes et cosmétiques depuis l'app, publiés directement, sans spoil, avec historique et notification à l'autre.
+- Confrontation : visuels finaux (25 cartes, emblèmes, fond de table), livret « Comment jouer » illustré, une branche par carte (variante en Épique et plus, réglable par Billy), deux camps sans Errant réglés à 50/50 par table.
+- Coffre : les cartes se dévoilent une par une après l'animation, comme sur Kyara. Bug corrigé : les auras étaient invisibles partout.
+- 22 suites de tests vertes (816 vérifications).
+
 ## 2026-10-22 — Campagne de tests, illustrations, ouverture selon le nombre
 - Campagne de tests complète sur base isolée et prévisualisation sans installation (serveur du jeu dans le navigateur) : https://claude.ai/artifact/6xiA1siGGJxtffTESvFCrS. 8 bugs trouvés et corrigés, dont « openSheet is not defined » aussi présent en production.
 - Boutique refaite façon Boutique Discord ; clé du coffre au clic et coffre qui éclate ; Confrontation lisible (cartes illustrées, bandeau d'aide, PV) ; skins façon LoL.

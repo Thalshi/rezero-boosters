@@ -217,6 +217,7 @@ document.addEventListener("change", (e) => {
   if (t.dataset.cfg === "def") CONFIG.def = +t.value;
   else if (t.dataset.prog) { if (t.value === "") delete CONFIG.progress[t.dataset.prog]; else CONFIG.progress[t.dataset.prog] = +t.value; }
   else if (t.dataset.ep) CONFIG.ep[t.dataset.ep] = +t.value;
+  else if (t.dataset.feat) { if (t.checked) delete CONFIG.features[t.dataset.feat]; else CONFIG.features[t.dataset.feat] = false; }
   else if (t.dataset.extra) {
     const uid = t.dataset.uidFor, list = new Set(CONFIG.extra[uid] || []);
     if (t.checked) list.add(t.dataset.extra); else list.delete(t.dataset.extra);

@@ -126,11 +126,12 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 |---|---|---|---|
 | 9.1 | Tests automatiques (sécurité, économie, confidentialité, parcours) | ✅ | `tests/` |
 | 9.2 | Compteurs de synchro `sync_rev` (étape 1) | ✅ | en ligne |
-| 9.3 | Route de synchro unique `/api/game/sync` (étape 2+) | ⬜ | |
-| 9.4 | Index et lecture par deltas | ⬜ | |
+| 9.3 | Route de synchro unique `/api/game/sync` (étape 2+) | ✅ | `/api/sync` : un appel lit tous les compteurs, seules les sections changées sont rechargées, resynchro complète toutes les 60 s, retour à l'ancien mode si la route échoue. Mesure au repos : 95 → 25 requêtes/min, lignes lues −81 % |
+| 9.4 | Index et lecture par deltas | 🟡 | index `docs (coll, updated)` en place ; lecture par deltas (seulement les documents modifiés) à faire si la charge le demande |
 | 9.5 | Performances mobiles (images, animations, mémoire) | 🟡 | |
 | 9.6 | Accessibilité (clavier, lecteurs d'écran, animations réduites) | 🟡 | |
-| 9.7 | Plan de mise en production et de retour arrière | ⬜ | `docs/MISE_EN_PRODUCTION.md` |
+| 9.7 | Plan de mise en production et de retour arrière | ✅ | `docs/MISE_EN_PRODUCTION.md`, décisions dans `docs/DECISIONS.md` |
+| 9.8 | Interrupteurs par fonctionnalité (déploiement progressif) | ✅ | Admin → « Nouveautés ouvertes aux joueurs » ; le serveur refuse les actions d'une nouveauté fermée ; `tests/fonctionnalites.mjs` |
 
 ## Plan de réalisation (ordre, dépendances, critères de validation)
 1. **Fondations cosmétiques** (4.1–4.3) → critère : catalogue + inventaire côté serveur, tests de propriété et de transfert.

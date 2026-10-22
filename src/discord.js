@@ -14,20 +14,40 @@
   const enc = encodeURIComponent;
   const snapDoc = (d) => ({ id: d.id, exists: !!d.exists, data: () => (d.exists ? d.data : undefined), metadata: { fromCache: false, hasPendingWrites: false } });
   const snapQuery = (docs) => ({ docs: docs.map(snapDoc), size: docs.length, empty: !docs.length, docChanges: () => [], metadata: { fromCache: false, hasPendingWrites: false } });
-  function poll(load, next, error) {
-    let last = null, stopped = false, timer;
-    const tick = async () => {
-      if (stopped) return;
-      try { const v = await load(); const key = JSON.stringify(v); if (key !== last) { last = key; next(v); } }
-      catch (e) { if (e.code === "not_signed_in") { stopped = true; error?.(e); return; } }
-      if (!stopped) timer = setTimeout(tick, document.hidden ? POLL * 3 : POLL);
-    };
-    tick();
-    poll.refreshers.add(() => { clearTimeout(timer); tick(); });
-    return () => { stopped = true; clearTimeout(timer); };
+  // Synchro (étape 2) : un seul appel régulier, /api/sync, renvoie les compteurs de version de chaque section
+  // (market, players, feed…). On ne recharge que les abonnements dont la section a changé, plus une resynchro
+  // complète de secours toutes les minutes. Si /api/sync ne répond pas, chaque abonnement se recharge comme avant.
+  const FULL = 60000, subs = new Set();
+  let timer = null, running = false, syncOk = true;
+  const sectionOf = (path) => String(path || "").split("/")[0];
+  async function reload(sub, rev) {
+    sub.rev = rev; sub.at = Date.now();
+    try { const v = await sub.load(); const key = JSON.stringify(v); if (key !== sub.last) { sub.last = key; sub.next(v); } }
+    catch (e) { if (e.code === "not_signed_in") { sub.stop(); sub.error?.(e); } else sub.rev = undefined; }
   }
-  poll.refreshers = new Set();
-  const refreshSoon = () => setTimeout(() => poll.refreshers.forEach((f) => f()), 50);
+  async function tick(force) {
+    clearTimeout(timer); timer = null;
+    if (running || !subs.size) { schedule(); return; }
+    running = true;
+    let revs = null;
+    if (syncOk) { try { revs = (await api("GET", "/api/sync")).revs; } catch (e) { if (e.code !== "not_signed_in") { syncOk = false; setTimeout(() => (syncOk = true), 5 * 60000); } } }
+    const now = Date.now();
+    await Promise.all([...subs].map((sub) => {
+      const rev = revs ? revs[sub.section] || 0 : undefined;
+      if (force || !revs || sub.rev === undefined || sub.rev !== rev || now - sub.at > FULL) return reload(sub, rev);
+    }));
+    running = false;
+    schedule();
+  }
+  function schedule() { if (!timer && subs.size) timer = setTimeout(tick, document.hidden ? POLL * 3 : POLL); }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  function poll(load, next, error, path) {
+    const sub = { load, next, error, section: sectionOf(path), last: null, rev: undefined, at: 0, stop: () => subs.delete(sub) };
+    subs.add(sub);
+    reload(sub, undefined).then(schedule);
+    return sub.stop;
+  }
+  const refreshSoon = () => setTimeout(() => tick(true), 50);
 
   function docRef(path) {
     const id = path.split("/").pop();
@@ -38,7 +58,7 @@
       update: (data) => api("PATCH", "/api/doc?path=" + enc(path), data).then(refreshSoon),
       delete: () => api("DELETE", "/api/doc?path=" + enc(path)).then(refreshSoon),
       acquire: (o) => api("POST", "/api/acquire", { path, holder: o.holder, ttlMs: o.ttlMs }),
-      onSnapshot: (next, error) => poll(() => api("GET", "/api/doc?path=" + enc(path)), (d) => next(snapDoc(d)), error),
+      onSnapshot: (next, error) => poll(() => api("GET", "/api/doc?path=" + enc(path)), (d) => next(snapDoc(d)), error, path),
       collection: (sub) => collRef(path + "/" + sub),
     };
   }
@@ -49,7 +69,7 @@
       limit: (n) => query(path, { ...opts, limit: n }),
       where: () => query(path, opts),
       get: () => api("GET", url()).then((r) => snapQuery(r.docs)),
-      onSnapshot: (next, error) => poll(() => api("GET", url()).then((r) => r.docs), (docs) => next(snapQuery(docs)), error),
+      onSnapshot: (next, error) => poll(() => api("GET", url()).then((r) => r.docs), (docs) => next(snapQuery(docs)), error, path),
     };
   }
   function collRef(path) {

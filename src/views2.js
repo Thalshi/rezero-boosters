@@ -90,7 +90,7 @@ function listingDzHTML(l) {
     ${prev.length ? `<p class="note">Aperçu seulement, non transféré (cosmétiques de compte du vendeur) : ${prev.map((c) => esc(c.name)).join(", ")}</p>` : ""}</div>`;
 }
 function sellDesignHTML(id) {
-  const d = cosOf(save).designs[id]; if (!d) return "";
+  const d = cosOf(save).designs[id]; if (!d || !featureOn(CONFIG, "marcheDesign")) return "";
   const inst = Object.entries(d).filter(([, r]) => r.startsWith("i:")).map(([, r]) => refCos(save, r)).filter(Boolean);
   const acct = Object.entries(d).filter(([, r]) => r.startsWith("a:")).map(([, r]) => refCos(save, r)).filter(Boolean);
   if (!inst.length && !acct.length) return "";
@@ -401,6 +401,8 @@ function viewAdmin() {
   const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
   return `<div class="wrap page" style="max-width:900px">${head("Admin · 管理", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
+    <div class="card sec"><h3>Nouveautés ouvertes aux joueurs</h3><p class="note">Une nouveauté fermée disparaît du menu et le serveur refuse ses actions. Rien n'est perdu : on la rouvre quand on veut.</p>
+      <div class="feat-list">${FEATURES.map(([k, l]) => `<label class="zopt-line"><input type="checkbox" data-feat="${k}" ${featureOn(CONFIG, k) ? "checked" : ""}> ${l}</label>`).join("")}</div></div>
     ${SRV ? `<form class="card sec" id="annForm"><h3>Annonce</h3><p class="note">Elle s'affiche au comptoir et en notification pour tout le QG.</p><textarea class="in" id="annText" rows="2" maxlength="300" placeholder="Ex. : l'épisode 2 sort samedi à 18 h !"></textarea><button class="btn acc" type="submit">Envoyer l'annonce</button></form>` : ""}
     <section class="sec"><h2>Joueurs · ${ids.length}</h2>${ids.length ? `<div class="adm-list">${ids.map((uid) => `<div class="adm-row">${who(uid)}
         <select aria-label="Épisode atteint" data-prog="${uid}"><option value="" ${CONFIG.progress[uid] == null ? "selected" : ""}>Par défaut (${epLabel(CONFIG.def)})</option>${epOptions(CONFIG.progress[uid])}</select>

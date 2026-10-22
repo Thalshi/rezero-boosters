@@ -32,8 +32,10 @@ async function zFeature(id) {
   catch (e) { toast(e.message); }
 }
 
+const closedHTML = (name) => `<div class="wrap page">${head("Bientôt · 準備中", name)}${empty("Cette partie du jeu n'est pas encore ouverte. Billy l'annoncera au QG.")}</div>`;
 // ===== Boutique Arcanique =====
 function viewBoutique() {
+  if (!featureOn(CONFIG, "boutique")) return closedHTML("Boutique Arcanique");
   const list = COSMETICS.filter((c) => c.slot === zShopSlot);
   const own = cosOf(save).own;
   return `<div class="wrap page">${head("Boutique Arcanique · 店", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
@@ -97,6 +99,7 @@ function zInventory() {
 // Le tirage est fait par le serveur AVANT l'animation ; l'animation ne fait que le révéler.
 const ZR = { results: null, flipped: [], status: "idle" };
 function viewSanctuaire() {
+  if (!featureOn(CONFIG, "sanctuaire")) return closedHTML("Sanctuaire des Invocations");
   const cos = cosOf(save);
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
   return `<div class="wrap page">${head("Sanctuaire des Invocations · 召", "Sanctuaire des Invocations", "Touche le portail scellé pour invoquer des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}

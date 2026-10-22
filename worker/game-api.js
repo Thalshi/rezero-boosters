@@ -262,7 +262,7 @@ export async function gameRoute(req, env, user, path) {
     const cfg = await getConfig(env);
     const labRes = await labRoute(env, user, path, body, cfg);
     if (labRes) return labRes;
-    const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow });
+    const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
     if (defRes) return defRes;
 
     if (path === "/api/game/open") {
@@ -302,11 +302,13 @@ export async function gameRoute(req, env, user, path) {
     }
     // --- cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique, carte vedette ---
     if (path === "/api/game/shop/buy") {
+      if (!G.featureOn(cfg, "boutique")) return fail(403, "La Boutique Arcanique n'est pas encore ouverte.");
       const r = await mutate(env, user.id, (s) => { const o = G.buyCosmeticS(s, String(body.id || "")); return o.error ? { abort: true, error: o.error } : o; });
       if (r.error) return fail(400, r.error);
       return json(r);
     }
     if (path === "/api/game/summon") {
+      if (!G.featureOn(cfg, "sanctuaire")) return fail(403, "Le Sanctuaire des Invocations n'est pas encore ouvert.");
       // le tirage est fait ici, avant toute animation : le navigateur ne fait que montrer le résultat
       const r = await mutate(env, user.id, (s, now) => { const o = G.summonS(s, +body.n === 5 ? 5 : +body.n === 1 ? 1 : 0, rng, now); return o.error ? { abort: true, error: o.error } : o; });
       if (r.error) return fail(400, r.error);
@@ -372,7 +374,7 @@ export async function gameRoute(req, env, user, path) {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
         if (!G.CARD_BY_ID[body.id] || !G.hasCard(s, body.id)) return { abort: true, error: "Tu n'as plus cette carte." };
         // avec son design : les instances uniques partent sous séquestre avec la carte
-        const dz = body.withDesign ? G.takeDesignForSaleS(s, body.id) : null;
+        const dz = body.withDesign && G.featureOn(cfg, "marcheDesign") ? G.takeDesignForSaleS(s, body.id) : null;
         if (!G.removeCardS(s, body.id, !!body.gold)) return { abort: true, error: "Tu n'as plus cette carte." };
         G.trackS(s, "sell", 1, now);
         return { lid, dz };

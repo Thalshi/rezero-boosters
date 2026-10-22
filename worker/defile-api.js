@@ -36,6 +36,8 @@ function publicView(d, uid) {
 export async function defileRoute(env, user, path, body, h) {
   if (!path.startsWith("/api/game/defile")) return null;
   const now = Date.now();
+  // Défilé fermé par l'admin : les joueurs ne peuvent plus rien y faire (l'admin garde la main pour le préparer)
+  if (!G.featureOn(h.cfg, "defile") && !user.admin && path !== "/api/game/defile/state") return fail(403, "Le Défilé des Légendes n'est pas encore ouvert.");
   if (path === "/api/game/defile/state") {
     const [cur, hall, arch] = await Promise.all([readJSON(env, "defile/current"), readJSON(env, "defile/hall"), readJSON(env, "defile/archives")]);
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;

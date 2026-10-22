@@ -484,7 +484,7 @@ function packOpensAt(pk, cfg, uid) {
 const mixFillOf = (pk, cfg, uid) => { const pool = poolFor(pk, cfg, uid); return pk.fac ? RANKS.filter((r) => !pool.some((c) => c.rar === r)) : []; };
 function configFrom(data) {
   const d = DEFAULT_CONFIG();
-  return { ep: { ...d.ep, ...(data?.ep || {}) }, progress: { ...(data?.progress || {}) }, def: data?.def ?? d.def, extra: JSON.parse(JSON.stringify(data?.extra || {})) };
+  return { ep: { ...d.ep, ...(data?.ep || {}) }, progress: { ...(data?.progress || {}) }, def: data?.def ?? d.def, extra: JSON.parse(JSON.stringify(data?.extra || {})), features: { ...(data?.features || {}) } };
 }
 const boosted = (t, k) => Object.fromEntries(Object.entries(t).map(([r, p]) => [r, r === "l" || r === "m" ? p * k : p]));
 function rollWith(table, rng) {
@@ -921,3 +921,8 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
   for (const it of inst) { if (!COS_BY_ID[it.c] || cos.inst.some((x) => x.i === it.i)) continue; cos.inst.push({ i: it.i, c: it.c, t: it.t || now }); d[it.slot || COS_BY_ID[it.c].slot] = "i:" + it.i; }
   if (hasCard(s, cardId)) cos.designs[cardId] = d;
 }
+
+// ===== Interrupteurs par fonctionnalité (réglés par l'admin dans config/game, sans redéployer) =====
+// Absent = activé. Permet de déployer le code puis d'ouvrir chaque nouveauté quand ses valeurs sont validées.
+const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
+const featureOn = (cfg, f) => cfg?.features?.[f] !== false;

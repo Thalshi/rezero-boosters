@@ -17,7 +17,7 @@ async function defAct(action, body, msg) {
 const defCard = (e, o = {}) => (byId[e.card] ? cardHTML(byId[e.card], { gold: e.gold, design: e.design, present: true, ...o }) : "");
 // bannière du gagnant à l'accueil, pendant une semaine
 function hallHTML() {
-  if (!SRV) return "";
+  if (!SRV || !featureOn(CONFIG, "defile")) return "";
   defLoad();
   const h = DEF.hall; if (!h || !byId[h.card]) return "";
   return `<section class="sec def-hall"><div class="def-hall-in"><div class="def-hall-card">${defCard(h)}</div>
@@ -25,6 +25,7 @@ function hallHTML() {
     <div class="row"><button class="btn sm" type="button" data-nav="defile">Voir le Défilé</button><button class="btn sm" type="button" data-nav="profil" data-p="${h.uid}">Son profil</button></div></div></div></section>`;
 }
 function viewDefile() {
+  if (!featureOn(CONFIG, "defile") && !IS_ADMIN) return closedHTML("Défilé des Légendes");
   if (!SRV) return `<div class="wrap page">${head("Défilé · 華", "Défilé des Légendes")}${empty("Le Défilé se joue sur le site du QG, avec ton compte Discord.")}</div>`;
   defLoad();
   const d = DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);

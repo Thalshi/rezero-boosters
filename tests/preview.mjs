@@ -40,8 +40,8 @@ try {
     // booster et coffre
     await page.click(await choisir(page, "coffre")); await page.waitForTimeout(1200);
     await page.click("#cfKey");
-    await page.waitForSelector(".cf-grid", { timeout: 20000 }).catch(() => {});
-    t.check(`${label} · coffre : animation puis 5 cartes face cachée`, (await page.locator(".cf .slot").count()) === 5);
+    await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
+    t.check(`${label} · coffre : animation puis les 5 cartes une par une`, (await page.locator("#stage .pdots i").count()) === 5 && (await page.locator("#revealBtn").count()) === 1);
     await page.click('#stage [data-act="skip"]'); await page.waitForTimeout(400);
     t.check(`${label} · coffre : récapitulatif`, (await page.locator(".summary [data-card]").count()) === 5);
     await page.click('#stage [data-act="stage-close"]');

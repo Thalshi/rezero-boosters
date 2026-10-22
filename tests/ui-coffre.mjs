@@ -65,12 +65,12 @@ try {
       const dur = sc.beats.reduce((a, [b, n]) => a + ({ pause: n || 400, shake: 360 * (n || 1), runes: 90 * (n || 8) + 200, ladder: 260 * 6, crystal: 460 * (n || 1), banner: 1500 }[b] ?? 1000), 0);
       await sleep(Math.min(dur * .55, 4500));
       await page.screenshot({ path: join(OUT, `coffre-${label}-${id}.png`) });
-      const ok = await page.waitForSelector(".cf-grid", { timeout: dur + 6000 }).then(() => true).catch(() => false);
-      t.check(`${label} · ${id} : le scénario se termine sur les 5 cartes face cachée`, ok && (await page.locator(".cf .slot").count()) === 5, errors.slice(-1));
+      const ok = await page.waitForSelector("#revealBtn", { timeout: dur + 6000 }).then(() => true).catch(() => false);
+      t.check(`${label} · ${id} : le scénario se termine sur les 5 cartes, à dévoiler une par une`, ok && (await page.locator("#stage .pdots i").count()) === 5, errors.slice(-1));
       if (!ok) { await page.evaluate(() => closeStage()); continue; }
-      await page.click('[data-cflip="2"]'); await sleep(200);
-      t.check(`${label} · ${id} : retourner une carte au choix`, (await page.locator(".cf .slot.flipped").count()) === 1);
-      await page.click('[data-act="cf-next"]'); await sleep(150);
+      await page.click("#revealBtn"); await sleep(250);
+      t.check(`${label} · ${id} : toucher retourne la première carte`, (await page.locator("#stage .reveal-card.on .kc").count()) === 1);
+      await page.click("#revealBtn"); await sleep(150);
       if (ids.indexOf(id) === 0) await page.screenshot({ path: join(OUT, `coffre-${label}-cartes.png`) });
       await page.click('[data-act="skip"]'); await sleep(250);
       t.check(`${label} · ${id} : récapitulatif`, (await page.locator(".summary .kcw").count()) === 5);
@@ -91,7 +91,7 @@ try {
   await rp.goto("file://" + join(ROOT, "artifact.html")); await sleep(900);
   await openChest(rp, "sp-seisme", cardsFor("sp-seisme"));
   await rp.click("#cfKey"); await sleep(300);
-  t.check("animations réduites : les cartes arrivent tout de suite", (await rp.locator(".cf-grid").count()) === 1, rErr);
+  t.check("animations réduites : les cartes arrivent tout de suite", (await rp.locator("#revealBtn").count()) === 1, rErr);
   // le vrai tirage invité donne un scénario permis par ses cartes
   await rp.click('[data-act="skip"]'); await sleep(200); await rp.click('[data-act="stage-close"]');
   const real = await rp.evaluate(async () => { save.free = 3; await startOpening(false, "coffre"); const o = opening; return { scenario: o.scenario, ok: CHEST_BY_ID[o.scenario]?.when(chestCtx(o.cards.map((x) => ({ id: x.c.id, gold: x.gold, isNew: x.isNew })))) }; });

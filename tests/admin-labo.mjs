@@ -82,7 +82,7 @@ try {
     await page.selectOption("#labSc", "fk-redemarrage");
     await page.click('[data-act="lab-open"]'); await page.waitForTimeout(1200);
     t.check(`${label} · coffre du labo marqué « rien n'est réel »`, (await page.locator(".lab-pill").count()) === 1 && (await page.locator("#cfChest").count()) === 1);
-    await page.click("#cfKey"); await page.waitForSelector(".cf-grid", { timeout: 15000 });
+    await page.click("#cfKey"); await page.waitForSelector("#revealBtn", { timeout: 15000 });
     await page.click('[data-act="skip"]'); await page.waitForTimeout(300);
     t.check(`${label} · récapitulatif du labo : Rejouer et Retour, pas d'achat`, (await page.locator('#stage [data-act="lab-replay"]').count()) === 1 && (await page.locator('#stage [data-act="again"]').count()) === 0);
     await page.click('#stage [data-act="lab-replay"]'); await page.waitForTimeout(800);

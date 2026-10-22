@@ -54,9 +54,9 @@ try {
     await page.click('[data-zsum="10"]'); await sleep(500);
     t.check(`${label} · ×10 : le coffre et sa clé`, (await page.locator("#cfChest").count()) === 1 && (await page.locator("#cfKey").count()) === 1);
     await page.click("#cfKey");
-    t.check(`${label} · ×10 : 10 objets face cachée`, await page.waitForSelector(".cf-grid", { timeout: 20000 }).then(() => true).catch(() => false) && (await page.locator(".cf .slot").count()) === 10, errors);
-    await page.click('[data-cflip="7"]'); await sleep(200);
-    t.check(`${label} · ×10 : retourner un objet au choix`, (await page.locator(".cf .slot.flipped .ocos").count()) === 1);
+    t.check(`${label} · ×10 : les 10 objets se dévoilent un par un`, await page.waitForSelector("#revealBtn", { timeout: 20000 }).then(() => true).catch(() => false) && (await page.locator("#stage .pdots i").count()) === 10, errors);
+    await page.click("#revealBtn"); await sleep(400);
+    t.check(`${label} · ×10 : toucher pour retourner l'objet`, (await page.locator("#stage .reveal-card.on .ocos").count()) === 1);
     await page.click('[data-act="skip"]'); await sleep(250);
     t.check(`${label} · ×10 : récapitulatif`, (await page.locator(".summary .ocos").count()) === 10);
     await page.click('[data-act="stage-close"]'); await sleep(200);

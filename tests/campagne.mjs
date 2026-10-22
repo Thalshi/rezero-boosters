@@ -47,11 +47,16 @@ async function ouvrir(J, selector, { label = "", flipAll = false } = {}) {
     leaked = await page.locator("#stage [data-card]").count(); // aucune carte ne doit être visible avant l'ouverture
     await page.click("#cfKey");
     const sc = G.CHEST_BY_ID[res.scenario];
-    for (let i = 0; i < 40 && !(await page.locator(".cf-grid").count()); i++) { if (i === 3) leaked += await page.locator("#stage .kc").count(); await page.waitForTimeout(250); }
-    if (!(await page.locator(".cf-grid").count())) return { res, chest, stuck: true, scenario: sc?.id };
-    if (flipAll) for (let i = 0; i < 5; i++) { await page.click(`[data-cflip="${i}"]`).catch(() => {}); await page.waitForTimeout(80); }
-    const faces = await page.$$eval(".cf .slot.flipped .kc", (els) => els.map((e) => e.getAttribute("aria-label") || ""));
-    await page.click('#stage [data-act="skip"]');
+    for (let i = 0; i < 40 && !(await page.locator("#revealBtn").count()); i++) { if (i === 3) leaked += await page.locator("#stage .kc").count(); await page.waitForTimeout(250); }
+    if (!(await page.locator("#revealBtn").count())) return { res, chest, stuck: true, scenario: sc?.id };
+    // après le coffre, les cartes se dévoilent une par une (comme la pochette)
+    const faces = [];
+    if (flipAll) for (let i = 0; i < res.cards.length; i++) {
+      await page.click("#revealBtn"); await page.waitForTimeout(120);
+      faces.push(await page.getAttribute("#stage .reveal-card.on .kc", "aria-label").catch(() => ""));
+      await page.click("#revealBtn"); await page.waitForTimeout(80);
+    }
+    if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]');
     res.faces = faces;
   } else {
     await page.click("#pack"); await page.waitForTimeout(900);
@@ -69,7 +74,7 @@ async function choisir(page, packId, paid = false) {
   return `[data-act="open-pack"][data-p="${packId}"]${paid ? "[data-paid]" : ":not([data-paid])"} >> visible=true`;
 }
 async function finir(page) {
-  if (await page.locator("#cfKey").count()) { await page.click("#cfKey"); await page.waitForSelector(".cf-grid", { timeout: 20000 }).catch(() => {}); }
+  if (await page.locator("#cfKey").count()) { await page.click("#cfKey"); await page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {}); }
   else if (await page.locator("#pack").count()) { await page.click("#pack"); await page.waitForTimeout(900); }
   if (!(await page.locator(".summary").count())) await page.click('#stage [data-act="skip"]').catch(() => {});
   await page.waitForTimeout(300);
@@ -207,8 +212,8 @@ try {
   await P.page.dblclick('[data-zsum="10"]'); await P.page.waitForTimeout(800);
   sa = await P.state();
   t.check("Sanctuaire ×10 : double clic, une seule invocation (10 objets, un débit), ouverte dans le coffre", sa.chakra === sb.chakra - G.summonCost(10) && sa.cos.inst.length === sb.cos.inst.length + 10 && (await P.page.locator("#cfChest").count()) === 1);
-  await P.page.click("#cfKey"); await P.page.waitForSelector(".cf-grid", { timeout: 20000 }).catch(() => {});
-  t.check("Sanctuaire ×10 : 10 objets face cachée après le scénario", (await P.page.locator(".cf .slot").count()) === 10);
+  await P.page.click("#cfKey"); await P.page.waitForSelector("#revealBtn", { timeout: 20000 }).catch(() => {});
+  t.check("Sanctuaire ×10 : après le scénario, les 10 objets se dévoilent un par un", (await P.page.locator("#stage .pdots i").count()) === 10 && (await P.page.locator("#revealBtn").count()) === 1);
   await P.page.click('[data-act="skip"]').catch(() => {}); await P.page.click('[data-act="stage-close"]').catch(() => {});
   sb = sa;
   await P.page.check("#zSkip"); await P.page.dblclick('[data-zsum="1"]'); await P.page.waitForTimeout(1500);

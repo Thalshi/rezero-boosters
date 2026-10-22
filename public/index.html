@@ -5262,7 +5262,8 @@ const Coffre = (() => {
       else for (const [b, ...args] of sc.beats) { if (me !== run || opening !== o) return; await BEAT[b]?.(o, ...args); }
     } catch (e) { /* une erreur d'animation ne bloque jamais l'ouverture : on passe aux cartes */ }
     if (me !== run || opening !== o) return;
-    o.cf = "grid"; o.phase = "grid"; drawOpening();
+    // comme la pochette (et Kyara) : les cartes se dévoilent une par une, en grand
+    o.cf = "cards"; o.phase = "cards"; o.i = 0; o.flipped = false; $("stage").dataset.cf = ""; drawOpening();
   }
 
   // --- les 5 cartes face cachée, puis le récapitulatif ---

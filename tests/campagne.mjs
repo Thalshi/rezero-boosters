@@ -89,13 +89,15 @@ const same = (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].s
 const closeStage = async (page) => { await page.click('#stage [data-act="stage-close"]').catch(() => page.click('#stage [data-act="lab-back"]').catch(() => {})); await page.waitForTimeout(250); if (await page.locator(".ttl-sheet").count()) await page.click('.ttl-sheet [data-act="close"] >> nth=-1').catch(() => {}); };
 
 let A, P, Q, R, solo, inst, firstBuy, lst, sk;
-async function etape(name, fn) { t.section(name); try { await fn(); } catch (e) { t.check(`${name} : l'étape va jusqu'au bout`, false, String(e.message || e).slice(0, 500)); for (const J of [A, P, Q, R].filter(Boolean)) await shot(J.page, `echec-${name.slice(0, 2).trim()}-${J.name.replace(/\W+/g, "-")}`); } }
+let CUR = null; // joueur en cours dans une étape qui crée ses propres joueurs (pour la capture en cas d'échec)
+async function etape(name, fn) { if (process.env.ONLY && !name.startsWith(process.env.ONLY)) return; t.section(name); try { await fn(); } catch (e) { t.check(`${name} : l'étape va jusqu'au bout`, false, String(e.message || e).slice(0, 500)); for (const J of [A, P, Q, R, CUR].filter(Boolean)) await shot(J.page, `echec-${name.slice(0, 2).trim()}-${J.name.replace(/\W+/g, "-")}`); } }
 try {
   // =====================================================================================
   await etape("1. Parcours joueur : boosters, coffre, économie (téléphone, ordi, animations réduites)", async () => {
   for (const [k, conf] of [["mobile", { vp: "mobile" }], ["ordi", { vp: "ordi" }], ["réduit", { vp: "mobile", reduced: true }]]) {
     const pid = { mobile: IDS.p1, ordi: IDS.p2, "réduit": IDS.p3 }[k];
     const J = await joueur(pid, "Joueur " + k, conf);
+    CUR = J;
     let s0 = await J.state();
     t.check(`${k} · compte neuf : 3 boosters gratuits, 120 ◆`, s0.free === G.FREE_MAX && s0.chakra === 120);
     const o1 = await ouvrir(J, await choisir(J.page, "mix"));
@@ -106,6 +108,7 @@ try {
     await closeStage(J.page);
     // pack du jour
     await J.go("boosters");
+    await J.page.click('[data-seg="packTab"][data-v="day"] >> visible=true').catch(() => {}); await J.page.waitForTimeout(300); // l'onglet du jour, pas le carrousel qui tourne
     const od = await ouvrir(J, '[data-act="open-day"] >> visible=true');
     t.check(`${k} · pack du jour : cartes identiques au serveur`, same(od.shown, od.res.cards.map((c) => c.id)));
     await closeStage(J.page);

@@ -66,7 +66,7 @@ try {
       const v = (await A.api("confront/state", { gid })).vue, seq0 = Math.max(...v.journal.map((e) => e.seq));
       const play = v.actions.find((a) => a.type === "jouer"); await idle(page);
       if (play) {
-        const def = v.main.find((c) => c.uid === play.carte).def, card = page.locator(`.ar-hc[data-cu="${play.carte}"]`);
+        const def = v.main.find((c) => c.uid === play.carte).def, card = page.locator(`.ar-hc[data-cu="${play.carte}"]`); await card.waitFor({ timeout: 8000 }).catch(() => null); await idle(page);
         if (play.cible) { // glisser la carte sur l'étiquette du champion visé
           const a = await card.boundingBox(), b = await page.locator(`.ar-tag[data-pid="${play.cible}"] .ar-nm`).boundingBox();
           const ax = a.x + a.width * .3, ay = a.y + 24; await page.mouse.move(ax, ay); await page.mouse.down();

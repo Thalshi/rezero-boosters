@@ -24,6 +24,16 @@ const cfCardDef = (c) => CF.cat?.cartes?.[c?.def] || { nom: c?.def || "?", kanji
 const cfSigne = (id) => CF.cat?.signes?.find((x) => x.id === id) || { kanji: "", nom: id };
 const cfAction = (c, extra = "") => { if (!c) return ""; const d = cfCardDef(c), sg = cfSigne(c.signe); return `<span class="cfa ${extra}" title="${esc(d.texte || "")}"><b>${d.kanji}</b><span>${esc(d.nom)}</span><small>${sg.kanji}${c.rang}</small></span>`; };
 
+// ===== Illustrations du QG (src/illus.js) : déclarées une fois en CSS, utilisées par classe =====
+(() => {
+  const css = [
+    ...Object.entries(typeof ILLUS_CARTE === "object" ? ILLUS_CARTE : {}).map(([k, u]) => `.cfart-${k}{background-image:url(${u})}`),
+    ...Object.entries(typeof ILLUS_BRANCHE === "object" ? ILLUS_BRANCHE : {}).map(([k, u]) => `.cfemb-${k}{background-image:url(${u})}`),
+    ...Object.entries(typeof ILLUS_SKIN === "object" ? ILLUS_SKIN : {}).map(([k, u]) => `.sk-${k} .skx{background:radial-gradient(60% 55% at 50% 58%,#fff 44%,rgba(255,255,255,0) 78%),url(${u}) center/cover}`),
+  ].join("\n");
+  const st = document.createElement("style"); st.id = "illus-css"; st.textContent = css; document.head.appendChild(st);
+})();
+const cfEmb = (b, cls = "") => (typeof ILLUS_BRANCHE === "object" && ILLUS_BRANCHE[b] ? `<i class="cf-emb cfemb-${b} ${cls}" aria-hidden="true"></i>` : `<b>${cfBranch(b).kanji}</b>`);
 // ===== Visuels des cartes d'action (cadres façon Legends of Runeterra, icônes originales) =====
 // famille → couleur et libellé ; chaque carte a une icône, une règle courte et son signe de présage dans le coin
 const CF_FAM = {
@@ -74,7 +84,7 @@ function cfFace(c, extra = "") {
   const when = d.type === "reaction" ? "Hors de ton tour" : d.type === "equipement" ? "Équipement" : d.type === "differe" ? "Effet plus tard" : "À ton tour";
   return `<span class="cff ${extra}" style="--fc:${col}" title="${esc(d.texte || "")}">
     <span class="cff-band">${fam}<i>${sg.kanji}<b>${c.rang}</b></i></span>
-    <span class="cff-art">${CF_ICON[c.def] || `<b>${d.kanji}</b>`}</span>
+    ${typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cff-art pic cfart-${c.def}"></span>` : `<span class="cff-art">${CF_ICON[c.def] || `<b>${d.kanji}</b>`}</span>`}
     <span class="cff-name">${esc(d.nom)}</span><span class="cff-rule">${esc(CF_SHORT[c.def] || d.texte || "")}</span><span class="cff-when">${when}</span></span>`;
 }
 // petite pastille (équipement posé, défausse, journal)
@@ -96,7 +106,7 @@ function viewConfront() {
     ${L.miennes.length ? `<section class="sec"><h2>Mes parties</h2>${L.miennes.map((g) => row(g, "Reprendre")).join("")}</section>` : ""}
     <section class="sec"><h2>Salons ouverts</h2>${L.salons.length ? L.salons.map((g) => row(g, "Voir")).join("") : `<p class="note">Aucun salon public pour l'instant. Crée le tien !</p>`}</section>
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
-    <section class="sec"><h2>Les 8 branches</h2><div class="cf-branches">${(CF.cat?.branchIds || []).map((b) => `<div class="cf-br"><b>${cfBranch(b).kanji}</b><div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>
+    <section class="sec"><h2>Les 8 branches</h2><div class="cf-branches">${(CF.cat?.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>
       <p class="note">La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. Règles complètes dans le livret (docs/confrontation/REGLES.md).</p></section></div>`;
 }
 
@@ -131,8 +141,8 @@ function cfTableHTML() {
 function cfPerso(c, big) {
   if (!c) return "";
   const card = byId[c.cardId], b = cfBranch(c.branch);
-  const art = c.pret || !card ? `<div class="cf-loan"><b>${b.kanji}</b><span>Carte de prêt</span></div>` : cardHTML(card, { design: c.cosmetique || null });
-  return `<div class="cf-perso ${big ? "big" : ""}">${art}<p class="cf-pb"><b>${b.kanji} ${esc(b.nom)}</b>${big ? `<small>${esc(b.pouvoir)}</small>` : ""}</p></div>`;
+  const art = c.pret || !card ? `<div class="cf-loan">${cfEmb(c.branch, "big")}<span>Carte de prêt</span></div>` : cardHTML(card, { design: c.cosmetique || null });
+  return `<div class="cf-perso ${big ? "big" : ""}">${art}<p class="cf-pb"><b>${cfEmb(c.branch, "sm")} ${esc(b.nom)}</b>${big ? `<small>${esc(b.pouvoir)}</small>` : ""}</p></div>`;
 }
 const ROLE_TXT = { gardien: "Gardien : survis, les Sentinelles t'aident.", sentinelle: "Sentinelle : protège le Gardien.", briseur: "Briseur : élimine le Gardien.", errant: "Errant : sois le dernier en vie." };
 function cfBoard(v) {
@@ -143,7 +153,7 @@ function cfBoard(v) {
     return `<div class="cf-seat ${v.tour?.pid === p.id ? "turn" : ""} ${pr?.pid === p.id ? "wait" : ""} ${p.vivant ? "" : "dead"} ${p.id === v.moi ? "me" : ""} ${tg.length ? "target" : ""}" data-cft="${p.id}">
       ${v.tour?.pid === p.id ? `<span class="cf-ribbon">${p.id === v.moi ? "Ton tour" : "Son tour"}</span>` : ""}
       <div class="cf-seat-top">${cfPerso(p.perso)}<div class="cf-seat-id"><b>${esc(cfName(p.id))}</b>
-        ${p.role ? `<span class="cf-role r-${p.role}">${ROLE_LABEL[p.role]}</span>` : ""}${p.perso ? `<small>${cfBranch(p.perso.branch).kanji} ${esc(cfBranch(p.perso.branch).nom)}</small>` : ""}
+        ${p.role ? `<span class="cf-role r-${p.role}">${ROLE_LABEL[p.role]}</span>` : ""}${p.perso ? `<small class="cf-brl">${cfEmb(p.perso.branch, "sm")} ${esc(cfBranch(p.perso.branch).nom)}</small>` : ""}
         ${p.vivant ? "" : `<small class="cf-ko">Éliminé</small>`}${p.enLigne ? "" : `<small>Hors ligne</small>`}</div></div>
       <div class="cf-hp ${low ? "low" : ""}" role="img" aria-label="${p.pv} PV sur ${p.pvMax}"><span style="width:${pct}%"></span>${Array.from({ length: p.pvMax }, () => "<i></i>").join("")}<b>${p.pv}/${p.pvMax} PV</b></div>
       <div class="cf-stats"><span title="Cartes en main">🂠 ${p.nbMain}</span>${p.distancePercue != null ? `<span title="Distance depuis toi">↔ ${p.distancePercue}</span>` : ""}</div>

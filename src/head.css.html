@@ -1194,7 +1194,9 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .cf-hp b { position: absolute; inset: 0; display: grid; place-items: center; font: 700 10px/1 var(--mono); color: #fff; text-shadow: 0 1px 2px #000; }
 .cf-stats { display: flex; gap: 12px; font: 600 12px var(--mono); color: var(--fg2); }
 .cf-tgt { display: flex; flex-direction: column; gap: 6px; }
-.cf-tgt .btn { width: 100%; }
+.cf-tgt .btn { width: 100%; min-width: 0; white-space: normal; font-size: 13px; line-height: 1.2; padding: 8px 10px; height: auto; }
+.cf-seat-top .cf-loan span { display: none; }
+.cf-seat-top .cf-loan { gap: 0; }
 .cf-pile b { color: var(--fg); font-family: var(--mono); }
 .cf-actions .btn.big { flex: 1 1 220px; min-width: 0; height: auto; min-height: 54px; padding-block: 10px; white-space: normal; line-height: 1.25; }
 .cf-react .btn { white-space: normal; height: auto; padding-block: 10px; line-height: 1.25; min-width: 0; }
@@ -1203,4 +1205,12 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .cf-help summary { cursor: pointer; font-weight: 700; color: var(--gold); }
 .cf-help ol { margin: 10px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--fg2); font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { .cf-seat.target { animation: none; } .cf-card { transition: none; } }
+
+/* illustrations */
+.cff-art.pic { width: 100%; flex: 1.4; border-radius: 8px; background-size: cover; background-position: center; filter: none; box-shadow: inset 0 0 0 1px #0008, 0 0 14px color-mix(in srgb, var(--fc) 35%, transparent); margin-top: 2px; }
+.cf-emb { display: inline-block; width: 44px; height: 44px; flex: none; background-size: cover; background-position: center; border-radius: 50%; box-shadow: 0 0 0 1px #0006; vertical-align: middle; }
+.cf-emb.sm { width: 20px; height: 20px; }
+.cf-emb.big { width: 70%; height: auto; aspect-ratio: 1; }
+.cf-br .cf-emb { width: 52px; height: 52px; }
+.cf-brl { display: inline-flex; align-items: center; gap: 4px; }
 </style>

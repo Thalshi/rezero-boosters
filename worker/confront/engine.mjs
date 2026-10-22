@@ -92,10 +92,12 @@ export function distancePercue(s, aId, bId) {
 export const porteeArme = (s, p) => (p.arme ? def(s, p.arme).portee : ARME_DE_BASE.portee);
 function frappesMax(s, p) {
   if (p.arme && def(s, p.arme).illimite) return Infinity;
-  let n = branche(p) === "assaut" ? s.config.frappesAssaut : s.config.frappesParTour;
+  let n = branche(p) === "assaut" ? s.config.assaut.frappes : s.config.frappesParTour;
   if (petiteTable(s) && s.config.petiteTable.armeLongueFrappeBonus && p.arme && def(s, p.arme).portee >= 3) n += 1;
   return n;
 }
+/** Bonus de PV du Gardien : un nombre, ou un objet par taille de table. */
+export const bonusGardien = (cfg, n) => (typeof cfg.bonusGardien === "number" ? cfg.bonusGardien : cfg.bonusGardien[n] ?? 1);
 export const limiteMain = (s, p) => {
   const { min, max } = s.config.limiteMain;
   let l = Math.max(min ?? 0, p.pv);
@@ -299,7 +301,7 @@ function setupGame(s, now) {
     const c = s.reserve.find((x) => x.instanceId === p.choix);
     p.perso = { ...c };
     s.usage.push({ joueur: p.id, instanceId: c.instanceId, cardId: c.cardId, proprietaire: c.proprietaire, pret: c.pret });
-    p.pvMax = cfg.pv[s.mode] + (p.role === "gardien" ? cfg.bonusGardien : 0);
+    p.pvMax = cfg.pv[s.mode] + (p.role === "gardien" ? bonusGardien(cfg, n) : 0) + (petiteTable(s) && p.perso.branch === "survie" ? cfg.petiteTable.surviePvMax || 0 : 0);
     p.pv = p.pvMax;
     s.stats.joueurs[p.id] = { mainMax: 0 };
   }
@@ -473,9 +475,10 @@ function taskAttaque(s, t, now) {
   const sansPresage = t.nature !== "pluie" && branche(src) === "precision" && petiteTable(s) && s.config.petiteTable.precisionSansPresage;
   if (!sansPresage) {
     if (hasEquip(s, c, "voile") && presage(s, c, "voile", (k) => s.config.presage.voile.includes(k.signe))) { stat(s, c.id, "esquives"); emit(s, "esquive", { pid: c.id, par: "voile", src: src.id }); return; }
-    if (branche(c) === "defense" && presage(s, c, "defense", (k) => s.config.presage.defense.includes(k.signe))) { stat(s, c.id, "esquives"); stat(s, c.id, "esquivesDefense"); emit(s, "esquive", { pid: c.id, par: "defense", src: src.id }); return; }
+    const sigDef = petiteTable(s) && s.config.petiteTable.defense ? s.config.petiteTable.defense : s.config.presage.defense;
+    if (branche(c) === "defense" && presage(s, c, "defense", (k) => sigDef.includes(k.signe))) { stat(s, c.id, "esquives"); stat(s, c.id, "esquivesDefense"); emit(s, "esquive", { pid: c.id, par: "defense", src: src.id }); return; }
   }
-  openPrompt(s, "reaction", c.id, now, { src: src.id, nature: t.nature });
+  openPrompt(s, "reaction", c.id, now, { src: src.id, nature: t.nature, ...(t.carte ? { carte: t.carte } : {}) });
 }
 
 function taskDegats(s, t) {
@@ -487,7 +490,15 @@ function taskDegats(s, t) {
   stat(s, c.id, "pvPerdus", t.n);
   if (t.src) stat(s, t.src, "degatsInfliges", t.n);
   emit(s, "degats", { pid: c.id, n: t.n, src: t.src, cause: t.cause, pv: c.pv });
-  if (branche(c) === "resistance") { piocher(s, c, t.n * s.config.resistance.parPv, "resistance"); stat(s, c.id, "piochesResistance", t.n); }
+  if (branche(c) === "resistance") {
+    const { parPv, maxParTour } = s.config.resistance;
+    let k = t.n * parPv;
+    if (maxParTour != null) { const deja = (s.turn.resistance ||= {})[c.id] || 0; k = Math.max(0, Math.min(k, maxParTour - deja)); s.turn.resistance[c.id] = deja + k; }
+    if (k) { piocher(s, c, k, "resistance"); stat(s, c.id, "piochesResistance", k); }
+  }
+  // Assaut : une Frappe qui fait perdre des PV fait piocher son auteur
+  const src = t.src && P(s, t.src);
+  if (src && src.vivant && (t.cause === "frappe" || t.cause === "riposte") && branche(src) === "assaut" && s.config.assaut.piocheSiTouche) piocher(s, src, s.config.assaut.piocheSiTouche, "assaut");
   if (c.pv <= 0) s.queue.unshift({ t: "agonie", cible: c.id, src: t.src, cause: t.cause });
 }
 
@@ -497,9 +508,11 @@ function optionsSauvetage(s, p) {
   if (survieDispo(s, p, true)) o.push("survie");
   return o;
 }
+// coût de Ténacité : à 2 et 3 joueurs, la première utilisation de chaque tour peut coûter moins (réglage)
+const coutSurvie = (s, p) => (petiteTable(s) && s.config.petiteTable.survieCoutPremier && p && s.turn && p.survieTour !== s.turn.n ? s.config.petiteTable.survieCoutPremier : s.config.survie.cout);
 function survieDispo(s, p, sauvetage = false) {
   if (branche(p) !== "survie") return false;
-  if (p.main.length < s.config.survie.cout) return false;
+  if (p.main.length < coutSurvie(s, p)) return false;
   if (!sauvetage && p.pv >= p.pvMax) return false;
   const lim = s.config.survie.parTour;
   if (lim != null && s.turn && s.turn.pid === p.id && s.turn.survie >= lim) return false;
@@ -676,7 +689,7 @@ function resolveTimeout(s, now) {
     }
     case "sauvetage": {
       const o = optionsSauvetage(s, p), el = handOf(s, p, "elixir")[0];
-      a = auto && o.includes("elixir") ? { type: "elixir", carte: el } : auto && o.includes("survie") ? { type: "survie", cartes: p.main.slice(-2) } : { type: "encaisser" };
+      a = auto && o.includes("elixir") ? { type: "elixir", carte: el } : auto && o.includes("survie") ? { type: "survie", cartes: p.main.slice(-coutSurvie(s, p)) } : { type: "encaisser" };
       break;
     }
     case "stratege": a = { type: "garder", cartes: pr.data.cartes.slice(0, s.config.stratege.garde) }; break;
@@ -782,6 +795,18 @@ function respond(s, p, a, now, auto) {
         fromHand(s, p, a.carte); discardCard(s, a.carte);
         stat(s, p.id, "parades");
         emit(s, "pare", { pid: p.id, src: src.id, carte: cardPub(s, a.carte) });
+        // petite table : la Frappe parée d'un joueur Précision lui fait piocher (réglage)
+        if (pr.data.nature !== "pluie" && src.vivant && branche(src) === "precision" && petiteTable(s) && s.config.petiteTable.precisionPiocheSiParee) piocher(s, src, s.config.petiteTable.precisionPiocheSiParee, "precision");
+        // Précision (réglage) : Frappe parée, présage ; sur les signes indiqués, la Frappe revient dans sa main
+        const rep = s.config.precision.repriseSiParee;
+        if (pr.data.nature === "frappe" && src.vivant && branche(src) === "precision" && rep && rep.length && pr.data.carte && s.discard.includes(pr.data.carte)) {
+          if (presage(s, src, "reprise", (k) => rep.includes(k.signe))) {
+            s.discard.splice(s.discard.lastIndexOf(pr.data.carte), 1);
+            src.main.push(pr.data.carte);
+            stat(s, src.id, "reprises");
+            emit(s, "reprise", { pid: src.id, carte: cardPub(s, pr.data.carte) });
+          }
+        }
         return done();
       }
       if (a.type === "riposter") {
@@ -795,7 +820,13 @@ function respond(s, p, a, now, auto) {
         s.queue.unshift({ t: "attaque", src: p.id, cible: src.id, nature: "riposte" });
         return;
       }
-      if (a.type === "encaisser") { done(); s.queue.unshift({ t: "degats", cible: p.id, n: 1, src: src.id, cause: pr.data.nature }); return; }
+      if (a.type === "encaisser") {
+        done();
+        // Précision (réglage) : une Frappe qui touche une cible sans carte en main fait perdre 2 PV
+        const n = pr.data.nature !== "pluie" && branche(src) === "precision" && s.config.precision.degatsMainVide && p.main.length === 0 ? s.config.precision.degatsMainVide : 1;
+        s.queue.unshift({ t: "degats", cible: p.id, n, src: src.id, cause: pr.data.nature });
+        return;
+      }
       return refuse("ACTION_INVALIDE", "Réponds par parer, riposter ou encaisser.");
     }
     case "onde": {
@@ -883,16 +914,18 @@ function respond(s, p, a, now, auto) {
 }
 
 function ciblesVoleur(s, p) {
-  return vivants(s).filter((q) => q.id !== p.id && q.main.length && (s.config.porteeVoleur == null || distancePercue(s, p.id, q.id) <= s.config.porteeVoleur)).map((q) => q.id);
+  const { portee, petiteTablePlusRiche, petiteTableMainMin } = s.config.voleur;
+  return vivants(s).filter((q) => q.id !== p.id && q.main.length && (portee == null || distancePercue(s, p.id, q.id) <= portee) && !(petiteTable(s) && petiteTableMainMin && q.main.length < petiteTableMainMin) && !(petiteTablePlusRiche && petiteTable(s) && q.main.length < p.main.length + (petiteTablePlusRiche === "strict" ? 1 : 0))).map((q) => q.id);
 }
 
 function survie(s, p, cartes, sauvetage, done) {
   if (!survieDispo(s, p, sauvetage)) refuse("SURVIE_IMPOSSIBLE", "Ténacité impossible maintenant.");
-  const k = s.config.survie.cout;
+  const k = coutSurvie(s, p);
   if (!Array.isArray(cartes) || cartes.length !== k || new Set(cartes).size !== k || !cartes.every((u) => inHand(p, u))) refuse("CARTES_INVALIDES", `Défausse exactement ${k} cartes de ta main.`);
   cartes.forEach((u) => { fromHand(s, p, u); discardCard(s, u); });
   p.pv = Math.min(p.pvMax, p.pv + 1);
   if (s.turn && s.turn.pid === p.id) s.turn.survie++;
+  if (s.turn) p.survieTour = s.turn.n;
   stat(s, p.id, "soins"); stat(s, p.id, "survies");
   emit(s, "survie", { pid: p.id, cartes: cartes.map((u) => cardPub(s, u)), pv: p.pv });
   done();
@@ -926,7 +959,7 @@ function jouer(s, p, a) {
       use(); s.turn.frappes++;
       stat(s, p.id, "frappes"); hostile(s, p.id, cible.id);
       evt({ cible: cible.id });
-      s.queue.unshift({ t: "attaque", src: p.id, cible: cible.id, nature: "frappe" });
+      s.queue.unshift({ t: "attaque", src: p.id, cible: cible.id, nature: "frappe", carte: uid });
       return;
     }
     case "parade": case "riposte": return refuse("REACTION_SEULEMENT", "Cette carte se joue en réaction, hors de ton tour.");
@@ -1024,7 +1057,7 @@ export function legalActions(s, pid) {
         const k = Math.max(0, p.main.length - limiteMain(s, p));
         out.push({ type: "finir", aDefausser: k, promptId: id });
         if (s.turn.entrave) break;
-        if (survieDispo(s, p)) out.push({ type: "survie", cartes: s.config.survie.cout, promptId: id });
+        if (survieDispo(s, p)) out.push({ type: "survie", cartes: coutSurvie(s, p), promptId: id });
         const autres = vivants(s).filter((q) => q.id !== pid);
         const seen = new Set();
         for (const u of p.main) {
@@ -1063,7 +1096,7 @@ export function legalActions(s, pid) {
       case "sauvetage": {
         const o = optionsSauvetage(s, p);
         if (o.includes("elixir")) out.push({ type: "elixir", carte: handOf(s, p, "elixir")[0], promptId: id });
-        if (o.includes("survie")) out.push({ type: "survie", cartes: s.config.survie.cout, promptId: id });
+        if (o.includes("survie")) out.push({ type: "survie", cartes: coutSurvie(s, p), promptId: id });
         out.push({ type: "encaisser", promptId: id });
         break;
       }

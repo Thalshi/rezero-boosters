@@ -107,7 +107,7 @@ export function setup(n, { seed = "t", branches = {}, roles = null, seats = null
   if (roles) {
     for (const p of s.players) {
       p.role = roles[p.id]; p.roleVisible = p.role === "gardien";
-      p.pvMax = s.config.pv[s.mode] + (p.role === "gardien" ? s.config.bonusGardien : 0); p.pv = p.pvMax;
+      p.pvMax = s.config.pv[s.mode] + (p.role === "gardien" ? E.bonusGardien(s.config, s.players.length) : 0); p.pv = p.pvMax;
     }
   }
   if (seats) seats.forEach((id, i) => { s.players.find((p) => p.id === id).siege = i; });

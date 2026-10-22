@@ -254,17 +254,72 @@ t.section("Branches : Assaut, Survie, Défense, Résistance, Chance, Stratège, 
   t.check("Stratège : garde 2 cartes, la 3e va sous la pioche", deepEq(P(st, "p0").main.sort(), [top3[1], top3[2]].sort()) && st.deck[0] === top3[0] && st.prompt.kind === "tour");
 
   // Voleur : vol au lieu de la première pioche
+  const toP0 = (st) => { st.queue = []; st.prompt = null; st.turn = { pid: "p1", n: 1, tour: 1, stage: "actions", frappes: 0, survie: 0, entrave: false, fini: true }; return E.act(st, "p1", { type: "presence", enLigne: true }).state; };
   let vo = duel("voleur", "assaut");
-  arrange(vo, { p0: { main: [] }, p1: { main: ["parade"] } });
-  vo.queue = []; vo.prompt = null;
-  vo.turn = { pid: "p1", n: 1, tour: 1, stage: "actions", frappes: 0, survie: 0, entrave: false, fini: true };
-  vo = E.act(vo, "p1", { type: "presence", enLigne: true }).state;
+  arrange(vo, { p0: { main: [] }, p1: { main: ["parade", "frappe", "elixir"] } });
+  vo = toP0(vo);
   t.check("Voleur : on lui propose de voler au lieu de piocher", vo.prompt.kind === "voleur");
-  const stolen = P(vo, "p1").main[0];
+  const avant = [...P(vo, "p1").main];
   r = E.act(vo, "p0", { type: "piocher", cible: "p1" });
-  t.check("Voleur : il prend la carte de p1 et pioche 1 carte", P(r.state, "p0").main.length === 2 && P(r.state, "p0").main.includes(stolen) && P(r.state, "p1").main.length === 0);
+  const stolen = avant.find((u) => !P(r.state, "p1").main.includes(u));
+  t.check("Voleur : il prend une carte de p1 et pioche 1 carte", P(r.state, "p0").main.length === 2 && P(r.state, "p0").main.includes(stolen) && P(r.state, "p1").main.length === 2);
   const evVol = r.events.find((e) => e.type === "vol");
   t.check("la carte volée n'est visible que du voleur et du volé", evVol && deepEq(evVol.vis, ["p0", "p1"]) && E.eventsFor(r.events, null).every((e) => e.type !== "vol"));
+  let vo2 = duel("voleur", "assaut");
+  arrange(vo2, { p0: { main: [] }, p1: { main: ["parade", "frappe"] } });
+  vo2 = toP0(vo2);
+  t.check("correction petite table : pas de vol sur un joueur qui a moins de 3 cartes (pioche normale)", vo2.prompt.kind === "tour" && P(vo2, "p0").main.length === 2 && P(vo2, "p1").main.length === 2);
+}
+
+// ===================================================================================
+t.section("Corrections d'équilibrage appliquées (valeurs par défaut)");
+{
+  // Assaut : une Frappe qui touche fait piocher
+  let a = setup(2, { seed: "corr", branches: { p0: "assaut", p1: "chance" }, seats: ["p0", "p1"] });
+  arrange(a, { p0: { main: ["frappe"] }, p1: { main: [], equip: [] } });
+  forceTurn(a, "p0");
+  a = ok(ok(a, "p0", { type: "jouer", carte: card(a, "p0", "frappe"), cible: "p1" }), "p1", { type: "encaisser" });
+  t.check("Assaut : sa Frappe touche, il pioche 1 carte", P(a, "p1").pv === 5 && P(a, "p0").main.length === 1);
+  // Résistance : au plus 1 carte par tour de jeu
+  let r = setup(2, { seed: "corr", branches: { p0: "assaut", p1: "resistance" }, seats: ["p0", "p1"] });
+  arrange(r, { p0: { main: ["frappe", "frappe", "frappe"] }, p1: { main: [], equip: [] } });
+  forceTurn(r, "p0");
+  for (let i = 0; i < 2; i++) r = ok(ok(r, "p0", { type: "jouer", carte: card(r, "p0", "frappe"), cible: "p1" }), "p1", { type: "encaisser" });
+  t.check("Résistance : 2 PV perdus dans le même tour, 1 seule carte piochée", P(r, "p1").pv === 4 && P(r, "p1").main.length === 1);
+  // Précision : Frappe parée, présage Feu ou Vent, la Frappe revient
+  let pr = setup(4, { seed: "corr4", branches: { p0: "precision", p1: "assaut", p2: "assaut", p3: "assaut" }, roles: { p0: "gardien", p1: "briseur", p2: "briseur", p3: "errant" }, seats: ["p0", "p1", "p2", "p3"] });
+  arrange(pr, { p0: { main: ["frappe"] }, p1: { main: ["parade"], equip: [] } });
+  forceTurn(pr, "p0");
+  const f = card(pr, "p0", "frappe");
+  pr = ok(pr, "p0", { type: "jouer", carte: f, cible: "p1" });
+  deckTop(pr, [{ signe: "vent" }]);
+  pr = ok(pr, "p1", { type: "parer", carte: card(pr, "p1", "parade") });
+  t.check("Précision : Frappe parée + présage Vent, la Frappe revient dans sa main", P(pr, "p0").main.includes(f) && !pr.discard.includes(f));
+  let pr2 = setup(4, { seed: "corr4", branches: { p0: "precision", p1: "assaut", p2: "assaut", p3: "assaut" }, roles: { p0: "gardien", p1: "briseur", p2: "briseur", p3: "errant" }, seats: ["p0", "p1", "p2", "p3"] });
+  arrange(pr2, { p0: { main: ["frappe"] }, p1: { main: ["parade"], equip: [] } });
+  forceTurn(pr2, "p0");
+  const f2 = card(pr2, "p0", "frappe");
+  pr2 = ok(pr2, "p0", { type: "jouer", carte: f2, cible: "p1" });
+  deckTop(pr2, [{ signe: "eau" }]);
+  pr2 = ok(pr2, "p1", { type: "parer", carte: card(pr2, "p1", "parade") });
+  t.check("Précision : présage Eau, la Frappe reste à la défausse", !P(pr2, "p0").main.includes(f2) && pr2.discard.includes(f2));
+  // Défense à petite table : Vent esquive aussi
+  let d = setup(2, { seed: "corr", branches: { p0: "assaut", p1: "defense" }, seats: ["p0", "p1"] });
+  arrange(d, { p0: { main: ["frappe"] }, p1: { main: [], equip: [] } });
+  forceTurn(d, "p0"); deckTop(d, [{ signe: "vent" }]);
+  const rd = E.act(d, "p0", { type: "jouer", carte: card(d, "p0", "frappe"), cible: "p1" });
+  t.check("Défense à 2 joueurs : présage Vent, esquive (Eau ou Vent)", types(rd.events).includes("esquive"));
+  let d7 = setup(5, { seed: "corr5", branches: { p0: "assaut", p1: "defense", p2: "assaut", p3: "assaut", p4: "assaut" }, roles: { p0: "gardien", p1: "briseur", p2: "briseur", p3: "errant", p4: "sentinelle" }, seats: ["p0", "p1", "p2", "p3", "p4"] });
+  arrange(d7, { p0: { main: ["frappe"] }, p1: { main: [], equip: [] } });
+  forceTurn(d7, "p0"); deckTop(d7, [{ signe: "vent" }]);
+  const rd7 = E.act(d7, "p0", { type: "jouer", carte: card(d7, "p0", "frappe"), cible: "p1" });
+  t.check("Défense à 5 joueurs : présage Vent, pas d'esquive (Eau seul)", !types(rd7.events).includes("esquive") && rd7.state.prompt.kind === "reaction");
+  // PV du Gardien par table, compensation du second joueur en duel
+  const pvG = (n) => { const s = E.createGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pvg" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "gardien").pvMax; };
+  t.check("PV du Gardien : 6 à 4 joueurs, 4 à 5, 6 à 6, 5 à 7", pvG(4) === 6 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 5, [4, 5, 6, 7].map(pvG));
+  const du = playGame(E.createGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "second" }), { maxSteps: 2 }).state;
+  const second = du.players.find((p) => p.id !== du.premier);
+  t.check("duel : le second joueur commence avec 7 cartes (6 + 1 de compensation)", second.main.length === 7);
 }
 
 // ===================================================================================
@@ -312,7 +367,7 @@ t.section("Cartes d'action : refus et effets");
   d = ok(ok(d, "p0", { type: "jouer", carte: card(d, "p0", "frappe"), cible: "p1" }), "p1", { type: "encaisser" });
   t.check("duel : l'Élixir ne sauve pas à 0 PV (2 joueurs en vie), p1 est éliminé", d.phase === "fin" && d.result.gagnants[0] === "p0");
   // Récompense en trio
-  let tr = setup(3, { seed: "tr", branches: { p0: "assaut", p1: "assaut", p2: "assaut" }, seats: ["p0", "p1", "p2"] });
+  let tr = setup(3, { seed: "tr", branches: { p0: "chance", p1: "assaut", p2: "assaut" }, seats: ["p0", "p1", "p2"] });
   arrange(tr, { p0: { main: ["frappe"] }, p1: { main: [], pv: 1, equip: [] } });
   forceTurn(tr, "p0");
   tr = ok(ok(tr, "p0", { type: "jouer", carte: card(tr, "p0", "frappe"), cible: "p1" }), "p1", { type: "encaisser" });

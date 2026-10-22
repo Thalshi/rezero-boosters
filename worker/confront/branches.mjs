@@ -6,12 +6,12 @@
 export const BRANCHES = {
   assaut: {
     nom: "Assaut", kanji: "猛",
-    pouvoir: "Fureur : tu peux jouer 2 Frappes par tour au lieu d'une.",
+    pouvoir: "Fureur : tu peux jouer 2 Frappes par tour au lieu d'une, et chaque fois qu'une de tes Frappes fait perdre des PV, pioche 1 carte.",
     moment: "ton tour",
   },
   defense: {
     nom: "Défense", kanji: "守",
-    pouvoir: "Garde : quand une Frappe ou une Pluie de shurikens te vise, présage ; sur Eau, l'attaque est esquivée. Cumulable avec le Voile de brume (deux présages).",
+    pouvoir: "Garde : quand une Frappe ou une Pluie de shurikens te vise, présage ; sur Eau, l'attaque est esquivée (à 2 ou 3 joueurs : sur Eau ou Vent). Cumulable avec le Voile de brume (deux présages).",
     moment: "hors de ton tour, automatique",
   },
   stratege: {
@@ -21,17 +21,17 @@ export const BRANCHES = {
   },
   voleur: {
     nom: "Voleur", kanji: "盗",
-    pouvoir: "Main leste : à ta pioche, tu peux remplacer ta première carte par une carte prise au hasard dans la main d'un autre joueur.",
+    pouvoir: "Main leste : à ta pioche, tu peux remplacer ta première carte par une carte prise au hasard dans la main d'un autre joueur (à 2 ou 3 joueurs : seulement s'il a au moins 3 cartes en main).",
     moment: "début de ton tour",
   },
   precision: {
     nom: "Précision", kanji: "狙",
-    pouvoir: "Œil sûr : tu vois les autres joueurs à 1 de distance de moins (minimum 1). À 2 ou 3 joueurs : tes Frappes ne peuvent pas être esquivées par un présage (Voile de brume, Défense) ; seule une carte les arrête.",
+    pouvoir: "Œil sûr : tu vois les autres joueurs à 1 de distance de moins (minimum 1). Quand une de tes Frappes est parée, présage : sur Feu ou Vent, reprends cette Frappe en main. À 2 ou 3 joueurs : tes Frappes ne peuvent pas être esquivées par un présage (Voile de brume, Défense) ; seule une carte les arrête.",
     moment: "permanent",
   },
   resistance: {
     nom: "Résistance", kanji: "耐",
-    pouvoir: "Endurance : chaque fois que tu perds 1 PV, pioche 1 carte.",
+    pouvoir: "Endurance : chaque fois que tu perds 1 PV, pioche 1 carte (au plus 1 carte par tour de jeu).",
     moment: "hors de ton tour, automatique",
   },
   survie: {

@@ -27,7 +27,8 @@ export function ennemis(v, opts = {}) {
   if (opts.focus) {
     const f = autres.find((p) => p.id === opts.focus);
     if (f) return [f];
-    return autres.filter((p) => !partners.has(p.id));
+    // la victime est éliminée : l'alliance s'arrête, chacun pour soi
+    return [...autres].sort((a, b) => a.pv - b.pv);
   }
   if (v.mode !== "classique") return [...autres].sort((a, b) => a.pv - b.pv || H(v, b.id, me.id) - H(v, a.id, me.id));
   const g = v.joueurs.find((p) => p.role === "gardien");
@@ -73,7 +74,7 @@ export function botAction(v, opts = {}) {
     case "onde": case "defi": return pick("defausser")[0] || pick("encaisser")[0];
     case "sauvetage": {
       const e = pick("elixir")[0]; if (e) return e;
-      if (pick("survie").length) return with$({ type: "survie", cartes: cheap(2) });
+      if (pick("survie").length) return with$({ type: "survie", cartes: cheap(pick("survie")[0].cartes) });
       return pick("encaisser")[0];
     }
     case "stratege": { const a = pick("garder")[0]; const best = [...a.parmi].sort((x, y) => val(card(v, y)) - val(card(v, x))); return with$({ type: "garder", cartes: best.slice(0, a.nombre) }); }
@@ -113,7 +114,8 @@ function tourAction(v, opts, acts, me, foes, foeIds, rankFoe, byUid, cheap, with
   // 3. soins
   if (me.pv < me.pvMax && of("elixir")[0]) return of("elixir")[0];
   if (me.pv < me.pvMax && of("festin")[0]) return of("festin")[0];
-  if (acts.find((a) => a.type === "survie") && me.pv < me.pvMax && v.main.length >= 4) return with$({ type: "survie", cartes: cheap(2) });
+  // Survie : avec les cartes qui seraient défaussées en fin de tour, ou en urgence
+  if (acts.find((a) => a.type === "survie") && me.pv < me.pvMax && (v.main.length - v.limiteMain >= 1 || (me.pv <= 2 && v.main.length >= 3))) return with$({ type: "survie", cartes: cheap(acts.find((a) => a.type === "survie").cartes) });
   if (v.monRole === "sentinelle" && g && g.vivant && g.pv < g.pvMax && me.pv >= 3) { const l = of("lien").find((a) => a.cible === g.id); if (l) return l; }
   // 4. gêner les ennemis
   const sc = toFoe(of("sceau"))[0]; if (sc) return sc;
@@ -130,7 +132,13 @@ function tourAction(v, opts, acts, me, foes, foeIds, rankFoe, byUid, cheap, with
   // 5. attaques
   const zone = (d) => { const a = of(d)[0]; if (a && foes.length > friendsHit()) return a; return null; };
   const df = toFoe(of("defi"))[0]; if (df && nFrappes >= 2) return df;
-  const fr = toFoe(of("frappe"))[0]; if (fr) return fr;
+  // Frappe : la première du tour toujours ; les suivantes seulement si elles peuvent achever la cible
+  // ou s'il reste de quoi se défendre (une Frappe sert aussi contre le Défi et l'Onde de choc)
+  const fr = toFoe(of("frappe"))[0];
+  if (fr) {
+    const tgt = v.joueurs.find((p) => p.id === fr.cible);
+    if (v.tour.frappes === 0 || nFrappes >= 3 || tgt.pv <= 1 || tgt.nbMain === 0) return fr;
+  }
   const z = zone("pluie") || zone("onde"); if (z) return z;
   // 6. fin du tour
   const fin = acts.find((a) => a.type === "finir");

@@ -1061,6 +1061,23 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 /* ===== Confrontation ===== */
 .cf-row { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 12px 14px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--panel); }
 .cf-row .btn { margin-left: auto; }
+/* Admin : branches des cartes */
+.brx-sum { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.brx-sum span { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line2); font-size: 13px; }
+.brx-sum b { color: var(--gold); font-family: var(--mono); }
+.brx-list { display: grid; gap: 10px; margin-top: 14px; }
+.brx-p { padding: 12px 14px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--panel); }
+.brx-h { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin-bottom: 8px; }
+.brx-h > b { font-size: 16px; }
+.brx-all { margin-left: auto; display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--mut); }
+.brx-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.brx-c { display: grid; gap: 4px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); }
+.brx-c.mod { border-color: var(--gold); }
+.brx-c small { color: var(--gold); font-size: 11px; }
+.brx-r { font: 700 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--rc); }
+.brx-t { font-size: 13px; }
+.brx-sel { display: flex; gap: 6px; align-items: center; }
+.brx-sel select, .brx-all select { flex: 1; min-width: 0; background: var(--bg); color: var(--fg); border: 1px solid var(--line2); border-radius: 8px; padding: 5px 8px; font: inherit; font-size: 13px; }
 /* Confrontation : livret de règles et fiches des rôles */
 .cf-howto { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; margin: 18px 0; padding: 16px 18px; border-radius: var(--r-xl); border: 1px solid #f5c51855; background: radial-gradient(120% 140% at 0% 0%, #f5c51822, transparent 60%), var(--panel); }
 .cf-howto div { display: grid; gap: 2px; } .cf-howto span { color: var(--fg2); font-size: 14px; }
@@ -3296,7 +3313,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
   ["missions", "務", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "華", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "対", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "店", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "召", "Sanctuaire"]] : []), ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
-  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
+  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["branches", "枝", "Branches"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -4029,6 +4046,7 @@ function viewAdmin() {
   const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
   return `<div class="wrap page" style="max-width:900px">${head("Admin · 管理", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
+    <div class="card sec"><h3>Confrontation : branches des cartes</h3><p class="note">Chaque carte a une branche (son pouvoir en partie), avec une variante possible selon la rareté. Une proposition est en place : à toi de l'ajuster.</p><button class="btn" type="button" data-nav="branches">Régler les branches</button></div>
     <div class="card sec"><h3>Nouveautés ouvertes aux joueurs</h3><p class="note">Une nouveauté fermée disparaît du menu et le serveur refuse ses actions. Rien n'est perdu : on la rouvre quand on veut.</p>
       <div class="feat-list">${FEATURES.map(([k, l]) => `<label class="zopt-line"><input type="checkbox" data-feat="${k}" ${featureOn(CONFIG, k) ? "checked" : ""}> ${l}</label>`).join("")}</div></div>
     ${SRV ? `<form class="card sec" id="annForm"><h3>Annonce</h3><p class="note">Elle s'affiche au comptoir et en notification pour tout le QG.</p><textarea class="in" id="annText" rows="2" maxlength="300" placeholder="Ex. : l'épisode 2 sort samedi à 18 h !"></textarea><button class="btn acc" type="submit">Envoyer l'annonce</button></form>` : ""}
@@ -4779,7 +4797,7 @@ function viewConfront() {
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
     <section class="sec"><h2>Les 4 rôles</h2><p class="note">À partir de 4 joueurs, chacun reçoit un rôle. Seul le Gardien est connu de tous.</p><div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r, { short: true })).join("")}</div></section>
     <section class="sec"><h2>Les 8 branches</h2><div class="cf-branches">${(CF.cat?.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>
-      <p class="note">La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. <a href="#/confront/regles">Lire le livret complet</a>.</p></section></div>`;
+      <p class="note">Chaque carte a sa branche : les cartes Épique et plus d'un perso en ont souvent une autre. La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. <a href="#/confront/regles">Lire le livret complet</a>.</p></section></div>`;
 }
 
 function cfTableHTML() {
@@ -5023,7 +5041,7 @@ function viewRegles() {
 
     ${sec("perso", 3, "Ton personnage et sa branche", `<p>Les personnages viennent de vos collections : chacun peut <b>apporter au plus une carte par branche</b>. Pour chaque branche que tu laisses vide, le jeu ajoute une <b>carte de prêt</b> (un personnage générique). Tout est mélangé, puis chacun reçoit <b>deux propositions secrètes</b> et en choisit une.</p>
       <div class="rg-box"><b>Tes cartes restent à toi</b><p>Jouer la carte d'un autre ne change rien à la propriété ni au design. Pendant la partie, les cartes apportées ne peuvent être ni vendues ni échangées ; elles sont libérées à la fin.</p></div>
-      <p>La <b>branche</b> donne un pouvoir. La rareté ne compte pas : une Commune et une Mythique de la même branche ont exactement le même pouvoir.</p>
+      <p>Chaque carte a une <b>branche</b>, qui donne son pouvoir. Les cartes Épique, Légendaire et Mythique d'un perso ont souvent une <b>autre branche</b> que ses cartes plus communes : deux cartes du même perso peuvent donc jouer différemment. Ce n'est jamais plus fort, juste différent : une Commune et une Mythique de la même branche ont exactement le même pouvoir. Quand tu apportes tes cartes, chacune est rangée sous sa branche.</p>
       <div class="cf-branches">${(cat.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>`)}
 
     ${sec("miseenplace", 4, "Mise en place", `<ol class="rg-ol"><li>Le serveur place les joueurs au hasard autour de la table.</li>
@@ -5074,6 +5092,50 @@ function viewRegles() {
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-rg]"); if (!a) return;
   e.preventDefault(); document.getElementById("rg-" + a.dataset.rg)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+});
+
+// ===== Admin : branche de Confrontation de chaque carte (#/branches) =====
+// Le serveur propose (branche du perso ; une 2e branche en Épique et plus) ; Billy ajuste carte par carte.
+ROUTES.push("branches");
+const BRX = { data: null, loading: false, filtre: "" };
+async function brxLoad() {
+  if (BRX.loading) return; BRX.loading = true;
+  try { await cfCat(); BRX.data = await srv("confront/branches"); } catch (e) { BRX.data = { error: e.message }; }
+  BRX.loading = false; if (view === "branches") draw();
+}
+async function brxSet(ids, branch) {
+  try { BRX.data = await srv("confront/branches/set", { ids, branch }); toast(ids.length > 1 ? `${ids.length} cartes mises à jour.` : "Branche enregistrée."); }
+  catch (e) { toast(e.message); }
+  draw();
+}
+const brxOf = (id) => BRX.data.choix[id] || BRX.data.proposees[id];
+function viewBranches() {
+  if (!IS_ADMIN) return `<div class="wrap page">${empty("Cette page est réservée à Billy.")}</div>`;
+  if (!SRV) return `<div class="wrap page">${empty("Les branches se règlent sur le site du QG.")}</div>`;
+  if (!BRX.data) { brxLoad(); return `<div class="wrap page"><p class="note">Chargement…</p></div>`; }
+  if (BRX.data.error) return `<div class="wrap page">${empty(esc(BRX.data.error))}</div>`;
+  const ids = CF.cat?.branchIds || [], opts = (sel) => ids.map((b) => `<option value="${b}" ${b === sel ? "selected" : ""}>${esc(cfBranch(b).nom)}</option>`).join("");
+  const count = Object.fromEntries(ids.map((b) => [b, 0])); for (const c of ALL_CARDS) count[brxOf(c.id)]++;
+  const changed = Object.keys(BRX.data.choix).length;
+  const people = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac))
+    .map(([who, p]) => ({ who, p, cards: ALL_CARDS.filter((c) => c.who === who).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank) }))
+    .filter((x) => x.cards.length && (BRX.filtre !== "modif" || x.cards.some((c) => BRX.data.choix[c.id])) && (BRX.filtre !== "var" || new Set(x.cards.map((c) => brxOf(c.id))).size > 1));
+  return `<div class="wrap page" style="max-width:980px">${head("Admin · Confrontation", "Branches des cartes", "Chaque carte a une branche, qui donne son pouvoir en Confrontation. Proposition de départ : la branche du perso, et une deuxième branche pour ses cartes Épique, Légendaire et Mythique. Ce n'est jamais plus fort, juste différent. Tu changes ce que tu veux : c'est pris en compte dès la prochaine partie.")}
+    <div class="brx-sum">${ids.map((b) => `<span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} <b>${count[b]}</b></span>`).join("")}</div>
+    <p class="note">${changed ? `${changed} carte${changed > 1 ? "s" : ""} modifiée${changed > 1 ? "s" : ""} par toi.` : "Aucune modification : tout suit la proposition."} Cette page cite des persos pas encore débloqués : ne la montre pas aux joueurs.</p>
+    ${seg("brxF", [["", "Tous les persos"], ["var", "Avec variantes"], ["modif", "Modifiés"]], BRX.filtre)}
+    <div class="brx-list">${people.map(({ who, p, cards }) => `<div class="brx-p">
+      <div class="brx-h"><b>${esc(p.name)}</b><span class="note">${FACTIONS[p.fac]?.label || ""}</span>
+        <label class="brx-all">Toutes ses cartes <select data-brxall="${who}" aria-label="Branche de toutes les cartes de ${esc(p.name)}"><option value="">Choisir…</option>${opts("")}<option value="__prop">Revenir à la proposition</option></select></label></div>
+      <div class="brx-cards">${cards.map((c) => { const b = brxOf(c.id), mod = !!BRX.data.choix[c.id];
+        return `<label class="brx-c ${mod ? "mod" : ""}"><span class="brx-r" style="--rc:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="brx-t">${esc(subOf(c))}</span>
+          <span class="brx-sel">${cfEmb(b, "sm")}<select data-brx="${c.id}" aria-label="Branche de ${esc(p.name)} · ${esc(subOf(c))}">${opts(b)}</select></span>${mod ? `<small>modifiée · proposé : ${esc(cfBranch(BRX.data.proposees[c.id]).nom)}</small>` : ""}</label>`; }).join("")}</div></div>`).join("")}</div></div>`;
+}
+VIEWS.branches = viewBranches;
+ADMIN_SEG.brxF = (v) => { BRX.filtre = v; };
+document.addEventListener("change", (e) => {
+  const one = e.target.closest?.("[data-brx]"); if (one) return brxSet([one.dataset.brx], one.value);
+  const all = e.target.closest?.("[data-brxall]"); if (all && all.value) return brxSet(ALL_CARDS.filter((c) => c.who === all.dataset.brxall).map((c) => c.id), all.value === "__prop" ? null : all.value);
 });
 
 // ===== Coffre arcanique : scène 3D, clé, et lecteur de scénarios =====

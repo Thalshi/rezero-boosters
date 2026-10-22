@@ -91,7 +91,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
   ["missions", "務", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "華", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "対", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "店", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "召", "Sanctuaire"]] : []), ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
-  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
+  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["branches", "枝", "Branches"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {

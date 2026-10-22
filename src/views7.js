@@ -94,7 +94,7 @@ function viewRegles() {
 
     ${sec("perso", 3, "Ton personnage et sa branche", `<p>Les personnages viennent de vos collections : chacun peut <b>apporter au plus une carte par branche</b>. Pour chaque branche que tu laisses vide, le jeu ajoute une <b>carte de prêt</b> (un personnage générique). Tout est mélangé, puis chacun reçoit <b>deux propositions secrètes</b> et en choisit une.</p>
       <div class="rg-box"><b>Tes cartes restent à toi</b><p>Jouer la carte d'un autre ne change rien à la propriété ni au design. Pendant la partie, les cartes apportées ne peuvent être ni vendues ni échangées ; elles sont libérées à la fin.</p></div>
-      <p>La <b>branche</b> donne un pouvoir. La rareté ne compte pas : une Commune et une Mythique de la même branche ont exactement le même pouvoir.</p>
+      <p>Chaque carte a une <b>branche</b>, qui donne son pouvoir. Les cartes Épique, Légendaire et Mythique d'un perso ont souvent une <b>autre branche</b> que ses cartes plus communes : deux cartes du même perso peuvent donc jouer différemment. Ce n'est jamais plus fort, juste différent : une Commune et une Mythique de la même branche ont exactement le même pouvoir. Quand tu apportes tes cartes, chacune est rangée sous sa branche.</p>
       <div class="cf-branches">${(cat.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>`)}
 
     ${sec("miseenplace", 4, "Mise en place", `<ol class="rg-ol"><li>Le serveur place les joueurs au hasard autour de la table.</li>
@@ -145,4 +145,48 @@ function viewRegles() {
 document.addEventListener("click", (e) => {
   const a = e.target.closest("[data-rg]"); if (!a) return;
   e.preventDefault(); document.getElementById("rg-" + a.dataset.rg)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+});
+
+// ===== Admin : branche de Confrontation de chaque carte (#/branches) =====
+// Le serveur propose (branche du perso ; une 2e branche en Épique et plus) ; Billy ajuste carte par carte.
+ROUTES.push("branches");
+const BRX = { data: null, loading: false, filtre: "" };
+async function brxLoad() {
+  if (BRX.loading) return; BRX.loading = true;
+  try { await cfCat(); BRX.data = await srv("confront/branches"); } catch (e) { BRX.data = { error: e.message }; }
+  BRX.loading = false; if (view === "branches") draw();
+}
+async function brxSet(ids, branch) {
+  try { BRX.data = await srv("confront/branches/set", { ids, branch }); toast(ids.length > 1 ? `${ids.length} cartes mises à jour.` : "Branche enregistrée."); }
+  catch (e) { toast(e.message); }
+  draw();
+}
+const brxOf = (id) => BRX.data.choix[id] || BRX.data.proposees[id];
+function viewBranches() {
+  if (!IS_ADMIN) return `<div class="wrap page">${empty("Cette page est réservée à Billy.")}</div>`;
+  if (!SRV) return `<div class="wrap page">${empty("Les branches se règlent sur le site du QG.")}</div>`;
+  if (!BRX.data) { brxLoad(); return `<div class="wrap page"><p class="note">Chargement…</p></div>`; }
+  if (BRX.data.error) return `<div class="wrap page">${empty(esc(BRX.data.error))}</div>`;
+  const ids = CF.cat?.branchIds || [], opts = (sel) => ids.map((b) => `<option value="${b}" ${b === sel ? "selected" : ""}>${esc(cfBranch(b).nom)}</option>`).join("");
+  const count = Object.fromEntries(ids.map((b) => [b, 0])); for (const c of ALL_CARDS) count[brxOf(c.id)]++;
+  const changed = Object.keys(BRX.data.choix).length;
+  const people = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac))
+    .map(([who, p]) => ({ who, p, cards: ALL_CARDS.filter((c) => c.who === who).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank) }))
+    .filter((x) => x.cards.length && (BRX.filtre !== "modif" || x.cards.some((c) => BRX.data.choix[c.id])) && (BRX.filtre !== "var" || new Set(x.cards.map((c) => brxOf(c.id))).size > 1));
+  return `<div class="wrap page" style="max-width:980px">${head("Admin · Confrontation", "Branches des cartes", "Chaque carte a une branche, qui donne son pouvoir en Confrontation. Proposition de départ : la branche du perso, et une deuxième branche pour ses cartes Épique, Légendaire et Mythique. Ce n'est jamais plus fort, juste différent. Tu changes ce que tu veux : c'est pris en compte dès la prochaine partie.")}
+    <div class="brx-sum">${ids.map((b) => `<span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} <b>${count[b]}</b></span>`).join("")}</div>
+    <p class="note">${changed ? `${changed} carte${changed > 1 ? "s" : ""} modifiée${changed > 1 ? "s" : ""} par toi.` : "Aucune modification : tout suit la proposition."} Cette page cite des persos pas encore débloqués : ne la montre pas aux joueurs.</p>
+    ${seg("brxF", [["", "Tous les persos"], ["var", "Avec variantes"], ["modif", "Modifiés"]], BRX.filtre)}
+    <div class="brx-list">${people.map(({ who, p, cards }) => `<div class="brx-p">
+      <div class="brx-h"><b>${esc(p.name)}</b><span class="note">${FACTIONS[p.fac]?.label || ""}</span>
+        <label class="brx-all">Toutes ses cartes <select data-brxall="${who}" aria-label="Branche de toutes les cartes de ${esc(p.name)}"><option value="">Choisir…</option>${opts("")}<option value="__prop">Revenir à la proposition</option></select></label></div>
+      <div class="brx-cards">${cards.map((c) => { const b = brxOf(c.id), mod = !!BRX.data.choix[c.id];
+        return `<label class="brx-c ${mod ? "mod" : ""}"><span class="brx-r" style="--rc:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="brx-t">${esc(subOf(c))}</span>
+          <span class="brx-sel">${cfEmb(b, "sm")}<select data-brx="${c.id}" aria-label="Branche de ${esc(p.name)} · ${esc(subOf(c))}">${opts(b)}</select></span>${mod ? `<small>modifiée · proposé : ${esc(cfBranch(BRX.data.proposees[c.id]).nom)}</small>` : ""}</label>`; }).join("")}</div></div>`).join("")}</div></div>`;
+}
+VIEWS.branches = viewBranches;
+ADMIN_SEG.brxF = (v) => { BRX.filtre = v; };
+document.addEventListener("change", (e) => {
+  const one = e.target.closest?.("[data-brx]"); if (one) return brxSet([one.dataset.brx], one.value);
+  const all = e.target.closest?.("[data-brxall]"); if (all && all.value) return brxSet(ALL_CARDS.filter((c) => c.who === all.dataset.brxall).map((c) => c.id), all.value === "__prop" ? null : all.value);
 });

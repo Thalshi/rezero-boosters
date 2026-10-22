@@ -5,7 +5,7 @@
 import * as G from "./game.js";
 import { createGame, act, tick, viewFor, legalActions } from "./confront/engine.mjs";
 import { botAction } from "./confront/bots.mjs";
-import { brancheProposee } from "./confront/branches-proposees.mjs";
+import { brancheDeCarte, brancheProposeeCarte } from "./confront/branches-proposees.mjs";
 import { BRANCHES, BRANCH_IDS } from "./confront/branches.mjs";
 import { CARD_DEFS, SIGNES } from "./confront/cards.mjs";
 import { modeFor } from "./confront/config.mjs";
@@ -81,8 +81,15 @@ async function viewOf(env, g, uid) {
   return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me) };
 }
 // cartes de collection apportables : celles du joueur, avec leur branche (rien d'autre du catalogue n'est envoyé)
-function myCards(s) {
-  return Object.keys(s.owned).filter((id) => G.hasCard(s, id) && G.CARD_BY_ID[id]).map((id) => ({ cardId: id, branch: brancheProposee(G.CARD_BY_ID[id].who) })).filter((c) => c.branch);
+function myCards(s, choix) {
+  return Object.keys(s.owned).filter((id) => G.hasCard(s, id) && G.CARD_BY_ID[id]).map((id) => ({ cardId: id, branch: brancheDeCarte(G.CARD_BY_ID[id], choix) })).filter((c) => c.branch);
+}
+// branches choisies par Billy, carte par carte (doc « confrontcfg/branches », fermé à l'API des documents) ;
+// une carte sans choix garde la proposition (branche du perso, variante en Épique et plus)
+const BR_DOC = "confrontcfg/branches";
+async function branchChoices(env) {
+  const r = await env.DB.prepare("SELECT data FROM docs WHERE path = ?").bind(BR_DOC).first();
+  return (r && JSON.parse(r.data).cartes) || {};
 }
 
 export async function confrontRoute(env, user, path, body, h) {
@@ -90,13 +97,29 @@ export async function confrontRoute(env, user, path, body, h) {
   if (!G.featureOn(h.cfg, "confrontation") && !user.admin) return fail(403, "Re Zéro : Confrontation n'est pas encore ouvert.");
   const a = path.slice("/api/game/confront/".length);
   if (a === "catalogue") return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES });
+  // admin : la branche de chaque carte (proposition et choix de Billy), et la modifier
+  if (a === "branches" || a === "branches/set") {
+    if (!user.admin) return fail(403, "Réservé à l'admin.");
+    const choix = await branchChoices(env);
+    if (a === "branches/set") {
+      const ids = [...new Set((Array.isArray(body.ids) ? body.ids : []).map(String))];
+      const b = body.branch == null || body.branch === "" ? null : String(body.branch);
+      if (!ids.length || ids.some((id) => !G.CARD_BY_ID[id])) return fail(400, "Carte inconnue.");
+      if (b && !BRANCH_IDS.includes(b)) return fail(400, "Branche inconnue.");
+      // choisir la proposition revient à ne rien imposer : la carte suivra une proposition corrigée plus tard
+      for (const id of ids) { if (!b || b === brancheProposeeCarte(G.CARD_BY_ID[id])) delete choix[id]; else choix[id] = b; }
+      await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'confrontcfg', 'branches', ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
+        .bind(BR_DOC, JSON.stringify({ cartes: choix }), Date.now()).run();
+    }
+    return json({ proposees: Object.fromEntries(Object.values(G.CARD_BY_ID).map((c) => [c.id, brancheProposeeCarte(c)])), choix });
+  }
   if (a === "list") {
     const since = Date.now() - STALE;
     const rows = (await env.DB.prepare("SELECT data FROM docs WHERE coll = 'confront' AND updated > ? ORDER BY updated DESC LIMIT 60").bind(since).all()).results.map((r) => JSON.parse(r.data));
     const pub = (g) => ({ gid: g.id, nom: g.nom, phase: g.state.phase, joueurs: g.state.players.length, createur: g.createur });
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
     return json({ salons: rows.filter((g) => g.public && g.state.phase === "lobby").map(pub), enCours: rows.filter((g) => g.public && g.state.phase !== "lobby" && g.state.phase !== "fin").map(pub),
-      miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub), cartes: s ? myCards(s) : [], verrou: s?.confront || null });
+      miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], verrou: s?.confront || null });
   }
   if (a === "create") {
     if (!user.member && !user.admin) return fail(403, "Réservé aux membres du QG de Shinjuku.");
@@ -131,7 +154,7 @@ export async function confrontRoute(env, user, path, body, h) {
       // la contribution vient de la vraie collection : une carte possédée par branche, branche donnée par le serveur
       if (s.confront && s.confront.gid !== gid && Date.now() - s.confront.t < STALE) return fail(400, "Tu as déjà des cartes engagées dans une autre partie.");
       const ids = [...new Set((Array.isArray(action.cartes) ? action.cartes : []).map(String))].slice(0, BRANCH_IDS.length);
-      const mine = Object.fromEntries(myCards(s).map((c) => [c.cardId, c.branch]));
+      const mine = Object.fromEntries(myCards(s, await branchChoices(env)).map((c) => [c.cardId, c.branch]));
       if (ids.some((id) => !mine[id])) return fail(400, "Tu ne peux apporter que des cartes de ta collection.");
       action.cartes = ids.map((id) => ({ instanceId: user.id + ":" + id, cardId: id, branch: mine[id], cosmetique: G.designOfS(s, id) || undefined }));
     }

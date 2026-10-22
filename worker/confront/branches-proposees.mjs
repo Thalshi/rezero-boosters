@@ -31,5 +31,23 @@ export const BRANCHES_PROPOSEES = {
   billy: "chance", inconnu: "chance", ragna: "chance", lion: "chance", shiro: "chance", teo: "chance", dispawn: "chance", cerf: "chance",
 };
 
-/** Branche proposée pour une carte de collection { who } (ou null si le perso n'est pas listé). */
+// Variantes selon la rareté : les cartes Épique, Légendaire et Mythique d'un perso prennent une
+// deuxième branche, proche de son caractère. Ce n'est pas plus fort, juste différent.
+export const RARETES_VARIANTE = ["e", "l", "m"];
+export const SECONDES = {
+  rorkantarak: "resistance", explosion: "chance", ogre1: "resistance", ogre2: "resistance", ogre3: "resistance", ogre4: "resistance", seb: "resistance", nelson: "survie",
+  braxx: "voleur", sylvar: "stratege", rayzo: "precision", monoco2: "chance", elfe1: "chance", ecureuil2: "survie", felin: "voleur",
+  kai: "assaut", sultran: "assaut", carukan: "resistance", irsy: "precision", monoco: "survie", reichi: "precision", aramis: "chance",
+  ed: "chance", siflar: "stratege", gobelin: "chance", morden: "precision", sasori: "defense", elfe2: "chance",
+  valcer: "defense", elijah: "stratege", byakko: "assaut", sakuto: "assaut", soldat1: "defense", oiseau: "defense", kuradai: "voleur", stalk: "chance",
+  unbeaten: "assaut", goldor: "defense", castorgeant: "assaut", mahed: "assaut", soldat2: "defense", belier: "stratege", porcepic: "defense",
+  nestor: "stratege", archibald: "stratege", sanglier: "resistance", castor1: "chance", castor2: "chance", ecureuil: "resistance", mojo: "chance", iouaf: "resistance",
+  billy: "stratege", inconnu: "stratege", ragna: "precision", lion: "stratege", shiro: "survie", teo: "precision", dispawn: "voleur", cerf: "survie",
+};
+
+/** Branche proposée pour un perso { who } (ou null si le perso n'est pas listé). */
 export const brancheProposee = (who) => BRANCHES_PROPOSEES[who] || null;
+/** Branche proposée pour une carte précise : variante selon la rareté. */
+export const brancheProposeeCarte = (card) => (card && RARETES_VARIANTE.includes(card.rar) && SECONDES[card.who]) || brancheProposee(card?.who);
+/** Branche réelle d'une carte : le choix de Billy (par carte) s'il existe, sinon la proposition. */
+export const brancheDeCarte = (card, choix = {}) => (card && choix[card.id]) || brancheProposeeCarte(card);

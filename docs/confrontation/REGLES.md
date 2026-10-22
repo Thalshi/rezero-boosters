@@ -39,7 +39,7 @@ Un joueur ouvre un salon (privé sur invitation ou public : géré par le serveu
 ### 3.2 Les contributions : une carte par branche au plus [Original]
 - Chaque joueur peut apporter **au plus une carte de collection par branche**, donc au plus 8 cartes. Il peut en apporter moins, ou aucune.
 - « Une par branche » limite **la contribution**, pas la collection : on peut posséder dix personnages Assaut ; on en apporte un seul à une partie donnée.
-- La carte apportée indique sa branche. La branche de chaque personnage est une donnée du serveur (proposition provisoire : `worker/confront/branches-proposees.mjs`, **à valider par Billy**). Tous les personnages d'une même branche ont le même pouvoir.
+- La carte apportée indique sa branche. La branche est une donnée du serveur, **carte par carte** : proposition dans `worker/confront/branches-proposees.mjs` (branche du perso pour Commune, Peu commune et Rare ; une deuxième branche proche de son caractère pour Épique, Légendaire et Mythique), que Billy ajuste dans Admin → Branches (choix gardés dans le doc `confrontcfg/branches`). Une variante n'est jamais plus forte : tous les personnages d'une même branche ont le même pouvoir. [Original]
 - Le serveur vérifie que le joueur possède bien chaque instance et la **bloque** pendant la partie (ni vente ni échange). La même instance ne peut pas être dans la réserve deux fois. Deux joueurs peuvent apporter deux instances différentes du même personnage.
 - Délai pour contribuer : 2 minutes [Provisoire]. Passé ce délai, le joueur est considéré comme n'ayant rien apporté.
 

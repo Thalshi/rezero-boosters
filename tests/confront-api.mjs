@@ -3,7 +3,7 @@
 import { startServer, player, reporter, IDS, grant, playwright, ROOT } from "./lib.mjs";
 import * as G from "../worker/game.js";
 import { botAction } from "../worker/confront/bots.mjs";
-import { brancheProposee } from "../worker/confront/branches-proposees.mjs";
+import { brancheProposee, brancheProposeeCarte } from "../worker/confront/branches-proposees.mjs";
 import { join } from "node:path";
 import { mkdirSync } from "node:fs";
 
@@ -17,6 +17,23 @@ try {
   for (const p of [A, B, S]) await p.api("state");
   grant(srv, [A, B], { free: 14 });
   for (let i = 0; i < 12; i++) { await A.api("open", { pack: "mix" }); await B.api("open", { pack: "mix" }); }
+
+  t.section("Branches des cartes (variantes selon la rareté, réglées par l'admin)");
+  const Bil = await player(srv.base, IDS.admin, "Billy"); await Bil.api("state");
+  t.check("variante : une Épique ou mieux d'un perso peut avoir une autre branche que sa Commune", brancheProposeeCarte(G.CARD_BY_ID["seb-sk-chroma"]) === brancheProposee("seb") && brancheProposeeCarte(G.CARD_BY_ID["seb-sk-prestige"]) !== brancheProposee("seb"));
+  t.check("toutes les cartes ont une branche", G.ALL_CARDS.every((c) => brancheProposeeCarte(c)));
+  t.check("la liste des branches est réservée à l'admin", (await A.api("confront/branches")).status === 403 && (await A.api("confront/branches/set", { ids: ["seb"], branch: "chance" })).status === 403);
+  const br0 = await Bil.api("confront/branches");
+  t.check("admin : proposition pour chaque carte, aucun choix au départ", br0.status === 200 && Object.keys(br0.proposees).length === G.ALL_CARDS.length && Object.keys(br0.choix).length === 0);
+  t.check("branche ou carte inconnue : refusé", (await Bil.api("confront/branches/set", { ids: ["seb"], branch: "dragon" })).status === 400 && (await Bil.api("confront/branches/set", { ids: ["pas-une-carte"], branch: "chance" })).status === 400);
+  const firstA = Object.keys((await A.api("state")).state.owned).find((id) => G.CARD_BY_ID[id]);
+  const autre = ["assaut", "defense", "stratege", "voleur", "precision", "resistance", "survie", "chance"].find((b) => b !== brancheProposeeCarte(G.CARD_BY_ID[firstA]));
+  const set1 = await Bil.api("confront/branches/set", { ids: [firstA], branch: autre });
+  t.check("admin : changer la branche d'une carte", set1.status === 200 && set1.choix[firstA] === autre);
+  t.check("le joueur voit la nouvelle branche de sa carte", (await A.api("confront/list")).cartes.find((x) => x.cardId === firstA)?.branch === autre);
+  t.check("l'API des documents ne donne pas les choix de l'admin", (await A.doc("GET", "confrontcfg/branches")).body?.exists === false);
+  const back = await Bil.api("confront/branches/set", { ids: [firstA], branch: null });
+  t.check("revenir à la proposition", back.status === 200 && !back.choix[firstA] && (await A.api("confront/list")).cartes.find((x) => x.cardId === firstA)?.branch === brancheProposeeCarte(G.CARD_BY_ID[firstA]));
 
   t.section("Salon");
   const c = await A.api("confront/create", { nom: "Table test", public: true });
@@ -33,7 +50,7 @@ try {
 
   t.section("Contributions depuis la collection");
   const listA = await A.api("confront/list");
-  t.check("le serveur n'envoie que mes cartes, avec leur branche", listA.cartes.length > 0 && listA.cartes.every((x) => G.CARD_BY_ID[x.cardId] && x.branch === brancheProposee(G.CARD_BY_ID[x.cardId].who)));
+  t.check("le serveur n'envoie que mes cartes, avec leur branche", listA.cartes.length > 0 && listA.cartes.every((x) => G.CARD_BY_ID[x.cardId] && x.branch === brancheProposeeCarte(G.CARD_BY_ID[x.cardId])));
   const stA = (await A.api("state")).state;
   const notMine = G.CARDS.find((c) => !stA.owned[c.id] && brancheProposee(c.who)).id;
   t.check("apporter une carte que je n'ai pas : refusé", (await A.api("confront/act", { gid, action: { type: "contribuer", cartes: [notMine] } })).status === 400);

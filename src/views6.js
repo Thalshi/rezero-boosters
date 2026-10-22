@@ -23,6 +23,62 @@ async function cfAct(action) {
 const cfCardDef = (c) => CF.cat?.cartes?.[c?.def] || { nom: c?.def || "?", kanji: "?" };
 const cfSigne = (id) => CF.cat?.signes?.find((x) => x.id === id) || { kanji: "", nom: id };
 const cfAction = (c, extra = "") => { if (!c) return ""; const d = cfCardDef(c), sg = cfSigne(c.signe); return `<span class="cfa ${extra}" title="${esc(d.texte || "")}"><b>${d.kanji}</b><span>${esc(d.nom)}</span><small>${sg.kanji}${c.rang}</small></span>`; };
+
+// ===== Visuels des cartes d'action (cadres façon Legends of Runeterra, icônes originales) =====
+// famille → couleur et libellé ; chaque carte a une icône, une règle courte et son signe de présage dans le coin
+const CF_FAM = {
+  attaque: ["#ff4d2e", "Attaque"], esquive: ["#4d9bff", "Réaction"], soin: ["#3fbf7f", "Soin"], vol: ["#b072ff", "Vol"], defausse: ["#8a8590", "Défausse"],
+  pioche: ["#4dd6ff", "Pioche"], duel: ["#ff9b3d", "Duel"], zone: ["#ff2f6d", "Zone"], arme: ["#f5c518", "Arme"], defense: ["#5ac8fa", "Défense"], visee: ["#f5c518", "Visée"], differe: ["#c06bff", "Effet différé"],
+};
+const CF_SHORT = {
+  frappe: "1 dégât à un joueur à portée", parade: "Annule une attaque contre toi", riposte: "Annule l'attaque et renvoie-la", elixir: "+1 PV, ou te sauve à 0 PV",
+  festin: "+1 PV pour tout le monde", lien: "Donne 1 de tes PV à un blessé", larcin: "Vole une carte à distance 1", dissipation: "Défausse une carte d'un joueur",
+  inspiration: "Pioche 2 cartes", revelation: "Pioche 3 cartes", etal: "Chacun prend une carte retournée", defi: "Duel de Frappes : le perdant prend 1 dégât",
+  pluie: "1 dégât à tous les autres", onde: "Tous défaussent une Frappe ou prennent 1 dégât", lames: "Portée 1 · Frappes illimitées", lance: "Portée 2", baton: "Portée 3",
+  arc: "Portée 4", canon: "Portée 5", voile: "Peut esquiver les attaques (Eau)", cape: "On te voit 1 plus loin", oeil: "Tu vois 1 plus près", kanji: "Bloque les prochains dégâts",
+  sceau: "Bloque le tour d'un joueur", orbe: "Bombe qui passe de main en main",
+};
+const I = (d) => `<svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const CF_ICON = {
+  frappe: I('<path d="M10 38 34 14"/><path d="M30 10l8 8"/><path d="M14 30l4 4"/><path d="M8 40l4-4"/><path d="M34 14l4-4"/>'),
+  parade: I('<path d="M24 6 38 11v11c0 9-6 16-14 20C16 38 10 31 10 22V11z"/><path d="M18 24l5 5 8-10"/>'),
+  riposte: I('<path d="M24 6 38 11v11c0 9-6 16-14 20C16 38 10 31 10 22V11z"/><path d="M30 19H19l4-4"/><path d="M19 19l4 4"/>'),
+  elixir: I('<path d="M19 6h10"/><path d="M21 6v10l-8 14a6 6 0 0 0 5 9h12a6 6 0 0 0 5-9l-8-14V6"/><path d="M16 28h16"/><path d="M24 31v6M21 34h6"/>'),
+  festin: I('<path d="M8 26h32"/><path d="M10 26a14 10 0 0 1 28 0"/><path d="M24 12v4"/><path d="M12 34h24"/><path d="M16 40h16"/>'),
+  lien: I('<path d="M17 21a6 6 0 0 1 0-8l3-3a6 6 0 0 1 8 8l-2 2"/><path d="M31 27a6 6 0 0 1 0 8l-3 3a6 6 0 0 1-8-8l2-2"/><path d="M20 28l8-8"/>'),
+  larcin: I('<path d="M14 26V14a3 3 0 0 1 6 0v8"/><path d="M20 20v-6a3 3 0 0 1 6 0v8"/><path d="M26 20v-3a3 3 0 0 1 6 0v11a12 12 0 0 1-12 12h-2a10 10 0 0 1-8-4l-5-7a3 3 0 0 1 5-3l4 4"/>'),
+  dissipation: I('<path d="M14 14l20 20M34 14 14 34"/><circle cx="24" cy="24" r="16"/>'),
+  inspiration: I('<path d="M24 6a12 12 0 0 1 7 22v4H17v-4A12 12 0 0 1 24 6z"/><path d="M18 38h12M20 42h8"/>'),
+  revelation: I('<path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="6"/>'),
+  etal: I('<path d="M8 18h32l-3-8H11z"/><path d="M10 18v20h28V18"/><path d="M20 38V28h8v10"/>'),
+  defi: I('<path d="M8 8l18 18M8 14V8h6"/><path d="M40 8 22 26M40 14V8h-6"/><path d="M14 32l-6 6M34 32l6 6"/><path d="M17 29l2 2M31 29l-2 2"/>'),
+  pluie: I('<path d="M12 10l4 4-4 4-4-4z"/><path d="M30 6l4 4-4 4-4-4z"/><path d="M20 24l4 4-4 4-4-4z"/><path d="M36 26l4 4-4 4-4-4z"/><path d="M12 36l4 4-4 4-4-4z"/>'),
+  onde: I('<circle cx="24" cy="24" r="4"/><path d="M14 14a14 14 0 0 0 0 20M34 14a14 14 0 0 1 0 20"/><path d="M8 8a22 22 0 0 0 0 32M40 8a22 22 0 0 1 0 32"/>'),
+  lames: I('<path d="M8 40 30 18M30 18l6-10 4 4-10 6"/><path d="M40 40 18 18M18 18 12 8l-4 4 10 6"/>'),
+  lance: I('<path d="M8 40 36 12"/><path d="M36 12l6-6-2 10-10 2z"/><path d="M12 32l4 4"/>'),
+  baton: I('<path d="M14 42 32 16"/><circle cx="35" cy="11" r="6"/><path d="M35 3v2M43 11h-2M35 19v-2"/>'),
+  arc: I('<path d="M14 6a26 26 0 0 1 0 36"/><path d="M14 6v36"/><path d="M14 24h26M34 18l6 6-6 6"/>'),
+  canon: I('<path d="M6 22h22l6-6h8v12h-8l-6-6"/><path d="M12 22v10h6l2-10"/><circle cx="40" cy="22" r="2"/>'),
+  voile: I('<path d="M6 18c6-4 10 4 16 0s10 4 16 0"/><path d="M6 26c6-4 10 4 16 0s10 4 16 0"/><path d="M6 34c6-4 10 4 16 0s10 4 16 0"/>'),
+  cape: I('<path d="M18 8h12l2 4c6 6 8 20 8 28H8c0-8 2-22 8-28z"/><path d="M24 14v26"/>'),
+  oeil: I('<circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="1"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6"/>'),
+  kanji: I('<rect x="10" y="8" width="28" height="32" rx="3"/><path d="M17 17h14M24 13v22M17 27h14M19 35l-3 3M29 35l3 3"/>'),
+  sceau: I('<rect x="8" y="20" width="32" height="20" rx="3"/><path d="M15 20v-6a9 9 0 0 1 18 0v6"/><path d="M24 28v5"/>'),
+  orbe: I('<circle cx="22" cy="28" r="13"/><path d="M30 18l5-5"/><path d="M35 7v3M38 10h3M33 5l1 2"/>'),
+};
+const cfFam = (d) => CF_FAM[d.type === "reaction" ? "esquive" : d.cat] || ["#8a8590", ""];
+// grande carte (main, choix) : bandeau de famille, icône, nom, règle courte, signe du présage
+function cfFace(c, extra = "") {
+  if (!c) return "";
+  const d = cfCardDef(c), [col, fam] = cfFam(d), sg = cfSigne(c.signe);
+  const when = d.type === "reaction" ? "Hors de ton tour" : d.type === "equipement" ? "Équipement" : d.type === "differe" ? "Effet plus tard" : "À ton tour";
+  return `<span class="cff ${extra}" style="--fc:${col}" title="${esc(d.texte || "")}">
+    <span class="cff-band">${fam}<i>${sg.kanji}<b>${c.rang}</b></i></span>
+    <span class="cff-art">${CF_ICON[c.def] || `<b>${d.kanji}</b>`}</span>
+    <span class="cff-name">${esc(d.nom)}</span><span class="cff-rule">${esc(CF_SHORT[c.def] || d.texte || "")}</span><span class="cff-when">${when}</span></span>`;
+}
+// petite pastille (équipement posé, défausse, journal)
+const cfChip = (c) => { if (!c) return ""; const d = cfCardDef(c), [col] = cfFam(d); return `<span class="cfc" style="--fc:${col}" title="${esc(d.nom)} : ${esc(CF_SHORT[c.def] || d.texte || "")}">${CF_ICON[c.def] || d.kanji}<span>${esc(d.nom)}</span></span>`; };
 const cfBranch = (b) => CF.cat?.branches?.[b] || { nom: b, kanji: "?" };
 
 function viewConfront() {
@@ -78,39 +134,62 @@ function cfPerso(c, big) {
   const art = c.pret || !card ? `<div class="cf-loan"><b>${b.kanji}</b><span>Carte de prêt</span></div>` : cardHTML(card, { design: c.cosmetique || null });
   return `<div class="cf-perso ${big ? "big" : ""}">${art}<p class="cf-pb"><b>${b.kanji} ${esc(b.nom)}</b>${big ? `<small>${esc(b.pouvoir)}</small>` : ""}</p></div>`;
 }
+const ROLE_TXT = { gardien: "Gardien : survis, les Sentinelles t'aident.", sentinelle: "Sentinelle : protège le Gardien.", briseur: "Briseur : élimine le Gardien.", errant: "Errant : sois le dernier en vie." };
 function cfBoard(v) {
-  const me = v.joueurs.find((p) => p.id === v.moi), pr = v.attente, acts = v.actions || [];
-  const seat = (p) => `<div class="cf-seat ${v.tour?.pid === p.id ? "turn" : ""} ${pr?.pid === p.id ? "wait" : ""} ${p.vivant ? "" : "dead"} ${p.id === v.moi ? "me" : ""}" data-cft="${p.id}">
-    <div class="cf-seat-h"><b>${esc(cfName(p.id))}</b>${p.role ? `<span class="pill">${ROLE_LABEL[p.role]}</span>` : ""}${p.enLigne ? "" : `<span class="pill">hors ligne</span>`}</div>
-    ${cfPerso(p.perso)}
-    <div class="cf-pv" aria-label="${p.pv} PV sur ${p.pvMax}">${"♥".repeat(Math.max(0, p.pv))}<i>${"♡".repeat(Math.max(0, p.pvMax - p.pv))}</i></div>
-    <p class="note">${p.nbMain} carte${p.nbMain > 1 ? "s" : ""}${p.distancePercue != null ? ` · distance ${p.distancePercue}` : ""}</p>
-    <div class="cf-eq">${cfAction(p.arme)}${p.equip.map((c) => cfAction(c)).join("")}</div>
-    ${CF.sel && CF.targets?.some((a) => a.cible === p.id) ? `<div class="cf-tgt">${CF.targets.filter((a) => a.cible === p.id).map((a) => `<button class="btn sm gold" type="button" data-cfa='${JSON.stringify(a)}'>${a.choix ? (a.choix === "main" ? "Main" : esc(cfCardDef({ def: a.choix }).nom || "Carte posée")) : "Cibler"}</button>`).join("")}</div>` : ""}
-  </div>`;
+  const me = v.joueurs.find((p) => p.id === v.moi), pr = v.attente, acts = v.actions || [], mineTurn = pr && me && pr.pid === me.id;
+  const seat = (p) => {
+    const tg = CF.sel && CF.targets?.filter((a) => a.cible === p.id) || [];
+    const pct = p.pvMax ? Math.max(0, p.pv) / p.pvMax * 100 : 0, low = p.pv <= 1;
+    return `<div class="cf-seat ${v.tour?.pid === p.id ? "turn" : ""} ${pr?.pid === p.id ? "wait" : ""} ${p.vivant ? "" : "dead"} ${p.id === v.moi ? "me" : ""} ${tg.length ? "target" : ""}" data-cft="${p.id}">
+      ${v.tour?.pid === p.id ? `<span class="cf-ribbon">${p.id === v.moi ? "Ton tour" : "Son tour"}</span>` : ""}
+      <div class="cf-seat-top">${cfPerso(p.perso)}<div class="cf-seat-id"><b>${esc(cfName(p.id))}</b>
+        ${p.role ? `<span class="cf-role r-${p.role}">${ROLE_LABEL[p.role]}</span>` : ""}${p.perso ? `<small>${cfBranch(p.perso.branch).kanji} ${esc(cfBranch(p.perso.branch).nom)}</small>` : ""}
+        ${p.vivant ? "" : `<small class="cf-ko">Éliminé</small>`}${p.enLigne ? "" : `<small>Hors ligne</small>`}</div></div>
+      <div class="cf-hp ${low ? "low" : ""}" role="img" aria-label="${p.pv} PV sur ${p.pvMax}"><span style="width:${pct}%"></span>${Array.from({ length: p.pvMax }, () => "<i></i>").join("")}<b>${p.pv}/${p.pvMax} PV</b></div>
+      <div class="cf-stats"><span title="Cartes en main">🂠 ${p.nbMain}</span>${p.distancePercue != null ? `<span title="Distance depuis toi">↔ ${p.distancePercue}</span>` : ""}</div>
+      <div class="cf-eq">${p.arme ? cfChip(p.arme) : `<span class="cfc base">${CF_ICON.frappe}<span>Dague · portée 1</span></span>`}${p.equip.map(cfChip).join("")}</div>
+      ${tg.length ? `<div class="cf-tgt">${tg.map((a) => `<button class="btn gold" type="button" data-cfa='${JSON.stringify(a)}'>${a.choix ? (a.choix === "main" ? "Une carte de sa main" : esc(cfCardDef({ def: v.joueurs.flatMap((q) => [q.arme, ...q.equip]).find((x) => x?.uid === a.choix)?.def }).nom || "Carte posée")) : "Cibler"}</button>`).join("")}</div>` : ""}
+    </div>`;
+  };
   const res = v.resultat;
-  const fin = v.phase === "fin" && res ? `<section class="sec cf-fin"><h2>${res.gagnants?.length ? `Victoire : ${res.gagnants.map(cfName).map(esc).join(", ")}` : "Partie terminée sans vainqueur"}</h2><p class="note">${res.camp ? `Camp gagnant : ${esc(res.camp)} · ` : ""}${res.tours} tours.${res.raison === "annulee" ? " Partie annulée." : ""}</p></section>` : "";
-  return `${fin}<div class="cf-board">${v.joueurs.map(seat).join("")}</div>
-    <div class="cf-mid"><span>Pioche ${v.pioche}</span><span>Défausse ${v.nbDefausse}</span>${v.defausse?.length ? `<span>Dernière : ${cfAction(v.defausse.at(-1))}</span>` : ""}${v.etal?.length ? `<span>Étal : ${v.etal.map((c) => cfAction(c)).join("")}</span>` : ""}</div>
-    ${me ? cfHand(v, me, pr, acts) : ""}`;
+  const fin = v.phase === "fin" && res ? `<section class="sec cf-fin"><h2>${res.gagnants?.includes(v.moi) ? "Victoire !" : res.gagnants?.length ? `Victoire de ${res.gagnants.map(cfName).map(esc).join(", ")}` : "Partie terminée sans vainqueur"}</h2><p class="note">${res.camp ? `Camp gagnant : ${esc(res.camp)} · ` : ""}${res.tours} tours.${res.raison === "annulee" ? " Partie annulée." : ""}</p></section>` : "";
+  const help = `<details class="cf-help"${CF.helpOpen === false ? "" : " open"}><summary>Comment jouer</summary><ol>
+    <li><b>But</b> : ${v.monRole ? esc(ROLE_TXT[v.monRole]) : v.mode === "duel" ? "fais tomber l'autre joueur à 0 PV." : "sois le dernier en vie."}</li>
+    <li><b>À ton tour</b> : tu pioches 2 cartes, tu joues celles que tu veux (une seule Frappe par tour), puis <b>Finis ton tour</b>.</li>
+    <li><b>Attaquer</b> : la Frappe touche un joueur à portée de ton arme (↔ distance ≤ portée). Les armes augmentent la portée.</li>
+    <li><b>Quand on t'attaque</b> : joue une Parade pour annuler, ou encaisse (−1 PV).</li>
+    <li><b>Fin du tour</b> : tu gardes au plus autant de cartes que tes PV.</li>
+    ${me?.perso ? `<li><b>Ton pouvoir (${esc(cfBranch(me.perso.branch).nom)})</b> : ${esc(cfBranch(me.perso.branch).pouvoir)}</li>` : ""}</ol></details>`;
+  return `${fin}${me && v.phase === "partie" ? cfBanner(v, me, pr) : ""}<div class="cf-board">${v.joueurs.map(seat).join("")}</div>
+    <div class="cf-mid"><span class="cf-pile">Pioche <b>${v.pioche}</b></span><span class="cf-pile">Défausse <b>${v.nbDefausse}</b></span>${v.defausse?.length ? `<span>Dernière jouée ${cfChip(v.defausse.at(-1))}</span>` : ""}${v.etal?.length ? `<span>Étal ${v.etal.map(cfChip).join("")}</span>` : ""}</div>
+    ${me ? cfHand(v, me, pr, acts) : ""}${me ? help : ""}`;
 }
-const PROMPT_TXT = { tour: "C'est ton tour.", reaction: "On t'attaque : pare, riposte ou encaisse.", onde: "Défausse une Frappe ou perds 1 PV.", defi: "Défi : défausse une Frappe ou perds 1 PV.", sauvetage: "Tu tombes à 0 PV : sauve-toi si tu peux.", stratege: "Stratège : garde les cartes de ton choix.", voleur: "Voleur : pioche normalement ou prends une carte au hasard à un joueur.", etal: "Étal : prends une carte." };
-function cfHand(v, me, pr, acts) {
+// bandeau « que dois-je faire ? »
+function cfBanner(v, me, pr) {
   const mine = pr && pr.pid === me.id;
+  if (!me.vivant) return `<div class="cf-banner off">Tu es éliminé. Tu peux regarder la fin de la partie.</div>`;
+  if (!pr) return "";
+  if (!mine) return `<div class="cf-banner off">${esc(cfName(pr.pid))} joue…${pr.deadline ? ` <span data-cfdl="${pr.deadline}"></span>` : ""}</div>`;
+  const steps = pr.kind === "tour" ? (CF.sel ? (CF.targets?.length ? "Touche le bouton « Cibler » sur un joueur." : "Clique sur « Jouer cette carte ».") : "1. Choisis une carte en surbrillance · 2. Choisis sa cible · 3. Finis ton tour") : "";
+  return `<div class="cf-banner"><b>${PROMPT_TXT[pr.kind] || "À toi."}</b>${steps ? `<span>${steps}</span>` : ""}${pr.deadline ? ` <span class="cf-dl" data-cfdl="${pr.deadline}"></span>` : ""}</div>`;
+}
+const PROMPT_TXT = { tour: "C'est ton tour !", reaction: "On t'attaque ! Pare, riposte ou encaisse.", onde: "Onde de choc : défausse une Frappe ou perds 1 PV.", defi: "Défi : défausse une Frappe ou perds 1 PV.", sauvetage: "Tu tombes à 0 PV : sauve-toi si tu peux !", stratege: "Stratège : choisis les cartes à garder.", voleur: "Voleur : pioche normalement ou vole une carte au hasard.", etal: "Étal : prends une carte." };
+function cfHand(v, me, pr, acts) {
   const plays = acts.filter((a) => a.type === "jouer"), fin = acts.find((a) => a.type === "finir");
-  const btn = (a, label, cls = "") => `<button class="btn sm ${cls}" type="button" data-cfa='${JSON.stringify(a)}'>${label}</button>`;
+  const btn = (a, label, cls = "") => `<button class="btn ${cls}" type="button" data-cfa='${JSON.stringify(a)}'>${label}</button>`;
   const other = acts.filter((a) => ["parer", "riposter", "encaisser", "defausser", "elixir", "survie", "piocher", "prendre"].includes(a.type));
-  const LBL = { parer: "Parer", riposter: "Riposter", encaisser: "Encaisser", defausser: "Défausser une Frappe", elixir: "Boire un Élixir", survie: "Ténacité (défausser 2)", prendre: "Prendre" };
+  const LBL = { parer: "🛡 Parer", riposter: "↩ Riposter", encaisser: "Encaisser (−1 PV)", defausser: "Défausser une Frappe", elixir: "Boire un Élixir (+1 PV)", survie: "Ténacité : défausser 2 cartes (+1 PV)", prendre: "Prendre" };
   const garder = acts.find((a) => a.type === "garder");
-  return `<section class="sec cf-me"><div class="cf-me-h"><h2>Ta main</h2>${v.monRole ? `<span class="pill">Rôle : ${ROLE_LABEL[v.monRole]}</span>` : ""}${v.limiteMain != null ? `<span class="note">Limite de main ${v.limiteMain} · portée ${v.porteeArme}</span>` : ""}</div>
-    <p class="cf-prompt">${mine ? PROMPT_TXT[pr.kind] || "À toi." : pr ? `En attente de ${esc(cfName(pr.pid))}…` : ""}${pr?.deadline ? ` <span class="note" data-cfdl="${pr.deadline}"></span>` : ""}</p>
-    <div class="cf-hand">${(v.main || []).map((c) => { const ok = plays.filter((a) => a.carte === c.uid || cfCardDef(acts.find((x) => x.carte === a.carte) || {}).nom === cfCardDef(c).nom && false); const playable = plays.some((a) => a.carte === c.uid) || plays.some((a) => (v.main.find((m) => m.uid === a.carte) || {}).def === c.def);
-      const discard = fin && fin.aDefausser > 0, picked = CF.defausse.includes(c.uid);
-      return `<button type="button" class="cf-card ${playable ? "ok" : ""} ${CF.sel === c.uid ? "sel" : ""} ${picked ? "picked" : ""}" data-cfc="${c.uid}" ${playable || discard ? "" : "disabled"}>${cfAction(c)}<small>${esc(cfCardDef(c).texte || "")}</small></button>`; }).join("")}</div>
-    ${garder ? `<p class="note">Garde ${garder.nombre} carte(s) :</p><div class="cf-hand">${(pr.cartes || v.attente?.cartes || []).map((c) => `<button type="button" class="cf-card ok ${CF.garder.includes(c.uid) ? "picked" : ""}" data-cfg="${c.uid}">${cfAction(c)}</button>`).join("")}</div>${btn({ type: "garder", cartes: CF.garder, promptId: garder.promptId }, `Garder (${CF.garder.length}/${garder.nombre})`, "gold")}` : ""}
-    <div class="row">${CF.sel && CF.noTarget ? btn(CF.noTarget, "Jouer cette carte", "gold") : ""}${other.map((a) => btn(a, a.type === "piocher" ? (a.cible ? `Voler à ${esc(cfName(a.cible))}` : "Piocher normalement") : a.type === "prendre" ? `Prendre ${cfCardDef(v.etal.find((c) => c.uid === a.carte) || {}).nom}` : LBL[a.type])).join("")}
-      ${fin ? btn({ type: "finir", defausse: CF.defausse, promptId: fin.promptId }, fin.aDefausser ? `Finir le tour (défausser ${CF.defausse.length}/${fin.aDefausser})` : "Finir le tour", "acc") : ""}</div>
-    ${CF.sel && CF.targets?.length ? `<p class="note">Choisis une cible sur la table.</p>` : ""}</section>`;
+  const playableDefs = new Set(plays.map((a) => (v.main.find((m) => m.uid === a.carte) || {}).def));
+  return `<section class="sec cf-me"><div class="cf-me-h"><h2>Ta main</h2>${v.monRole ? `<span class="cf-role r-${v.monRole}" title="${esc(ROLE_TXT[v.monRole])}">Rôle : ${ROLE_LABEL[v.monRole]}</span>` : ""}${v.limiteMain != null ? `<span class="note">Garde au plus ${v.limiteMain} cartes · ta portée : ${v.porteeArme}</span>` : ""}</div>
+    ${other.length ? `<div class="cf-react">${other.map((a) => btn(a, a.type === "piocher" ? (a.cible ? `Voler une carte à ${esc(cfName(a.cible))}` : "Piocher normalement") : a.type === "prendre" ? `Prendre ${cfCardDef(v.etal.find((c) => c.uid === a.carte) || {}).nom}` : LBL[a.type], a.type === "encaisser" ? "acc" : "gold")).join("")}</div>` : ""}
+    <div class="cf-hand">${(v.main || []).map((c) => {
+      const playable = playableDefs.has(c.def), discard = fin && fin.aDefausser > 0, picked = CF.defausse.includes(c.uid);
+      return `<button type="button" class="cf-card ${playable ? "ok" : ""} ${CF.sel === c.uid ? "sel" : ""} ${picked ? "picked" : ""}" data-cfc="${c.uid}" ${playable || discard ? "" : "disabled"} aria-label="${esc(cfCardDef(c).nom)}${playable ? ", jouable" : ""}">${cfFace(c)}</button>`; }).join("") || `<p class="note">Aucune carte en main.</p>`}</div>
+    ${garder ? `<p class="note">Garde ${garder.nombre} carte(s) :</p><div class="cf-hand">${(pr.cartes || v.attente?.cartes || []).map((c) => `<button type="button" class="cf-card ok ${CF.garder.includes(c.uid) ? "picked" : ""}" data-cfg="${c.uid}">${cfFace(c)}</button>`).join("")}</div>${btn({ type: "garder", cartes: CF.garder, promptId: garder.promptId }, `Garder (${CF.garder.length}/${garder.nombre})`, "gold")}` : ""}
+    <div class="row cf-actions">${CF.sel && CF.noTarget ? btn(CF.noTarget, "Jouer cette carte", "gold big") : ""}
+      ${fin ? btn({ type: "finir", defausse: CF.defausse, promptId: fin.promptId }, fin.aDefausser ? `Finir le tour (choisis ${fin.aDefausser - CF.defausse.length} carte${fin.aDefausser - CF.defausse.length > 1 ? "s" : ""} à défausser)` : "Finir mon tour", "acc big") : ""}</div>
+    ${fin?.aDefausser ? `<p class="note">Tu as trop de cartes : touche ${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} à défausser, puis « Finir le tour ».</p>` : ""}</section>`;
 }
 const EVT = {
   debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}.`,
@@ -145,6 +224,7 @@ function cfSelect(uid) {
   draw();
 }
 VIEWS.confront = viewConfront;
+document.addEventListener("toggle", (e) => { if (e.target.classList?.contains("cf-help")) CF.helpOpen = e.target.open; }, true);
 // la liste des salons change sans cesse : rechargée à chaque arrivée sur la page des salons
 addEventListener("hashchange", () => { if (location.hash === "#/confront") { CF.list = null; cfLoadList(); } });
 document.addEventListener("click", (e) => {

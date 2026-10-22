@@ -112,7 +112,7 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 | 8.3 | Modes : Duel 2, Trio 3 sans rôles, classique 4–7 avec rôles | ✅ | moteur `worker/confront/engine.mjs` |
 | 8.4 | 8 branches (Assaut, Défense, Stratège, Voleur, Précision, Résistance, Survie, Chance) | ✅ | `branches.mjs` ; ⛔ répartition des persos `branches-proposees.mjs` à valider par Billy |
 | 8.5 | Contributions (une carte par branche), prêts, réserve commune, 2 propositions, choix | ✅ | contributions vérifiées sur la vraie collection, branche donnée par le serveur |
-| 8.6 | Moteur serveur : tours, pioche, actions, réactions, délais, défausse, PV, portée, distance, armes, équipements | 🟡 | moteur pur fini et testé ; intégration dans `worker/game-api.js` (stockage D1, routes) ⬜ |
+| 8.6 | Moteur serveur : tours, pioche, actions, réactions, délais, défausse, PV, portée, distance, armes, équipements | ✅ | moteur pur (`worker/confront/engine.mjs`) branché au serveur (`worker/confront-api.js`) |
 | 8.7 | Informations secrètes filtrées, anti-triche, reconnexion, abandon, journal | ✅ | `viewFor` par joueur ; partie fermée à l'API des documents ; reprise à tout moment |
 | 8.8 | Salons privés/publics, invitations, prêt, chronomètres, spectateurs | ✅ | code à 4 lettres, bots pour tester seul, délais appliqués à chaque consultation, cartes apportées verrouillées pendant la partie |
 | 8.9 | Interface : lobby, contribution, mélange, choix, table 2/3/7, main privée, réactions, résultats | ✅ | `#/confront` (ordi et téléphone) ; `tests/confront-api.mjs` (partie complète par l'API) |
@@ -128,8 +128,8 @@ Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosm
 | 9.2 | Compteurs de synchro `sync_rev` (étape 1) | ✅ | en ligne |
 | 9.3 | Route de synchro unique `/api/game/sync` (étape 2+) | ✅ | `/api/sync` : un appel lit tous les compteurs, seules les sections changées sont rechargées, resynchro complète toutes les 60 s, retour à l'ancien mode si la route échoue. Mesure au repos : 95 → 25 requêtes/min, lignes lues −81 % |
 | 9.4 | Index et lecture par deltas | 🟡 | index `docs (coll, updated)` en place ; lecture par deltas (seulement les documents modifiés) à faire si la charge le demande |
-| 9.5 | Performances mobiles (images, animations, mémoire) | 🟡 | |
-| 9.6 | Accessibilité (clavier, lecteurs d'écran, animations réduites) | 🟡 | |
+| 9.5 | Performances mobiles (images, animations, mémoire) | 🟡 | synchro allégée, animations sur canvas bornées (200 particules), images déjà intégrées ; pas encore de mesure sur un vrai téléphone bas de gamme |
+| 9.6 | Accessibilité (clavier, lecteurs d'écran, animations réduites) | 🟡 | clé, portail et cartes au clavier, annonces aria-live, animations réduites testées ; audit complet au lecteur d'écran à faire |
 | 9.7 | Plan de mise en production et de retour arrière | ✅ | `docs/MISE_EN_PRODUCTION.md`, décisions dans `docs/DECISIONS.md` |
 | 9.8 | Interrupteurs par fonctionnalité (déploiement progressif) | ✅ | Admin → « Nouveautés ouvertes aux joueurs » ; le serveur refuse les actions d'une nouveauté fermée ; `tests/fonctionnalites.mjs` |
 

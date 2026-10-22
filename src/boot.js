@@ -4,6 +4,7 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 const SEG = {
   packTab: (v) => { packTab = v; }, colTab: (v) => { col.tab = v; }, colRar: (v) => { col.rar = v; }, colFac: (v) => { col.fac = col.fac === v ? "" : v; col.tab = "cards"; col.own = "all"; },
   mTab: (v) => { marketTab = v; }, mkRar: (v) => { mk.rar = v; }, mkWin: (v) => { mk.win = +v; }, achF: (v) => { achF = v; }, rankTab: (v) => { boardTab = v; },
+  ...Z_SEG,
 };
 document.addEventListener("click", (e) => {
   const t = e.target;
@@ -43,7 +44,9 @@ document.addEventListener("click", (e) => {
   if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack);
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
   if (act === "pool") return openPool(ab.dataset.p);
-  if (act === "skip") { opening.phase = "done"; return drawOpening(); }
+  if (act === "skip") { Coffre.stop(); opening.phase = "done"; return drawOpening(); }
+  if (act === "cf-next") return Coffre.next();
+  if (act === "cf-sound") return Coffre.toggleSound();
   if (act === "stage-back") { if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }

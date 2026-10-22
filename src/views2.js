@@ -250,7 +250,9 @@ async function loadProfile(uid) {
 }
 function selfProfile() {
   const owned = Object.fromEntries(Object.entries(save.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
-  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [] };
+  const featured = save.featured && has(save.featured) ? save.featured : null;
+  const designs = Object.fromEntries([...(save.showcase || []), ...(featured ? [featured] : [])].map((id) => [id, myDesign(id)]).filter(([, d]) => d));
+  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs };
 }
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;
@@ -274,8 +276,9 @@ function viewProfil() {
     </div></div>
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
+    ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette · 看板</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette · 看板</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
-      ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
+      ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
     <section class="sec"><h2>Collection</h2><p class="note">${st.unique} cartes uniques</p>
       <div class="rarbars">${RANKS.slice().reverse().map((k) => `<div style="--c:${RAR[k].color}"><small><i></i>${RAR[k].label}</small><b>${ids.filter((id) => byId[id].rar === k).length}</b></div>`).join("")}</div></section>
     <section class="sec"><h2>${isMe ? "Mes factions" : "Ses factions"}</h2><div class="sbars">${facs.map(([f, n, t]) => `<div class="sbar" style="cursor:default"><span>${facLabel(f)}</span><span class="m"><i style="width:${n / t * 100}%"></i></span><span class="v">${n}/${t}</span></div>`).join("")}</div></section>
@@ -439,6 +442,7 @@ function drawOpening() {
   const o = opening, el = $("stage");
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
   const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button><span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span><span style="width:40px"></span></div>`;
+  if (Coffre.isChest(o.pk) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
     el.innerHTML = `${top}<section class="stage">
@@ -495,7 +499,7 @@ async function tearPack() {
   }
   opening.phase = "cards"; drawOpening();
 }
-function closeStage() { opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; draw(); }
+function closeStage() { Coffre.stop(); opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
   const c = byId[x.id];
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Objet déverrouillé"><div class="sheet-h"><h2>Objet déverrouillé !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
@@ -557,7 +561,7 @@ function draw() {
   $("view").innerHTML = (VIEWS[view] || viewBoosters)();
   if (opening) drawOpening(); else $("stage").hidden = true;
   $("chatFab").hidden = chat.open;
-  fillNames();
+  fillNames(); afterViews();
 }
 function subscribeExtra() {
   if (!DB || subscribeExtra.done) return; subscribeExtra.done = true;

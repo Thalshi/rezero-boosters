@@ -5,7 +5,7 @@ Branche de travail : `dev/re-zero-complet` (partie de `boosters-economie-v1`). R
 
 Légende : ✅ terminé · 🟡 partiel · ⬜ à développer · ⛔ bloqué par une décision (option provisoire documentée, réglable sans code)
 
-Mise à jour : à chaque fonctionnalité terminée.
+Mise à jour : à chaque fonctionnalité terminée. Dernière : 22 octobre, cosmétiques et coffre (étapes 1 à 5 du plan).
 
 ## Décisions déjà prises (à respecter)
 - L'Invocation utilise le **Portail scellé (B + C)** : on touche le portail, une main touche le sceau, charge, fissures, éclats ; ×1 et ×5 ; feinte de rareté.
@@ -37,20 +37,20 @@ Mise à jour : à chaque fonctionnalité terminée.
 ## 2. Coffre hextech / arcanique (dossier §3)
 | # | Élément | État | Notes |
 |---|---|---|---|
-| 2.1 | Coffre ouvrable, 5 cartes face cachée, récapitulatif | 🟡 | version simple (toucher, tremble, retourner) en ligne |
-| 2.2 | Coffre 3D, vraie ouverture du couvercle | ⬜ | prototype 3D existant à intégrer |
-| 2.3 | Clé : glisser, clic, tactile, clavier | ⬜ | prototype existant |
-| 2.4 | Runes et cristal | ⬜ | |
-| 2.5 | Teinte selon la meilleure rareté réelle (R bleu, E violet, L or, M rouge) | 🟡 | lueur existante, à porter sur le coffre |
-| 2.6 | Variantes or visibles | 🟡 | |
-| 2.7 | Moteur modulaire de scénarios (conditions, pondérations, tests) | ⬜ | un seul moteur, pas 30 systèmes |
-| 2.8 | 6 scénarios classiques | ⬜ | |
-| 2.9 | 7 fake drops / faux redémarrages (résultat jamais falsifié) | ⬜ | |
-| 2.10 | 7 transformations (plusieurs E, 2 L, L+M, 2 M, plusieurs or…) | ⬜ | |
-| 2.11 | 6 spectaculaires | ⬜ | |
-| 2.12 | 4 secrets | ⬜ | |
-| 2.13 | Sons facultatifs, passer, mobile, animations réduites | 🟡 | passer existe ; sons ⬜ |
-| 2.14 | Pondérations des scénarios | ⛔ | poids provisoires réglables |
+| 2.1 | Coffre ouvrable, 5 cartes face cachée, récapitulatif | ✅ | `src/coffre.js` : cartes retournées une à une, « suivante », « tout révéler », récapitulatif |
+| 2.2 | Coffre 3D, vraie ouverture du couvercle | ✅ | porté du prototype |
+| 2.3 | Clé : glisser, clic, tactile, clavier | ✅ | testé (`tests/ui-coffre.mjs`) |
+| 2.4 | Runes et cristal | ✅ | 8 runes en orbite, cristal au-dessus du coffre |
+| 2.5 | Teinte selon la meilleure rareté réelle (R bleu, E violet, L or, M rouge) | ✅ | coffre et fond suivent la teinte montrée ; la vraie teinte arrive toujours avant l'ouverture |
+| 2.6 | Variantes or visibles | ✅ | lueur dorée au retournement, scénarios « Pluie d'or » et « Reflet doré » |
+| 2.7 | Moteur modulaire de scénarios (conditions, pondérations, tests) | ✅ | `CHEST_SCENARIOS` dans `src/game.js`, choisi par le serveur APRÈS le tirage ; 35 temps forts réutilisables ; `tests/coffre.mjs` |
+| 2.8 | 6 scénarios classiques | ✅ | nette, runes, cristal, souffle, serrure ancienne, échelle des raretés |
+| 2.9 | 7 fake drops / faux redémarrages (résultat jamais falsifié) | ✅ | serrure récalcitrante, fausse Commune, faux redémarrage, extinction, couvercle qui retombe, cristal fêlé, clé brisée ; test : une feinte montre toujours moins que la vérité |
+| 2.10 | 7 transformations (plusieurs E, 2 L, L+M, 2 M, plusieurs or…) | ✅ | trinité violette, double couronne, éclipse, cœurs jumeaux, pluie d'or, reflet doré, chrysalide |
+| 2.11 | 6 spectaculaires | ✅ | colonne céleste, ciel d'étoiles, kanji géant, orbite des cartes, séisme, aurore |
+| 2.12 | 4 secrets | ✅ | le créateur (carte de Billy E+), arc-en-ciel (5 raretés), minuit à Shinjuku, miroir (même carte E+ deux fois) |
+| 2.13 | Sons facultatifs, passer, mobile, animations réduites | ✅ | sons synthétisés coupés par défaut ; « Passer » à tout moment ; animations réduites = ouverture directe |
+| 2.14 | Pondérations des scénarios | ⛔ | provisoire : secret toujours si possible, transformation 75 %, feinte 25 %, spectacle 35 % ; répartition mesurée : classique 51 %, feinte 20 %, transfo 13 %, spectacle 9 %, secret 8 % |
 
 ## 3. Galerie et administration (dossier §4)
 | # | Élément | État | Notes |
@@ -66,20 +66,20 @@ Mise à jour : à chaque fonctionnalité terminée.
 ## 4. Cosmétiques : Boutique, Sanctuaire, inventaire, Atelier (dossier §5 + décisions)
 | # | Élément | État | Notes |
 |---|---|---|---|
-| 4.1 | Catalogue de cosmétiques sans bonus : cadres, auras, couronnes/auréoles/ailes, holographie, particules, fonds, présentations | ⬜ | ne cachent pas le visage, compatibles Communes |
-| 4.2 | Inventaire cosmétique commun | ⬜ | |
-| 4.3 | Deux natures : cosmétique de compte (réutilisable, non transférable) et instance unique (transférable) | ⬜ | |
-| 4.4 | Boutique Arcanique : prévisualiser, acheter (essence) | ⬜ | ⛔ prix |
-| 4.5 | Sanctuaire des Invocations : ×1 et ×5, tirage serveur, Portail scellé | ⬜ | ⛔ coût, probabilités, garanties, doublons |
-| 4.6 | Feinte de rareté et intensité selon la rareté | 🟡 | prototype |
-| 4.7 | Atelier Arcanique : prévisualiser, équiper, retirer, enregistrer un design | ⬜ | |
-| 4.8 | Cartes personnalisées affichées partout (collection, fiche, profil, marché) | ⬜ | |
+| 4.1 | Catalogue de cosmétiques sans bonus : cadres, auras, couronnes/auréoles/ailes, holographie, particules, fonds, présentations | ✅ | 45 objets, 7 emplacements, jamais sur le visage |
+| 4.2 | Inventaire cosmétique commun | ✅ | onglet Inventaire de l'Atelier |
+| 4.3 | Deux natures : cosmétique de compte (réutilisable, non transférable) et instance unique (transférable) | ✅ | instance sur une seule carte à la fois |
+| 4.4 | Boutique Arcanique : prévisualiser, acheter (essence) | ✅ | prix décidé par le serveur ; ⛔ montants (60 à 2000 ◆ provisoires) |
+| 4.5 | Sanctuaire des Invocations : ×1 et ×5, tirage serveur, Portail scellé | ✅ | ⛔ coût 150 ◆ / ×5 à 675 ◆, taux, pity 80, ×5 au moins Rare : provisoires |
+| 4.6 | Feinte de rareté et intensité selon la rareté | ✅ | Mythique annoncée Épique, Légendaire annoncée Rare |
+| 4.7 | Atelier Arcanique : prévisualiser, équiper, retirer, enregistrer un design | ✅ | |
+| 4.8 | Cartes personnalisées affichées partout (collection, fiche, profil, marché) | 🟡 | collection, fiche, profil, vitrine, vedette ✅ ; marché ⬜ (étape 9) |
 
 ## 5. Profil, carte vedette, Défilé des Légendes (dossier §6)
 | # | Élément | État | Notes |
 |---|---|---|---|
 | 5.1 | Profil public, vitrine de 4 cartes | ✅ | |
-| 5.2 | Carte vedette avec son design ; retrait auto si vendue | ⬜ | |
+| 5.2 | Carte vedette avec son design ; retrait auto si vendue | ✅ | testé côté serveur (vente au marché) |
 | 5.3 | Défilé hebdomadaire/mensuel : inscription volontaire, snapshot figé | ⬜ | ⛔ fréquence |
 | 5.4 | Votes sans auto-vote, anti-sybil, égalités | ⬜ | |
 | 5.5 | Modération (retrait d'une inscription, motif) | ⬜ | |
@@ -101,8 +101,8 @@ Mise à jour : à chaque fonctionnalité terminée.
 |---|---|---|---|
 | 7.1 | Audit et trois concepts | ✅ | prototype `claude.ai/artifact/9VwDWaQ6pYuGn4a65bvhyC` |
 | 7.2 | Portail scellé B+C choisi | ✅ | |
-| 7.3 | Intégration réelle (Sanctuaire, voir 4.5) | ⬜ | |
-| 7.4 | Storyboard, états, erreurs, mobile, animations réduites, passer | 🟡 | prototype |
+| 7.3 | Intégration réelle (Sanctuaire, voir 4.5) | ✅ | tirage serveur avant l'animation |
+| 7.4 | Storyboard, états, erreurs, mobile, animations réduites, passer | ✅ | « Passer l'animation », filet de sécurité si l'animation plante |
 
 ## 8. Confrontation (dossier §8 à §12, 04)
 | # | Élément | État | Notes |

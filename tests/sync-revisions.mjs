@@ -84,8 +84,12 @@ try {
   t.check("ancien Worker : données du joueur intactes", st2.opened === snap.opened && st2.chakra === snap.chakra && JSON.stringify(st2.owned) === JSON.stringify(snap.owned));
   const steps = {};
   steps.booster = (await T2.api("open", { pack: "mix", paid: true })).status;
-  const c3 = Object.entries(st2.owned).find(([, o]) => o.n > 0)[0];
-  const l3 = await R2.api("market/sell", { id: c3, price: 10 }); steps.vente = l3.status;
+  // l'ancien Worker ne connaît pas les cartes ajoutées depuis (nouveaux persos de l'épisode 1) : on vend une carte connue des deux versions
+  const owned3 = Object.entries(st2.owned).filter(([, o]) => o.n > 0).map(([id]) => id);
+  let l3 = null, refused = 0;
+  for (const c3 of owned3) { l3 = await R2.api("market/sell", { id: c3, price: 10 }); if (l3.status === 200) break; refused++; }
+  steps.vente = l3.status;
+  if (refused) t.note(`Retour arrière : ${refused} carte(s) du nouveau catalogue refusée(s) à la vente par l'ancien Worker (il ne les connaît pas). À prévoir dans le plan de retour arrière.`);
   steps.achat = (await A2.api("market/buy", { lid: l3.lid })).status;
   steps.comptoir = (await T2.api("chat/send", { text: "retour arrière" })).status;
   steps.config = (await A2.doc("PUT", "config/game", {})).status;

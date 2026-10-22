@@ -38,10 +38,12 @@ async function mutate(env, uid, fn) {
   }
   throw new Error("busy");
 }
+// carte vedette publique : la carte et son design, seulement si elle est encore dans la collection
+const featuredOf = (s) => (s.featured && G.hasCard(s, s.featured) ? { featured: s.featured, fd: G.designOfS(s, s.featured) } : { featured: null });
 async function publishStats(env, uid, s) {
   const st = G.statsS(s);
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'players', ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
-    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, t: Date.now() }), Date.now()).run();
+    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), t: Date.now() }), Date.now()).run();
   await bumpRev(env, "players");
 }
 async function getConfig(env) {
@@ -292,6 +294,29 @@ export async function gameRoute(req, env, user, path) {
       await postFeed(env, user.id, [r.card]);
       return json(r);
     }
+    // --- cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique, carte vedette ---
+    if (path === "/api/game/shop/buy") {
+      const r = await mutate(env, user.id, (s) => { const o = G.buyCosmeticS(s, String(body.id || "")); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
+    if (path === "/api/game/summon") {
+      // le tirage est fait ici, avant toute animation : le navigateur ne fait que montrer le résultat
+      const r = await mutate(env, user.id, (s, now) => { const o = G.summonS(s, +body.n === 5 ? 5 : +body.n === 1 ? 1 : 0, rng, now); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
+    if (path === "/api/game/design") {
+      const r = await mutate(env, user.id, (s) => { const o = G.saveDesignS(s, String(body.card || ""), body.design || {}); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
+    if (path === "/api/game/featured") {
+      const id = body.card ? String(body.card) : null;
+      const r = await mutate(env, user.id, (s) => { if (id && !G.hasCard(s, id)) return { abort: true, error: "Tu n'as pas cette carte." }; s.featured = id; return {}; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
     if (path === "/api/game/claim") {
       const r = await mutate(env, user.id, (s, now) => {
         const o = G.claimAnyS(s, body.kind, body.id, now);
@@ -445,7 +470,10 @@ export async function gameRoute(req, env, user, path) {
       if (!row) return fail(404, "Profil introuvable.");
       const s = G.normalizeSave(JSON.parse(row.data));
       const owned = Object.fromEntries(Object.entries(s.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
-      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [] });
+      // designs visibles des cartes exposées (vitrine et carte vedette) ; rien d'autre de l'inventaire n'est public
+      const shown = [...new Set([...(s.showcase || []), ...(s.featured ? [s.featured] : [])])];
+      const designs = Object.fromEntries(shown.map((id) => [id, G.designOfS(s, id)]).filter(([, d]) => d));
+      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs });
     }
     if (path === "/api/game/showcase") {
       const ids = (Array.isArray(body.ids) ? body.ids : []).filter((id) => G.CARD_BY_ID[id]).slice(0, 4);

@@ -475,7 +475,7 @@ async function startOpening(paid, packId) {
   finally { busy = false; }
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
-  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine };
+  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine, scenario: r.scenario };
   closeMenu(); $("overlay").hidden = true;
   draw();
 }

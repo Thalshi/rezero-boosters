@@ -515,6 +515,7 @@ function removeCardS(s, id, gold, n = 1) {
   if (gold ? o.gold < n : o.n < n) return false;
   if (gold) o.gold -= n; else o.n -= n;
   s.owned[id] = o;
+  dropDesignIfGoneS(s, id);
   return true;
 }
 // Ouvre un booster dans l'état `s`. Renvoie les cartes tirées, ou null si le booster n'a aucune carte débloquée.
@@ -559,7 +560,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
     s.dailyPack = dayKey(now);
     const r = openPackS(s, pk, poolFor(pk, cfg, uid), rng, now, mixPoolFor(pk, cfg, uid));
     trackS(s, "day", 1, now);
-    if (pk.skins) trackS(s, "coffre", 1, now);
+    if (pk.skins) { trackS(s, "coffre", 1, now); r.scenario = pickScenarioS(r.cards, rng, now); }
     return { pack: "jour", ...r };
   }
   const pk = packOfAt(packId, now), pool = poolFor(pk, cfg, uid);
@@ -569,7 +570,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   if (paid) { if (s.chakra < PRICE) return { error: `Il te faut ${PRICE} ◆ (tu en as ${s.chakra}).` }; s.chakra -= PRICE; }
   else { if (!s.free) return { error: "Plus de booster gratuit pour l'instant." }; if (s.free === FREE_MAX) s.freeTs = now; s.free--; }
   const r = openPackS(s, pk, pool, rng, now, mixPoolFor(pk, cfg, uid));
-  if (pk.skins) trackS(s, "coffre", 1, now);
+  if (pk.skins) { trackS(s, "coffre", 1, now); r.scenario = pickScenarioS(r.cards, rng, now); }
   return { pack: pk.id, ...r };
 }
 function packChance(rar, k = 1, last = LAST) {
@@ -665,4 +666,204 @@ function importSaveS(cand, now = Date.now()) {
 // Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
 const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk };
+// ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
+// Aucun cosmétique ne donne de bonus. Ils ne cachent jamais le visage : cadres et auras autour de la carte,
+// ornements au-dessus, holographie et particules en voile léger, fond derrière l'illustration.
+// Deux natures : « compte » (achetés en boutique, réutilisables sur toutes tes cartes, non transférables)
+// et « instance » (obtenues au Sanctuaire, uniques, une carte à la fois, transférables avec la carte).
+const COS_SLOTS = [
+  { id: "cadre", label: "Cadre" }, { id: "aura", label: "Aura" }, { id: "orn", label: "Ornement" },
+  { id: "holo", label: "Holographie" }, { id: "part", label: "Particules" }, { id: "fond", label: "Fond" }, { id: "pres", label: "Présentation" },
+];
+// k : variante de rendu ; c1, c2 : couleurs ; only : « sanctuaire » si l'objet ne s'achète pas en boutique
+const COSMETICS = [
+  { id: "cadre-argent", slot: "cadre", name: "Cadre d'argent", rar: "c", k: "metal", c1: "#e8ecf2", c2: "#8a93a3" },
+  { id: "cadre-cuivre", slot: "cadre", name: "Cadre de cuivre", rar: "c", k: "metal", c1: "#f0b07a", c2: "#8a4a20" },
+  { id: "cadre-or", slot: "cadre", name: "Cadre d'or", rar: "pc", k: "metal", c1: "#fff0b0", c2: "#b8862a" },
+  { id: "cadre-neon", slot: "cadre", name: "Cadre néon", rar: "r", k: "neon", c1: "#4dd6ff", c2: "#2a6fff" },
+  { id: "cadre-sang", slot: "cadre", name: "Cadre de sang", rar: "r", k: "neon", c1: "#ff4d5e", c2: "#7a0f1c" },
+  { id: "cadre-emeraude", slot: "cadre", name: "Cadre d'émeraude", rar: "e", k: "gem", c1: "#5af2a0", c2: "#0f6a44" },
+  { id: "cadre-amethyste", slot: "cadre", name: "Cadre d'améthyste", rar: "e", k: "gem", c1: "#d9a0ff", c2: "#5a2a9e" },
+  { id: "cadre-obsidienne", slot: "cadre", name: "Cadre d'obsidienne", rar: "l", k: "gem", c1: "#9a8ab8", c2: "#120e18" },
+  { id: "cadre-prisme", slot: "cadre", name: "Cadre prismatique", rar: "m", k: "prisme", c1: "#ff4d9e", c2: "#4dd6ff", only: "sanctuaire" },
+  { id: "aura-braise", slot: "aura", name: "Aura de braise", rar: "pc", k: "pulse", c1: "#ff7a2e" },
+  { id: "aura-givre", slot: "aura", name: "Aura de givre", rar: "pc", k: "pulse", c1: "#8fe3ff" },
+  { id: "aura-sylve", slot: "aura", name: "Aura de sylve", rar: "r", k: "pulse", c1: "#5ad17a" },
+  { id: "aura-neant", slot: "aura", name: "Aura du néant", rar: "e", k: "flow", c1: "#8a4dff" },
+  { id: "aura-solaire", slot: "aura", name: "Aura solaire", rar: "e", k: "flow", c1: "#ffd24d" },
+  { id: "aura-spectre", slot: "aura", name: "Aura spectrale", rar: "l", k: "flow", c1: "#e8f4ff" },
+  { id: "aura-ecarlate", slot: "aura", name: "Aura écarlate", rar: "m", k: "flow", c1: "#ff2e4d", only: "sanctuaire" },
+  { id: "orn-etoile", slot: "orn", name: "Étoile du QG", rar: "c", k: "etoile", c1: "#f5c518" },
+  { id: "orn-kanji", slot: "orn", name: "Kanji flottant 零", rar: "pc", k: "kanji", c1: "#ff4d2e" },
+  { id: "orn-aureole", slot: "orn", name: "Auréole", rar: "r", k: "aureole", c1: "#fff3b0" },
+  { id: "orn-cornes", slot: "orn", name: "Cornes d'ombre", rar: "r", k: "cornes", c1: "#3a2a4a" },
+  { id: "orn-couronne", slot: "orn", name: "Couronne d'or", rar: "e", k: "couronne", c1: "#f5c518" },
+  { id: "orn-ailes-lumiere", slot: "orn", name: "Ailes de lumière", rar: "l", k: "ailes", c1: "#fff8e0" },
+  { id: "orn-ailes-ombre", slot: "orn", name: "Ailes d'ombre", rar: "l", k: "ailes", c1: "#2a1a3a", only: "sanctuaire" },
+  { id: "holo-nacre", slot: "holo", name: "Nacre", rar: "pc", k: "nacre" },
+  { id: "holo-arcenciel", slot: "holo", name: "Arc-en-ciel", rar: "r", k: "arcenciel" },
+  { id: "holo-scintille", slot: "holo", name: "Scintillement", rar: "e", k: "scintille" },
+  { id: "holo-prisme", slot: "holo", name: "Prisme vivant", rar: "l", k: "prisme" },
+  { id: "holo-glitch", slot: "holo", name: "Faille du néant", rar: "m", k: "glitch", only: "sanctuaire" },
+  { id: "part-etincelles", slot: "part", name: "Étincelles", rar: "c", k: "etincelles", c1: "#ffd24d" },
+  { id: "part-flocons", slot: "part", name: "Flocons", rar: "pc", k: "flocons", c1: "#e8f4ff" },
+  { id: "part-petales", slot: "part", name: "Pétales", rar: "r", k: "petales", c1: "#ff9ec4" },
+  { id: "part-braises", slot: "part", name: "Braises", rar: "r", k: "braises", c1: "#ff6a2e" },
+  { id: "part-lucioles", slot: "part", name: "Lucioles", rar: "e", k: "lucioles", c1: "#c8ff6a" },
+  { id: "part-runes", slot: "part", name: "Runes du sceau", rar: "l", k: "runes", c1: "#b072ff", only: "sanctuaire" },
+  { id: "fond-nuit", slot: "fond", name: "Nuit étoilée", rar: "c", k: "nuit", c1: "#0d1430", c2: "#2a3a80" },
+  { id: "fond-crepuscule", slot: "fond", name: "Crépuscule", rar: "c", k: "degrade", c1: "#3a1440", c2: "#c8642a" },
+  { id: "fond-abysse", slot: "fond", name: "Abysse", rar: "pc", k: "degrade", c1: "#02141c", c2: "#0f6a8a" },
+  { id: "fond-forge", slot: "fond", name: "Forge", rar: "r", k: "degrade", c1: "#1a0a04", c2: "#c84a1a" },
+  { id: "fond-aurore", slot: "fond", name: "Aurore boréale", rar: "e", k: "aurore", c1: "#0a1a2a", c2: "#3affb0" },
+  { id: "fond-washi", slot: "fond", name: "Papier washi", rar: "l", k: "washi", c1: "#3a3022", c2: "#7a6a48" },
+  { id: "pres-flotte", slot: "pres", name: "Flottement", rar: "pc", k: "flotte" },
+  { id: "pres-incline", slot: "pres", name: "Inclinaison 3D", rar: "r", k: "incline" },
+  { id: "pres-projecteur", slot: "pres", name: "Projecteur", rar: "e", k: "projecteur" },
+  { id: "pres-orbite", slot: "pres", name: "Orbite lente", rar: "l", k: "orbite", only: "sanctuaire" },
+];
+const COS_BY_ID = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
+// --- valeurs PROVISOIRES (à valider) : prix en boutique, coût et probabilités des invocations ---
+const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
+const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
+const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
+const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
+const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
+const SUMMON_5_FLOOR = "r";           // ×5 : au moins une Rare ou mieux
+const summonCost = (n) => (n === 5 ? Math.round(SUMMON_COST * 5 * (1 - SUMMON_DISCOUNT_5)) : SUMMON_COST * n);
+function cosOf(s) {
+  const c = s.cos && typeof s.cos === "object" ? s.cos : (s.cos = {});
+  if (!c.own || typeof c.own !== "object") c.own = {};
+  if (!Array.isArray(c.inst)) c.inst = [];
+  if (!c.designs || typeof c.designs !== "object") c.designs = {};
+  if (typeof c.sinceM !== "number") c.sinceM = 0;
+  return c;
+}
+// références d'un design : « a:<id> » pour un cosmétique de compte, « i:<instance> » pour une instance
+const refCos = (s, ref) => {
+  if (typeof ref !== "string") return null;
+  const c = cosOf(s);
+  if (ref.startsWith("a:")) { const id = ref.slice(2); return c.own[id] && COS_BY_ID[id] ? COS_BY_ID[id] : null; }
+  if (ref.startsWith("i:")) { const it = c.inst.find((x) => x.i === ref.slice(2)); return it && COS_BY_ID[it.c] ? COS_BY_ID[it.c] : null; }
+  return null;
+};
+// le design d'une carte, résolu en cosmétiques (pour l'affichage)
+function designOfS(s, cardId) {
+  const d = cosOf(s).designs[cardId]; if (!d) return null;
+  const out = {}; for (const sl of COS_SLOTS) { const c = refCos(s, d[sl.id]); if (c && c.slot === sl.id) out[sl.id] = c.id; }
+  return Object.keys(out).length ? out : null;
+}
+function buyCosmeticS(s, id) {
+  const c = COS_BY_ID[id], cos = cosOf(s);
+  if (!c) return { error: "Cet objet n'existe pas." };
+  if (c.only === "sanctuaire") return { error: "Cet objet ne s'obtient qu'au Sanctuaire des Invocations." };
+  if (cos.own[id]) return { error: "Tu as déjà cet objet." };
+  const price = COS_PRICE[c.rar];
+  if (s.chakra < price) return { error: `Il te faut ${price} ◆ (tu en as ${s.chakra}).` };
+  s.chakra -= price; cos.own[id] = Date.now(); trackS(s, "shop", 1);
+  return { bought: id, price };
+}
+const SUMMON_POOL = (rar) => COSMETICS.filter((c) => c.rar === rar);
+function summonS(s, n, rng, now = Date.now()) {
+  if (n !== 1 && n !== 5) return { error: "On invoque 1 ou 5 objets à la fois." };
+  const cost = summonCost(n), cos = cosOf(s);
+  if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
+  s.chakra -= cost;
+  const rars = [];
+  for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
+  // ×5 : au moins une Rare ou mieux
+  if (n === 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
+  const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
+  trackS(s, "summon", n, now);
+  return { got, cost };
+}
+// enregistre le design d'une carte ; une instance ne peut être que sur une carte à la fois (elle quitte l'ancienne)
+function saveDesignS(s, cardId, design) {
+  if (!CARD_BY_ID[cardId] || !hasCard(s, cardId)) return { error: "Tu n'as pas cette carte." };
+  const cos = cosOf(s), clean = {};
+  for (const sl of COS_SLOTS) {
+    const ref = design?.[sl.id]; if (!ref) continue;
+    const c = refCos(s, ref); if (!c || c.slot !== sl.id) return { error: `Objet invalide pour l'emplacement ${sl.label}.` };
+    clean[sl.id] = ref;
+  }
+  for (const [cid, d] of Object.entries(cos.designs)) if (cid !== cardId) for (const k of Object.keys(d)) if (d[k].startsWith("i:") && Object.values(clean).includes(d[k])) delete d[k];
+  if (Object.keys(clean).length) cos.designs[cardId] = clean; else delete cos.designs[cardId];
+  return { design: clean };
+}
+// une carte qui quitte la collection perd son design (les instances retournent dans l'inventaire) et n'est plus vedette
+function dropDesignIfGoneS(s, cardId) {
+  if (hasCard(s, cardId)) return;
+  const cos = cosOf(s); delete cos.designs[cardId];
+  if (s.featured === cardId) s.featured = null;
+  s.showcase = (s.showcase || []).filter((x) => x !== cardId);
+}
+const usedInstances = (s) => { const u = {}; for (const [cid, d] of Object.entries(cosOf(s).designs)) for (const r of Object.values(d)) if (r.startsWith("i:")) u[r.slice(2)] = cid; return u; };
+
+// ===== Coffre arcanique : moteur de scénarios d'ouverture =====
+// Un seul moteur : chaque scénario est une suite de « temps forts » (beats) joués par le navigateur.
+// Le serveur tire les 5 cartes PUIS choisit le scénario d'après elles : l'animation ne change jamais le résultat,
+// une feinte ne fait que retarder la vraie couleur. Poids provisoires, réglables (décision en attente).
+// Temps forts disponibles (voir src/coffre.js) : nom, puis paramètres.
+const CHEST_BEATS = ["insert", "turn", "tint", "ladder", "shake", "runes", "runesOut", "crystal", "crack", "burstCrystal", "keyPop", "keyBreak", "goldKey", "lidPeek", "lidFall", "blackout", "redrop", "dust", "split", "crowns", "eclipse", "twin", "coins", "gild", "sheen", "chrysalis", "column", "stars", "kanji", "orbit", "quake", "aurora", "banner", "pause", "open"];
+// ctx : best (meilleure rareté), rank, n[r] (nombre par rareté), gold, news, newTop, who[], ids[], list[{id, who, rar}], hour (Paris)
+const CHEST_SCENARIOS = [
+  // 6 classiques
+  { id: "cl-nette", cat: "classique", name: "Ouverture nette", w: 6, when: () => true, beats: [["insert"], ["turn"], ["tint"], ["shake", 1], ["open"]] },
+  { id: "cl-runes", cat: "classique", name: "Runes éveillées", w: 5, when: () => true, beats: [["insert"], ["turn"], ["runes", 6], ["tint"], ["open"]] },
+  { id: "cl-cristal", cat: "classique", name: "Cristal chantant", w: 5, when: () => true, beats: [["insert"], ["turn"], ["crystal", 2], ["tint"], ["open"]] },
+  { id: "cl-souffle", cat: "classique", name: "Souffle arcanique", w: 4, when: () => true, beats: [["insert"], ["turn"], ["dust"], ["tint"], ["open"]] },
+  { id: "cl-serrure", cat: "classique", name: "Serrure ancienne", w: 4, when: () => true, beats: [["insert"], ["turn"], ["pause", 300], ["turn"], ["tint"], ["shake", 1], ["open"]] },
+  { id: "cl-echelle", cat: "classique", name: "Échelle des raretés", w: 4, when: (x) => x.rank >= 2, beats: [["insert"], ["turn"], ["ladder"], ["open"]] },
+  // 7 fake drops et faux redémarrages
+  { id: "fk-recalcitrante", cat: "fake", name: "Serrure récalcitrante", w: 3, when: (x) => x.rank >= 2, beats: [["insert"], ["keyPop"], ["pause", 700], ["insert"], ["turn"], ["tint"], ["shake", 2], ["open"]] },
+  { id: "fk-grise", cat: "fake", name: "Fausse Commune", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint", "c"], ["lidPeek"], ["lidFall"], ["pause", 500], ["tint"], ["shake", 2], ["open"]] },
+  { id: "fk-redemarrage", cat: "fake", name: "Faux redémarrage", w: 2, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["tint", "pc"], ["blackout"], ["redrop"], ["runes", 8], ["tint"], ["open"]] },
+  { id: "fk-extinction", cat: "fake", name: "Extinction", w: 3, when: (x) => x.best === "m", beats: [["insert"], ["turn"], ["runes", 8], ["tint", "e"], ["runesOut"], ["pause", 900], ["tint"], ["runes", 8], ["shake", 3], ["open"]] },
+  { id: "fk-retombe", cat: "fake", name: "Couvercle qui retombe", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint", "r"], ["lidPeek"], ["lidFall"], ["shake", 2], ["tint"], ["open"]] },
+  { id: "fk-fele", cat: "fake", name: "Cristal fêlé", w: 3, when: (x) => x.rank >= 2, beats: [["insert"], ["turn"], ["crystal", 1], ["crack"], ["pause", 600], ["tint"], ["burstCrystal"], ["open"]] },
+  { id: "fk-cle", cat: "fake", name: "Clé brisée", w: 2, when: (x) => x.gold > 0 || x.rank >= 4, beats: [["insert"], ["turn"], ["keyBreak"], ["pause", 500], ["goldKey"], ["insert"], ["turn"], ["tint"], ["open"]] },
+  // 7 transformations (le coffre change selon les cartes)
+  { id: "tr-trinite", cat: "transfo", name: "Trinité violette", w: 4, when: (x) => x.n.e >= 2, beats: [["insert"], ["turn"], ["tint"], ["split", "e"], ["shake", 2], ["open"]] },
+  { id: "tr-couronne", cat: "transfo", name: "Double couronne", w: 5, when: (x) => x.n.l >= 2, beats: [["insert"], ["turn"], ["tint", "l"], ["crowns"], ["gild"], ["tint"], ["open"]] },
+  { id: "tr-eclipse", cat: "transfo", name: "Éclipse", w: 6, when: (x) => x.n.l >= 1 && x.n.m >= 1, beats: [["insert"], ["turn"], ["tint", "l"], ["eclipse"], ["tint"], ["shake", 3], ["open"]] },
+  { id: "tr-jumeaux", cat: "transfo", name: "Cœurs jumeaux", w: 7, when: (x) => x.n.m >= 2, beats: [["insert"], ["turn"], ["tint"], ["twin"], ["quake"], ["open"]] },
+  { id: "tr-pluie-or", cat: "transfo", name: "Pluie d'or", w: 5, when: (x) => x.gold >= 2, beats: [["insert"], ["turn"], ["coins"], ["gild"], ["tint"], ["open"]] },
+  { id: "tr-reflet", cat: "transfo", name: "Reflet doré", w: 2, when: (x) => x.gold === 1, beats: [["insert"], ["turn"], ["sheen"], ["tint"], ["open"]] },
+  { id: "tr-chrysalide", cat: "transfo", name: "Chrysalide", w: 2, when: (x) => x.news >= 4 && x.rank >= 3, beats: [["insert"], ["turn"], ["chrysalis"], ["tint"], ["open"]] },
+  // 6 spectaculaires
+  { id: "sp-colonne", cat: "spectacle", name: "Colonne céleste", w: 4, when: (x) => x.best === "m", beats: [["insert"], ["turn"], ["tint"], ["column"], ["quake"], ["open"]] },
+  { id: "sp-etoiles", cat: "spectacle", name: "Ciel d'étoiles", w: 3, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["stars"], ["tint"], ["open"]] },
+  { id: "sp-kanji", cat: "spectacle", name: "Kanji géant", w: 3, when: (x) => x.rank >= 3 && x.newTop, beats: [["insert"], ["turn"], ["tint"], ["kanji", "零"], ["open"]] },
+  { id: "sp-orbite", cat: "spectacle", name: "Orbite des cartes", w: 3, when: (x) => x.n.r + x.n.e + x.n.l + x.n.m >= 3, beats: [["insert"], ["turn"], ["tint"], ["orbit"], ["open"]] },
+  { id: "sp-seisme", cat: "spectacle", name: "Séisme", w: 2, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["tint"], ["quake"], ["shake", 3], ["open"]] },
+  { id: "sp-aurore", cat: "spectacle", name: "Aurore", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint"], ["aurora"], ["open"]] },
+  // 4 secrets (jamais annoncés au joueur avant d'être vus)
+  { id: "se-createur", cat: "secret", name: "Le créateur", w: 1, when: (x) => x.list.some((c) => c.who === "billy" && RANKS.indexOf(c.rar) >= 3), beats: [["insert"], ["turn"], ["tint"], ["banner", "Billy a signé ce coffre"], ["kanji", "創"], ["open"]] },
+  { id: "se-arcenciel", cat: "secret", name: "Arc-en-ciel", w: 1, when: (x) => new Set(x.rars).size >= 5, beats: [["insert"], ["turn"], ["ladder"], ["banner", "Cinq raretés, un seul coffre"], ["aurora"], ["open"]] },
+  { id: "se-minuit", cat: "secret", name: "Minuit à Shinjuku", w: 1, when: (x) => x.hour === 0 && x.rank >= 2, beats: [["insert"], ["turn"], ["blackout"], ["stars"], ["banner", "Minuit à Shinjuku"], ["tint"], ["open"]] },
+  { id: "se-miroir", cat: "secret", name: "Miroir", w: 1, when: (x) => x.list.some((c, i) => RANKS.indexOf(c.rar) >= 3 && x.ids.indexOf(c.id) !== i), beats: [["insert"], ["turn"], ["tint"], ["twin"], ["banner", "Deux fois la même carte"], ["open"]] },
+];
+const CHEST_BY_ID = Object.fromEntries(CHEST_SCENARIOS.map((x) => [x.id, x]));
+// probabilités provisoires : un secret possible sort toujours ; une transformation possible sort 3 fois sur 4 ;
+// sinon feinte 25 %, spectacle 35 % (si possibles), classique le reste
+const CHEST_W = { transfo: 0.75, fake: 0.25, spectacle: 0.35 };
+function chestCtx(cards, now = Date.now()) {
+  const rars = cards.map((x) => CARD_BY_ID[x.id].rar), n = Object.fromEntries(RANKS.map((r) => [r, rars.filter((x) => x === r).length]));
+  const best = rars.reduce((a, r) => (RANKS.indexOf(r) > RANKS.indexOf(a) ? r : a), "c"), rank = RANKS.indexOf(best);
+  let hour = new Date(now).getUTCHours();
+  try { hour = +new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now)).find((p) => p.type === "hour").value; } catch (e) {}
+  return { best, rank, n, rars, gold: cards.filter((x) => x.gold).length, news: cards.filter((x) => x.isNew).length, newTop: cards.some((x) => x.isNew && CARD_BY_ID[x.id].rar === best),
+    who: cards.map((x) => CARD_BY_ID[x.id].who), ids: cards.map((x) => x.id), list: cards.map((x) => ({ id: x.id, who: CARD_BY_ID[x.id].who, rar: CARD_BY_ID[x.id].rar })), hour };
+}
+const chestEligible = (ctx) => CHEST_SCENARIOS.filter((x) => x.when(ctx));
+function pickWeighted(list, rng) { const tot = list.reduce((a, x) => a + x.w, 0); let v = rng() * tot; for (const x of list) { v -= x.w; if (v < 0) return x; } return list[list.length - 1]; }
+function pickScenarioS(cards, rng, now = Date.now()) {
+  const el = chestEligible(chestCtx(cards, now)), of = (cat) => el.filter((x) => x.cat === cat);
+  if (of("secret").length) return pickWeighted(of("secret"), rng).id;
+  if (of("transfo").length && rng() < CHEST_W.transfo) return pickWeighted(of("transfo"), rng).id;
+  if (of("fake").length && rng() < CHEST_W.fake) return pickWeighted(of("fake"), rng).id;
+  if (of("spectacle").length && rng() < CHEST_W.spectacle) return pickWeighted(of("spectacle"), rng).id;
+  return pickWeighted(of("classique"), rng).id;
+}
+
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_5_FLOOR, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestCtx, chestEligible, pickWeighted, pickScenarioS };

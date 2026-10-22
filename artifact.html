@@ -703,6 +703,260 @@ legend { font: 700 14px var(--disp); padding: 0 6px; }
 .chest.out .lid { transform: translateY(-40px) rotate(-18deg); opacity: 0; transition: all .5s; }
 @keyframes shake { 20% { transform: rotate(-4deg); } 40% { transform: rotate(4deg); } 60% { transform: rotate(-3deg); } 80% { transform: rotate(3deg); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ===== Cosmétiques (Atelier Arcanique) : aucun bonus, jamais par-dessus le visage ===== */
+.kc.cz-cadre { border-color: transparent; }
+.kc.cz-cadre-neon { box-shadow: 0 0 14px var(--zf1), 0 8px 20px #0007; }
+.kc.cz-cadre-gem { box-shadow: inset 0 0 0 1px #fff3, 0 0 10px color-mix(in srgb, var(--zf1) 60%, transparent), 0 8px 20px #0007; }
+@property --zang { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+.kc.cz-cadre-prisme { animation: zspin 6s linear infinite; }
+@keyframes zspin { to { --zang: 360deg; } }
+.kcw.cz-aura { isolation: isolate; }
+.kcw.cz-aura::before { content: ""; position: absolute; inset: -7%; z-index: -1; border-radius: 10cqw; background: radial-gradient(closest-side, var(--za), transparent); opacity: .55; filter: blur(4px); pointer-events: none; }
+.kcw.cz-aura-pulse::before { animation: zpulse 2.6s ease-in-out infinite; }
+.kcw.cz-aura-flow::before { background: conic-gradient(from var(--zang, 0deg), var(--za), transparent 30%, var(--za) 55%, transparent 80%, var(--za)); filter: blur(7px); animation: zspin 5s linear infinite; opacity: .6; }
+@keyframes zpulse { 50% { opacity: .85; transform: scale(1.03); } }
+.cz-orn { position: absolute; z-index: 4; left: 50%; top: -9cqw; transform: translateX(-50%); color: var(--zo); pointer-events: none; display: grid; place-items: center; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--zo) 70%, transparent)); }
+.cz-orn-etoile, .cz-orn-kanji { font: 900 14cqw/1 var(--body); animation: zfloat 3s ease-in-out infinite; }
+.cz-orn-couronne svg { width: 30cqw; height: 17cqw; }
+.cz-orn-aureole { top: -7cqw; width: 46cqw; height: 11cqw; border-radius: 50%; border: 1.6cqw solid var(--zo); box-shadow: 0 0 10px var(--zo); animation: zfloat 3.4s ease-in-out infinite; }
+.cz-orn-cornes { top: -6cqw; width: 70cqw; height: 16cqw; }
+.cz-orn-cornes::before, .cz-orn-cornes::after { content: ""; position: absolute; top: 0; width: 13cqw; height: 16cqw; border: 2.4cqw solid #ff4d5e; border-color: var(--zo) var(--zo) transparent transparent; border-radius: 0 100% 0 0; background: none; }
+.cz-orn-cornes::before { left: 0; transform: scaleX(-1); } .cz-orn-cornes::after { right: 0; }
+.cz-orn-ailes { top: 14%; width: 150%; height: 60%; z-index: -1; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--zo) 60%, transparent)); }
+.kcw:has(.cz-orn-ailes) { isolation: isolate; }
+.cz-orn-ailes::before, .cz-orn-ailes::after { content: ""; position: absolute; top: 0; width: 34%; height: 100%; background: repeating-linear-gradient(170deg, var(--zo) 0 18%, color-mix(in srgb, var(--zo) 70%, transparent) 18% 24%); border-radius: 100% 0 100% 30%; opacity: .9; animation: zflap 2.8s ease-in-out infinite; }
+.cz-orn-ailes::before { left: 0; transform-origin: 100% 40%; } .cz-orn-ailes::after { right: 0; transform: scaleX(-1); transform-origin: 0 40%; }
+@keyframes zflap { 50% { transform: rotate(-6deg); } }
+.cz-orn-ailes::after { animation-name: zflap2; } @keyframes zflap2 { 0%, 100% { transform: scaleX(-1); } 50% { transform: scaleX(-1) rotate(-6deg); } }
+@keyframes zfloat { 50% { translate: 0 -1.5cqw; } }
+.cz-holo { position: absolute; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: color-dodge; opacity: .26; background-size: 260% 100%; animation: holo 7s linear infinite; }
+.cz-holo-nacre { background-image: linear-gradient(115deg, #ffd6f0, #d6f0ff, #fff6d6, #e0d6ff, #ffd6f0); }
+.cz-holo-arcenciel { background-image: linear-gradient(115deg, #ff4d4d, #ffd24d, #4dff88, #4dd6ff, #a04dff, #ff4d4d); opacity: .22; }
+.cz-holo-scintille { background-image: radial-gradient(2px 2px at 20% 30%, #fff, transparent), radial-gradient(2px 2px at 60% 70%, #fff, transparent), radial-gradient(1.5px 1.5px at 80% 25%, #fff, transparent), radial-gradient(2px 2px at 35% 85%, #fff, transparent); background-size: 100% 100%; opacity: .6; mix-blend-mode: screen; animation: ztwinkle 1.8s steps(2) infinite; }
+.cz-holo-prisme { background-image: conic-gradient(from 0deg at 30% 30%, #ff4d9e, #ffd24d, #4dd6ff, #8a4dff, #ff4d9e); background-size: 100% 100%; opacity: .2; animation: zhue 5s linear infinite; }
+.cz-holo-glitch { background-image: repeating-linear-gradient(0deg, #8a4dff33 0 2px, transparent 2px 6px), linear-gradient(115deg, transparent 40%, #ff2e4d55 50%, transparent 60%); opacity: .45; mix-blend-mode: screen; animation: holo 2.2s steps(6) infinite; }
+@keyframes ztwinkle { 50% { opacity: .2; } }
+@keyframes zhue { to { filter: hue-rotate(360deg); } }
+.cz-part { position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; background-repeat: repeat; opacity: .8; }
+.cz-part-etincelles, .cz-part-braises { background-image: radial-gradient(circle, var(--zp) 0 1.2px, transparent 1.8px), radial-gradient(circle, var(--zp) 0 1px, transparent 1.6px); background-size: 22% 18%, 31% 27%; background-position: 0 0, 40% 60%; animation: zrise 4s linear infinite; }
+.cz-part-braises { opacity: .7; animation-duration: 6s; }
+.cz-part-flocons, .cz-part-petales { background-image: radial-gradient(circle, var(--zp) 0 1.6px, transparent 2.2px), radial-gradient(ellipse 3px 2px, var(--zp) 0 1.2px, transparent 2px); background-size: 26% 22%, 34% 30%; background-position: 10% 0, 60% 30%; animation: zfall 7s linear infinite; }
+.cz-part-lucioles { background-image: radial-gradient(circle, var(--zp) 0 1.6px, color-mix(in srgb, var(--zp) 40%, transparent) 2.6px, transparent 4px); background-size: 38% 30%; animation: zrise 9s linear infinite, ztwinkle 1.6s ease-in-out infinite; }
+.cz-part-runes { background-image: radial-gradient(circle, var(--zp) 0 1.4px, transparent 2px); background-size: 18% 14%; mask-image: radial-gradient(closest-side, transparent 60%, #000 75%); animation: zrise 5s linear infinite; }
+@keyframes zrise { from { background-position: 0 100%, 40% 160%; } to { background-position: 0 -100%, 40% -40%; } }
+@keyframes zfall { from { background-position: 10% -100%, 60% -70%; } to { background-position: 30% 100%, 40% 130%; } }
+.kcw.cz-pres-flotte { animation: zfloat 3.6s ease-in-out infinite; }
+.kcw.cz-pres-incline .kc { animation: ztilt 6s ease-in-out infinite; }
+@keyframes ztilt { 25% { transform: perspective(600px) rotateY(9deg) rotateX(3deg); } 75% { transform: perspective(600px) rotateY(-9deg) rotateX(-2deg); } }
+.kcw.cz-pres-projecteur::after { content: ""; position: absolute; inset: -30% -20% 30%; z-index: -1; background: radial-gradient(ellipse at 50% 0, #fff3, transparent 65%); pointer-events: none; }
+.kcw.cz-pres-orbite .kc { animation: zorbit 9s ease-in-out infinite; }
+@keyframes zorbit { 50% { transform: perspective(700px) rotateY(18deg) translateY(-1.5cqw); } }
+@media (prefers-reduced-motion: reduce) { .kc.cz-cadre-prisme, .kcw.cz-aura::before, .cz-orn, .cz-orn-ailes::before, .cz-orn-ailes::after, .cz-holo, .cz-part, .kcw.cz-pres-flotte, .kcw.cz-pres-incline .kc, .kcw.cz-pres-orbite .kc { animation: none !important; } }
+
+/* ===== Boutique, Atelier, Sanctuaire ===== */
+.z-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 16px; margin: 0 0 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); font-size: 14px; color: var(--fg2); }
+.z-bar b { color: var(--fg); font-family: var(--mono); }
+.z-bar .btn { margin-left: auto; }
+.zgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+@media (min-width: 700px) { .zgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .zgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.zgrid.one { grid-template-columns: minmax(0, 240px); }
+@media (min-width: 700px) { .zgrid.five { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.zt { display: flex; flex-direction: column; gap: 10px; padding: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); height: 100%; box-sizing: border-box; }
+.zt-prev { padding: 6px 10%; }
+.zt-t { display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 1.3; flex: 1; }
+.zt-t span { font: 500 12px var(--mono); }
+.zt-t small { color: var(--mut); font-size: 12px; }
+.zt .btn { width: 100%; }
+.zat { display: grid; gap: 24px; margin-top: 18px; }
+@media (min-width: 900px) { .zat { grid-template-columns: 320px minmax(0, 1fr); align-items: start; } .zat-prev { position: sticky; top: 92px; } }
+.zat-prev { display: flex; flex-direction: column; gap: 14px; }
+.zat-card { width: min(260px, 70vw); margin: 0 auto; padding: 18px 0; }
+.zpick { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--mut); }
+.zpick select { height: 44px; padding: 0 12px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line2); color: var(--fg); font: 500 14px var(--body); }
+.zat-slots { display: flex; flex-direction: column; gap: 18px; }
+.zslot { display: flex; flex-direction: column; gap: 8px; }
+.zopts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.zopt { --c: var(--line3); display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 4px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line2); color: var(--fg3); font: 500 13px var(--body); cursor: pointer; text-align: left; }
+.zopt i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.zopt small { color: var(--mut); font-size: 11px; }
+.zopt:hover { border-color: var(--line3); color: var(--fg); }
+.zopt.on { border-color: var(--c); color: var(--fg); background: color-mix(in srgb, var(--c) 14%, var(--panel)); }
+.zopt:not([data-ref]).on, .zopt[data-ref=""].on { --c: var(--acc); }
+.zopt-line { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--fg2); cursor: pointer; }
+.zopt-line input { width: 18px; height: 18px; accent-color: var(--acc); }
+.zsanct { display: grid; gap: 20px; }
+@media (min-width: 900px) { .zsanct { grid-template-columns: minmax(0, 1fr) 320px; align-items: center; } }
+.sanctum-host { position: relative; aspect-ratio: 1 / 1; max-height: 70vh; width: 100%; margin: 0 auto; border-radius: var(--r-xl); background: radial-gradient(circle at 50% 50%, #1c1626, var(--bg) 70%); border: 1px solid var(--line); overflow: hidden; }
+.sanctum-host.glowing { animation: zglow 1.2s ease-out; }
+@keyframes zglow { 0% { box-shadow: 0 0 0 0 var(--glow); } 30% { box-shadow: 0 0 60px 10px var(--glow); } 100% { box-shadow: 0 0 0 0 transparent; } }
+.sanctum { position: absolute; inset: 0; cursor: pointer; outline: none; }
+.sanctum:focus-visible { box-shadow: inset 0 0 0 2px var(--acc); border-radius: var(--r-xl); }
+.sanctum.busy { cursor: default; }
+.sanctum canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.sanctum-hand { position: absolute; left: 50%; bottom: 0; width: 18%; transform: translate(-50%, 100%); pointer-events: none; opacity: 0; }
+.sanctum-hand svg { display: block; width: 100%; }
+.sanctum-hand.touch { animation: zreach 1.3s cubic-bezier(.3,.7,.3,1) forwards; }
+@keyframes zreach { 0% { transform: translate(-50%, 100%); opacity: 0; } 25% { opacity: 1; } 55% { transform: translate(-50%, calc(-1 * var(--reach, 120px))); opacity: 1; } 100% { transform: translate(-50%, calc(-1 * var(--reach, 120px) + 20px)); opacity: 0; } }
+.sanctum-hint { position: absolute; left: 0; right: 0; bottom: 14px; margin: 0; text-align: center; font: 500 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--fg2); pointer-events: none; }
+.sanctum.busy .sanctum-hint { opacity: 0; }
+.zs-side { display: flex; flex-direction: column; gap: 12px; }
+.zs-side .btn { width: 100%; }
+.zrates { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 500 12px var(--mono); color: var(--fg2); }
+.zrates i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.zresults { margin-top: 28px; }
+.zres { display: block; height: 100%; }
+.zback { display: grid; place-items: center; min-height: 220px; width: 100%; border-radius: var(--r-lg); border: 1px solid var(--line2); background: repeating-linear-gradient(135deg, #1a1622 0 10px, #15121c 10px 20px); color: var(--gold); font: 700 44px var(--body); cursor: pointer; text-shadow: 0 0 18px #f5c51866; }
+.zback:hover { border-color: var(--gold); }
+.zfeat-row { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 20px; align-items: center; }
+.zfeat-row h2 { margin: 0 0 6px; }
+@media (max-width: 560px) { .zfeat-row { grid-template-columns: 1fr; justify-items: center; text-align: center; } .zfeat-row > .kcw { --w: 200px; } }
+@media (prefers-reduced-motion: reduce) { .sanctum-hand.touch { animation: none; } }
+
+/* ===== Coffre arcanique : coffre 3D, clé, runes, cristal, temps forts des scénarios ===== */
+@property --rare { syntax: "<color>"; inherits: true; initial-value: #b5b1bb; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.stage-wrap { transition: --glow .6s; }
+.cf { position: relative; overflow: hidden; transition: --rare .55s ease; min-height: 520px; }
+.cf-fx { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.cf .c3-scene { position: relative; perspective: 900px; margin: 40px 0 10px; animation: cfdrop .7s cubic-bezier(.2, .9, .3, 1.25) both; --w: 200px; --d: 172px; --hb: 120px; --hl: 66px; }
+@media (max-width: 560px) { .cf .c3-scene { --w: 150px; --d: 130px; --hb: 90px; --hl: 50px; } }
+@keyframes cfdrop { from { opacity: 0; transform: translateY(-90px) scale(.7); } to { opacity: 1; transform: none; } }
+.cf .c3-scene.redrop { animation: cfdrop .7s cubic-bezier(.2, .9, .3, 1.25) both; }
+.cf .c3 { position: relative; width: var(--w); height: calc(var(--hb) + var(--hl)); transform-style: preserve-3d; transform: rotateX(-16deg) rotateY(-30deg); animation: cfsway 5s ease-in-out infinite; }
+@keyframes cfsway { 50% { transform: rotateX(-12deg) rotateY(-18deg) translateY(-6px); } }
+.cf .c3.shake1 { animation: cfrattle .2s linear 2; }
+.cf .c3.shake2 { animation: cfrattle .14s linear 4; }
+.cf .c3.shake3 { animation: cfrattle .09s linear 9; }
+@keyframes cfrattle { 25% { transform: rotateX(-16deg) rotateY(-26deg) rotateZ(2.5deg); } 75% { transform: rotateX(-16deg) rotateY(-34deg) rotateZ(-2.5deg); } }
+.cf .c3-base, .cf .c3-lid { position: absolute; left: 0; width: var(--w); transform-style: preserve-3d; }
+.cf .c3-base { top: var(--hl); height: var(--hb); }
+.cf .c3-lid { top: 0; height: var(--hl); transform-origin: 50% 100% calc(var(--d) / -2); transition: transform .9s cubic-bezier(.3, 1.35, .5, 1); }
+.cf .c3.peek .c3-lid { transform: rotateX(28deg); transition-duration: .5s; }
+.cf .c3.open .c3-lid { transform: rotateX(105deg); }
+.cf .f { position: absolute; border-radius: 4px;
+  background: radial-gradient(70% 55% at 28% 30%, color-mix(in srgb, var(--rare) 38%, transparent), transparent 70%),
+    repeating-linear-gradient(128deg, transparent 0 17px, color-mix(in srgb, var(--rare) 22%, transparent) 17px 19px, transparent 19px 34px),
+    linear-gradient(160deg, #1d2735, #0d121b 70%);
+  box-shadow: inset 0 0 0 3px #0a0d13, inset 0 0 0 6px #c9a24a, inset 0 0 0 8px #6e5524, inset 0 0 26px color-mix(in srgb, var(--rare) 55%, transparent); }
+.cf .f::before { content: ""; position: absolute; inset: 9px; border-radius: 2px; border: 1px solid color-mix(in srgb, var(--rare) 50%, transparent); box-shadow: 0 0 8px color-mix(in srgb, var(--rare) 40%, transparent); }
+.cf .c3.gilded .f { background: radial-gradient(70% 55% at 28% 30%, #fff5c855, transparent 70%), linear-gradient(160deg, #d9b452, #7a5718 70%); }
+.cf .c3.sheen .c3-base .front::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, #fff8 48%, #f0c860aa 52%, transparent 70%); background-size: 260% 100%; animation: cfsheen .85s ease-out both; }
+@keyframes cfsheen { from { background-position: 120% 0; } to { background-position: -40% 0; } }
+.cf .c3.chrysalis { filter: brightness(1.8) saturate(.4) drop-shadow(0 0 30px #fff); animation: cfcocoon 1.25s ease-in-out; }
+@keyframes cfcocoon { 30% { transform: rotateX(-16deg) rotateY(-30deg) scale(.86); } 70% { transform: rotateX(-16deg) rotateY(-30deg) scale(1.12); } }
+.cf .c3.ghost { position: absolute; left: 0; top: 0; opacity: .45; filter: blur(1px); animation: cftwin 1.1s ease-in-out forwards; pointer-events: none; }
+@keyframes cftwin { 0% { translate: 0 0; } 40% { translate: 70% -10px; } 100% { translate: 0 0; opacity: 0; } }
+.cf .c3-base .front, .cf .c3-base .back { width: var(--w); height: var(--hb); }
+.cf .c3-base .front { transform: translateZ(calc(var(--d) / 2)); }
+.cf .c3-base .back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); }
+.cf .c3-base .right, .cf .c3-base .left { width: var(--d); height: var(--hb); left: calc((var(--w) - var(--d)) / 2); filter: brightness(.62); }
+.cf .c3-base .right { transform: rotateY(90deg) translateZ(calc(var(--w) / 2)); }
+.cf .c3-base .left { transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+.cf .c3-base .bottom, .cf .c3-base .inside { width: var(--w); height: var(--d); top: calc((var(--hb) - var(--d)) / 2); }
+.cf .c3-base .bottom { transform: rotateX(-90deg) translateZ(calc(var(--hb) / 2)); filter: brightness(.4); }
+.cf .c3-base .inside { transform: rotateX(90deg) translateZ(calc(var(--hb) / 2 - 3px)); background: radial-gradient(circle, color-mix(in srgb, var(--rare) 70%, white), color-mix(in srgb, var(--rare) 40%, #000) 70%); box-shadow: none; }
+.cf .c3-base .inside::before { display: none; }
+.cf .c3-lid .front, .cf .c3-lid .back { width: var(--w); height: var(--hl); }
+.cf .c3-lid .front { transform: translateZ(calc(var(--d) / 2)); }
+.cf .c3-lid .back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); }
+.cf .c3-lid .right, .cf .c3-lid .left { width: var(--d); height: var(--hl); left: calc((var(--w) - var(--d)) / 2); filter: brightness(.62); }
+.cf .c3-lid .right { transform: rotateY(90deg) translateZ(calc(var(--w) / 2)); }
+.cf .c3-lid .left { transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+.cf .c3-lid .top, .cf .c3-lid .under { width: var(--w); height: var(--d); top: calc((var(--hl) - var(--d)) / 2); }
+.cf .c3-lid .top { transform: rotateX(90deg) translateZ(calc(var(--hl) / 2)); filter: brightness(1.18); }
+.cf .c3-lid .under { transform: rotateX(-90deg) translateZ(calc(var(--hl) / 2)); background: radial-gradient(circle, color-mix(in srgb, var(--rare) 55%, white), color-mix(in srgb, var(--rare) 30%, #000) 75%); }
+.cf .emblem { position: absolute; left: 50%; top: -34%; width: 64%; transform: translateX(-50%) translateZ(calc(var(--d) / 2 + 2px)); filter: drop-shadow(0 0 6px var(--rare)); pointer-events: none; }
+.cf .emblem svg { display: block; width: 100%; }
+.cf .c3.open .emblem { opacity: 0; transition: opacity .2s; }
+.cf .lock { position: absolute; left: 50%; top: 52%; width: 34px; height: 34px; margin-left: -17px; border-radius: 50%; transform: translateZ(4px); }
+.cf .lock.hot { box-shadow: 0 0 0 3px var(--rare), 0 0 18px var(--rare); }
+.cf .beam { position: absolute; left: 18%; right: 18%; bottom: 52%; height: 0; opacity: 0; pointer-events: none; background: linear-gradient(to top, color-mix(in srgb, var(--rare) 65%, white), transparent); filter: blur(8px); transition: height .7s ease .25s, opacity .7s ease .25s; }
+.cf .c3-scene.open .beam { height: 260%; opacity: .9; }
+/* runes en orbite et cristal au-dessus du coffre */
+.cf-runes { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+.cf-runes i { position: absolute; font: 700 18px/1 var(--body); font-style: normal; color: color-mix(in srgb, var(--rare) 35%, #444); transform: rotate(calc(var(--i) * 45deg)) translateY(calc(var(--w) * -.95)) rotate(calc(var(--i) * -45deg)); translate: -50% -50%; transition: color .25s, text-shadow .25s; }
+.cf-runes i.on { color: color-mix(in srgb, var(--rare) 60%, white); text-shadow: 0 0 12px var(--rare), 0 0 2px #fff; }
+.cf.dim .cf-runes i, .cf.dim .c3 { filter: brightness(.35); transition: filter .35s; }
+.cf-crystal { position: absolute; left: 50%; top: -46px; width: 26px; height: 40px; translate: -50% 0; pointer-events: none; z-index: 2; }
+.cf-crystal i { position: absolute; inset: 0; clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%); background: linear-gradient(160deg, #fff, var(--rare) 55%, #10101a); box-shadow: 0 0 18px var(--rare); filter: drop-shadow(0 0 8px var(--rare)); animation: cffloat 2.6s ease-in-out infinite; }
+.cf-crystal i + i { display: none; }
+@keyframes cffloat { 50% { translate: 0 -6px; } }
+.cf-crystal.pulse i:first-child { animation: cfpulse .45s ease-out; }
+@keyframes cfpulse { 50% { transform: scale(1.4); filter: brightness(2) drop-shadow(0 0 16px var(--rare)); } }
+.cf-crystal.cracked i:first-child { background: linear-gradient(160deg, #888, #333 55%, #10101a); }
+.cf-crystal.cracked::after { content: ""; position: absolute; inset: 0; clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%); background: linear-gradient(120deg, transparent 45%, var(--rare) 47%, transparent 50%), linear-gradient(60deg, transparent 55%, var(--rare) 57%, transparent 60%); }
+.cf-crystal.burst i:first-child { animation: cfburst .45s ease-out forwards; }
+@keyframes cfburst { to { transform: scale(2.6); opacity: 0; filter: brightness(3); } }
+.cf-crystal.split i { display: block; animation: cfsplit .95s ease-out forwards; }
+.cf-crystal.split i:nth-child(2) { --x: -60px; } .cf-crystal.split i:nth-child(3) { --x: 60px; }
+@keyframes cfsplit { to { translate: var(--x, 0) 8px; } }
+/* clé */
+.cf .keybox { display: grid; justify-items: center; gap: 6px; margin-top: 42px; z-index: 3; }
+.cf .key { width: 132px; height: 40px; display: grid; place-items: center; cursor: grab; touch-action: none; user-select: none; filter: drop-shadow(0 4px 10px #000c) drop-shadow(0 0 6px color-mix(in srgb, var(--rare) 60%, transparent)); transition: transform .35s cubic-bezier(.4, 0, .2, 1), opacity .25s; position: relative; z-index: 5; }
+.cf .key svg { width: 132px; height: 40px; }
+.cf .key:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; border-radius: 8px; }
+.cf .key.drag { cursor: grabbing; transition: none; }
+.cf .key.broken svg { animation: cfbreak .6s ease-in forwards; }
+@keyframes cfbreak { 30% { transform: rotate(-12deg); } 100% { transform: translateY(60px) rotate(40deg); opacity: 0; } }
+.cf .key.golden { filter: drop-shadow(0 0 14px #f5c518) drop-shadow(0 0 4px #fff); animation: cfgold .5s ease-out; }
+@keyframes cfgold { from { opacity: 0; transform: scale(1.6); } }
+.cf .keyhint { font: 500 11px/1.3 var(--mono); color: var(--fg2); }
+.cf-tools { display: flex; gap: 8px; justify-content: center; z-index: 5; }
+.cf .sub { color: var(--mut); font-size: 13px; margin: 0; }
+/* temps forts : effets plein écran */
+.cf.blackout .c3-scene, .cf.blackout .keybox { opacity: 0; transition: opacity .35s; }
+.cf.blackout::before { content: ""; position: absolute; inset: 0; background: #000; z-index: 3; animation: cffade .35s both; }
+@keyframes cffade { from { opacity: 0; } }
+.cf.night::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 30%, #0d1030, #000 80%); z-index: 0; animation: cffade .6s both; }
+.cf.night > * { position: relative; z-index: 1; }
+.cf.night > .cf-fx { position: absolute; z-index: 4; }
+.cf.quake { animation: cfquake .1s linear 7; }
+@keyframes cfquake { 25% { translate: -6px 3px; } 75% { translate: 6px -3px; } }
+.cf.glowing::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4; background: radial-gradient(55% 50% at 50% 45%, color-mix(in srgb, var(--rare) 70%, #fff), transparent 75%); animation: cfflash 1s ease-out forwards; }
+@keyframes cfflash { 0% { opacity: 0; } 25% { opacity: .55; } 100% { opacity: 0; } }
+.cf-fx .dust { position: absolute; left: 50%; top: 52%; width: 5px; height: 5px; border-radius: 50%; background: var(--rare); box-shadow: 0 0 8px var(--rare); animation: cfdust .95s ease-in var(--d) both; transform: rotate(var(--a)) translateY(-180px); }
+@keyframes cfdust { to { transform: rotate(calc(var(--a) + 160deg)) translateY(0); opacity: 0; } }
+.cf-fx .crown { position: absolute; left: 50%; top: 30%; width: 56px; translate: -50% 0; animation: cfcrown 1.15s ease-in-out both; filter: drop-shadow(0 0 10px #f5c518); }
+@keyframes cfcrown { 0% { transform: translateX(calc(var(--s) * 140px)) scale(.6); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateX(0) translateY(40px) scale(1.1); opacity: 0; } }
+.cf-fx .eclipse { position: absolute; left: 50%; top: 36%; width: 150px; height: 150px; margin: -75px 0 0 -75px; border-radius: 50%; background: conic-gradient(var(--r-l) 0 50%, var(--r-m) 50% 100%); box-shadow: 0 0 60px #f5c51888, 0 0 90px #ff4d2e88; animation: cfeclipse 1.3s ease-in-out both; }
+.cf-fx .eclipse::after { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: #050409; animation: cfmoon 1.3s ease-in-out both; }
+@keyframes cfeclipse { from { opacity: 0; transform: rotate(-90deg) scale(.4); } 30% { opacity: 1; } to { opacity: 0; transform: rotate(270deg) scale(1.3); } }
+@keyframes cfmoon { from { translate: -40px 0; } to { translate: 0 0; } }
+.cf-fx .coin { position: absolute; top: -20px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff4c0, #e2b54a 50%, #8a6420); box-shadow: 0 0 8px #f5c51888; animation: cfcoin 1.1s ease-in var(--d) both; }
+@keyframes cfcoin { to { transform: translateY(560px) rotateY(720deg); opacity: .2; } }
+.cf-fx .column { position: absolute; left: 50%; top: 0; bottom: 30%; width: 120px; margin-left: -60px; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--rare) 75%, white) 60%, #fff); filter: blur(10px); animation: cfcolumn 1.1s ease-out both; }
+@keyframes cfcolumn { from { transform: scaleY(0); transform-origin: top; opacity: 0; } 50% { opacity: 1; } to { transform: scaleY(1); opacity: .6; } }
+.cf-fx .star { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff; animation: cfstar .8s ease-out var(--d) both; }
+@keyframes cfstar { from { opacity: 0; transform: scale(0); } }
+.cf-fx .kanji { position: absolute; left: 0; right: 0; top: 18%; text-align: center; font: 700 clamp(120px, 30vw, 220px)/1 var(--body); color: color-mix(in srgb, var(--rare) 60%, white); text-shadow: 0 0 40px var(--rare); animation: cfkanji 1.15s ease-out both; }
+@keyframes cfkanji { from { opacity: 0; transform: scale(2.4); } 40% { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(.8); } }
+.cf-fx .orb { position: absolute; left: 50%; top: 42%; width: 44px; height: 64px; margin: -32px 0 0 -22px; border-radius: 6px; border: 2px solid #c9a95c; background: radial-gradient(circle at 50% 42%, #2c2240, #110e18 70%); box-shadow: 0 0 12px var(--rare); animation: cforbit 1.35s ease-in-out both; animation-delay: calc(var(--i) * -0.27s); }
+@keyframes cforbit { from { transform: rotate(0) translateX(150px) rotate(0); opacity: 0; } 20% { opacity: 1; } to { transform: rotate(360deg) translateX(20px) rotate(-360deg); opacity: 0; } }
+.cf-fx .aurora { position: absolute; left: -10%; right: -10%; top: calc(8% + var(--i) * 9%); height: 70px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rare) 70%, #3fbf7f), color-mix(in srgb, var(--rare) 60%, #4dd6ff), transparent); filter: blur(18px); opacity: .55; animation: cfaurora 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -.7s); }
+@keyframes cfaurora { from { transform: translateX(-8%) skewY(-4deg); } to { transform: translateX(8%) skewY(4deg); } }
+.cf-fx .banner { position: absolute; left: 0; right: 0; top: 14%; text-align: center; font: 700 clamp(18px, 4vw, 28px)/1.2 var(--body); color: #fff; text-shadow: 0 0 18px var(--rare); letter-spacing: .04em; animation: cfbanner 1.5s ease-out both; }
+@keyframes cfbanner { from { opacity: 0; letter-spacing: .4em; } 25% { opacity: 1; letter-spacing: .04em; } 85% { opacity: 1; } to { opacity: 0; } }
+/* 5 cartes face cachée */
+.cf-grid h2 { margin: 0; }
+.cf .multi { display: grid; grid-template-columns: repeat(5, minmax(0, 170px)); gap: 12px; justify-content: center; width: 100%; perspective: 1000px; }
+@media (max-width: 700px) { .cf .multi { grid-template-columns: repeat(3, minmax(0, 110px)); } }
+.cf .slot { position: relative; aspect-ratio: 210 / 318; border: 0; padding: 0; background: none; cursor: pointer; animation: cfdeal .5s cubic-bezier(.2, .9, .3, 1.2) both; animation-delay: calc(var(--i) * 90ms); color: inherit; }
+.cf .slot.flipped { animation: none; cursor: default; }
+.cf .slot.turning { animation: cfturn .45s ease-out; }
+@keyframes cfdeal { from { opacity: 0; transform: translateY(60px) scale(.6); } }
+@keyframes cfturn { from { transform: perspective(700px) rotateY(90deg) scale(1.04); } }
+.cf .slot .back, .cf .slot .front { position: absolute; inset: 0; }
+.cf .slot .front { display: none; }
+.cf .slot.flipped .front { display: block; }
+.cf .slot.flipped .back { display: none; }
+.cf .slot .back { border-radius: 10px; border: 2px solid #c9a95c; background: radial-gradient(circle at 50% 42%, #2c2240, #110e18 70%); display: grid; place-items: center; box-shadow: 0 8px 20px #0008; transition: transform .2s, border-color .2s; }
+.cf .slot .back b { font: 700 clamp(22px, 5vw, 38px)/1 var(--body); color: #c9a95c; text-shadow: 0 0 14px #c9a95c88; }
+.cf .slot:hover:not(.flipped) .back, .cf .slot:focus-visible .back { border-color: var(--gold); transform: translateY(-3px); }
+.cf .slot.flipped .kcw { --w: 100%; }
+.stage-wrap.flashy::after { content: ""; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, color-mix(in srgb, var(--glow) 55%, transparent), transparent 70%); animation: cfflash 1s ease-out forwards; }
+@media (prefers-reduced-motion: reduce) { .cf .c3, .cf-crystal i, .cf-fx * { animation: none !important; } }
 </style>
 <header class="hd">
   <div class="wrap hd-in">
@@ -1248,6 +1502,7 @@ function removeCardS(s, id, gold, n = 1) {
   if (gold ? o.gold < n : o.n < n) return false;
   if (gold) o.gold -= n; else o.n -= n;
   s.owned[id] = o;
+  dropDesignIfGoneS(s, id);
   return true;
 }
 // Ouvre un booster dans l'état `s`. Renvoie les cartes tirées, ou null si le booster n'a aucune carte débloquée.
@@ -1292,7 +1547,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
     s.dailyPack = dayKey(now);
     const r = openPackS(s, pk, poolFor(pk, cfg, uid), rng, now, mixPoolFor(pk, cfg, uid));
     trackS(s, "day", 1, now);
-    if (pk.skins) trackS(s, "coffre", 1, now);
+    if (pk.skins) { trackS(s, "coffre", 1, now); r.scenario = pickScenarioS(r.cards, rng, now); }
     return { pack: "jour", ...r };
   }
   const pk = packOfAt(packId, now), pool = poolFor(pk, cfg, uid);
@@ -1302,7 +1557,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
   if (paid) { if (s.chakra < PRICE) return { error: `Il te faut ${PRICE} ◆ (tu en as ${s.chakra}).` }; s.chakra -= PRICE; }
   else { if (!s.free) return { error: "Plus de booster gratuit pour l'instant." }; if (s.free === FREE_MAX) s.freeTs = now; s.free--; }
   const r = openPackS(s, pk, pool, rng, now, mixPoolFor(pk, cfg, uid));
-  if (pk.skins) trackS(s, "coffre", 1, now);
+  if (pk.skins) { trackS(s, "coffre", 1, now); r.scenario = pickScenarioS(r.cards, rng, now); }
   return { pack: pk.id, ...r };
 }
 function packChance(rar, k = 1, last = LAST) {
@@ -1397,6 +1652,206 @@ function importSaveS(cand, now = Date.now()) {
 // Un vote compte s'il a été enregistré avant la fermeture de la question.
 // Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
 const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
+
+// ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
+// Aucun cosmétique ne donne de bonus. Ils ne cachent jamais le visage : cadres et auras autour de la carte,
+// ornements au-dessus, holographie et particules en voile léger, fond derrière l'illustration.
+// Deux natures : « compte » (achetés en boutique, réutilisables sur toutes tes cartes, non transférables)
+// et « instance » (obtenues au Sanctuaire, uniques, une carte à la fois, transférables avec la carte).
+const COS_SLOTS = [
+  { id: "cadre", label: "Cadre" }, { id: "aura", label: "Aura" }, { id: "orn", label: "Ornement" },
+  { id: "holo", label: "Holographie" }, { id: "part", label: "Particules" }, { id: "fond", label: "Fond" }, { id: "pres", label: "Présentation" },
+];
+// k : variante de rendu ; c1, c2 : couleurs ; only : « sanctuaire » si l'objet ne s'achète pas en boutique
+const COSMETICS = [
+  { id: "cadre-argent", slot: "cadre", name: "Cadre d'argent", rar: "c", k: "metal", c1: "#e8ecf2", c2: "#8a93a3" },
+  { id: "cadre-cuivre", slot: "cadre", name: "Cadre de cuivre", rar: "c", k: "metal", c1: "#f0b07a", c2: "#8a4a20" },
+  { id: "cadre-or", slot: "cadre", name: "Cadre d'or", rar: "pc", k: "metal", c1: "#fff0b0", c2: "#b8862a" },
+  { id: "cadre-neon", slot: "cadre", name: "Cadre néon", rar: "r", k: "neon", c1: "#4dd6ff", c2: "#2a6fff" },
+  { id: "cadre-sang", slot: "cadre", name: "Cadre de sang", rar: "r", k: "neon", c1: "#ff4d5e", c2: "#7a0f1c" },
+  { id: "cadre-emeraude", slot: "cadre", name: "Cadre d'émeraude", rar: "e", k: "gem", c1: "#5af2a0", c2: "#0f6a44" },
+  { id: "cadre-amethyste", slot: "cadre", name: "Cadre d'améthyste", rar: "e", k: "gem", c1: "#d9a0ff", c2: "#5a2a9e" },
+  { id: "cadre-obsidienne", slot: "cadre", name: "Cadre d'obsidienne", rar: "l", k: "gem", c1: "#9a8ab8", c2: "#120e18" },
+  { id: "cadre-prisme", slot: "cadre", name: "Cadre prismatique", rar: "m", k: "prisme", c1: "#ff4d9e", c2: "#4dd6ff", only: "sanctuaire" },
+  { id: "aura-braise", slot: "aura", name: "Aura de braise", rar: "pc", k: "pulse", c1: "#ff7a2e" },
+  { id: "aura-givre", slot: "aura", name: "Aura de givre", rar: "pc", k: "pulse", c1: "#8fe3ff" },
+  { id: "aura-sylve", slot: "aura", name: "Aura de sylve", rar: "r", k: "pulse", c1: "#5ad17a" },
+  { id: "aura-neant", slot: "aura", name: "Aura du néant", rar: "e", k: "flow", c1: "#8a4dff" },
+  { id: "aura-solaire", slot: "aura", name: "Aura solaire", rar: "e", k: "flow", c1: "#ffd24d" },
+  { id: "aura-spectre", slot: "aura", name: "Aura spectrale", rar: "l", k: "flow", c1: "#e8f4ff" },
+  { id: "aura-ecarlate", slot: "aura", name: "Aura écarlate", rar: "m", k: "flow", c1: "#ff2e4d", only: "sanctuaire" },
+  { id: "orn-etoile", slot: "orn", name: "Étoile du QG", rar: "c", k: "etoile", c1: "#f5c518" },
+  { id: "orn-kanji", slot: "orn", name: "Kanji flottant 零", rar: "pc", k: "kanji", c1: "#ff4d2e" },
+  { id: "orn-aureole", slot: "orn", name: "Auréole", rar: "r", k: "aureole", c1: "#fff3b0" },
+  { id: "orn-cornes", slot: "orn", name: "Cornes d'ombre", rar: "r", k: "cornes", c1: "#3a2a4a" },
+  { id: "orn-couronne", slot: "orn", name: "Couronne d'or", rar: "e", k: "couronne", c1: "#f5c518" },
+  { id: "orn-ailes-lumiere", slot: "orn", name: "Ailes de lumière", rar: "l", k: "ailes", c1: "#fff8e0" },
+  { id: "orn-ailes-ombre", slot: "orn", name: "Ailes d'ombre", rar: "l", k: "ailes", c1: "#2a1a3a", only: "sanctuaire" },
+  { id: "holo-nacre", slot: "holo", name: "Nacre", rar: "pc", k: "nacre" },
+  { id: "holo-arcenciel", slot: "holo", name: "Arc-en-ciel", rar: "r", k: "arcenciel" },
+  { id: "holo-scintille", slot: "holo", name: "Scintillement", rar: "e", k: "scintille" },
+  { id: "holo-prisme", slot: "holo", name: "Prisme vivant", rar: "l", k: "prisme" },
+  { id: "holo-glitch", slot: "holo", name: "Faille du néant", rar: "m", k: "glitch", only: "sanctuaire" },
+  { id: "part-etincelles", slot: "part", name: "Étincelles", rar: "c", k: "etincelles", c1: "#ffd24d" },
+  { id: "part-flocons", slot: "part", name: "Flocons", rar: "pc", k: "flocons", c1: "#e8f4ff" },
+  { id: "part-petales", slot: "part", name: "Pétales", rar: "r", k: "petales", c1: "#ff9ec4" },
+  { id: "part-braises", slot: "part", name: "Braises", rar: "r", k: "braises", c1: "#ff6a2e" },
+  { id: "part-lucioles", slot: "part", name: "Lucioles", rar: "e", k: "lucioles", c1: "#c8ff6a" },
+  { id: "part-runes", slot: "part", name: "Runes du sceau", rar: "l", k: "runes", c1: "#b072ff", only: "sanctuaire" },
+  { id: "fond-nuit", slot: "fond", name: "Nuit étoilée", rar: "c", k: "nuit", c1: "#0d1430", c2: "#2a3a80" },
+  { id: "fond-crepuscule", slot: "fond", name: "Crépuscule", rar: "c", k: "degrade", c1: "#3a1440", c2: "#c8642a" },
+  { id: "fond-abysse", slot: "fond", name: "Abysse", rar: "pc", k: "degrade", c1: "#02141c", c2: "#0f6a8a" },
+  { id: "fond-forge", slot: "fond", name: "Forge", rar: "r", k: "degrade", c1: "#1a0a04", c2: "#c84a1a" },
+  { id: "fond-aurore", slot: "fond", name: "Aurore boréale", rar: "e", k: "aurore", c1: "#0a1a2a", c2: "#3affb0" },
+  { id: "fond-washi", slot: "fond", name: "Papier washi", rar: "l", k: "washi", c1: "#3a3022", c2: "#7a6a48" },
+  { id: "pres-flotte", slot: "pres", name: "Flottement", rar: "pc", k: "flotte" },
+  { id: "pres-incline", slot: "pres", name: "Inclinaison 3D", rar: "r", k: "incline" },
+  { id: "pres-projecteur", slot: "pres", name: "Projecteur", rar: "e", k: "projecteur" },
+  { id: "pres-orbite", slot: "pres", name: "Orbite lente", rar: "l", k: "orbite", only: "sanctuaire" },
+];
+const COS_BY_ID = Object.fromEntries(COSMETICS.map((c) => [c.id, c]));
+// --- valeurs PROVISOIRES (à valider) : prix en boutique, coût et probabilités des invocations ---
+const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
+const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
+const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
+const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
+const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
+const SUMMON_5_FLOOR = "r";           // ×5 : au moins une Rare ou mieux
+const summonCost = (n) => (n === 5 ? Math.round(SUMMON_COST * 5 * (1 - SUMMON_DISCOUNT_5)) : SUMMON_COST * n);
+function cosOf(s) {
+  const c = s.cos && typeof s.cos === "object" ? s.cos : (s.cos = {});
+  if (!c.own || typeof c.own !== "object") c.own = {};
+  if (!Array.isArray(c.inst)) c.inst = [];
+  if (!c.designs || typeof c.designs !== "object") c.designs = {};
+  if (typeof c.sinceM !== "number") c.sinceM = 0;
+  return c;
+}
+// références d'un design : « a:<id> » pour un cosmétique de compte, « i:<instance> » pour une instance
+const refCos = (s, ref) => {
+  if (typeof ref !== "string") return null;
+  const c = cosOf(s);
+  if (ref.startsWith("a:")) { const id = ref.slice(2); return c.own[id] && COS_BY_ID[id] ? COS_BY_ID[id] : null; }
+  if (ref.startsWith("i:")) { const it = c.inst.find((x) => x.i === ref.slice(2)); return it && COS_BY_ID[it.c] ? COS_BY_ID[it.c] : null; }
+  return null;
+};
+// le design d'une carte, résolu en cosmétiques (pour l'affichage)
+function designOfS(s, cardId) {
+  const d = cosOf(s).designs[cardId]; if (!d) return null;
+  const out = {}; for (const sl of COS_SLOTS) { const c = refCos(s, d[sl.id]); if (c && c.slot === sl.id) out[sl.id] = c.id; }
+  return Object.keys(out).length ? out : null;
+}
+function buyCosmeticS(s, id) {
+  const c = COS_BY_ID[id], cos = cosOf(s);
+  if (!c) return { error: "Cet objet n'existe pas." };
+  if (c.only === "sanctuaire") return { error: "Cet objet ne s'obtient qu'au Sanctuaire des Invocations." };
+  if (cos.own[id]) return { error: "Tu as déjà cet objet." };
+  const price = COS_PRICE[c.rar];
+  if (s.chakra < price) return { error: `Il te faut ${price} ◆ (tu en as ${s.chakra}).` };
+  s.chakra -= price; cos.own[id] = Date.now(); trackS(s, "shop", 1);
+  return { bought: id, price };
+}
+const SUMMON_POOL = (rar) => COSMETICS.filter((c) => c.rar === rar);
+function summonS(s, n, rng, now = Date.now()) {
+  if (n !== 1 && n !== 5) return { error: "On invoque 1 ou 5 objets à la fois." };
+  const cost = summonCost(n), cos = cosOf(s);
+  if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
+  s.chakra -= cost;
+  const rars = [];
+  for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
+  // ×5 : au moins une Rare ou mieux
+  if (n === 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
+  const got = rars.map((r) => { const pool = SUMMON_POOL(r), c = pool[Math.floor(rng() * pool.length)]; let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: c.id, t: now }); return { i, id: c.id, rar: r }; });
+  trackS(s, "summon", n, now);
+  return { got, cost };
+}
+// enregistre le design d'une carte ; une instance ne peut être que sur une carte à la fois (elle quitte l'ancienne)
+function saveDesignS(s, cardId, design) {
+  if (!CARD_BY_ID[cardId] || !hasCard(s, cardId)) return { error: "Tu n'as pas cette carte." };
+  const cos = cosOf(s), clean = {};
+  for (const sl of COS_SLOTS) {
+    const ref = design?.[sl.id]; if (!ref) continue;
+    const c = refCos(s, ref); if (!c || c.slot !== sl.id) return { error: `Objet invalide pour l'emplacement ${sl.label}.` };
+    clean[sl.id] = ref;
+  }
+  for (const [cid, d] of Object.entries(cos.designs)) if (cid !== cardId) for (const k of Object.keys(d)) if (d[k].startsWith("i:") && Object.values(clean).includes(d[k])) delete d[k];
+  if (Object.keys(clean).length) cos.designs[cardId] = clean; else delete cos.designs[cardId];
+  return { design: clean };
+}
+// une carte qui quitte la collection perd son design (les instances retournent dans l'inventaire) et n'est plus vedette
+function dropDesignIfGoneS(s, cardId) {
+  if (hasCard(s, cardId)) return;
+  const cos = cosOf(s); delete cos.designs[cardId];
+  if (s.featured === cardId) s.featured = null;
+  s.showcase = (s.showcase || []).filter((x) => x !== cardId);
+}
+const usedInstances = (s) => { const u = {}; for (const [cid, d] of Object.entries(cosOf(s).designs)) for (const r of Object.values(d)) if (r.startsWith("i:")) u[r.slice(2)] = cid; return u; };
+
+// ===== Coffre arcanique : moteur de scénarios d'ouverture =====
+// Un seul moteur : chaque scénario est une suite de « temps forts » (beats) joués par le navigateur.
+// Le serveur tire les 5 cartes PUIS choisit le scénario d'après elles : l'animation ne change jamais le résultat,
+// une feinte ne fait que retarder la vraie couleur. Poids provisoires, réglables (décision en attente).
+// Temps forts disponibles (voir src/coffre.js) : nom, puis paramètres.
+const CHEST_BEATS = ["insert", "turn", "tint", "ladder", "shake", "runes", "runesOut", "crystal", "crack", "burstCrystal", "keyPop", "keyBreak", "goldKey", "lidPeek", "lidFall", "blackout", "redrop", "dust", "split", "crowns", "eclipse", "twin", "coins", "gild", "sheen", "chrysalis", "column", "stars", "kanji", "orbit", "quake", "aurora", "banner", "pause", "open"];
+// ctx : best (meilleure rareté), rank, n[r] (nombre par rareté), gold, news, newTop, who[], ids[], list[{id, who, rar}], hour (Paris)
+const CHEST_SCENARIOS = [
+  // 6 classiques
+  { id: "cl-nette", cat: "classique", name: "Ouverture nette", w: 6, when: () => true, beats: [["insert"], ["turn"], ["tint"], ["shake", 1], ["open"]] },
+  { id: "cl-runes", cat: "classique", name: "Runes éveillées", w: 5, when: () => true, beats: [["insert"], ["turn"], ["runes", 6], ["tint"], ["open"]] },
+  { id: "cl-cristal", cat: "classique", name: "Cristal chantant", w: 5, when: () => true, beats: [["insert"], ["turn"], ["crystal", 2], ["tint"], ["open"]] },
+  { id: "cl-souffle", cat: "classique", name: "Souffle arcanique", w: 4, when: () => true, beats: [["insert"], ["turn"], ["dust"], ["tint"], ["open"]] },
+  { id: "cl-serrure", cat: "classique", name: "Serrure ancienne", w: 4, when: () => true, beats: [["insert"], ["turn"], ["pause", 300], ["turn"], ["tint"], ["shake", 1], ["open"]] },
+  { id: "cl-echelle", cat: "classique", name: "Échelle des raretés", w: 4, when: (x) => x.rank >= 2, beats: [["insert"], ["turn"], ["ladder"], ["open"]] },
+  // 7 fake drops et faux redémarrages
+  { id: "fk-recalcitrante", cat: "fake", name: "Serrure récalcitrante", w: 3, when: (x) => x.rank >= 2, beats: [["insert"], ["keyPop"], ["pause", 700], ["insert"], ["turn"], ["tint"], ["shake", 2], ["open"]] },
+  { id: "fk-grise", cat: "fake", name: "Fausse Commune", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint", "c"], ["lidPeek"], ["lidFall"], ["pause", 500], ["tint"], ["shake", 2], ["open"]] },
+  { id: "fk-redemarrage", cat: "fake", name: "Faux redémarrage", w: 2, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["tint", "pc"], ["blackout"], ["redrop"], ["runes", 8], ["tint"], ["open"]] },
+  { id: "fk-extinction", cat: "fake", name: "Extinction", w: 3, when: (x) => x.best === "m", beats: [["insert"], ["turn"], ["runes", 8], ["tint", "e"], ["runesOut"], ["pause", 900], ["tint"], ["runes", 8], ["shake", 3], ["open"]] },
+  { id: "fk-retombe", cat: "fake", name: "Couvercle qui retombe", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint", "r"], ["lidPeek"], ["lidFall"], ["shake", 2], ["tint"], ["open"]] },
+  { id: "fk-fele", cat: "fake", name: "Cristal fêlé", w: 3, when: (x) => x.rank >= 2, beats: [["insert"], ["turn"], ["crystal", 1], ["crack"], ["pause", 600], ["tint"], ["burstCrystal"], ["open"]] },
+  { id: "fk-cle", cat: "fake", name: "Clé brisée", w: 2, when: (x) => x.gold > 0 || x.rank >= 4, beats: [["insert"], ["turn"], ["keyBreak"], ["pause", 500], ["goldKey"], ["insert"], ["turn"], ["tint"], ["open"]] },
+  // 7 transformations (le coffre change selon les cartes)
+  { id: "tr-trinite", cat: "transfo", name: "Trinité violette", w: 4, when: (x) => x.n.e >= 2, beats: [["insert"], ["turn"], ["tint"], ["split", "e"], ["shake", 2], ["open"]] },
+  { id: "tr-couronne", cat: "transfo", name: "Double couronne", w: 5, when: (x) => x.n.l >= 2, beats: [["insert"], ["turn"], ["tint", "l"], ["crowns"], ["gild"], ["tint"], ["open"]] },
+  { id: "tr-eclipse", cat: "transfo", name: "Éclipse", w: 6, when: (x) => x.n.l >= 1 && x.n.m >= 1, beats: [["insert"], ["turn"], ["tint", "l"], ["eclipse"], ["tint"], ["shake", 3], ["open"]] },
+  { id: "tr-jumeaux", cat: "transfo", name: "Cœurs jumeaux", w: 7, when: (x) => x.n.m >= 2, beats: [["insert"], ["turn"], ["tint"], ["twin"], ["quake"], ["open"]] },
+  { id: "tr-pluie-or", cat: "transfo", name: "Pluie d'or", w: 5, when: (x) => x.gold >= 2, beats: [["insert"], ["turn"], ["coins"], ["gild"], ["tint"], ["open"]] },
+  { id: "tr-reflet", cat: "transfo", name: "Reflet doré", w: 2, when: (x) => x.gold === 1, beats: [["insert"], ["turn"], ["sheen"], ["tint"], ["open"]] },
+  { id: "tr-chrysalide", cat: "transfo", name: "Chrysalide", w: 2, when: (x) => x.news >= 4 && x.rank >= 3, beats: [["insert"], ["turn"], ["chrysalis"], ["tint"], ["open"]] },
+  // 6 spectaculaires
+  { id: "sp-colonne", cat: "spectacle", name: "Colonne céleste", w: 4, when: (x) => x.best === "m", beats: [["insert"], ["turn"], ["tint"], ["column"], ["quake"], ["open"]] },
+  { id: "sp-etoiles", cat: "spectacle", name: "Ciel d'étoiles", w: 3, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["stars"], ["tint"], ["open"]] },
+  { id: "sp-kanji", cat: "spectacle", name: "Kanji géant", w: 3, when: (x) => x.rank >= 3 && x.newTop, beats: [["insert"], ["turn"], ["tint"], ["kanji", "零"], ["open"]] },
+  { id: "sp-orbite", cat: "spectacle", name: "Orbite des cartes", w: 3, when: (x) => x.n.r + x.n.e + x.n.l + x.n.m >= 3, beats: [["insert"], ["turn"], ["tint"], ["orbit"], ["open"]] },
+  { id: "sp-seisme", cat: "spectacle", name: "Séisme", w: 2, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["tint"], ["quake"], ["shake", 3], ["open"]] },
+  { id: "sp-aurore", cat: "spectacle", name: "Aurore", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint"], ["aurora"], ["open"]] },
+  // 4 secrets (jamais annoncés au joueur avant d'être vus)
+  { id: "se-createur", cat: "secret", name: "Le créateur", w: 1, when: (x) => x.list.some((c) => c.who === "billy" && RANKS.indexOf(c.rar) >= 3), beats: [["insert"], ["turn"], ["tint"], ["banner", "Billy a signé ce coffre"], ["kanji", "創"], ["open"]] },
+  { id: "se-arcenciel", cat: "secret", name: "Arc-en-ciel", w: 1, when: (x) => new Set(x.rars).size >= 5, beats: [["insert"], ["turn"], ["ladder"], ["banner", "Cinq raretés, un seul coffre"], ["aurora"], ["open"]] },
+  { id: "se-minuit", cat: "secret", name: "Minuit à Shinjuku", w: 1, when: (x) => x.hour === 0 && x.rank >= 2, beats: [["insert"], ["turn"], ["blackout"], ["stars"], ["banner", "Minuit à Shinjuku"], ["tint"], ["open"]] },
+  { id: "se-miroir", cat: "secret", name: "Miroir", w: 1, when: (x) => x.list.some((c, i) => RANKS.indexOf(c.rar) >= 3 && x.ids.indexOf(c.id) !== i), beats: [["insert"], ["turn"], ["tint"], ["twin"], ["banner", "Deux fois la même carte"], ["open"]] },
+];
+const CHEST_BY_ID = Object.fromEntries(CHEST_SCENARIOS.map((x) => [x.id, x]));
+// probabilités provisoires : un secret possible sort toujours ; une transformation possible sort 3 fois sur 4 ;
+// sinon feinte 25 %, spectacle 35 % (si possibles), classique le reste
+const CHEST_W = { transfo: 0.75, fake: 0.25, spectacle: 0.35 };
+function chestCtx(cards, now = Date.now()) {
+  const rars = cards.map((x) => CARD_BY_ID[x.id].rar), n = Object.fromEntries(RANKS.map((r) => [r, rars.filter((x) => x === r).length]));
+  const best = rars.reduce((a, r) => (RANKS.indexOf(r) > RANKS.indexOf(a) ? r : a), "c"), rank = RANKS.indexOf(best);
+  let hour = new Date(now).getUTCHours();
+  try { hour = +new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now)).find((p) => p.type === "hour").value; } catch (e) {}
+  return { best, rank, n, rars, gold: cards.filter((x) => x.gold).length, news: cards.filter((x) => x.isNew).length, newTop: cards.some((x) => x.isNew && CARD_BY_ID[x.id].rar === best),
+    who: cards.map((x) => CARD_BY_ID[x.id].who), ids: cards.map((x) => x.id), list: cards.map((x) => ({ id: x.id, who: CARD_BY_ID[x.id].who, rar: CARD_BY_ID[x.id].rar })), hour };
+}
+const chestEligible = (ctx) => CHEST_SCENARIOS.filter((x) => x.when(ctx));
+function pickWeighted(list, rng) { const tot = list.reduce((a, x) => a + x.w, 0); let v = rng() * tot; for (const x of list) { v -= x.w; if (v < 0) return x; } return list[list.length - 1]; }
+function pickScenarioS(cards, rng, now = Date.now()) {
+  const el = chestEligible(chestCtx(cards, now)), of = (cat) => el.filter((x) => x.cat === cat);
+  if (of("secret").length) return pickWeighted(of("secret"), rng).id;
+  if (of("transfo").length && rng() < CHEST_W.transfo) return pickWeighted(of("transfo"), rng).id;
+  if (of("fake").length && rng() < CHEST_W.fake) return pickWeighted(of("fake"), rng).id;
+  if (of("spectacle").length && rng() < CHEST_W.spectacle) return pickWeighted(of("spectacle"), rng).id;
+  return pickWeighted(of("classique"), rng).id;
+}
 
 const ART = {
   rayzo: "data:image/jpeg;base64,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",
@@ -1884,7 +2339,7 @@ async function startOpening(paid, packId) {
   finally { busy = false; }
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
-  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine };
+  opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, divine: r.divine, scenario: r.scenario };
   closeMenu(); $("overlay").hidden = true;
   draw();
 }
@@ -2189,20 +2644,41 @@ function artIn(c) {
 const thumb = (c, cls = "th") => `<span class="${cls}">${c && imgKey(c) ? artIn(c) : ""}</span>`;
 const nameOf = (c) => PEOPLE[c.who].name;
 const subOf = (c) => (c.skin ? c.title.replace("Skin ", "Skin ") : c.title);
+// décor d'une carte personnalisée (Atelier Arcanique) : classes et éléments ajoutés, jamais par-dessus le visage
+const FOND_BG = {
+  nuit: (c) => `radial-gradient(1px 1px at 20% 30%, #fff9 50%, transparent), radial-gradient(1px 1px at 70% 20%, #fff7 50%, transparent), radial-gradient(1.5px 1.5px at 40% 75%, #fff8 50%, transparent), radial-gradient(1px 1px at 85% 60%, #fff6 50%, transparent), linear-gradient(170deg, ${c.c2}, ${c.c1} 70%)`,
+  degrade: (c) => `linear-gradient(170deg, ${c.c2}, ${c.c1} 72%)`,
+  aurore: (c) => `linear-gradient(160deg, transparent 20%, ${c.c2}55 35%, transparent 50%, ${c.c2}33 65%, transparent 80%), linear-gradient(175deg, ${c.c1}, #05080c)`,
+  washi: (c) => `repeating-linear-gradient(95deg, #ffffff08 0 2px, transparent 2px 7px), linear-gradient(170deg, ${c.c2}, ${c.c1} 75%)`,
+};
+function cosDeco(design, present) {
+  if (!design) return null;
+  const C = (sl) => (design[sl] ? COS_BY_ID[design[sl]] : null), f = C("cadre"), a = C("aura"), o = C("orn"), h = C("holo"), pa = C("part"), fo = C("fond"), pr = C("pres");
+  const kc = [], wrap = [], style = [];
+  const base = fo ? FOND_BG[fo.k](fo) : "linear-gradient(170deg, color-mix(in srgb, var(--rc) 26%, #17161d), color-mix(in srgb, var(--rc) 10%, #0e0d12) 70%)";
+  if (f) { kc.push("cz-cadre", "cz-cadre-" + f.k); style.push(`--zf1:${f.c1};--zf2:${f.c2}`, `background:${base} padding-box, ${f.k === "prisme" ? `conic-gradient(from var(--zang, 0deg), ${f.c1}, #ffd24d, ${f.c2}, #8a4dff, ${f.c1})` : `linear-gradient(135deg, ${f.c1}, ${f.c2} 45%, ${f.c1} 70%, ${f.c2})`} border-box`); }
+  else if (fo) style.push(`background:${base}`);
+  if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
+  if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
+  const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? "零" : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
+  return { kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+}
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
-  return `<div class="kcw" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}"><div class="kc r-${c.rar} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
-    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};` : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
+  const dz = soon || locked ? null : cosDeco(o.design, o.present);
+  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
+    style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>
+    <div class="kc-a">${soon ? "" : artIn(c)}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span></div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}
   </div></div>`;
 }
-const cardFor = (c, o = {}) => cardHTML(c, { ...o, soon: !visible(c), locked: !has(c.id) });
+const myDesign = (id) => (has(id) ? designOfS(save, id) : null);
+const cardFor = (c, o = {}) => cardHTML(c, { design: myDesign(c.id), ...o, soon: !visible(c), locked: !has(c.id) });
 const icon = {
   search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
   lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
@@ -2223,7 +2699,7 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? ["神", "Légende"] : u
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
-  ["missions", "務", "Missions", toClaim()], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
+  ["missions", "務", "Missions", toClaim()], ["boutique", "店", "Boutique"], ["sanctuaire", "召", "Sanctuaire"], ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
   ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
@@ -2519,11 +2995,12 @@ function viewCard() {
       <h1>${esc(p.name)}</h1><p class="mono mut" style="margin:0">${p.kanji || ""} · ${noOf(c.id)} · ${esc(c.title)}</p></div></div>
     <div class="wrap page" style="padding-top:28px">
     <div class="wk-grid">
-      <div class="wk-card card">${cardHTML(c, { locked: !got, gold: !o.n && o.gold > 0 })}
+      <div class="wk-card card">${cardHTML(c, { locked: !got, gold: !o.n && o.gold > 0, design: myDesign(c.id) })}
         <div class="row" style="justify-content:space-between;width:100%"><span style="color:${R.color};font-weight:700;font-size:14px">${R.label} · ${got ? "possédée" : "non possédée"}</span><span class="mono mut" style="font-size:13px">${pct(chance)} / ${per}</span></div>
         <div class="row" style="width:100%">
           ${got ? `${DB && canShare ? `<button class="btn acc sm" type="button" data-sell="${c.id}">Vendre</button>` : ""}
             ${SRV ? `<button class="btn sm" type="button" data-show="${c.id}">${(save.showcase || []).includes(c.id) ? "★ Retirer de la vitrine" : "☆ Vitrine"}</button>` : ""}
+            <button class="btn sm" type="button" data-nav="atelier" data-p="${c.id}">飾 Personnaliser</button>
             ${o.n + o.gold > 1 ? `<button class="btn sm" type="button" data-dis="${c.id}" data-gold="${o.n > 1 ? "" : 1}">Désenchanter · +${cardValue(c.id, !(o.n > 1))} ◆</button>` : ""}
             ${canChat() ? `<button class="btn sm" type="button" data-act="chat-show" data-p="${c.id}">Montrer au comptoir</button>` : ""}
             <button class="btn sm" type="button" data-share="${c.id}" data-gold="${!o.n && o.gold ? 1 : ""}">Partager</button>`
@@ -2800,7 +3277,9 @@ async function loadProfile(uid) {
 }
 function selfProfile() {
   const owned = Object.fromEntries(Object.entries(save.owned).filter(([, o]) => o.n + o.gold > 0).map(([id, o]) => [id, [o.n, o.gold]]));
-  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [] };
+  const featured = save.featured && has(save.featured) ? save.featured : null;
+  const designs = Object.fromEntries([...(save.showcase || []), ...(featured ? [featured] : [])].map((id) => [id, myDesign(id)]).filter(([, d]) => d));
+  return { uid: ME || "moi", stats: stats(), owned, showcase: save.showcase || [], wish: save.wish || [], featured, designs };
 }
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;
@@ -2824,8 +3303,9 @@ function viewProfil() {
     </div></div>
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
+    ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette · 看板</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette · 看板</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
-      ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
+      ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
     <section class="sec"><h2>Collection</h2><p class="note">${st.unique} cartes uniques</p>
       <div class="rarbars">${RANKS.slice().reverse().map((k) => `<div style="--c:${RAR[k].color}"><small><i></i>${RAR[k].label}</small><b>${ids.filter((id) => byId[id].rar === k).length}</b></div>`).join("")}</div></section>
     <section class="sec"><h2>${isMe ? "Mes factions" : "Ses factions"}</h2><div class="sbars">${facs.map(([f, n, t]) => `<div class="sbar" style="cursor:default"><span>${facLabel(f)}</span><span class="m"><i style="width:${n / t * 100}%"></i></span><span class="v">${n}/${t}</span></div>`).join("")}</div></section>
@@ -2989,6 +3469,7 @@ function drawOpening() {
   const o = opening, el = $("stage");
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
   const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button><span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span><span style="width:40px"></span></div>`;
+  if (Coffre.isChest(o.pk) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
     el.innerHTML = `${top}<section class="stage">
@@ -3045,7 +3526,7 @@ async function tearPack() {
   }
   opening.phase = "cards"; drawOpening();
 }
-function closeStage() { opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; draw(); }
+function closeStage() { Coffre.stop(); opening = null; $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
   const c = byId[x.id];
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Objet déverrouillé"><div class="sheet-h"><h2>Objet déverrouillé !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
@@ -3107,12 +3588,434 @@ function draw() {
   $("view").innerHTML = (VIEWS[view] || viewBoosters)();
   if (opening) drawOpening(); else $("stage").hidden = true;
   $("chatFab").hidden = chat.open;
-  fillNames();
+  fillNames(); afterViews();
 }
 function subscribeExtra() {
   if (!DB || subscribeExtra.done) return; subscribeExtra.done = true;
   DB.collection("avis").orderBy("t", "desc").limit(100).onSnapshot((s) => { shared.avis = s.docs.map((d) => d.data()).filter((r) => r && r.stars >= 1 && r.stars <= 5); sharedChanged(); }, () => {});
 }
+
+// ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
+// Le serveur décide de tout (achat, tirage, design) ; le navigateur ne fait qu'afficher et animer le résultat.
+ROUTES.push("boutique", "sanctuaire", "atelier");
+const COS_SLOT_LABEL = Object.fromEntries(COS_SLOTS.map((s) => [s.id, s.label]));
+let zShopSlot = "cadre", zAtelierTab = "design", zDraft = null, zDraftCard = null, zInvSlot = "";
+
+// carte d'exemple pour prévisualiser un cosmétique : la carte vedette, sinon la plus rare possédée, sinon Nestor
+function zSample() {
+  if (save.featured && has(save.featured)) return byId[save.featured];
+  const mine = CARDS.filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
+  return mine[0] || byId.nestor || CARDS[0];
+}
+const zTile = (c, action = "", extra = "") => `<div class="zt r-${c.rar}">
+    <div class="zt-prev">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: true })}</div>
+    <div class="zt-t"><b>${esc(c.name)}</b><span style="color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><small>${COS_SLOT_LABEL[c.slot]}${extra}</small></div>${action}</div>`;
+
+// --- actions (serveur, ou sauvegarde locale en mode invité) ---
+async function zCall(action, body, local) {
+  if (SRV) return srv(action, body);
+  const r = local(); if (r.error) throw new Error(r.error); persist(); return r;
+}
+async function zBuy(id) {
+  try { await zCall("shop/buy", { id }, () => buyCosmeticS(save, id)); toast(`${COS_BY_ID[id].name} ajouté à ton inventaire.`); draw(); }
+  catch (e) { toast(e.message); draw(); }
+}
+async function zSaveDesign() {
+  try { await zCall("design", { card: zDraftCard, design: zDraft }, () => saveDesignS(save, zDraftCard, zDraft)); toast("Design enregistré."); zDraft = null; draw(); }
+  catch (e) { toast(e.message); }
+}
+async function zFeature(id) {
+  try { await zCall("featured", { card: id }, () => { save.featured = id; return {}; }); toast(id ? "Carte vedette mise à jour." : "Carte vedette retirée."); draw(); }
+  catch (e) { toast(e.message); }
+}
+
+// ===== Boutique Arcanique =====
+function viewBoutique() {
+  const list = COSMETICS.filter((c) => c.slot === zShopSlot);
+  const own = cosOf(save).own;
+  return `<div class="wrap page">${head("Boutique Arcanique · 店", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
+    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span><button class="btn sm" type="button" data-nav="atelier">Ouvrir l'Atelier</button></div>
+    ${seg("zShop", COS_SLOTS.map((s) => [s.id, s.label]), zShopSlot)}
+    <div class="zgrid">${list.map((c) => {
+      const owned = !!own[c.id], price = COS_PRICE[c.rar];
+      const act = c.only === "sanctuaire" ? `<button class="btn sm" type="button" data-nav="sanctuaire">Sanctuaire uniquement</button>`
+        : owned ? `<button class="btn sm" type="button" disabled>Possédé</button>`
+        : `<button class="btn sm gold" type="button" data-zbuy="${c.id}" ${save.chakra < price ? "disabled" : ""}>Acheter · ${fmtN(price)} ◆</button>`;
+      return zTile(c, act);
+    }).join("")}</div></div>`;
+}
+
+// ===== Atelier Arcanique =====
+function zOptions(slot) {
+  const cos = cosOf(save), used = usedInstances(save), out = [];
+  for (const c of COSMETICS) if (c.slot === slot && cos.own[c.id]) out.push({ ref: "a:" + c.id, c, note: "Compte" });
+  for (const it of cos.inst) { const c = COS_BY_ID[it.c]; if (c && c.slot === slot) out.push({ ref: "i:" + it.i, c, note: used[it.i] && used[it.i] !== zDraftCard ? `Sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique" }); }
+  return out;
+}
+function viewAtelier() {
+  const mine = [...CARDS, ...SKINS].filter((c) => has(c.id));
+  if (param && has(param) && zDraftCard !== param) { zDraftCard = param; zDraft = null; }
+  if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
+  const cos = cosOf(save);
+  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length]], zAtelierTab);
+  if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique · 飾", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
+  if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
+  const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, refCos(save, r)?.id]).filter(([, v]) => v));
+  if (zAtelierTab === "inv") return `<div class="wrap page">${head("Atelier Arcanique · 飾", "Atelier Arcanique")}${tabs}${zInventory()}</div>`;
+  const dirty = JSON.stringify(zDraft) !== JSON.stringify(cos.designs[zDraftCard] || {});
+  return `<div class="wrap page">${head("Atelier Arcanique · 飾", "Atelier Arcanique", "Choisis une carte, essaie les cosmétiques de ton inventaire, puis enregistre son design. Il s'affiche partout : collection, profil, carte vedette.")}${tabs}
+    <div class="zat">
+      <div class="zat-prev"><div class="zat-card">${cardHTML(c, { design: resolved, present: true, gold: !own(c.id).n && own(c.id).gold > 0 })}</div>
+        <div class="row" style="justify-content:center">
+          <button class="btn gold" type="button" data-zsave ${dirty ? "" : "disabled"}>Enregistrer le design</button>
+          <button class="btn" type="button" data-zclear ${Object.keys(zDraft).length ? "" : "disabled"}>Tout retirer</button>
+          <button class="btn" type="button" data-zfeat="${save.featured === c.id ? "" : c.id}">${save.featured === c.id ? "★ Carte vedette" : "☆ Mettre en vedette"}</button>
+        </div>
+        <label class="zpick">Carte à personnaliser <select id="zCard">${mine.map((x) => `<option value="${x.id}" ${x.id === zDraftCard ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)} (${RAR[x.rar].label})</option>`).join("")}</select></label>
+      </div>
+      <div class="zat-slots">${COS_SLOTS.map((sl) => { const opts = zOptions(sl.id); return `<div class="zslot"><p class="eyebrow mut">${sl.label}</p>
+        <div class="zopts"><button type="button" class="zopt ${zDraft[sl.id] ? "" : "on"}" data-zset="${sl.id}" data-ref="">Aucun</button>
+        ${opts.map((o) => `<button type="button" class="zopt ${zDraft[sl.id] === o.ref ? "on" : ""}" data-zset="${sl.id}" data-ref="${o.ref}" style="--c:${RAR[o.c.rar].color}"><i></i>${esc(o.c.name)}<small>${o.note}</small></button>`).join("")}
+        ${opts.length ? "" : `<span class="note">Rien pour l'instant : <a href="#/boutique">Boutique</a> ou <a href="#/sanctuaire">Sanctuaire</a>.</span>`}</div></div>`; }).join("")}
+        ${sl0Note()}</div>
+    </div></div>`;
+}
+const sl0Note = () => `<p class="note">Une instance unique ne décore qu'une carte à la fois : la choisir ici la retire de l'autre carte. Les cosmétiques de compte s'utilisent sur autant de cartes que tu veux.</p>`;
+function zInventory() {
+  const cos = cosOf(save), used = usedInstances(save);
+  const items = [...Object.keys(cos.own).filter((id) => COS_BY_ID[id]).map((id) => ({ c: COS_BY_ID[id], kind: "Compte · réutilisable" })),
+    ...cos.inst.filter((it) => COS_BY_ID[it.c]).map((it) => ({ c: COS_BY_ID[it.c], kind: used[it.i] ? `Instance · sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique · libre" }))]
+    .filter((x) => !zInvSlot || x.c.slot === zInvSlot);
+  return `${seg("zInv", [["", "Tout"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
+    ${items.length ? `<div class="zgrid">${items.map((x) => zTile(x.c, "", ` · ${x.kind}`)).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
+}
+
+// ===== Sanctuaire des Invocations : Portail scellé (B + C) =====
+// Le tirage est fait par le serveur AVANT l'animation ; l'animation ne fait que le révéler.
+const ZR = { results: null, flipped: [], status: "idle" };
+function viewSanctuaire() {
+  const cos = cosOf(save);
+  const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
+  return `<div class="wrap page">${head("Sanctuaire des Invocations · 召", "Sanctuaire des Invocations", "Touche le portail scellé pour invoquer des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
+    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Mythique garantie dans <b>${Math.max(0, SUMMON_PITY_M - cos.sinceM)}</b> invocations</span></div>
+    <div class="zsanct"><div id="sanctumHost" class="sanctum-host"></div>
+      <div class="zs-side">
+        <button class="btn gold big" type="button" data-zsum="1" ${save.chakra < summonCost(1) || ZR.status === "running" ? "disabled" : ""}>Invoquer ×1 · ${fmtN(summonCost(1))} ◆</button>
+        <button class="btn acc big" type="button" data-zsum="5" ${save.chakra < summonCost(5) || ZR.status === "running" ? "disabled" : ""}>Invoquer ×5 · ${fmtN(summonCost(5))} ◆</button>
+        <p class="note">×5 : au moins une Rare ou mieux. Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte.</p>
+        <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
+        <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
+      </div></div>
+    ${ZR.results && ZR.status === "done" ? zResultsHTML() : ""}</div>`;
+}
+let zSkipAnim = false;
+try { zSkipAnim = localStorage.getItem("rz-skip-summon") === "1"; } catch (e) {}
+const zBest = (got) => got.reduce((a, x) => (RANKS.indexOf(x.rar) > RANKS.indexOf(a) ? x.rar : a), "c");
+function zResultsHTML() {
+  const got = ZR.results, multi = got.length > 1;
+  const tiles = got.map((x, i) => { const c = COS_BY_ID[x.id], open = !multi || ZR.flipped[i];
+    return open ? `<div class="zres" data-i="${i}">${zTile(c, "", " · instance unique")}</div>` : `<button class="zres zback" type="button" data-zflip="${i}" aria-label="Retourner l'objet ${i + 1}"><b>封</b></button>`; }).join("");
+  const left = got.filter((_, i) => multi && !ZR.flipped[i]).length;
+  return `<section class="sec zresults"><p class="eyebrow gold">${multi ? "Invocation ×5" : "Invocation"}</p><h2>${left ? "Retourne tes objets" : "Ajouté à ton inventaire"}</h2>
+    <div class="zgrid ${multi ? "five" : "one"}">${tiles}</div>
+    <div class="row">${left ? `<button class="btn" type="button" data-zflipnext>Retourner le suivant</button><button class="btn" type="button" data-zflipall>Tout révéler</button>` : `<button class="btn gold" type="button" data-nav="atelier">Équiper à l'Atelier</button>`}</div></section>`;
+}
+async function zSummon(n) {
+  if (ZR.status === "running") return; // pas de double invocation
+  ZR.status = "running"; draw();
+  let r;
+  try { r = await zCall("summon", { n }, () => summonS(save, n, Math.random)); }
+  catch (e) { ZR.status = "idle"; toast(e.message); return draw(); }
+  ZR.results = r.got; ZR.flipped = r.got.map(() => false);
+  const done = () => { ZR.status = "done"; Portal.reset(); draw(); document.querySelector(".zresults")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+  if (zSkipAnim || matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
+  Portal.play(zBest(r.got), done);
+}
+function zFlip(i) {
+  if (ZR.flipped[i]) return; ZR.flipped[i] = true;
+  const r = ZR.results[i].rar;
+  if (r === "l" || r === "m") { const h = $("sanctumHost"); h?.style.setProperty("--glow", RAR[r].color); h?.classList.remove("glowing"); void h?.offsetWidth; h?.classList.add("glowing"); }
+  draw();
+}
+
+// --- le Portail scellé : canvas persistant, raccroché à la page après chaque rendu ---
+const Portal = (() => {
+  const host = document.createElement("div"); host.className = "sanctum"; host.tabIndex = 0; host.setAttribute("role", "button"); host.setAttribute("aria-label", "Toucher le portail pour invoquer");
+  host.innerHTML = `<canvas></canvas><div class="sanctum-hand" aria-hidden="true"><svg viewBox="0 0 100 172"><defs><linearGradient id="zhg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".6" stop-color="var(--rare)" stop-opacity=".55"/><stop offset="1" stop-color="var(--rare)" stop-opacity="0"/></linearGradient></defs><g fill="url(#zhg)"><rect x="41" y="2" width="17" height="80" rx="8.5"/><rect x="58" y="44" width="16" height="46" rx="8"/><rect x="73" y="50" width="15" height="42" rx="7.5"/><rect x="86" y="58" width="12" height="36" rx="6"/><path d="M36 72h58q4 0 4 6v34q0 30-26 38H50q-22-4-24-30z"/><rect x="16" y="78" width="15" height="46" rx="7.5" transform="rotate(-32 23 100)"/><rect x="44" y="140" width="42" height="32" rx="6"/></g></svg></div><p class="sanctum-hint">Touche le portail</p>`;
+  const cv = host.querySelector("canvas"), ctx = cv.getContext("2d"), hand = host.querySelector(".sanctum-hand");
+  const RC = { c: "#b5b1bb", pc: "#3fbf7f", r: "#4d9bff", e: "#b072ff", l: "#f5c518", m: "#ff4d2e" };
+  const TIER = { c: { k: .8 }, pc: { k: .8 }, r: { k: 1 }, e: { k: 1, ring: 1 }, l: { k: 1.12, ring: 1, rays: 1 }, m: { k: 1.35, ring: 2, rays: 1, shake: 1, burst: 2 } };
+  const GL = ["召", "喚", "零", "界", "悪", "友", "匠", "季", "混", "神", "魂", "門"];
+  const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x)), sg = (e, a, b) => cl((e - a) / (b - a)), eo = (t) => 1 - Math.pow(1 - t, 3), ei = (t) => t * t * t, mx = (a, b, t) => a + (b - a) * t;
+  const hx = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)], ra = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`, lr = (a, b, t) => a.map((v, i) => Math.round(mx(v, b[i], t)));
+  const WH = [255, 255, 255]; let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const stars = Array.from({ length: 90 }, () => ({ a: rnd() * Math.PI * 2, z: rnd() }));
+  let W = 0, H = 0, parts = [], shards = [], cracks = [], run = null, raf = 0;
+  const makeCracks = () => { cracks = Array.from({ length: 8 }, (_, k) => { let x = 0, y = 0; const pts = [[0, 0]], a0 = k / 8 * Math.PI * 2 + rnd() * .5; for (let i = 0; i < 4; i++) { const a = a0 + (rnd() - .5) * .9; x += Math.cos(a) * .27; y += Math.sin(a) * .27; pts.push([x, y]); } return pts; }); };
+  makeCracks();
+  const spawn = (n, f) => { for (let i = 0; i < n && parts.length < 200; i++) parts.push(f()); };
+  const step = (cx, cy, col, pull) => { for (const p of parts) { if (pull) { const dx = cx - p.x, dy = cy - p.y, d = Math.hypot(dx, dy) + 1; p.vx += dx / d * pull / 60; p.vy += dy / d * pull / 60; if (d < 8) p.life = 0; } p.x += p.vx / 60; p.y += p.vy / 60; p.life -= 1 / 60; } parts = parts.filter((p) => p.life > 0); for (const p of parts) { ctx.fillStyle = ra(col, cl(p.life / p.max) * .9); ctx.fillRect(p.x, p.y, p.s, p.s); } };
+  const flash = (a, c = WH) => { if (a > 0) { ctx.fillStyle = ra(c, a); ctx.fillRect(0, 0, W, H); } };
+  function portalAt(cx, cy, open, rh, c, t, speed) {
+    if (open < 2) return;
+    ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, open, rh, 0, 0, Math.PI * 2); ctx.clip(); ctx.fillStyle = "#050409"; ctx.fillRect(0, 0, W, H);
+    for (let k = 0; k < 7; k++) { const z = (k / 7 + t * speed * .4) % 1; ctx.strokeStyle = ra(c, z * .55); ctx.lineWidth = 1 + z * 2; ctx.beginPath(); ctx.ellipse(cx, cy, open * z * 1.1, rh * z * 1.1, 0, 0, Math.PI * 2); ctx.stroke(); }
+    for (const s of stars) { const z = (s.z + t * speed * .5) % 1, r = z * z * Math.max(open, rh) * 1.3; ctx.fillStyle = ra(lr(c, WH, .4), z); ctx.fillRect(cx + Math.cos(s.a) * r * (open / rh), cy + Math.sin(s.a) * r, 1 + z * 2, 1 + z * 2); }
+    ctx.restore(); ctx.strokeStyle = ra(c, .95); ctx.lineWidth = 3; ctx.shadowColor = ra(c, 1); ctx.shadowBlur = 24; ctx.beginPath(); ctx.ellipse(cx, cy, open, rh, 0, 0, Math.PI * 2); ctx.stroke(); ctx.shadowBlur = 0;
+  }
+  function makeShards(cx, cy, rx, ry) {
+    const out = []; for (let i = 0; i < 12; i++) { const a0 = i / 12 * Math.PI * 2, a1 = (i + 1) / 12 * Math.PI * 2, am = (a0 + a1) / 2, P = (a, r) => [cx + Math.cos(a) * rx * r, cy + Math.sin(a) * ry * r];
+      for (const [r0, r1] of [[0, .55], [.55, 1]]) { const pts = r0 ? [P(a0, r0), P(a0, r1), P(am, r1 * 1.02), P(a1, r1), P(a1, r0)] : [[cx, cy], P(a0, r1), P(am, r1), P(a1, r1)];
+        const gx = pts.reduce((s, q) => s + q[0], 0) / pts.length, gy = pts.reduce((s, q) => s + q[1], 0) / pts.length, v = (r0 ? 300 : 180) + rnd() * 180;
+        out.push({ pts: pts.map(([x, y]) => [x - gx, y - gy]), x: gx, y: gy, vx: Math.cos(am) * v, vy: Math.sin(am) * v - 40, vr: (rnd() - .5) * 8, inner: !r0 }); } }
+    return out;
+  }
+  const HAND = .7, SW = 1.95;
+  // une erreur de dessin ne doit jamais bloquer l'invocation : on passe directement au résultat
+  function frame(nowMs) {
+    try { draw1(nowMs); } catch (err) { raf = 0; ctx.setTransform(1, 0, 0, 1, 0, 0); if (run) { const cb = run.done; run = null; cb(); } }
+  }
+  function draw1(nowMs) {
+    raf = 0;
+    if (!host.isConnected || document.hidden) { if (run) raf = requestAnimationFrame(frame); return; }
+    const r = host.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+    if (Math.round(r.width * dpr) !== cv.width || Math.round(r.height * dpr) !== cv.height) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+    W = r.width; H = r.height; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+    const now = nowMs / 1000, rar = run ? run.rar : "r", T = TIER[rar], k = T.k, real = hx(RC[rar]);
+    const eRun = run ? Math.max(0, now - run.t0) : null, idle = eRun == null, e = idle ? now : eRun;
+    const cx0 = W / 2, cy0 = H / 2, R = Math.min(W, H) * .4, rh = R * .95, rx = R * .62;
+    const t = idle || eRun < HAND ? .45 : .45 + (eRun - HAND) / k;
+    // feinte : une Mythique se charge en violet, une Légendaire en bleu, puis tout bascule pendant la tension
+    const fakeR = run && { m: "e", l: "r" }[rar]; let col = idle ? hx("#f5c518") : real, Tv = T;
+    if (fakeR) { const q = sg(t, SW, SW + .12); col = lr(hx(RC[fakeR]), real, q); if (q < 1) Tv = { ...TIER[fakeR], k }; }
+    host.style.setProperty("--rare", `rgb(${col.join(",")})`);
+    if (fakeR && t > SW && t < SW + .3) ctx.translate((rnd() - .5) * 10, (rnd() - .5) * 10);
+    const charge = sg(t, .45, 1.5), cracksP = sg(t, 1.2, 2), tension = sg(t, 1.8, 2.3), light = lr(col, WH, .6);
+    if (Tv.shake && tension > 0 && t < 2.5) ctx.translate((rnd() - .5) * tension * 7, (rnd() - .5) * tension * 7);
+    const sh = tension * 7 * (Tv.shake ? 1.8 : 1) + charge * 1.2, cx = cx0 + (rnd() - .5) * sh, cy = cy0 + (rnd() - .5) * sh;
+    if (t < 2.3) {
+      portalAt(cx, cy, rx, rh, col, e, mx(.5, 3, charge));
+      ctx.save(); ctx.font = `700 ${R * .42}px "Zen Kaku Gothic New", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.shadowColor = ra(col, 1); ctx.shadowBlur = 8 + charge * 30; ctx.fillStyle = ra(light, .25 + charge * .75); ctx.fillText("封", cx, cy); ctx.restore();
+      for (let ri = 0; ri <= (Tv.ring || 0); ri++) { const n = 8 - ri * 2, ox = rx * (1.45 + ri * .22), oy = rh * (1.05 + ri * .08), sp = mx(.4, 4, ei(charge)) * (ri % 2 ? -1 : 1), al = idle ? .3 : sg(t, .3 + ri * .2, .8 + ri * .2);
+        ctx.font = `700 ${Math.max(13, R * (.11 - ri * .015))}px "Zen Kaku Gothic New", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        for (let i = 0; i < n; i++) { const a = e * sp + i / n * Math.PI * 2; ctx.fillStyle = ra(ri ? light : col, al * (Math.cos(a) > -.3 ? 1 : .5)); ctx.fillText(GL[(i * 3 + ri * 4) % 12], cx + Math.cos(a) * ox, cy + Math.sin(a) * oy); } }
+      if (cracksP > 0) { ctx.save(); ctx.beginPath(); ctx.ellipse(cx, cy, rx, rh, 0, 0, Math.PI * 2); ctx.clip(); ctx.strokeStyle = ra(lr(col, WH, .8), .95); ctx.lineWidth = 2; ctx.shadowColor = ra(col, 1); ctx.shadowBlur = 12;
+        cracks.forEach((cr, j) => { const n = Math.floor(cl(cracksP * 1.4 - j * .05) * (cr.length - 1)); if (n < 1) return; ctx.beginPath(); for (let i = 0; i <= n; i++) ctx[i ? "lineTo" : "moveTo"](cx + cr[i][0] * rx * 1.3, cy + cr[i][1] * rh * .95); ctx.stroke(); }); ctx.restore(); }
+      if (t > .5 && t < 2) spawn(3, () => { const a = rnd() * Math.PI * 2, rr = Math.max(W, H) * .55; return { x: cx0 + Math.cos(a) * rr, y: cy0 + Math.sin(a) * rr, vx: 0, vy: 0, life: 1.4, max: 1.4, s: 2 }; });
+      step(cx0, cy0, col, t > .5 && t < 2 ? 380 : 0);
+      if (t > 2.15 && !shards.length) shards = makeShards(cx0, cy0, rx, rh);
+    } else {
+      const u = t - 2.3;
+      if (T.rays) { const a = cl(1 - u / .9); ctx.save(); ctx.translate(cx0, cy0); ctx.rotate(u * .6); for (let i = 0; i < 12; i++) { ctx.rotate(Math.PI / 6); ctx.fillStyle = ra(light, .22 * a); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.max(W, H), -18); ctx.lineTo(Math.max(W, H), 18); ctx.closePath(); ctx.fill(); } ctx.restore(); }
+      for (const s of shards) { const x = s.x + s.vx * u, y = s.y + s.vy * u + 200 * u * u; ctx.save(); ctx.translate(x, y); ctx.rotate(s.vr * u); ctx.globalAlpha = cl(1 - u / 1.1); ctx.fillStyle = s.inner ? "#0a0812" : ra(col, .55); ctx.strokeStyle = ra(light, .9); ctx.lineWidth = 1.4; ctx.beginPath(); s.pts.forEach(([px, py], i) => ctx[i ? "lineTo" : "moveTo"](px, py)); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
+      const burst = (n) => spawn(n, () => { const a = rnd() * Math.PI * 2, v = 120 + rnd() * 340; return { x: cx0, y: cy0, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: .9, max: .9, s: 2.2 }; });
+      if (u < .05) burst(70); if (T.burst === 2 && u > .14 && u < .2) burst(70);
+      step(cx0, cy0, col, 0);
+    }
+    if (idle) { const q = (now * .6) % 1; ctx.strokeStyle = ra(col, .5 * (1 - q)); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx0, cy0, mx(R * .12, R * .45, q), 0, Math.PI * 2); ctx.stroke(); }
+    else if (eRun > .5 && eRun < 1.3) { const q = sg(eRun, .5, 1.3); for (const d of [0, .18]) { const qq = cl(q - d); if (qq <= 0) continue; ctx.strokeStyle = ra(lr(col, WH, .6), .9 * (1 - qq)); ctx.lineWidth = 3 * (1 - qq) + .5; ctx.beginPath(); ctx.ellipse(cx0, cy0, mx(8, rx * 1.5, eo(qq)), mx(8, rh * 1.15, eo(qq)), 0, 0, Math.PI * 2); ctx.stroke(); } }
+    if (fakeR && t > SW && t < SW + .55) { const q = sg(t, SW, SW + .55); ctx.strokeStyle = ra(lr(real, WH, .3), 1 - q); ctx.lineWidth = 6 * (1 - q) + 1; ctx.beginPath(); ctx.ellipse(cx0, cy0, mx(rx * .3, rx * 2.2, eo(q)), mx(rh * .3, rh * 1.6, eo(q)), 0, 0, Math.PI * 2); ctx.stroke(); flash(.3 * (1 - q), real); }
+    if (!idle) flash(t > 2.22 ? Math.sin(sg(t, 2.22, 2.55) * Math.PI) * (T.burst === 2 ? .4 : .85) : 0, T.burst === 2 ? lr(col, WH, .45) : WH);
+    if (run && t >= 2.55 + .15) { const cb = run.done; run = null; cb(); }
+    raf = requestAnimationFrame(frame);
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+  host.addEventListener("click", () => { if (ZR.status !== "running" && save.chakra >= summonCost(1)) zSummon(1); });
+  host.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); host.click(); } });
+  return {
+    host,
+    attach(el) { if (el && host.parentNode !== el) el.appendChild(host); host.classList.toggle("busy", ZR.status === "running"); kick(); },
+    play(rar, done) {
+      parts = []; shards = []; makeCracks();
+      let finished = false; const once = () => { if (!finished) { finished = true; clearTimeout(guard); run = null; done(); } };
+      const guard = setTimeout(once, 9000); // filet : onglet en arrière-plan, appareil très lent
+      run = { rar, t0: performance.now() / 1000, done: once };
+      // la main monte et touche le sceau
+      hand.style.setProperty("--reach", `${hand.offsetHeight - host.clientHeight / 2}px`);
+      hand.classList.remove("touch"); void hand.offsetWidth; hand.classList.add("touch"); kick();
+    },
+    reset() { run = null; parts = []; shards = []; hand.classList.remove("touch"); },
+  };
+})();
+
+// --- branchement : rendu, menu, clics ---
+VIEWS.boutique = viewBoutique; VIEWS.atelier = viewAtelier; VIEWS.sanctuaire = viewSanctuaire;
+function afterViews() {
+  if (view === "sanctuaire") Portal.attach($("sanctumHost"));
+}
+const Z_SEG = { zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const b = t.closest("[data-zbuy]"); if (b) { b.disabled = true; return zBuy(b.dataset.zbuy); }
+  const s = t.closest("[data-zset]"); if (s) { const sl = s.dataset.zset, ref = s.dataset.ref; if (ref) zDraft[sl] = ref; else delete zDraft[sl]; return draw(); }
+  if (t.closest("[data-zsave]")) return zSaveDesign();
+  if (t.closest("[data-zclear]")) { zDraft = {}; return draw(); }
+  const f = t.closest("[data-zfeat]"); if (f) return zFeature(f.dataset.zfeat || null);
+  const sm = t.closest("[data-zsum]"); if (sm) return zSummon(+sm.dataset.zsum);
+  const fl = t.closest("[data-zflip]"); if (fl) return zFlip(+fl.dataset.zflip);
+  if (t.closest("[data-zflipnext]")) { const i = ZR.flipped.findIndex((x) => !x); if (i >= 0) zFlip(i); return; }
+  if (t.closest("[data-zflipall]")) { ZR.flipped = ZR.flipped.map(() => true); return draw(); }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id === "zCard") { zDraftCard = e.target.value; zDraft = null; nav("atelier", zDraftCard); }
+  if (e.target.id === "zSkip") { zSkipAnim = e.target.checked; try { localStorage.setItem("rz-skip-summon", zSkipAnim ? "1" : "0"); } catch (err) {} }
+});
+
+// ===== Coffre arcanique : scène 3D, clé, et lecteur de scénarios =====
+// Les cartes et le scénario viennent du serveur (src/game.js : pickScenarioS) ; ici on ne fait que les mettre en scène.
+// Un scénario = une suite de temps forts (CHEST_BEATS). Une feinte ne montre jamais un faux résultat : elle retarde la vraie couleur.
+const Coffre = (() => {
+  const KEY_SVG = `<svg viewBox="0 0 132 40" aria-hidden="true"><defs><linearGradient id="cfkg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".45" stop-color="#e2b54a"/><stop offset="1" stop-color="#8a6420"/></linearGradient><linearGradient id="cfkc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="var(--rare)"/><stop offset="1" stop-color="#101018"/></linearGradient></defs>
+  <path d="M6 14h10v-4h6v4h4v12h-4v4h-6v-4h-4v4H6z" fill="url(#cfkg)" stroke="#5a4214" stroke-width="1"/><rect x="24" y="17" width="78" height="6" rx="2" fill="url(#cfkg)" stroke="#5a4214" stroke-width="1"/>
+  <path d="M116 3l14 8.5v17L116 37l-14-8.5v-17z" fill="url(#cfkg)" stroke="#5a4214" stroke-width="1"/><path d="M116 10l8 5v10l-8 5-8-5V15z" fill="url(#cfkc)" stroke="#fff6" stroke-width=".8"/></svg>`;
+  const EMBLEM = `<svg viewBox="0 0 120 104" aria-hidden="true"><defs><linearGradient id="cfeg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b0"/><stop offset=".5" stop-color="#d8a83f"/><stop offset="1" stop-color="#7d5a1c"/></linearGradient></defs>
+  <g fill="url(#cfeg)" stroke="#5a4214" stroke-width="1.2"><path d="M50 26C36 18 16 22 4 40c14-5 24-3 32 3-12 4-20 12-24 24 12-8 22-10 30-8z"/><path d="M70 26c14-8 34-4 46 14-14-5-24-3-32 3 12 4 20 12 24 24-12-8-22-10-30-8z"/>
+  <path d="M60 4l20 12-3 50-17 34-17-34-3-50z"/></g><path d="M60 12l13 8-2 42-11 24-11-24-2-42z" fill="none" stroke="#fff3" stroke-width="1"/>
+  <text x="60" y="47" text-anchor="middle" font-family="Zen Kaku Gothic New, sans-serif" font-weight="700" font-size="21" fill="#3a280c">封</text>
+  <circle cx="60" cy="66" r="5" fill="#120d06"/><path d="M57.5 68h5l1.5 10h-8z" fill="#120d06"/></svg>`;
+  const CROWN = `<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M4 34L8 8l12 14L30 4l10 18L52 8l4 26z" fill="#f5c518" stroke="#7d5a1c" stroke-width="2"/></svg>`;
+  const RUNES = ["召", "零", "界", "悪", "友", "匠", "魂", "門"];
+  const faces = (part) => ["front", "back", "right", "left"].map((f) => `<div class="f ${f}"></div>`).join("") + (part === "base" ? '<div class="f bottom"></div><div class="f inside"></div>' : '<div class="f top"></div><div class="f under"></div>');
+  const chestHTML = () => `<div class="c3" id="cfChest"><div class="c3-lid">${faces("lid")}</div>
+      <div class="c3-base">${faces("base")}<div class="emblem">${EMBLEM}<div class="lock" id="cfLock"></div></div></div></div>`;
+  const reducedNow = () => reduced || matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const wait = (ms) => new Promise((r) => setTimeout(r, reducedNow() ? 0 : ms));
+  let run = 0; // identifiant de lecture : un « Passer » ou une fermeture coupe la lecture en cours
+
+  // --- sons facultatifs (coupés par défaut, mémorisés dans ce navigateur) ---
+  let soundOn = false; try { soundOn = localStorage.getItem("rz-sound") === "1"; } catch (e) {}
+  let ac = null;
+  function snd(f = 440, d = .12, type = "sine", vol = .06) {
+    if (!soundOn) return;
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.value = vol; g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + d); o.connect(g).connect(ac.destination); o.start(); o.stop(ac.currentTime + d); } catch (e) {}
+  }
+
+  // --- rendu ---
+  const bestOf = (o) => o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a].rank ? x.c.rar : a), "c");
+  function render(el, o, top) {
+    const sc = CHEST_BY_ID[o.scenario] || CHEST_BY_ID["cl-nette"];
+    el.innerHTML = `${top}<section class="stage cf" id="cf" style="--rare:${RAR.c.color}">
+      <div class="cf-fx" id="cfFx" aria-hidden="true"></div>
+      <div class="c3-scene" id="cfScene"><div class="beam"></div>
+        <div class="cf-runes" id="cfRunes" aria-hidden="true">${RUNES.map((k, i) => `<i style="--i:${i}">${k}</i>`).join("")}</div>
+        <div class="cf-crystal" id="cfCrystal" aria-hidden="true"><i></i><i></i><i></i></div>
+        ${chestHTML()}</div>
+      <div class="keybox"><div class="key" id="cfKey" tabindex="0" role="button" aria-label="Utiliser la clé sur le coffre">${KEY_SVG}</div>
+        <span class="keyhint" id="cfHint">Glisse la clé dans la serrure · ou touche-la</span></div>
+      <p class="sr-only" aria-live="polite" id="cfLive"></p>
+      <div class="cf-tools"><button class="btn sm" type="button" data-act="cf-sound" aria-pressed="${soundOn}">${soundOn ? "Son activé" : "Son coupé"}</button><button class="btn sm" type="button" data-act="skip">Passer</button></div>
+      <p class="sub">${o.pk.name}${o.pk.daily ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
+    el.dataset.cf = o.id;
+    wireKey(o, sc);
+  }
+  function wireKey(o, sc) {
+    const key = $("cfKey"), lock = $("cfLock"); let drag = null;
+    const over = (x, y) => { const r = lock.getBoundingClientRect(); return x > r.left - 24 && x < r.right + 24 && y > r.top - 24 && y < r.bottom + 24; };
+    key.addEventListener("pointerdown", (ev) => { if (o.cf !== "key") return; ev.preventDefault(); key.setPointerCapture(ev.pointerId); drag = { x0: ev.clientX, y0: ev.clientY, moved: false }; });
+    key.addEventListener("pointermove", (ev) => { if (!drag) return; if (Math.hypot(ev.clientX - drag.x0, ev.clientY - drag.y0) > 6) drag.moved = true; if (!drag.moved) return;
+      key.classList.add("drag"); key.style.translate = `${ev.clientX - drag.x0}px ${ev.clientY - drag.y0}px`; lock.classList.toggle("hot", over(ev.clientX, ev.clientY)); });
+    const up = (ev) => { if (!drag) return; const ok = !drag.moved || over(ev.clientX, ev.clientY); drag = null;
+      key.classList.remove("drag"); key.style.translate = ""; lock.classList.remove("hot"); if (ok) play(o, sc); };
+    key.addEventListener("pointerup", up); key.addEventListener("pointercancel", () => { drag = null; key.classList.remove("drag"); key.style.translate = ""; });
+    key.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); play(o, sc); } });
+  }
+
+  // --- les temps forts ---
+  const fx = () => $("cfFx"), chest = () => $("cfChest"), stage = () => $("cf");
+  // la teinte du coffre ET du fond suit ce que le scénario montre (une feinte reste grise ou bleue jusqu'à la bascule)
+  const setTint = (r) => { const c = r === "gold" ? "#f0c860" : RAR[r].color; stage()?.style.setProperty("--rare", c); $("stage").style.setProperty("--glow", c); if (opening) opening.glow = c; };
+  function spawnFx(cls, n, f) { const box = fx(); if (!box) return; for (let i = 0; i < n; i++) { const e = document.createElement("i"); e.className = cls; f?.(e, i); box.appendChild(e); } }
+  const clearFx = (sel) => fx()?.querySelectorAll(sel).forEach((e) => e.remove());
+  function keyTo(lock = true) {
+    const key = $("cfKey"); if (!key) return;
+    if (!lock) { key.style.transform = ""; key.style.opacity = 1; return; }
+    const lr = $("cfLock").getBoundingClientRect(), kr = key.getBoundingClientRect();
+    key.style.transform = `translate(${lr.left + lr.width / 2 - kr.left - 10}px, ${lr.top + lr.height / 2 - kr.top - kr.height / 2}px) scale(.55)`;
+  }
+  const BEAT = {
+    async insert() { $("cfHint")?.setAttribute("hidden", ""); keyTo(true); snd(520, .08, "triangle"); await wait(420); },
+    async turn() { const k = $("cfKey"); if (k) k.style.transform += " rotateX(80deg)"; snd(330, .1, "square", .03); chest()?.classList.add("shake1"); await wait(420); chest()?.classList.remove("shake1"); },
+    async tint(o, r) { setTint(r || bestOf(o)); if (!r) snd(660 + 80 * RAR[bestOf(o)].rank, .25); await wait(520); },
+    async ladder(o) { for (const r of RANKS.slice(0, RAR[bestOf(o)].rank + 1)) { setTint(r); snd(300 + 90 * RAR[r].rank, .1); await wait(260); } },
+    async shake(o, n = 1) { const c = chest(); c?.classList.add("shake" + Math.min(3, n)); snd(120, .2 * n, "sawtooth", .03); await wait(360 * n); c?.classList.remove("shake1", "shake2", "shake3"); },
+    async runes(o, n = 8) { const rs = [...document.querySelectorAll("#cfRunes i")].slice(0, n); for (const r of rs) { r.classList.add("on"); snd(800, .05); await wait(90); } await wait(200); },
+    async runesOut() { document.querySelectorAll("#cfRunes i").forEach((r) => r.classList.remove("on")); $("cf")?.classList.add("dim"); await wait(400); $("cf")?.classList.remove("dim"); },
+    async crystal(o, n = 1) { const c = $("cfCrystal"); for (let i = 0; i < n; i++) { c?.classList.remove("pulse"); void c?.offsetWidth; c?.classList.add("pulse"); snd(990, .2); await wait(460); } },
+    async crack() { $("cfCrystal")?.classList.add("cracked"); snd(180, .15, "square", .04); await wait(520); },
+    async burstCrystal() { $("cfCrystal")?.classList.add("burst"); snd(1200, .3); await wait(450); },
+    async keyPop() { const k = $("cfKey"); if (k) k.style.transform = "translateY(-12px)"; live("…la serrure résiste"); await wait(600); keyTo(false); },
+    async keyBreak() { $("cfKey")?.classList.add("broken"); snd(150, .25, "square", .05); live("La clé s'est brisée…"); await wait(600); },
+    async goldKey() { const k = $("cfKey"); if (!k) return; k.style.transition = "none"; keyTo(false); k.classList.remove("broken"); k.classList.add("golden"); void k.offsetWidth; k.style.transition = ""; live("Une clé dorée apparaît"); await wait(500); },
+    async lidPeek() { chest()?.classList.add("peek"); await wait(650); },
+    async lidFall() { const c = chest(); c?.classList.remove("peek"); c?.classList.add("shake2"); snd(90, .25, "sawtooth", .05); await wait(450); c?.classList.remove("shake2"); },
+    async blackout() { stage()?.classList.add("blackout"); snd(60, .5, "sine", .05); await wait(900); },
+    async redrop() { const s = $("cfScene"); s?.classList.remove("redrop"); void s?.offsetWidth; s?.classList.add("redrop"); stage()?.classList.remove("blackout"); await wait(750); },
+    async dust() { spawnFx("dust", 26, (e, i) => { e.style.setProperty("--a", `${i * 14}deg`); e.style.setProperty("--d", `${(i % 5) * 60}ms`); }); await wait(950); clearFx(".dust"); },
+    async split() { $("cfCrystal")?.classList.add("split"); snd(880, .3); await wait(950); },
+    async crowns() { spawnFx("crown", 2, (e, i) => { e.innerHTML = CROWN; e.style.setProperty("--s", i ? 1 : -1); }); snd(740, .4); await wait(1150); clearFx(".crown"); },
+    async eclipse() { spawnFx("eclipse", 1); snd(220, .9, "triangle"); await wait(1300); clearFx(".eclipse"); },
+    async twin() { const s = $("cfScene"), g = chest()?.cloneNode(true); if (g) { g.id = ""; g.classList.add("ghost"); s?.appendChild(g); } await wait(1100); g?.remove(); },
+    async coins() { spawnFx("coin", 28, (e, i) => { e.style.left = `${(i * 37) % 100}%`; e.style.setProperty("--d", `${(i % 7) * 90}ms`); }); snd(1320, .15); await wait(1200); clearFx(".coin"); },
+    async gild() { chest()?.classList.add("gilded"); await wait(600); },
+    async sheen() { chest()?.classList.add("sheen"); await wait(850); },
+    async chrysalis() { chest()?.classList.add("chrysalis"); snd(520, .8, "triangle"); await wait(1250); chest()?.classList.remove("chrysalis"); },
+    async column() { spawnFx("column", 1); snd(160, 1, "sawtooth", .03); await wait(1100); },
+    async stars() { stage()?.classList.add("night"); spawnFx("star", 50, (e) => { e.style.left = Math.random() * 100 + "%"; e.style.top = Math.random() * 80 + "%"; e.style.setProperty("--d", Math.round(Math.random() * 700) + "ms"); }); await wait(1250); },
+    async kanji(o, k = "零") { spawnFx("kanji", 1, (e) => { e.textContent = k; }); snd(440, .6, "triangle"); await wait(1150); clearFx(".kanji"); },
+    async orbit() { spawnFx("orb", 5, (e, i) => e.style.setProperty("--i", i)); await wait(1350); clearFx(".orb"); },
+    async quake() { stage()?.classList.add("quake"); snd(70, .7, "sawtooth", .06); await wait(700); stage()?.classList.remove("quake"); },
+    async aurora() { spawnFx("aurora", 3, (e, i) => e.style.setProperty("--i", i)); await wait(1300); },
+    async banner(o, text) { spawnFx("banner", 1, (e) => { e.textContent = text; }); live(text); await wait(1500); clearFx(".banner"); },
+    async pause(o, ms = 400) { await wait(ms); },
+    async open(o) { const k = $("cfKey"); if (k) k.style.opacity = 0; setTint(bestOf(o)); $("stage").style.setProperty("--glow", (o.glow = glowOf(o))); chest()?.classList.add("open"); $("cfScene")?.classList.add("open"); snd(880, .5, "triangle"); if (!reducedNow()) { stage()?.classList.add("glowing"); } await wait(1100); },
+  };
+  const live = (t) => { const l = $("cfLive"); if (l) l.textContent = t; };
+
+  async function play(o, sc) {
+    if (o.cf !== "key") return; // une seule ouverture, même avec plusieurs clics
+    o.cf = "anim"; const me = ++run;
+    try {
+      if (reducedNow()) { setTint(bestOf(o)); chest()?.classList.add("open"); }
+      else for (const [b, ...args] of sc.beats) { if (me !== run || opening !== o) return; await BEAT[b]?.(o, ...args); }
+    } catch (e) { /* une erreur d'animation ne bloque jamais l'ouverture : on passe aux cartes */ }
+    if (me !== run || opening !== o) return;
+    o.cf = "grid"; o.phase = "grid"; drawOpening();
+  }
+
+  // --- les 5 cartes face cachée, puis le récapitulatif ---
+  function grid(el, o, top) {
+    const left = o.flips.filter((x) => !x).length;
+    el.innerHTML = `${top}<section class="stage cf cf-grid" style="--rare:${RAR[bestOf(o)].color}">
+      <p class="eyebrow gold">${esc(o.pk.name)}</p><h2>${left ? "Retourne tes cartes" : "Tout est révélé"}</h2>
+      <div class="multi">${o.cards.map((x, i) => `<button class="slot ${o.flips[i] ? "flipped" : ""}" type="button" data-cflip="${i}" style="--i:${i};--rc:${x.gold ? "#f0c860" : RAR[x.c.rar].color}" aria-label="${o.flips[i] ? `${esc(nameOf(x.c))}, ${RAR[x.c.rar].label}${x.gold ? ", dorée" : ""}` : `Retourner la carte ${i + 1}`}">
+        <span class="back"><b>零</b></span><span class="front">${o.flips[i] ? cardHTML(x.c, { gold: x.gold, isNew: x.isNew }) : ""}</span></button>`).join("")}</div>
+      <p class="hint" aria-live="polite">${o.last != null ? `<b style="color:${o.cards[o.last].gold ? "#f0c860" : RAR[o.cards[o.last].c.rar].color}">${esc(nameOf(o.cards[o.last].c))} · ${RAR[o.cards[o.last].c.rar].label}${o.cards[o.last].gold ? " · Dorée" : ""}</b>${o.cards[o.last].isNew ? " · Nouvelle !" : ""}` : "Touche une carte pour la retourner"}</p>
+      <div class="row" style="justify-content:center">${left ? `<button class="btn" type="button" data-act="cf-next">Retourner la suivante</button><button class="btn" type="button" data-act="skip">Tout révéler</button>` : `<button class="btn gold big" type="button" data-act="skip">Voir le récapitulatif</button>`}</div>
+    </section>`;
+    el.dataset.cf = "";
+  }
+  function flip(i) {
+    const o = opening; if (!o || o.phase !== "grid" || o.flips[i]) return;
+    o.flips[i] = true; o.last = i;
+    const x = o.cards[i];
+    if (!reducedNow() && (RAR[x.c.rar].rank >= 4 || x.gold)) { const st = $("stage"); st.style.setProperty("--glow", x.gold ? "#f0c860" : RAR[x.c.rar].color); st.classList.remove("flashy"); void st.offsetWidth; st.classList.add("flashy"); snd(700 + 120 * RAR[x.c.rar].rank, .3); }
+    drawOpening();
+    const b = document.querySelector(`[data-cflip="${i}"]`); if (b && !reducedNow()) b.classList.add("turning");
+  }
+  return {
+    isChest: (pk) => !!(pk.skins || pk.base === "coffre"),
+    draw(el, o, top) {
+      if (!o.id) { o.id = Math.random().toString(36).slice(2); o.flips = o.cards.map(() => false); o.cf = "key"; }
+      if (o.phase === "pack") { el.style.setProperty("--glow", o.glow || RAR.c.color); if (el.dataset.cf !== o.id) render(el, o, top); else el.querySelector(".stage-top")?.replaceWith(Object.assign(document.createElement("div"), { innerHTML: top }).firstElementChild); return true; }
+      if (o.phase === "grid") { grid(el, o, top); return true; }
+      return false;
+    },
+    flip, stop() { run++; },
+    next() { const i = opening?.flips?.findIndex((x) => !x); if (i >= 0) flip(i); },
+    toggleSound() { soundOn = !soundOn; try { localStorage.setItem("rz-sound", soundOn ? "1" : "0"); } catch (e) {} const b = document.querySelector('[data-act="cf-sound"]'); if (b) { b.setAttribute("aria-pressed", soundOn); b.textContent = soundOn ? "Son activé" : "Son coupé"; } snd(660, .1); },
+  };
+})();
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-cflip]"); if (b) Coffre.flip(+b.dataset.cflip); });
 
 // ===== Événements =====
 let toastT;
@@ -3120,6 +4023,7 @@ function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = fals
 const SEG = {
   packTab: (v) => { packTab = v; }, colTab: (v) => { col.tab = v; }, colRar: (v) => { col.rar = v; }, colFac: (v) => { col.fac = col.fac === v ? "" : v; col.tab = "cards"; col.own = "all"; },
   mTab: (v) => { marketTab = v; }, mkRar: (v) => { mk.rar = v; }, mkWin: (v) => { mk.win = +v; }, achF: (v) => { achF = v; }, rankTab: (v) => { boardTab = v; },
+  ...Z_SEG,
 };
 document.addEventListener("click", (e) => {
   const t = e.target;
@@ -3159,7 +4063,9 @@ document.addEventListener("click", (e) => {
   if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack);
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
   if (act === "pool") return openPool(ab.dataset.p);
-  if (act === "skip") { opening.phase = "done"; return drawOpening(); }
+  if (act === "skip") { Coffre.stop(); opening.phase = "done"; return drawOpening(); }
+  if (act === "cf-next") return Coffre.next();
+  if (act === "cf-sound") return Coffre.toggleSound();
   if (act === "stage-back") { if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }

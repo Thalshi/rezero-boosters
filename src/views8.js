@@ -66,7 +66,7 @@ function viewCreateur() {
   } else {
     body = CREA.log.length ? `<ol class="cr-log">${CREA.log.map((l) => `<li><b>${esc(l.name || "")}</b> ${esc(l.text)}<small>${new Date(l.t).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</small></li>`).join("")}</ol>` : `<p class="note">Rien n'a encore été créé ni retouché.</p>`;
   }
-  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Dev · 創", "Créateur", "Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou dessine des cosmétiques. C'est publié tout de suite pour tout le monde ; un perso d'un épisode pas encore atteint reste caché aux joueurs. Chaque publication prévient l'autre membre de l'équipe.")}
+  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Dev", "Créateur", "Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou dessine des cosmétiques. C'est publié tout de suite pour tout le monde ; un perso d'un épisode pas encore atteint reste caché aux joueurs. Chaque publication prévient l'autre membre de l'équipe.")}
     ${tabs}<div class="cr-body">${body}</div></div>`;
 }
 
@@ -100,7 +100,7 @@ function crEditor() {
   let form = "";
   if (E.kind === "perso") form = `${fld("Nom", txt("name", 30, "Ex. Zéphyr"))}${fld("Faction", sel("fac", Object.entries(FACTIONS).map(([k, v]) => [k, v.label])), f.fac === "irl" ? "QG de Shinjuku : 6 skins (Chroma à Prestige) sont créés automatiquement." : "")}
       ${isNew ? fld("Rareté de sa carte", sel("rar", crRar())) : ""}${fld("Titre de sa carte", txt("tag", 40, "Ex. Vent du QG"))}
-      <div class="cr-2">${fld("Kanji", txt("kanji", 2, "風"))}${fld("Couleur", col("color"))}</div>
+      <div class="cr-2">${fld("Couleur", col("color"))}</div>
       ${fld("Épisode d'arrivée", sel("ep", Array.from({ length: EP_MAX }, (_, i) => [i + 1, epLabel(i + 1)])), "Caché aux joueurs tant que Billy n'a pas débloqué cet épisode.")}
       ${fld("Branche en Confrontation", sel("branche", CR_BRANCHES))}${fld("Pouvoir", area("power", 220))}${fld("Apparence", area("look", 220))}${img}`;
   else if (E.kind === "carte") form = `${fld("Titre", txt("title", 40, "Ex. Tempête"))}${fld("Rareté", sel("rar", crRar()), isNew ? "" : "Changer la rareté change la valeur de la carte pour ceux qui l'ont déjà.")}
@@ -113,7 +113,7 @@ function crEditor() {
       <label class="zopt-line"><input type="checkbox" data-crf="only" ${f.only ? "checked" : ""}> Réservé au Sanctuaire (ne s'achète pas)</label>`;
   const changed = JSON.stringify(f) !== JSON.stringify(E.start) || !!E.image;
   const canReset = !isNew && crBadge(E.kind, E.id).includes("Retouché");
-  return `<div class="wrap page" style="max-width:1100px">${head("Créateur · 創", esc(title))}
+  return `<div class="wrap page" style="max-width:1100px">${head("Créateur", esc(title))}
     <div class="cr-ed"><div class="cr-form">${form}
       <div class="row cr-act"><button class="btn gold big" type="button" data-cr-save ${changed && !CR.busy ? "" : "disabled"}>${isNew ? "Publier" : "Publier les changements"}</button>
         <button class="btn" type="button" data-cr-cancel>Annuler</button>${canReset ? `<button class="btn" type="button" data-cr-reset>Remettre d'origine</button>` : ""}</div>

@@ -487,7 +487,7 @@ async function startOpening(paid, packId, n = 1) {
 // Invocation du Sanctuaire, déjà tirée par le serveur : ×1 une carte qui se retourne seule, ×5 une pochette, ×10 le coffre
 const SUMMON_PK = { 1: "Invocation", 5: "Pochette du Sanctuaire", 10: "Coffre du Sanctuaire" };
 function summonOpening(got, scenario, extra = {}) {
-  const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "召", color: "#b072ff", count: n };
+  const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "", color: "#b072ff", count: n };
   const cards = got.map((x) => ({ c: { id: x.id, rar: x.rar }, cos: COS_BY_ID[x.id], gold: false, isNew: !!x.isNew }));
   opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, titles: takeTitles(), ...extra };
   closeMenu(); $("overlay").hidden = true; $("stage").dataset.cf = "";

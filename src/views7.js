@@ -43,7 +43,7 @@ const ROLE_BONUS = { 4: "Gardien : 2 cartes de plus au départ, Sentinelle : 1",
 function roleCard(r, opts = {}) {
   const R = ROLES[r];
   return `<article class="rl-card ${opts.mine ? "mine" : ""}" style="--rc:${R.col}">
-    <div class="rl-top"><span class="rl-ic">${R.icon}</span><div><p class="rl-k">${R.kanji} · ${R.vu}</p><h3>${opts.mine ? `Tu es ${R.nom}` : R.nom}</h3></div></div>
+    <div class="rl-top"><span class="rl-ic">${R.icon}</span><div><p class="rl-k">${R.vu}</p><h3>${opts.mine ? `Tu es ${R.nom}` : R.nom}</h3></div></div>
     <p class="rl-but"><b>But</b> ${R.but}</p>
     <p><b>Camp</b> ${R.camp}</p>${opts.short ? "" : `<p><b>À savoir</b> ${R.plus}</p>`}
     <p class="rl-tip">${R.conseil}</p></article>`;
@@ -69,7 +69,7 @@ function viewRegles() {
   const defs = Object.entries(cat.cartes || {}), total = defs.reduce((a, [, d]) => a + (d.qte || 0), 0);
   const fam = (f) => defs.filter(([, d]) => RG_FAM_OF(d) === f);
   const sec = (id, n, title, body) => `<section class="sec rg-sec" id="rg-${id}"><p class="rg-n">${n}</p><h2>${title}</h2>${body}</section>`;
-  return `<div class="wrap page rg">${head("Confrontation · 対決 · Livret", "Comment jouer", "Le livret complet de Re Zéro : Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
+  return `<div class="wrap page rg">${head("Confrontation · Livret", "Comment jouer", "Le livret complet de Re Zéro : Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
     <div class="row"><button class="btn sm" type="button" data-nav="confront">‹ Retour aux salons</button></div>
     <section class="sec rg-quick"><h2>En 30 secondes</h2><ol class="rg-steps">
       <li><b>Un camp</b><span>Gardien et Sentinelles contre Briseurs, à partir de 4 joueurs. Seul le Gardien est connu : à toi de deviner qui est avec toi.</span></li>
@@ -126,7 +126,7 @@ function viewRegles() {
       <p class="note">Les PV ne dépassent jamais ton maximum. Résistance pioche quand elle perd des PV ; Assaut pioche quand sa Frappe touche.</p>`)}
 
     ${sec("presage", 8, "Le présage", `<p>Certains effets demandent un <b>présage</b> : on retourne la carte du dessus de la pioche et on lit son signe (et parfois son rang, de 1 à 10). Chaque carte porte son signe dans le coin.</p>
-      <div class="rg-signs">${(cat.signes?.length ? cat.signes : [{ id: "feu", kanji: "火", nom: "Feu" }, { id: "eau", kanji: "水", nom: "Eau" }, { id: "vent", kanji: "風", nom: "Vent" }, { id: "terre", kanji: "土", nom: "Terre" }]).map((s) => `<span style="--sc:${SIGN_COL[s.id]}"><b>${s.kanji}</b>${esc(s.nom)}</span>`).join("")}</div>
+      <div class="rg-signs">${(cat.signes?.length ? cat.signes : [{ id: "feu", kanji: "火", nom: "Feu" }, { id: "eau", kanji: "水", nom: "Eau" }, { id: "vent", kanji: "風", nom: "Vent" }, { id: "terre", kanji: "土", nom: "Terre" }]).map((s) => `<span style="--sc:${SIGN_COL[s.id]}"><b>${ico(s.id)}</b>${esc(s.nom)}</span>`).join("")}</div>
       <p class="note">Eau : esquive (Voile, Défense). Feu : se libérer d'un Sceau d'entrave. Terre de rang 1 à 4 : l'Orbe instable explose. La branche Chance retourne 2 cartes et garde la meilleure.</p>`)}
 
     ${sec("cartes", 9, `Les ${defs.length || 25} cartes d'action`, `<p>${total || 82} cartes dans la pioche commune. Elles n'existent que pendant la partie : elles ne s'achètent pas et ne se gagnent pas. Le chiffre indique combien il y en a.</p>

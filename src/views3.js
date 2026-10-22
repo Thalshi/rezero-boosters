@@ -39,7 +39,7 @@ function sure(btn, label) {
   setTimeout(() => { if (btn.isConnected) { delete btn.dataset.sure; btn.textContent = btn.dataset.label; btn.classList.remove("sure"); } }, 4000);
   return false;
 }
-const closedHTML = (name) => `<div class="wrap page">${head("Bientôt · 準備中", name)}${empty("Cette partie du jeu n'est pas encore ouverte. Billy l'annoncera au QG.")}</div>`;
+const closedHTML = (name) => `<div class="wrap page">${head("Bientôt", name)}${empty("Cette partie du jeu n'est pas encore ouverte. Billy l'annoncera au QG.")}</div>`;
 // ===== Boutique Arcanique (organisée comme la Boutique Discord : collections, tuiles, aperçu sur ton profil) =====
 // Les collections ne sont qu'une présentation : prix et règles restent ceux du serveur (COS_PRICE, buyCosmeticS).
 const Z_COLLECTIONS = [
@@ -74,18 +74,18 @@ function viewBoutique() {
   if (!featureOn(CONFIG, "boutique")) return closedHTML("Boutique Arcanique");
   const F = zFeatured(), fItems = F.items.map((id) => COS_BY_ID[id]).filter(Boolean);
   const hero = `<section class="zs-hero" style="--h1:${F.c1};--h2:${F.c2}">
-      <div class="zs-hero-t"><p class="eyebrow">Collection à la une · ${F.kanji}</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
+      <div class="zs-hero-t"><p class="eyebrow">Collection à la une</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
         <button class="btn gold" type="button" data-zcoll="${F.id}">Voir la collection</button></div>
       <div class="zs-hero-cards">${fItems.slice(0, 3).map((c) => `<div class="zs-hero-card">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: true })}</div>`).join("")}</div>
-      <span class="zs-hero-k" aria-hidden="true">${F.kanji}</span></section>`;
+      <span class="zs-hero-k" aria-hidden="true">${ico(COLL_ICON[F.id] || "logo")}</span></section>`;
   const filters = seg("zShopF", [["", "Tout"], ...COS_SLOTS.map((sl) => [sl.id, sl.label])], zShopFilter);
   const rows = zShopFilter
     ? `<section class="sec"><h2>${COS_SLOT_LABEL[zShopFilter]}</h2><div class="zs-grid">${COSMETICS.filter((c) => c.slot === zShopFilter).map(zShopTile).join("")}</div></section>`
-    : [...Z_COLLECTIONS.map((col) => `<section class="sec zs-row" id="zcoll-${col.id}"><div class="zs-row-h" style="--h1:${col.c1}"><span class="zs-k">${col.kanji}</span><div><h2>${esc(col.name)}</h2><p class="note">${esc(col.tag)}</p></div></div>
+    : [...Z_COLLECTIONS.map((col) => `<section class="sec zs-row" id="zcoll-${col.id}"><div class="zs-row-h" style="--h1:${col.c1}"><span class="zs-k">${ico(COLL_ICON[col.id] || "logo")}</span><div><h2>${esc(col.name)}</h2><p class="note">${esc(col.tag)}</p></div></div>
         <div class="zs-grid">${col.items.map((id) => COS_BY_ID[id]).filter(Boolean).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zShopTile).join("")}</div></section>`),
-      `<section class="sec zs-row"><div class="zs-row-h" style="--h1:#ff4d2e"><span class="zs-k">封</span><div><h2>Exclusifs du Sanctuaire</h2><p class="note">Ils ne s'achètent pas : on les obtient seulement en invoquant au Sanctuaire.</p></div></div>
+      `<section class="sec zs-row"><div class="zs-row-h" style="--h1:#ff4d2e"><span class="zs-k">${ico("sanctuaire")}</span><div><h2>Exclusifs du Sanctuaire</h2><p class="note">Ils ne s'achètent pas : on les obtient seulement en invoquant au Sanctuaire.</p></div></div>
         <div class="zs-grid">${COSMETICS.filter((c) => c.only).map(zShopTile).join("")}</div></section>`].join("");
-  return `<div class="wrap page">${head("Boutique Arcanique · 店", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
+  return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
     <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span><button class="btn sm" type="button" data-nav="atelier">Ouvrir l'Atelier</button></div>
     ${hero}${filters}${rows}</div>`;
 }
@@ -102,7 +102,7 @@ function zOpenItem(id) {
     <div class="sheet-b"><div class="zs-prev" style="--h1:${col?.c1 || RAR[c.rar].color};--h2:${col?.c2 || "#15141a"}">
         <div class="zs-prof"><span class="zs-av">${esc(name[0].toUpperCase())}</span><div><b>${esc(name)}</b><small>Aperçu sur ton profil</small></div></div>
         <div class="zs-prev-card">${cardHTML(card, { design, present: true, gold: has(card.id) && !own(card.id).n && own(card.id).gold > 0 })}</div></div>
-      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${col ? `<span class="pill">${col.kanji} ${esc(col.name)}</span>` : ""}<span class="pill">Aucun bonus de jeu</span></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${col ? `<span class="pill">${ico(COLL_ICON[col.id] || "logo")} ${esc(col.name)}</span>` : ""}<span class="pill">Aucun bonus de jeu</span></div>
       ${act}</div></div>`;
   $("overlay").hidden = false;
 }
@@ -121,12 +121,12 @@ function viewAtelier() {
   if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
   const cos = cosOf(save);
   const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length]], zAtelierTab);
-  if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique · 飾", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
+  if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
   const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, refCos(save, r)?.id]).filter(([, v]) => v));
-  if (zAtelierTab === "inv") return `<div class="wrap page">${head("Atelier Arcanique · 飾", "Atelier Arcanique")}${tabs}${zInventory()}</div>`;
+  if (zAtelierTab === "inv") return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}${tabs}${zInventory()}</div>`;
   const dirty = JSON.stringify(zDraft) !== JSON.stringify(cos.designs[zDraftCard] || {});
-  return `<div class="wrap page">${head("Atelier Arcanique · 飾", "Atelier Arcanique", "Choisis une carte, essaie les cosmétiques de ton inventaire, puis enregistre son design. Il s'affiche partout : collection, profil, carte vedette.")}${tabs}
+  return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique", "Choisis une carte, essaie les cosmétiques de ton inventaire, puis enregistre son design. Il s'affiche partout : collection, profil, carte vedette.")}${tabs}
     <div class="zat">
       <div class="zat-prev"><div class="zat-card">${cardHTML(c, { design: resolved, present: true, gold: !own(c.id).n && own(c.id).gold > 0 })}</div>
         <div class="row" style="justify-content:center">
@@ -157,15 +157,15 @@ function zInventory() {
 // Le tirage est fait par le serveur AVANT l'animation ; l'ouverture ne fait que le révéler.
 // ×1 : une carte qui se retourne seule ; ×5 : une pochette ; ×10 : le coffre (avec ses scénarios).
 let zBusy = false;
-const Z_OFFERS = [[1, "Une carte", "Se retourne toute seule", "召"], [5, "Une pochette", "Au moins une Rare", "封"], [10, "Le coffre", "Au moins une Épique", "匣"]];
+const Z_OFFERS = [[1, "Une carte", "Se retourne toute seule", "carte"], [5, "Une pochette", "Au moins une Rare", "pochette"], [10, "Le coffre", "Au moins une Épique", "coffre"]];
 function viewSanctuaire() {
   if (!featureOn(CONFIG, "sanctuaire")) return closedHTML("Sanctuaire des Invocations");
   const cos = cosOf(save);
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
-  return `<div class="wrap page">${head("Sanctuaire des Invocations · 召", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
+  return `<div class="wrap page">${head("Sanctuaire des Invocations", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
     <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Mythique garantie dans <b>${Math.max(0, SUMMON_PITY_M - cos.sinceM)}</b> invocations</span></div>
     <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${save.chakra < summonCost(n) || zBusy ? "disabled" : ""}>
-      <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${k}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${k}</b></span>` : `<span class="zo-card"><b>${k}</b></span>`}</span>
+      <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${ico(k)}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${ico(k)}</b></span>` : `<span class="zo-card"><b>${ico(k)}</b></span>`}</span>
       <span class="zo-n">×${n}</span><b class="zo-t">${t}</b><span class="zo-s">${sub}</span>
       <span class="zo-p">${fmtN(summonCost(n))} ◆${n > 1 ? ` <s>${fmtN(SUMMON_COST * n)}</s>` : ""}</span></button>`).join("")}</div>
     <div class="zs-side">

@@ -9,7 +9,7 @@ const Coffre = (() => {
   <rect x="46" y="21" width="6" height="14" rx="1.5" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/><rect x="70" y="22" width="4" height="12" rx="1" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".6"/>
   <path d="M134 31v13h6v-5h5v7h6v-10h5v8h6v-13z" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/><circle cx="162" cy="28" r="4" fill="url(#cfkg)" stroke="#5a4214" stroke-width=".8"/></svg>`;
   const CROWN = `<svg viewBox="0 0 60 40" aria-hidden="true"><path d="M4 34L8 8l12 14L30 4l10 18L52 8l4 26z" fill="#f5c518" stroke="#7d5a1c" stroke-width="2"/></svg>`;
-  const RUNES = ["召", "零", "界", "悪", "友", "匠", "魂", "門"];
+  const RUNES = ["logo", "feu", "eau", "vent", "terre", "sanctuaire", "couronne", "eclair"];
   // coffre détaillé (SVG) : bois laqué, ferrures dorées, volutes, sceau à runes qui tourne, lumière dans la fente.
   // La lumière, la gemme et les runes prennent la couleur montrée par le scénario (--rare).
   const chestHTML = () => `<div class="ch2" id="cfChest"><svg viewBox="0 0 320 270" role="img" aria-label="Coffre arcanique scellé">
@@ -33,7 +33,7 @@ const Coffre = (() => {
       <rect x="72" y="132" width="12" height="108" fill="url(#chG)" stroke="#5a4214" stroke-width=".6"/><rect x="236" y="132" width="12" height="108" fill="url(#chG)" stroke="#5a4214" stroke-width=".6"/>
       <g fill="#5a4214"><circle cx="78" cy="142" r="2"/><circle cx="78" cy="186" r="2"/><circle cx="78" cy="230" r="2"/><circle cx="242" cy="142" r="2"/><circle cx="242" cy="186" r="2"/><circle cx="242" cy="230" r="2"/></g>
       <g fill="url(#chG)" stroke="#5a4214" stroke-width=".6"><path d="M38 214h20v6h-14v20h-6z"/><path d="M282 214h-20v6h14v20h6z"/></g>
-      <g class="ch2-runes" font-family="Zen Kaku Gothic New, serif" font-size="11" text-anchor="middle"><text x="104" y="226">零</text><text x="124" y="226">封</text><text x="196" y="226">界</text><text x="216" y="226">神</text></g>
+      <g class="ch2-runes" font-family="Zen Kaku Gothic New, serif" font-size="11" text-anchor="middle"><text x="104" y="226">✦</text><text x="124" y="226">✦</text><text x="196" y="226">✦</text><text x="216" y="226">✦</text></g>
       <rect class="ch2-seam" x="44" y="127" width="232" height="6" fill="url(#chSeam)" filter="url(#chGlow)"/>
       <g class="ch2-lid">
         <path d="M282 132L300 120L300 96Q292 70 282 98Z" fill="url(#chWS)" stroke="#e8c77e55"/>
@@ -43,7 +43,7 @@ const Coffre = (() => {
         <use href="#chCurl" x="98" y="88" width="40" height="24"/><use href="#chCurl" x="182" y="88" width="40" height="24" transform="scale(-1 1) translate(-404 0)"/>
         <rect x="36" y="124" width="248" height="10" fill="url(#chGH)" stroke="#5a4214" stroke-width=".6"/></g>
       <g class="ch2-lock"><path d="M160 104L190 116L186 162L160 180L134 162L130 116Z" fill="url(#chG)" stroke="#5a4214"/><circle cx="160" cy="140" r="25" fill="url(#chSeal)" stroke="#5a4214"/>
-        <g class="ch2-ring" font-family="Zen Kaku Gothic New, serif" font-size="7.5" fill="#e8c77e" text-anchor="middle"><circle cx="160" cy="140" r="21" fill="none" stroke="#e8c77e66" stroke-dasharray="2 3"/><text x="160" y="124">召</text><text x="176" y="143">門</text><text x="160" y="161">魂</text><text x="144" y="143">界</text></g>
+        <g class="ch2-ring" font-family="Zen Kaku Gothic New, serif" font-size="7.5" fill="#e8c77e" text-anchor="middle"><circle cx="160" cy="140" r="21" fill="none" stroke="#e8c77e66" stroke-dasharray="2 3"/><text x="160" y="124">✦</text><text x="176" y="143">✦</text><text x="160" y="161">✦</text><text x="144" y="143">✦</text></g>
         <circle cx="160" cy="140" r="9" fill="#0b0818" stroke="url(#chG)" stroke-width="1.5"/><path id="cfLock" d="M160 134a3 3 0 1 1 0 6l2 6h-4l2-6" fill="#000" stroke="#ffd27a88" stroke-width=".6"/></g>
       <path class="ch2-gem" d="M160 92l7 9-7 9-7-9z" fill="url(#chGem)" stroke="#fff8" filter="url(#chGlow)"/></g></svg></div>`;
   const reducedNow = () => reduced || matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -65,7 +65,7 @@ const Coffre = (() => {
     el.innerHTML = `${top}<section class="stage cf" id="cf" style="--rare:${RAR.c.color}">
       <div class="cf-fx" id="cfFx" aria-hidden="true"></div>
       <div class="c3-scene" id="cfScene"><div class="beam"></div>
-        <div class="cf-runes" id="cfRunes" aria-hidden="true">${RUNES.map((k, i) => `<i style="--i:${i}">${k}</i>`).join("")}</div>
+        <div class="cf-runes" id="cfRunes" aria-hidden="true">${RUNES.map((k, i) => `<i style="--i:${i}">${ico(k)}</i>`).join("")}</div>
         <div class="cf-crystal" id="cfCrystal" aria-hidden="true"><i></i><i></i><i></i></div>
         ${chestHTML()}</div>
       <div class="keybox"><div class="key" id="cfKey" tabindex="0" role="button" aria-label="Utiliser la clé sur le coffre">${KEY_SVG}</div>
@@ -125,7 +125,7 @@ const Coffre = (() => {
     async chrysalis() { chest()?.classList.add("chrysalis"); snd(520, .8, "triangle"); await wait(1250); chest()?.classList.remove("chrysalis"); },
     async column() { spawnFx("column", 1); snd(160, 1, "sawtooth", .03); await wait(1100); },
     async stars() { stage()?.classList.add("night"); spawnFx("star", 50, (e) => { e.style.left = Math.random() * 100 + "%"; e.style.top = Math.random() * 80 + "%"; e.style.setProperty("--d", Math.round(Math.random() * 700) + "ms"); }); await wait(1250); },
-    async kanji(o, k = "零") { spawnFx("kanji", 1, (e) => { e.textContent = k; }); snd(440, .6, "triangle"); await wait(1150); clearFx(".kanji"); },
+    async kanji() { spawnFx("kanji", 1, (e) => { e.innerHTML = ico("logo"); }); snd(440, .6, "triangle"); await wait(1150); clearFx(".kanji"); },
     async orbit() { spawnFx("orb", 5, (e, i) => e.style.setProperty("--i", i)); await wait(1350); clearFx(".orb"); },
     async quake() { stage()?.classList.add("quake"); snd(70, .7, "sawtooth", .06); await wait(700); stage()?.classList.remove("quake"); },
     async aurora() { spawnFx("aurora", 3, (e, i) => e.style.setProperty("--i", i)); await wait(1300); },
@@ -163,7 +163,7 @@ const Coffre = (() => {
     el.innerHTML = `${top}<section class="stage cf cf-grid" style="--rare:${RAR[bestOf(o)].color}">
       <p class="eyebrow gold">${esc(o.pk.name)}</p><h2>${left ? (o.pk.cos ? "Retourne tes objets" : "Retourne tes cartes") : "Tout est révélé"}</h2>
       <div class="multi ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x, i) => `<button class="slot ${o.flips[i] ? "flipped" : ""}" type="button" data-cflip="${i}" style="--i:${i};--rc:${x.gold ? "#f0c860" : RAR[x.c.rar].color}" aria-label="${o.flips[i] ? `${esc(itemName(x))}, ${RAR[x.c.rar].label}${x.gold ? ", dorée" : ""}` : `Retourner la carte ${i + 1}`}">
-        <span class="back"><b>零</b></span><span class="front">${o.flips[i] ? itemHTML(x) : ""}</span></button>`).join("")}</div>
+        <span class="back"><b>${ico("logo")}</b></span><span class="front">${o.flips[i] ? itemHTML(x) : ""}</span></button>`).join("")}</div>
       <p class="hint" aria-live="polite">${o.last != null ? `<b style="color:${o.cards[o.last].gold ? "#f0c860" : RAR[o.cards[o.last].c.rar].color}">${esc(itemName(o.cards[o.last]))} · ${RAR[o.cards[o.last].c.rar].label}${o.cards[o.last].gold ? " · Dorée" : ""}</b>${o.cards[o.last].isNew ? " · Nouvelle !" : ""}` : "Touche une carte pour la retourner"}</p>
       <div class="row" style="justify-content:center">${left ? `<button class="btn" type="button" data-act="cf-next">Retourner la suivante</button><button class="btn" type="button" data-act="skip">Tout révéler</button>` : `<button class="btn gold big" type="button" data-act="skip">Voir le récapitulatif</button>`}</div>
     </section>`;

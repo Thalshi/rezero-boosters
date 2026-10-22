@@ -30,6 +30,8 @@ const cfAction = (c, extra = "") => { if (!c) return ""; const d = cfCardDef(c),
     ...Object.entries(typeof ILLUS_CARTE === "object" ? ILLUS_CARTE : {}).map(([k, u]) => `.cfart-${k}{background-image:url(${u})}`),
     ...Object.entries(typeof ILLUS_BRANCHE === "object" ? ILLUS_BRANCHE : {}).map(([k, u]) => `.cfemb-${k}{background-image:url(${u})}`),
     ...Object.entries(typeof ILLUS_SKIN === "object" ? ILLUS_SKIN : {}).map(([k, u]) => `.sk-${k} .skx{background:radial-gradient(60% 55% at 50% 58%,#fff 44%,rgba(255,255,255,0) 78%),url(${u}) center/cover}`),
+    // fond de table de Confrontation, assombri pour garder les places lisibles
+    ...(typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table ? [`.cf-board{background:linear-gradient(#0b0a12b8,#0b0a12e0),url(${ILLUS_DECOR.table}) center/cover;padding:14px;border-radius:16px;box-shadow:inset 0 0 0 1px #ffffff14}`] : []),
   ].join("\n");
   const st = document.createElement("style"); st.id = "illus-css"; st.textContent = css; document.head.appendChild(st);
 })();

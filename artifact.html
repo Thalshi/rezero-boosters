@@ -5484,7 +5484,7 @@ function cfTableHTML() {
     <p class="note">Code <b class="mono">${T.gid}</b>${T.spectateur ? " · tu regardes en spectateur" : ""}</p></div>
     <div class="row"><button class="btn sm" type="button" data-nav="confront">Salons</button>${v.phase !== "fin" ? `<button class="btn sm" type="button" data-act="cf-share">Partager le salon</button>` : ""}
       ${v.phase === "lobby" && !T.spectateur && (v.hote === ME || T.createur === ME) && !T.ferme ? `<button class="btn sm" type="button" data-act="cf-close">Fermer le salon</button>` : ""}
-      ${has1("quitter") ? `<button class="btn sm acc" type="button" data-cfa='{"type":"quitter"}'>Quitter le salon</button>` : has1("abandon") && (v.phase === "contributions" || v.phase === "choix") ? `<button class="btn sm acc" type="button" data-act="cf-leave">Quitter la table</button>` : has1("abandon") ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Abandonner</button>` : ""}</div></div>`;
+      ${has1("quitter") ? `<button class="btn sm acc" type="button" data-cfa='{"type":"quitter"}'>Quitter le salon</button>` : has1("abandon") && (v.phase === "contributions" || v.phase === "choix") ? `<button class="btn sm acc" type="button" data-act="cf-leave">Quitter la table</button>` : v.phase === "partie" && v.joueurs.find((j) => j.id === v.moi)?.vivant ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Quitter la partie</button>` : v.phase !== "lobby" ? `<button class="btn sm" type="button" data-nav="confront">Quitter</button>` : ""}</div></div>`;
   let body = "";
   if (v.phase === "lobby") {
     const attente = v.joueurs.filter((p) => p.id !== v.hote && !/^bot:/.test(p.id) && !T.prets?.[p.id]).length;

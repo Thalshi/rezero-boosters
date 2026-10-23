@@ -776,10 +776,11 @@ const Open3D = (() => {
     $("o3All").hidden = true;
     for (const c of cur?.cards || []) if (!c.flipped && cur) { if (c.rk >= 4) await flipCard(c); else { flipCard(c); await wait(220); } }
   }
-  // récapitulatif dans la scène : les cartes restent en 3D, le titre et les boutons s'affichent par-dessus
+  // fin de l'ouverture : les boutons apparaissent par-dessus la scène, sans récapitulatif
   function showRecap() {
     const box = $("o3Recap"); if (!box || !cur) return;
-    const r = recapParts(cur.o); box.innerHTML = `<div class="o3-recap-h">${r.head}</div>${r.actions}<p class="o3-recap-tip">Touche une carte pour voir sa fiche</p>`;
+    // juste les boutons (Encore, Ma collection, Fermer) : les cartes retournées restent dans la scène
+    box.innerHTML = recapParts(cur.o).actions.replace(/<button class="btn big" type="button" data-share[^>]*>Partager<\/button>/, "");
     box.hidden = false; $("o3").classList.add("recap");
   }
   function finish() { const o = cur?.o; stop(); if (o) { o.phase = "done"; drawOpening(); } }

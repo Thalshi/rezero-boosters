@@ -258,6 +258,31 @@ export async function gameRoute(req, env, user, path) {
       if (!user.dev) return fail(403, "Réservé au dev.");
       return json(await auditPlayers(env));
     }
+    // tests sur un vrai compte (dev et admin seulement) : repartir d'un compte neuf, puis revenir à la sauvegarde d'avant.
+    // La sauvegarde (doc « devbackup/<uid> », fermé à l'API des documents) garde le compte tel qu'il était avant la remise à zéro.
+    if (path === "/api/game/dev/reset" || path === "/api/game/dev/restore") {
+      if (!user.dev && !user.admin) return fail(403, "Réservé au dev et à l'admin.");
+      await ensurePlayer(env, user, null);
+      const restore = path.endsWith("restore"), bk = await readDoc(env, "devbackup/" + user.id);
+      if (restore && !bk) return fail(400, "Aucune sauvegarde à restaurer.");
+      // la sauvegarde garde le VRAI compte : écrite avant la première remise à zéro, jamais écrasée par les suivantes,
+      // effacée seulement après une restauration réussie
+      if (!restore && !bk) { const row = await loadRow(env, user.id); if (row) await writeDoc(env, "devbackup", user.id, { save: G.normalizeSave(JSON.parse(row.data)), t: Date.now() }); }
+      const r = await mutate(env, user.id, (s, now) => {
+        if (s.confront) return { abort: true, error: "Tu as une partie de Confrontation en cours : finis-la ou abandonne avant." };
+        for (const k of Object.keys(s)) delete s[k];
+        Object.assign(s, restore ? bk.data.save : { ...G.freshSave(now), linked: true });
+        return {};
+      });
+      if (r.error) return fail(400, r.error);
+      if (restore) { await env.DB.prepare("DELETE FROM docs WHERE path = ?").bind("devbackup/" + user.id).run(); await bumpRev(env, "devbackup"); }
+      return json({ state: r.state });
+    }
+    if (path === "/api/game/dev/backup") {
+      if (!user.dev && !user.admin) return fail(403, "Réservé au dev et à l'admin.");
+      const bk = await readDoc(env, "devbackup/" + user.id);
+      return json({ backup: bk ? { t: bk.data.t, opened: bk.data.save?.opened || 0, cartes: Object.keys(bk.data.save?.owned || {}).length, chakra: bk.data.save?.chakra || 0 } : null });
+    }
     if (path === "/api/game/dev/stats") {
       if (!user.dev) return fail(403, "Réservé au dev.");
       return json(await devStats(env));

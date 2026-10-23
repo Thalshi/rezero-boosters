@@ -117,3 +117,11 @@ export function grant(srv, players, { free, chakra } = {}) {
 }
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 export const total = (s) => Object.values(s.owned || {}).reduce((a, o) => a + o.n + o.gold, 0);
+
+// deux cartes de même rareté (une chez chacun) pour un échange valable : carte contre carte de même rareté
+import * as GG from "../worker/game.js";
+export function samePair(sa, sb) {
+  const a = Object.keys(sa.owned).filter((id) => sa.owned[id].n > 0), b = Object.keys(sb.owned).filter((id) => sb.owned[id].n > 0);
+  for (const x of a) { const y = b.find((id) => GG.CARD_BY_ID[id].rar === GG.CARD_BY_ID[x].rar); if (y) return [x, y]; }
+  return [a[0], b[0]];
+}

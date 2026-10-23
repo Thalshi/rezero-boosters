@@ -5,6 +5,16 @@
 
 ---
 
+## 2026-10-23 — Retours de Reichi en local (7e mise en ligne)
+- Boosters : ×10 (5 coffres de 10 cartes d'affilée, « Coffre suivant 2/5 »), bouton Retour (y compris « Retour à l'ouverture » depuis une carte ou la collection), ouverture plus fluide (lumières fixes et cartes préparées pendant qu'on regarde le coffre).
+- Collection : recycler et combiner les doublons au choix (plus rien n'est recyclé sans le vouloir) ; « Mes envies » se choisissent une par une (plus d'ajout de toutes les manquantes).
+- Échanges : carte contre carte de même rareté (la Dorée à part), sans essence, 3 échanges par semaine et par joueur.
+- Prédictions : Billy fixe le temps pour répondre (fin des votes) ; les votes de chacun se dévoilent avec la bonne réponse.
+- Confrontation : en « chacun son deck », 2 persos tirés au hasard parmi son deck ; pioche en 3D (paquet sur la table, chaque carte piochée montrée en grand) ; finish façon TFT à chaque élimination (ralenti, caméra, foudre, météore ou lames, écran fendu, bannière) ; le suivi de la partie ne s'arrête plus après une erreur passagère (partie figée).
+- Sanctuaire : objets des autels entiers (la colonne de lumière les coupait) ; invocations en 3D de bout en bout (×1 tombe et se retourne seule, les objets restent des cartes 3D).
+- Règles : livret en livre à pages avec marque-pages. Missions : deux colonnes sans trous et un « Perso du jour ».
+- À faire : Boutique façon décorations Discord ; fond du monde flou car l'image source fait 634 px de large (il faut une image plus grande).
+
 ## 2026-10-23 — Test en local avec une base riche
 - Lanceur `tools/local/lancer.bat` (Windows) et `lancer.sh` : serveur local, base gardée dans `.local-db`, connexion admin et dev automatique.
 - En local seulement : chaque nouveau compte part avec 100 000 ◆ et 60 boosters ; bouton « Me donner 50 000 ◆ et 60 boosters » dans Gestion → Compte de test. Rien ne change en production.

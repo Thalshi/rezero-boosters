@@ -136,12 +136,12 @@ function openTradeBuilder(uid) {
   $("overlay").innerHTML = `<form class="sheet" id="tradeForm" data-to="${uid}" aria-label="Proposer un échange" style="max-width:760px">
     <div class="sheet-h"><h2>Échange avec <span data-uid="${uid}">…</span></h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b"><div class="trade-cols">
-      <fieldset><legend>Tu donnes</legend><div class="pick-list">${mine.map((o) => opt(o, "give")).join("") || '<p class="note">Rien à donner.</p>'}</div>
-        <label class="field" for="tradeEss">Essence en plus ◆<input id="tradeEss" type="number" min="0" max="${save.chakra}" value="0"></label></fieldset>
+      <fieldset><legend>Tu donnes</legend><div class="pick-list">${mine.map((o) => opt(o, "give")).join("") || '<p class="note">Rien à donner.</p>'}</div></fieldset>
       <fieldset><legend>Tu reçois</legend><div class="pick-list">${theirs.map((o) => opt(o, "want")).join("") || '<p class="note">Rien à recevoir.</p>'}</div></fieldset>
     </div>
-    <p class="note" id="tradeFair" style="text-align:center">Choisis des cartes des deux côtés.</p>
-    <button class="btn acc big block" type="submit">Envoyer la proposition</button></div>
+    <p class="note" style="text-align:center">Carte contre carte de même rareté · ${Math.max(0, tradesLeftS(save))}/${TRADE_WEEK} échanges restants cette semaine</p>
+    <p class="note" id="tradeFair" style="text-align:center">Choisis des cartes des deux côtés : même nombre de cartes de chaque rareté.</p>
+    <button class="btn acc big block" type="submit" disabled>Envoyer la proposition</button></div>
   </form>`;
   $("overlay").hidden = false;
   fillNames();
@@ -170,25 +170,45 @@ function viewMissions() {
     ${head("Missions", "Missions <em>&</em> succès")}
     <div><button class="btn acc big" type="button" data-claim="all" ${n ? "" : "disabled"}>Tout réclamer${n ? ` · ${n}` : ""}</button></div>
     <p class="lead">Reviens chaque jour : connexion, pack du jour, missions et prédictions donnent de l'essence et des boosters en plus des gratuits.</p>
-    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
+    <div class="mcols"><div class="mcol"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
         ${st.canClaim ? `<button class="btn gold" type="button" data-claim="streak">Jour ${st.next} · ${rewardText(STREAK[st.next - 1])}</button>` : `<span class="pill">Reviens demain</span>`}</div>
       <div class="days">${STREAK.map((r, i) => { const dd = i + 1, done = dd <= st.n, now = st.canClaim && dd === st.next; return `<div class="day ${done ? "done" : ""} ${now ? "now" : ""} ${dd === 7 ? "last" : ""}">J${dd}<i>${KDAY[i]}</i><span>${r.chakra ? `+${r.chakra}` : ""}${r.chakra && r.boosters ? " " : ""}${r.boosters ? `${r.boosters}B` : ""}</span></div>`; }).join("")}</div>
       <p class="mono mut" style="margin:0;font-size:12px">${fmtN(save.counts?.login || 0) ? "" : ""}Série actuelle : ${st.n} jour${st.n > 1 ? "s" : ""} · B = booster</p></div>
-    ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
-      ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}</div>
-    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
       ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div></div>
-    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
-      <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div></div>
+      <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>
+    ${missionHero()}</div>
+    <div class="mcol">${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
+      ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div></div></div>
     <section class="sec"><div class="sec-h"><div><p class="eyebrow">Succès</p><h2>Succès <span class="mono mut" style="font-size:18px">${doneAch}/${as.length}</span></h2></div>${seg("achF", [["all", "Tous"], ["todo", "À faire"], ["done", "Obtenus"]], achF)}</div>
       <div class="ach-grid">${achList.map((a) => { const ok = a.prog >= a.goal; return `<div class="ach ${a.claimed ? "ok" : ""}"><span class="ic">${a.claimed ? "✦" : "?"}</span><div class="bd"><b>${esc(a.label)}</b><p>${esc(a.desc)}</p><div class="bar"><i style="width:${Math.min(1, a.prog / a.goal) * 100}%"></i></div><small>${fmtN(a.prog)}/${fmtN(a.goal)} · ${rewardShort(a.reward)}</small></div>${!a.claimed && ok ? `<button class="btn gold sm" type="button" data-claim="ach" data-id="${a.id}">Réclamer</button>` : ""}</div>`; }).join("") || empty("Rien ici pour l'instant.")}</div></section>
   </div>`;
 }
 
+// une illustration de l'univers pour habiller la page : un perso du QG, différent chaque jour
+function missionHero() {
+  const pool = CARDS.filter((c) => !c.skin && visible(c) && imgKey(c)); if (!pool.length) return "";
+  const c = pool[hashOf(dayKey()) % pool.length], p = PEOPLE[c.who], q = [p.quote, ...(MORE[c.who] || [])].filter(Boolean)[0];
+  return `<div class="mbox mhero"><div class="mhero-art">${cardHTML(c, { w: 150, click: true })}</div><div class="mhero-t"><p class="eyebrow">Perso du jour</p><h2>${esc(p.name)}</h2>${q ? `<p class="mhero-q">« ${esc(q)} »</p>` : ""}
+    <p class="note">${has(c.id) ? "Déjà dans ta collection." : "Pas encore dans ta collection : il peut sortir de ton prochain booster."}</p><button class="btn gold" type="button" data-nav="boosters">Ouvrir un booster</button></div></div>`;
+}
+
 // ===== Prédictions (en plus de Kyara) =====
+const localDT = (t) => new Date(t - new Date(t).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+function predLeft(t) {
+  const m = Math.max(0, Math.round((t - Date.now()) / 60000));
+  return m >= 2880 ? `encore ${Math.round(m / 1440)} jours` : m >= 120 ? `encore ${Math.round(m / 60)} h` : `encore ${m} min`;
+}
+// qui a voté quoi, chargé une fois la bonne réponse révélée (rafraîchi toutes les minutes au plus)
+function predVoters() {
+  if (predVoters.busy || Date.now() - (predVoters.t || 0) < 60000) return;
+  predVoters.busy = true;
+  srv("pred/voters").then((r) => { predVoters.data = r.voters || {}; predVoters.t = Date.now(); if (view === "pred") draw(); }).catch(() => { predVoters.t = Date.now(); }).finally(() => { predVoters.busy = false; });
+}
 function viewPred() {
   if (!DB) return `<div class="wrap page">${head("Prédictions", "Prédis la <em>suite</em>")}<div class="card">${offlineMsg("faire tes prédictions")}</div></div>`;
   const qs = pred.questions, eps = [...new Set(qs.map((q) => q.ep))].sort((a, b) => b - a);
@@ -196,19 +216,23 @@ function viewPred() {
   const board = Object.entries(pred.scores).sort((a, b) => b[1] - a[1]);
   const myPts = pred.scores[ME] || 0, good = qs.filter((q) => q.status === "resolved" && pred.mine[q.id] === q.answer), earned = good.reduce((t, q) => t + predRewardOf(q), 0);
   const rank = board.findIndex(([u]) => u === ME) + 1;
+  if (SRV && qs.some((q) => q.status === "resolved")) predVoters();
   const qHTML = (q) => {
-    const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0, res = q.status === "resolved";
+    const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0, res = q.status === "resolved", open = predOpen(q);
+    const who = res ? (predVoters.data?.[q.id] || []) : [];
+    const whoHTML = (i) => { const l = who.filter(([, a]) => a === i).map(([u]) => u); return l.length ? `<span class="pq-who">${l.slice(0, 10).map((u) => `<span class="pq-v">${av(u)}${nm(u)}</span>`).join("")}${l.length > 10 ? `<span class="pq-more">+${l.length - 10}</span>` : ""}</span>` : ""; };
     return `<article class="pq ${q.status}">
-      <div class="pq-h"><span class="pill gold">+${predRewardOf(q)} ◆ si bonne réponse</span><span class="pill">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pill ${q.status === "open" ? "ok" : ""}">${res ? "Résultat" : q.status === "closed" ? "Votes fermés" : "Votes ouverts"}</span></div>
+      <div class="pq-h"><span class="pill gold">+${predRewardOf(q)} ◆ si bonne réponse</span><span class="pill">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pill ${open ? "ok" : ""}">${res ? "Résultat" : !open ? "Votes fermés" : q.endsAt ? `Votes ouverts · ${predLeft(q.endsAt)}` : "Votes ouverts"}</span></div>
       <h3>${esc(q.text)}</h3>
       <div class="pq-o">${q.options.map((o, i) => { const cls = [mine === i ? "mine" : "", res && q.answer === i ? "good" : "", res && mine === i && q.answer !== i ? "bad" : ""].join(" ");
-        return `<button class="${cls}" type="button" data-vote="${q.id}" data-idx="${i}" ${q.status !== "open" || !canShare ? "disabled" : ""} aria-pressed="${mine === i}">${c && tot ? `<span class="fill" style="width:${c[i] / tot * 100}%"></span>` : ""}<span>${esc(o)}</span>${c ? `<em>${c[i]} vote${c[i] > 1 ? "s" : ""}${tot ? ` · ${Math.round(c[i] / tot * 100)} %` : ""}</em>` : ""}${res && q.answer === i ? "<em>✓ bonne réponse</em>" : mine === i && !res ? "<em>ton choix</em>" : ""}</button>`; }).join("")}</div>
-      ${res ? `<p class="pq-res">${mine == null ? "Tu n'avais pas voté." : mine === q.answer ? `<b style="color:var(--ok)">Bien vu !</b> +${q.points || 1} pt et +${predRewardOf(q)} ◆` : "Raté cette fois."}</p>` : mine != null ? `<p class="pq-res">Ton choix est enregistré. Tu peux le changer tant que les votes sont ouverts.</p>` : ""}
+        return `<button class="${cls}" type="button" data-vote="${q.id}" data-idx="${i}" ${!open || !canShare ? "disabled" : ""} aria-pressed="${mine === i}">${c && tot ? `<span class="fill" style="width:${c[i] / tot * 100}%"></span>` : ""}<span>${esc(o)}</span>${c ? `<em>${c[i]} vote${c[i] > 1 ? "s" : ""}${tot ? ` · ${Math.round(c[i] / tot * 100)} %` : ""}</em>` : ""}${res && q.answer === i ? "<em>✓ bonne réponse</em>" : mine === i && !res ? "<em>ton choix</em>" : ""}</button>${whoHTML(i)}`; }).join("")}</div>
+      ${res ? `<p class="pq-res">${mine == null ? "Tu n'avais pas voté." : mine === q.answer ? `<b style="color:var(--ok)">Bien vu !</b> +${q.points || 1} pt et +${predRewardOf(q)} ◆` : "Raté cette fois."}</p>` : mine != null ? `<p class="pq-res">Ton choix est enregistré. Tu peux le changer tant que les votes sont ouverts. Les votes de chacun se dévoilent avec la bonne réponse.</p>` : ""}
       ${IS_ADMIN ? `<div class="pq-adm">
-        ${q.status === "open" ? `<button class="btn sm" type="button" data-pq="close" data-q="${q.id}">Fermer les votes</button>` : `<button class="btn sm" type="button" data-pq="open" data-q="${q.id}">Rouvrir</button>`}
+        ${open ? `<button class="btn sm" type="button" data-pq="close" data-q="${q.id}">Fermer les votes</button>` : `<button class="btn sm" type="button" data-pq="open" data-q="${q.id}">Rouvrir</button>`}
         <select aria-label="Bonne réponse" data-pq-answer="${q.id}"><option value="">Bonne réponse…</option>${q.options.map((o, i) => `<option value="${i}" ${q.answer === i ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>
         <button class="btn gold sm" type="button" data-pq="resolve" data-q="${q.id}">Valider</button>
         <label class="note">Récompense <input type="number" min="0" max="5000" value="${predRewardOf(q)}" data-pq-reward="${q.id}" aria-label="Récompense en essence"> ◆</label>
+        <label class="note">Fin des votes <input type="datetime-local" value="${q.endsAt ? localDT(q.endsAt) : ""}" data-pq-end="${q.id}" aria-label="Fin des votes"></label>
         <button class="btn sm" type="button" data-pq="delete" data-q="${q.id}">Supprimer</button></div>` : ""}
     </article>`;
   };
@@ -227,7 +251,8 @@ function viewPred() {
       <label class="field" for="pqOptions">Réponses possibles (une par ligne, 6 max)<textarea id="pqOptions" rows="4" placeholder="Kuradai&#10;Stalk&#10;Personne"></textarea></label>
       <div class="row"><label class="field" for="pqEp" style="flex:1">Épisode<input id="pqEp" type="number" min="1" max="50" value="${eps[0] || 2}"></label>
         <label class="field" for="pqPoints" style="flex:1">Points<input id="pqPoints" type="number" min="1" max="10" value="1"></label>
-        <label class="field" for="pqReward" style="flex:1">Récompense ◆<input id="pqReward" type="number" min="0" max="5000" value="${PRED_REWARD}"></label></div>
+        <label class="field" for="pqReward" style="flex:1">Récompense ◆<input id="pqReward" type="number" min="0" max="5000" value="${PRED_REWARD}"></label>
+        <label class="field" for="pqDur" style="flex:1">Temps pour répondre<select id="pqDur">${[[0, "Sans limite"], [1, "1 heure"], [3, "3 heures"], [6, "6 heures"], [12, "12 heures"], [24, "24 heures"], [48, "2 jours"], [72, "3 jours"], [168, "1 semaine"]].map(([h, l]) => `<option value="${h}" ${h === 48 ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
       <button class="btn acc" type="submit">Publier la question</button></form>` : ""}
   </div>`;
 }
@@ -525,6 +550,8 @@ function drawOpening() {
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
   const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">${ico("labo")} Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
   if (Open3D.draw(el, o, top)) return;
+  if (o.restore) { o.restore = false; o.phase = "done"; } // sans 3D : retour direct aux boutons de fin
+  if (o.single && o.phase === "pack") { o.single = false; o.phase = "cards"; setTimeout(() => { if (opening === o && !o.flipped) Reveal.tap(); }, reduced ? 0 : 650); } // sans 3D : la carte se retourne seule
   if ((Coffre.isChest(o.pk) || o.scenario) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
@@ -553,7 +580,7 @@ function recapParts(o) {
   const actions = `<div class="row" style="justify-content:center">
       ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
         : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
-        : o.pk.daily ? "" : againBtn(o)}
+        : o.pk.daily ? "" : o.chain && o.chain.k + 1 < o.chain.total ? `<button class="btn gold big" type="button" data-act="next-chest">Coffre suivant · ${o.chain.k + 2}/${o.chain.total}</button>` : againBtn(o)}
       ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
       ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
       <button class="btn big" type="button" data-act="stage-close">Fermer</button></div>`;
@@ -562,9 +589,12 @@ function recapParts(o) {
 // « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
 function againBtn(o) {
   const n = o.n || 1;
-  if (save.free) { const k = Math.min(n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>`; }
+  // ×10 en plus quand on en a assez : 5 coffres d'affilée
+  const ten = o.pk.daily ? "" : save.free >= 10 ? `<button class="btn gold big" type="button" data-act="again" data-n="10">×10 · 5 coffres</button>`
+    : !save.free && save.chakra >= PRICE * 10 ? `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="10">Acheter ×10 · ${fmtN(PRICE * 10)} ◆</button>` : "";
+  if (save.free) { const k = Math.min(n === 10 ? 2 : n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>${ten}`; }
   const k = n > 1 && save.chakra >= PRICE * 2 ? 2 : 1;
-  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>`;
+  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>${ten}`;
 }
 function bindPull(p) {
   let y0 = null, dy = 0;
@@ -586,6 +616,65 @@ async function tearPack() {
     await sleep(560);
   }
   opening.phase = "cards"; drawOpening();
+}
+// « Retour » depuis une carte ou la collection : on rouvre l'ouverture terminée, cartes retournées
+let lastOpening = null;
+function keepOpening() { if (opening && !opening.lab && !opening.pk.cos) lastOpening = opening; }
+function backToOpening() {
+  const o = lastOpening; if (!o) return; lastOpening = null;
+  opening = { ...o, phase: "pack", restore: true, o3id: null, i: 0, flipped: false, titles: [] };
+  closeMenu(); $("overlay").hidden = true; draw();
+}
+function backBtnHTML() {
+  if (lastOpening && ["carte", "collection", "wiki"].includes(view)) return `<div class="wrap backrow"><button class="backbtn" type="button" data-act="go-back">${ico("back")}<span>Retour à l'ouverture</span></button></div>`;
+  if (navStack.length && ["carte", "profil", "wiki", "classement", "raretes", "regles", "infos", "nouveautes", "avis"].includes(view)) return `<div class="wrap backrow"><button class="backbtn" type="button" data-act="go-back">${ico("back")}<span>Retour</span></button></div>`;
+  return "";
+}
+// ===== choisir ses doublons (recycler ou combiner) et ses envies =====
+// dupSel : { mode: "recycle" | "craft", sel: { "id" ou "id*" (dorée) : nombre } }
+let dupSel = null;
+const dupKey = (d) => d.id + (d.gold ? "*" : "");
+function dupSheet() {
+  if (!dupSel) return;
+  const craft = dupSel.mode === "craft", sel = dupSel.sel;
+  const list = dupeListS(save).filter((d) => !craft || !d.gold).map((d) => ({ ...d, c: byId[d.id] })).sort((a, b) => RAR[a.c.rar].rank - RAR[b.c.rar].rank || nameOf(a.c).localeCompare(nameOf(b.c)));
+  const count = Object.values(sel).reduce((a, n) => a + n, 0);
+  const value = list.reduce((a, d) => a + (sel[dupKey(d)] || 0) * d.value, 0);
+  const full = craft && count >= CRAFT_COST;
+  const ov = $("overlay"); ov.dataset.sheet = "dup";
+  ov.innerHTML = `<div class="sheet dup-sheet" role="dialog" aria-modal="true" aria-label="${craft ? "Combiner des doublons" : "Recycler des doublons"}"><div class="sheet-h"><h2>${craft ? `Choisis ${CRAFT_COST} doublons à combiner` : "Choisis les doublons à recycler"}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">${craft ? `Les ${CRAFT_COST} doublons choisis disparaissent et te donnent 1 skin au hasard. Ta dernière carte de chaque perso est toujours gardée.` : "Seuls les exemplaires en trop sont proposés : ta dernière carte de chaque perso est toujours gardée. Garde ceux que tu veux vendre ou échanger."}</p>
+      ${list.length ? `<div class="dup-grid">${list.map((d) => { const k = dupKey(d), n = sel[k] || 0; return `<div class="dup-it ${n ? "on" : ""}">${cardHTML(d.c, { gold: d.gold, w: 120 })}
+        <div class="dup-ct"><button class="btn sm" type="button" data-act="dup-dec" data-k="${k}" ${n ? "" : "disabled"} aria-label="Un de moins">−</button><b>${n}<small>/${d.extra}</small></b><button class="btn sm" type="button" data-act="dup-inc" data-k="${k}" ${n >= d.extra || full ? "disabled" : ""} aria-label="Un de plus">+</button></div>
+        ${craft ? "" : `<span class="dup-v">${d.value} ◆ l'unité</span>`}</div>`; }).join("")}</div>` : `<p class="note">Aucun doublon pour l'instant.</p>`}
+      <div class="row dup-foot">${craft ? "" : `<button class="btn" type="button" data-act="dup-all">Tout choisir</button>`}<button class="btn" type="button" data-act="dup-none" ${count ? "" : "disabled"}>Tout enlever</button>
+        <button class="btn gold big" type="button" data-act="dup-go" ${craft ? (count === CRAFT_COST ? "" : "disabled") : count ? "" : "disabled"}>${craft ? `Combiner · ${count}/${CRAFT_COST}` : `Recycler ${count} carte${count > 1 ? "s" : ""} · +${fmtN(value)} ◆`}</button></div></div></div>`;
+  ov.hidden = false;
+}
+function dupAct(act, k) {
+  if (!dupSel) return;
+  const craft = dupSel.mode === "craft", list = dupeListS(save).filter((d) => !craft || !d.gold), sel = dupSel.sel;
+  const count = Object.values(sel).reduce((a, n) => a + n, 0);
+  if (act === "dup-inc") { const d = list.find((x) => dupKey(x) === k); if (d && (sel[k] || 0) < d.extra && !(craft && count >= CRAFT_COST)) sel[k] = (sel[k] || 0) + 1; }
+  if (act === "dup-dec") { if (sel[k] > 1) sel[k]--; else delete sel[k]; }
+  if (act === "dup-all") for (const d of list) sel[dupKey(d)] = d.extra;
+  if (act === "dup-none") dupSel.sel = {};
+  if (act === "dup-go") {
+    const pick = Object.entries(sel).filter(([, n]) => n > 0).map(([key, n]) => ({ id: key.replace("*", ""), gold: key.endsWith("*"), n }));
+    return craft ? craft_(pick) : recycle(pick);
+  }
+  dupSheet();
+}
+const craft_ = (pick) => craft(pick.flatMap((p) => Array(p.n).fill(p.id)));
+// envies : les cartes qui te manquent, un cœur à toucher sur chacune
+function wishSheet() {
+  const ws = wishSet(), miss = ALL_CARDS.filter((c) => !has(c.id) && visible(c));
+  const ov = $("overlay"); ov.dataset.sheet = "wish";
+  ov.innerHTML = `<div class="sheet dup-sheet" role="dialog" aria-modal="true" aria-label="Mes envies"><div class="sheet-h"><h2>Mes envies · ${ws.size}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">Touche le cœur des cartes que tu veux : tu es prévenu dès qu'elles arrivent au marché.</p>
+      ${miss.length ? `<div class="dup-grid">${miss.map((c) => `<div class="dup-it ${ws.has(c.id) ? "on" : ""}">${cardHTML(c, { w: 120, locked: true })}<button class="btn sm wish-h ${ws.has(c.id) ? "on" : ""}" type="button" data-wish="${c.id}">${ws.has(c.id) ? "♥ Dans mes envies" : "♡ Envie"}</button></div>`).join("")}</div>` : `<p class="note">Il ne te manque aucune carte.</p>`}
+      <div class="row dup-foot"><button class="btn" type="button" data-act="wish-clear" ${ws.size ? "" : "disabled"}>Vider mes envies</button><button class="btn gold big" type="button" data-act="close">Terminé</button></div></div></div>`;
+  ov.hidden = false;
 }
 function closeStage() { Coffre.stop(); Reveal.stop(); Open3D.stop(); opening = null; setTimeout(flushTitles, 0); loadStyles(); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
@@ -646,7 +735,7 @@ const VIEWS = { boosters: viewBoosters, collection: viewCollection, wiki: viewWi
 function draw() {
   header(); drawNav();
   if (menuOpen) drawMenu();
-  $("view").innerHTML = (VIEWS[view] || viewBoosters)();
+  $("view").innerHTML = backBtnHTML() + (VIEWS[view] || viewBoosters)();
   if (opening) drawOpening(); else $("stage").hidden = true;
   $("chatFab").hidden = chat.open;
   fillNames(); afterViews();

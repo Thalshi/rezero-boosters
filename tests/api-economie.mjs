@@ -1,5 +1,5 @@
 // Économie et concurrence : boosters, marché, échanges, comptoir, notifications (côté serveur).
-import { startServer, player, reporter, IDS, grant } from "./lib.mjs";
+import { startServer, player, reporter, IDS, grant, samePair } from "./lib.mjs";
 import * as G from "../worker/game.js";
 
 const srv = await startServer({ port: +(process.env.PORT || 8802) });
@@ -66,14 +66,14 @@ try {
 
   t.section("Échanges");
   const sA = (await A.api("state")).state, sR = (await R.api("state")).state;
-  const give = Object.entries(sA.owned).find(([, o]) => o.n > 0)[0], want = Object.entries(sR.owned).find(([, o]) => o.n > 0)[0];
+  const [give, want] = samePair(sA, sR);
   const tp = await A.api("trade/propose", { to: R.id, give: [{ id: give, n: 1 }], want: [{ id: want, n: 1 }] });
   t.check("proposition d'échange équilibré acceptée", tp.status === 200, tp.error);
   const race = await Promise.all([R.api("trade/answer", { tid: tp.tid, action: "accept" }), A.api("trade/answer", { tid: tp.tid, action: "cancel" })]);
   t.check("accepter et annuler en même temps : une seule action passe", race.filter((x) => x.status === 200).length === 1, race.map((x) => x.status));
-  t.check("échange trop déséquilibré refusé", (await A.api("trade/propose", { to: R.id, give: [{ id: give, n: 1 }], chakra: 5000, want: [{ id: want, n: 1 }] })).status === 400);
+  t.check("échange avec de l'essence refusé (carte contre carte)", (await A.api("trade/propose", { to: R.id, give: [{ id: give, n: 1 }], chakra: 5000, want: [{ id: want, n: 1 }] })).status === 400);
   const sA2 = (await A.api("state")).state, sR2 = (await R.api("state")).state;
-  const g2 = Object.entries(sA2.owned).find(([, o]) => o.n > 0)[0], w2 = Object.entries(sR2.owned).find(([, o]) => o.n > 0)[0];
+  const [g2, w2] = samePair(sA2, sR2);
   const before = sA2.owned[g2].n;
   const tp2 = await A.api("trade/propose", { to: R.id, give: [{ id: g2, n: 1 }], want: [{ id: w2, n: 1 }] });
   const mid2 = (await A.api("state")).state.owned[g2]?.n || 0;

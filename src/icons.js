@@ -1,6 +1,7 @@
 // ===== Icônes néon (esprit hextech d'Arcane) : remplacent les kanji partout dans l'interface =====
 // Traits 24×24, couleur héritée (currentColor) ; la lueur vient de la classe .ic.
 const ICON = {
+  back: '<path d="M15 5l-7 7 7 7"/>',
   logo: '<path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><circle cx="12" cy="12" r="4.5"/><path d="M12 4.8v2.7M12 16.5v2.7M5.6 8.4l2.4 1.4M16 14.2l2.4 1.4"/>',
   // rôles de Confrontation
   gardien: '<path d="M4.5 9.5l3.5 3 4-6.5 4 6.5 3.5-3-1.7 9.5H6.2z"/><path d="M6 21.5h12"/><circle cx="12" cy="13.5" r="1.3"/>',

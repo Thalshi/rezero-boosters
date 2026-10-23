@@ -41,6 +41,7 @@ document.addEventListener("click", (e) => {
   const ab = t.closest("[data-act]"), act = ab?.dataset.act;
   if (act === "open-day") return startOpening(false, "jour");
   if (act === "open-pack") return startOpening(!!ab.dataset.paid, ab.dataset.p, +ab.dataset.n || 1);
+  if (act === "next-chest") return nextChest();
   if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack, +ab.dataset.n || 1);
   if (act === "summon-again") { const n = opening?.n || 1; closeStage(); return zSummon(n); }
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
@@ -57,12 +58,14 @@ document.addEventListener("click", (e) => {
   if (act === "cf-sound") return Coffre.toggleSound();
   if (act === "stage-back") { Reveal.stop(); Open3D.stop(); if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
-  if (act === "to-col") { closeStage(); return nav("collection"); }
+  if (act === "go-back") { if (lastOpening && ["carte", "collection", "wiki"].includes(view)) return backToOpening(); return history.back(); }
+  if (act === "to-col") { keepOpening(); closeStage(); return nav("collection"); }
   if (act === "to-atelier") { closeStage(); return nav("atelier"); }
   if (act === "dev-refresh") { devData.stats = null; devData.audit = null; draw(); return loadDev(true); }
-  if (act === "recycle") return recycle();
-  if (act === "craft") return craft();
-  if (act === "wish-all") return wishAllMissing();
+  if (act === "dup-open") { dupSel = { mode: ab.dataset.mode, sel: {} }; return dupSheet(); }
+  if (act?.startsWith("dup-")) return dupAct(act, ab.dataset.k);
+  if (act === "wish-open") return wishSheet();
+  if (act === "wish-clear") return wishClear();
   if (act === "reset-col") { Object.assign(col, { rar: "", fac: "", own: "all", sort: "num", q: "" }); return draw(); }
   if (act === "market-for") { const c = byId[ab.dataset.p]; mk.q = c ? nameOf(c) : ""; marketTab = "buy"; return nav("market"); }
   if (act === "copy-link") { const u = location.href; navigator.clipboard?.writeText(u).then(() => toast("Lien copié."), () => toast(u)); return; }
@@ -93,6 +96,7 @@ document.addEventListener("change", (e) => {
   const t = e.target;
   const SEL = { colFac: (v) => { col.fac = v; }, colOwn: (v) => { col.own = v; }, colSort: (v) => { col.sort = v; }, mkFac: (v) => { mk.fac = v; }, mkSort: (v) => { mk.sort = v; } };
   if (SEL[t.dataset.sel]) { SEL[t.dataset.sel](t.value); return draw(); }
+  if (t.dataset.pqEnd) return adminPred("deadline", t.dataset.pqEnd, t.value);
   if (t.dataset.pqReward) return adminPred("reward", t.dataset.pqReward, t.value);
   if (t.closest?.("#tradeForm")) updateTradeFair();
 });

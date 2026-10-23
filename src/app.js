@@ -154,7 +154,7 @@ function creditPredictions() {
 }
 async function vote(qid, idx) {
   const q = pred.questions.find((x) => x.id === qid);
-  if (!q || q.status !== "open") return toast("Les votes sont fermés pour cette question.");
+  if (!q || !predOpen(q)) return toast("Les votes sont fermés pour cette question.");
   const first = pred.mine[qid] == null, prev = pred.mine;
   pred.mine = { ...pred.mine, [qid]: idx }; draw();
   try {
@@ -179,7 +179,8 @@ async function adminPred(action, qid, value) {
   const ref = DB.doc("predq/" + qid);
   try {
     if (action === "close") await ref.update({ status: "closed" });
-    if (action === "open") await ref.update({ status: "open", answer: null });
+    if (action === "open") await ref.update({ status: "open", answer: null, endsAt: null });
+    if (action === "deadline") { const t = value ? new Date(value).getTime() : null; await ref.update({ endsAt: t }); pred.questions = pred.questions.map((q) => (q.id === qid ? { ...q, endsAt: t } : q)); toast(t ? "Fin des votes enregistrée." : "Plus de limite de temps."); draw(); }
     if (action === "resolve") { await ref.update({ status: "resolved", answer: value }); pred.questions = pred.questions.map((q) => (q.id === qid ? { ...q, status: "resolved", answer: value } : q)); await recomputeScores(); toast("Bonne réponse validée, points mis à jour."); }
     if (action === "reward") { await ref.update({ reward: predRewardOf({ reward: value }) }); toast("Récompense mise à jour."); }
     if (action === "delete") { await ref.delete(); pred.questions = pred.questions.filter((q) => q.id !== qid); await recomputeScores(); toast("Question supprimée."); }
@@ -187,10 +188,11 @@ async function adminPred(action, qid, value) {
 }
 async function addQuestion(form) {
   const text = $("pqText").value.trim(), options = $("pqOptions").value.split("\n").map((s) => s.trim()).filter(Boolean);
+  const dur = +($("pqDur")?.value || 0), endsAt = dur ? Date.now() + dur * 3600000 : null;
   const ep = +$("pqEp").value || 2, points = Math.max(1, Math.min(10, +$("pqPoints").value || 1)), reward = predRewardOf({ reward: $("pqReward").value });
   if (!text || options.length < 2) return toast("Écris une question et au moins 2 réponses (une par ligne).");
   try {
-    await DB.collection("predq").add({ ep, text, options: options.slice(0, 6), points, reward, status: "open", answer: null, t: Date.now() });
+    await DB.collection("predq").add({ ep, text, options: options.slice(0, 6), points, reward, status: "open", answer: null, endsAt, t: Date.now() });
     form.reset(); document.activeElement?.blur(); toast("Question publiée."); draw();
   } catch (e) { toast("Publication refusée : il faut être éditeur de l'app."); }
 }
@@ -399,12 +401,14 @@ function tradeOptions(owned, keepOne) {
 function tradeSelection() {
   const f = $("tradeForm"); if (!f) return null;
   const pick = (side) => [...f.querySelectorAll(`input[data-side=${side}]:checked`)].map((i) => ({ id: i.dataset.id, gold: !!i.dataset.gold, n: 1 }));
-  return { to: f.dataset.to, give: pick("give"), want: pick("want"), chakra: Math.max(0, Math.round(+$("tradeEss").value || 0)) };
+  return { to: f.dataset.to, give: pick("give"), want: pick("want"), chakra: 0 };
 }
 function updateTradeFair() {
   const s = tradeSelection(); if (!s) return;
-  const a = itemsValue(s.give) + s.chakra, b = itemsValue(s.want);
-  $("tradeFair").textContent = !s.want.length ? "Choisis au moins une carte à recevoir." : tradeFair(s.give, s.want, s.chakra) ? `Échange équilibré (${a} ◆ contre ${b} ◆ en valeur de recyclage).` : `Trop déséquilibré (${a} ◆ contre ${b} ◆) : les gros dons sont bloqués.`;
+  const rl = (l) => Object.entries(l.reduce((m, it) => { const k = tradeRarKey(it); m[k] = (m[k] || 0) + 1; return m; }, {})).map(([k, n]) => `${n} ${k.endsWith("*") ? "Dorée" : RAR[k].label}`).join(", ") || "rien";
+  const ok = s.give.length && s.want.length && tradeSameRar(s.give, s.want);
+  $("tradeFair").textContent = !s.give.length || !s.want.length ? "Choisis des cartes des deux côtés : même nombre de cartes de chaque rareté." : ok ? `Échange valable : ${rl(s.give)} contre ${rl(s.want)}.` : `Pas la même rareté : tu donnes ${rl(s.give)}, tu reçois ${rl(s.want)}.`;
+  const b2 = $("tradeForm").querySelector('[type="submit"]'); if (b2) b2.disabled = !ok;
 }
 async function sendTrade() {
   const s = tradeSelection();
@@ -416,12 +420,12 @@ async function sendTrade() {
 async function toggleWish(id) {
   if (!SRV) return toast(offlineMsg("garder une liste d'envies").replace(/<[^>]+>/g, ""));
   const on = wishSet().has(id);
-  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); draw(); }
+  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); draw(); if ($("overlay").dataset.sheet === "wish" && !$("overlay").hidden) wishSheet(); }
   catch (e) { toast(e.message); }
 }
-async function wishAllMissing() {
-  const ids = ALL_CARDS.filter((c) => !has(c.id) && visible(c)).map((c) => c.id);
-  try { await srv("wish", { add: ids }); toast(`${ids.length} cartes ajoutées à tes envies.`); draw(); } catch (e) { toast(e.message); }
+async function wishClear() {
+  const ids = [...wishSet()]; if (!ids.length) return;
+  try { await srv("wish", { remove: ids }); toast("Envies vidées."); draw(); wishSheet(); } catch (e) { toast(e.message); }
 }
 async function toggleShowcase(id) {
   const cur = (save.showcase || []).filter((x) => has(x));
@@ -470,6 +474,7 @@ let busy = false;
 // n = 1 : une pochette (5 cartes) ; n = 2 : 10 cartes dans le coffre
 async function startOpening(paid, packId, n = 1) {
   if (busy) return;
+  lastOpening = null;
   busy = true;
   let r;
   try {
@@ -481,7 +486,16 @@ async function startOpening(paid, packId, n = 1) {
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
   opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, n, divine: r.divine, scenario: r.scenario, titles: takeTitles() };
+  // ×10 : 5 coffres de 10 cartes à la suite
+  if (cards.length > 10) Object.assign(opening, { cards: cards.slice(0, 10), chain: { all: cards, scenarios: r.scenarios || [], k: 0, total: Math.ceil(cards.length / 10) } });
   closeMenu(); $("overlay").hidden = true;
+  draw();
+}
+// coffre suivant d'une ouverture ×10
+function nextChest() {
+  const o = opening, ch = o?.chain; if (!ch || ch.k + 1 >= ch.total) return;
+  const k = ch.k + 1;
+  opening = { ...o, phase: "pack", cards: ch.all.slice(k * 10, k * 10 + 10), i: 0, flipped: false, o3id: null, restore: false, scenario: ch.scenarios[k] || o.scenario, titles: [], chain: { ...ch, k } };
   draw();
 }
 // Invocation du Sanctuaire, déjà tirée par le serveur : ×1 une carte qui se retourne seule, ×5 une pochette, ×10 le coffre
@@ -489,10 +503,10 @@ const SUMMON_PK = { 1: "Invocation", 5: "Pochette du Sanctuaire", 10: "Coffre du
 function summonOpening(got, scenario, extra = {}) {
   const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "", color: "#b072ff", count: n };
   const cards = got.map((x) => ({ c: { id: x.id, rar: x.rar }, cos: COS_BY_ID[x.id], gold: false, isNew: !!x.isNew }));
-  opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, titles: takeTitles(), ...extra };
+  opening = { phase: "pack", single: n === 1, cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, titles: takeTitles(), ...extra };
   closeMenu(); $("overlay").hidden = true; $("stage").dataset.cf = "";
   draw();
-  if (n === 1) { const o = opening; setTimeout(() => { if (opening === o && !o.flipped) Reveal.tap(); }, reduced ? 0 : 650); }
+
 }
 // une ouverture contient des cartes (boosters) ou des cosmétiques (Sanctuaire)
 const itemName = (x) => (x.cos ? x.cos.name : nameOf(x.c));
@@ -578,11 +592,12 @@ async function share(id, gold) {
   catch (e) { toast(txt); }
 }
 
-async function recycle() {
-  const v = dupesValue(); if (!v) return;
+async function recycle(pick) {
+  if (!pick?.length) return toast("Choisis au moins un doublon.");
   try {
-    const got = SRV ? (await srv("recycle")).value : recycleS(save);
-    persist(); draw(); toast(`Doublons recyclés : +${got} ◆`);
+    const got = SRV ? (await srv("recycle", { pick })).value : recycleS(save, Date.now(), pick);
+    if (got?.error) throw new Error(got.error);
+    persist(); $("overlay").hidden = true; dupSel = null; draw(); toast(`Doublons recyclés : +${got} ◆`);
   } catch (e) { toast(e.message); }
 }
 
@@ -595,9 +610,11 @@ async function claim(kind, id) {
   } catch (e) { toast(e.message); }
 }
 
-async function craft() {
+async function craft(pick) {
+  if (pick?.length !== CRAFT_COST) return toast(`Choisis exactement ${CRAFT_COST} doublons.`);
   try {
-    const r = SRV ? await srv("craft") : craftS(save, CONFIG, ME, Math.random);
+    const r = SRV ? await srv("craft", { pick }) : craftS(save, CONFIG, ME, Math.random, Date.now(), pick);
+    dupSel = null;
     if (r.error) throw new Error(r.error);
     persist();
     unlocked(r.card);

@@ -114,7 +114,7 @@ const Arena = (() => {
     for (const [x, z, c] of [[-5, -3, "#ff9a4a"], [5, -3, "#ff9a4a"], [-4.5, 3, "#ff7ab8"], [4.5, 3, "#ff7ab8"]]) { const l = new THREE.PointLight(c, 10, 9, 1.6); l.position.set(x, 1.8, z); scene.add(l); }
     R = { renderer, scene, camera, composer, bloom, tweens: [], clockT: 0, shake: 0, cam: { pos: new THREE.Vector3(), look: new THREE.Vector3(), base: { pos: new THREE.Vector3(), look: new THREE.Vector3() } }, ray: new THREE.Raycaster(), ndc: new THREE.Vector2(), glyphs: {}, last: performance.now(), on: false, portrait: false };
     R.radial = canvasTex(128, 128, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, "#fff"); r.addColorStop(.3, "#ffffffaa"); r.addColorStop(1, "#fff0"); g.fillStyle = r; g.fillRect(0, 0, w, w); });
-    buildDecor(); buildParticles();
+    buildDecor(); buildParticles(); buildPile();
     canvas.addEventListener("pointermove", (e) => { if (drag) return; const p = champAt(e), ok = targeting && p && targetsFor(p).length; hover(ok ? p : null); canvas.style.cursor = ok ? "crosshair" : p ? "pointer" : "default"; });
     canvas.addEventListener("click", (e) => { const p = champAt(e); if (!p) return; if (targeting) pickTarget(p); else showInfo(p); });
     addEventListener("resize", () => { if (R.on) resize(); });
@@ -150,6 +150,45 @@ const Arena = (() => {
       const roof = new THREE.Mesh(new THREE.ConeGeometry(.34, .22, 4), new THREE.MeshStandardMaterial({ color: "#1d1626" })); roof.position.set(x, 1.86, z); roof.rotation.y = Math.PI / 4; scene.add(roof);
       const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: R.radial, color: "#ff9a4a", blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: .45 })); gl.scale.set(1.6, 1.6, 1); gl.position.copy(lamp.position); scene.add(gl);
     }
+  }
+  // la pioche : un vrai paquet de cartes posé au centre de la table, sa hauteur suit le nombre de cartes
+  const PILE_Y = .06, PILE_MAX = 26;
+  function buildPile() {
+    const back = canvasTex(256, 360, (g, w, h) => {
+      const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, "#2b1d4a"); bg.addColorStop(1, "#120b22"); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+      g.strokeStyle = "#e8c77e"; g.lineWidth = 8; g.strokeRect(10, 10, w - 20, h - 20); g.lineWidth = 2; g.strokeRect(24, 24, w - 48, h - 48);
+      g.save(); g.translate(w / 2, h / 2); g.scale(5, 5); g.translate(-12, -12); g.strokeStyle = "#e8c77e"; g.lineWidth = 1.2; g.lineJoin = "round";
+      for (const d of iconPaths("logo")) g.stroke(new Path2D(d)); g.beginPath(); g.arc(12, 12, 4.5, 0, 7); g.stroke(); g.restore();
+    });
+    const side = new THREE.MeshStandardMaterial({ color: "#d8c08a", roughness: .7 }), face = new THREE.MeshStandardMaterial({ map: back, roughness: .45, metalness: .1 });
+    const geo = new THREE.BoxGeometry(.62, .012, .88), mats = [side, side, face, side, side, side];
+    const g = new THREE.Group(); g.position.set(1.9, PILE_Y, .9); g.rotation.y = -.35; R.scene.add(g);
+    R.pile = { g, cards: Array.from({ length: PILE_MAX }, (_, i) => { const m = new THREE.Mesh(geo, mats); m.position.set((Math.random() - .5) * .025, i * .014, (Math.random() - .5) * .025); m.rotation.y = (Math.random() - .5) * .06; m.castShadow = m.receiveShadow = true; g.add(m); return m; }), n: PILE_MAX };
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: R.radial, color: "#e8c77e", blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: .35 })); glow.scale.set(1.8, 1.8, 1); glow.position.y = .2; g.add(glow);
+  }
+  function setPile(n) {
+    if (!R?.pile) return;
+    const k = Math.max(n > 0 ? 1 : 0, Math.min(PILE_MAX, Math.ceil(n / 2)));
+    R.pile.cards.forEach((m, i) => { m.visible = i < k; }); R.pile.n = k;
+  }
+  // position à l'écran du dessus de la pioche
+  function pileScreen() { if (!R?.pile) return null; const v = new THREE.Vector3(0, R.pile.n * .014 + .05, 0); R.pile.g.localToWorld(v); return screenOf(v); }
+  // une carte piochée : elle sort du paquet, s'affiche en grand au centre, puis rejoint la main
+  function showDraw(h, i, total) {
+    const from = pileScreen(), to = h.el.getBoundingClientRect(); if (!from) return;
+    const big = cardEl(h.c); big.classList.add("ar-draw"); $a("root")?.appendChild(big) || document.body.appendChild(big);
+    const w = big.offsetWidth || 120, hh = big.offsetHeight || 174, cx = innerWidth / 2, cy = innerHeight * .42, sc = Math.min(2.1, innerHeight * .46 / hh);
+    const at = (x, y, s, r = 0) => `translate(${x - w / 2}px, ${y - hh / 2}px) rotate(${r}deg) scale(${s})`;
+    const quick = total > 3, dur = (quick ? 900 : 1500) / (window.__arSpeed || 1);
+    h.el.style.opacity = "0";
+    const a = big.animate([
+      { transform: at(from[0], from[1], .22, -8) + " rotateY(180deg)", opacity: .6 },
+      { transform: at(cx, cy, sc * 1.05, 0), opacity: 1, offset: .28 },
+      { transform: at(cx, cy, sc, 0), opacity: 1, offset: quick ? .55 : .7 },
+      { transform: at(to.left + to.width / 2, to.top + to.height / 2, to.width / w, 0), opacity: 1 },
+    ], { duration: dur, delay: i * dur * (quick ? .45 : .75), easing: "cubic-bezier(.3,.7,.2,1)", fill: "both" });
+    const done = () => { big.remove(); h.el.style.opacity = ""; };
+    a.onfinish = done; a.oncancel = done;
   }
   // étincelles et pétales
   const NP = 1400;
@@ -388,6 +427,43 @@ const Arena = (() => {
     $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
+  // finish façon TFT : ralenti, bandes cinéma, la caméra plonge sur la victime, le coup final, image figée, bannière
+  const FIN_KINDS = ["foudre", "meteore", "lames"];
+  async function finisher(p, killer, e) {
+    if (reduced || !R) { pop(p, "Éliminé", "#ff4d5e", true); eliminateFx(p); return wait(900); }
+    const kc = killer && killer !== p ? col(killer.branch) : "#ff4d5e", kind = FIN_KINDS[[...(p.id + (killer?.id || ""))].reduce((h, ch) => h + ch.charCodeAt(0), 0) % 3];
+    const ov = document.createElement("div"); ov.className = "ar-fin"; ov.style.setProperty("--fc", kc);
+    const role = e.role && typeof ROLES === "object" && ROLES[e.role] ? ROLES[e.role].nom : "";
+    ov.innerHTML = `<i class="lb t"></i><i class="lb b"></i><svg class="fin-crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 48 L38 30 L41 12 M50 48 L66 34 L80 30 L97 22 M50 48 L58 66 L54 84 L60 100 M50 48 L30 56 L12 52 L0 60 M50 48 L70 60 L88 74"/></svg>
+      <div class="fin-ban"><small>Finish</small><b>${killer && killer !== p ? esc(nm(killer.id)) : "Éliminé"}</b><span>${killer && killer !== p ? "élimine " : ""}${esc(nm(p.id))}${role ? ` · c'était ${/^[AEIOUÉ]/.test(role) ? "l'" : "le "}${esc(role)}` : ""}</span></div>`;
+    $a("root").appendChild(ov); requestAnimationFrame(() => ov.classList.add("on"));
+    const c = R.cam, p0 = c.pos.clone(), l0 = c.look.clone(), vp = worldOf(p, 1);
+    const side = new THREE.Vector3(vp.x, 0, vp.z).normalize().multiplyScalar(-1.2);
+    const camP = vp.clone().add(new THREE.Vector3(side.x, 2.1, 4.6)), camL = vp.clone().add(new THREE.Vector3(0, .1, 0));
+    R.timeScale = 1; await tween(.55, (t) => { c.pos.lerpVectors(p0, camP, t); c.look.lerpVectors(l0, camL, t); }, easeOut);
+    R.timeScale = .4;
+    if (kind === "foudre") {
+      const pil = new THREE.Mesh(new THREE.CylinderGeometry(.7, 1.1, 16, 20, 1, true), additive({ color: new THREE.Color(kc).multiplyScalar(2), side: THREE.DoubleSide, opacity: 0 }));
+      pil.position.set(vp.x, 8, vp.z + .2); R.scene.add(pil);
+      await tween(.35, (t) => { pil.material.opacity = t; pil.scale.set(.2 + t, 1, .2 + t); }, easeIn);
+      setTimeout(() => tween(.6, (t) => { pil.material.opacity = 1 - t; }).then(() => R.scene.remove(pil)), 200);
+    } else if (kind === "meteore") {
+      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(.42, 1), new THREE.MeshStandardMaterial({ color: "#2a1a10", emissive: kc, emissiveIntensity: 2.2, flatShading: true })); R.scene.add(m);
+      const a = vp.clone().add(new THREE.Vector3(3, 9, -3));
+      await tween(.6, (t) => { m.position.lerpVectors(a, vp, t); m.rotation.x += .2; emit(4, m.position, kc, { speed: .4, life: .6, grav: -.5 }); }, easeIn);
+      R.scene.remove(m);
+    } else {
+      for (let i = 0; i < 5; i++) { slash(vp.clone().add(new THREE.Vector3((Math.random() - .5) * .5, (Math.random() - .5) * .6, 0)), i % 2 ? kc : "#ffffff"); await wait(70); }
+    }
+    // l'impact : image figée, éclair blanc, onde de choc, écran fendu
+    R.timeScale = .06; flash("#ffffff", .85, 520); R.shake = .55; ov.classList.add("hit");
+    emit(420, vp, kc, { speed: 6, life: 1.4, grav: 1 }); ring(new THREE.Vector3(vp.x, .05, vp.z), kc, 5, .9); ring(new THREE.Vector3(vp.x, .06, vp.z), "#ffffff", 3, .6);
+    eliminateFx(p);
+    await wait(450); R.timeScale = .5; await wait(1500);
+    R.timeScale = 1; ov.classList.add("out");
+    await tween(.6, (t) => { c.pos.lerpVectors(camP, c.base.pos, t); c.look.lerpVectors(camL, c.base.look, t); }, easeIO);
+    setTimeout(() => ov.remove(), 500);
+  }
   function eliminateFx(p) {
     if (!p) return;
     emit(140, worldOf(p, 1), col(p.branch), { speed: 3, life: 1.2, grav: 1 });
@@ -563,7 +639,8 @@ const Arena = (() => {
     if (st) st.discard = st.discard.filter((u) => keep.has(u));
     layoutHand();
     const hr = el.getBoundingClientRect();
-    hand.filter((h) => h.fresh).forEach((h, i) => { h.fresh = false; if (reduced) return; h.el.animate([{ transform: `translate(${deck.left - hr.left}px, ${deck.top - hr.top}px) rotate(20deg) scale(.4)`, opacity: .2 }, { transform: h.el.style.transform, opacity: 1 }], { duration: 420, delay: i * 110, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }); });
+    const fresh = hand.filter((h) => h.fresh);
+    fresh.forEach((h, i) => { h.fresh = false; if (reduced) return; if (R?.pile) return showDraw(h, i, fresh.length); h.el.animate([{ transform: `translate(${deck.left - hr.left}px, ${deck.top - hr.top}px) rotate(20deg) scale(.4)`, opacity: .2 }, { transform: h.el.style.transform, opacity: 1 }], { duration: 420, delay: i * 110, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }); });
   }
   function layoutHand() {
     if (!R || !st) return;
@@ -670,7 +747,7 @@ const Arena = (() => {
   const LBL = { parer: "Parer", riposter: "Riposter", encaisser: "Encaisser (−1 PV)", defausser: "Défausser une Frappe", elixir: "Boire un Élixir (+1 PV)", survie: "Ténacité : défausser 2 cartes (+1 PV)" };
   function renderSide() {
     const v = CF.table.vue, fin = finAct(), btn = $a("end");
-    $a("deckN").textContent = v.pioche;
+    $a("deckN").textContent = v.pioche; setPile(v.pioche);
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }
@@ -745,7 +822,7 @@ const Arena = (() => {
       case "riposte": if (p) { shield(p); pop(p, "Riposte !", "#2ee6ff", true); } await wait(300); await attackFx(p, champ(e.cible)); break;
       case "esquive": if (p) { shield(p, "#5ac8fa"); pop(p, "Esquivé !", "#5ac8fa", true); } await wait(520); break;
       case "kanji_absorbe": if (p) { pop(p, "Garde : aucun dégât", "#e8c77e", true); emit(50, worldOf(p, 1.3), "#e8c77e", { speed: 2.5, life: .8, grav: 0 }); } await wait(500); break;
-      case "elimination": if (p) { pop(p, "Éliminé", "#ff4d5e", true); p.alive = false; eliminateFx(p); if (e.role) p.role = e.role; renderTags(); } await wait(900); break;
+      case "elimination": if (p) { p.alive = false; if (e.role) p.role = e.role; await finisher(p, champ(e.par), e); renderTags(); } break;
       case "presage": omen(p, e); await wait(1300); break;
       case "orbe_explose": if (p) { setOrb(p, false); const o = worldOf(p, 1.6); emit(160, o, "#ff7a1a", { speed: 5, life: 1, grav: 2 }); ring(new THREE.Vector3(o.x, .05, o.z), "#ff7a1a", 4, .8); flash("#ff7a1a", .4); R.shake = .3; } await wait(700); break;
       case "orbe_passe": { const a = champ(e.de), b = champ(e.a); if (a) setOrb(a, false); await beam(a, b, "#ff7a1a", .5); if (b) setOrb(b, true); break; }
@@ -802,7 +879,7 @@ const Arena = (() => {
   // ---------- boucle ----------
   function frame(now) {
     if (!R.on) return;
-    const dt = Math.min(.05, (now - R.last) / 1000) * (window.__arSpeed || 1); R.last = now; R.clockT += dt;
+    const dt = Math.min(.05, (now - R.last) / 1000) * (window.__arSpeed || 1) * (R.timeScale ?? 1); R.last = now; R.clockT += dt;
     for (const tw of [...R.tweens]) { const k = Math.min(1, (R.clockT - tw.t0) / tw.dur); tw.fn(tw.ease(k), k); if (k >= 1) { R.tweens.splice(R.tweens.indexOf(tw), 1); tw.res(); } }
     for (const p of st?.champs || []) {
       p.bill.rotation.y = Math.atan2(R.camera.position.x - p.root.position.x, R.camera.position.z - p.root.position.z);

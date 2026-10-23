@@ -75,13 +75,14 @@ try {
       }
       t.check(`les ${ids.length} scénarios du coffre vont jusqu'aux cartes`, ids.length === 30 && bad.length === 0, bad);
     }
-    // invocation ×5 : la pochette, puis le dévoilement habituel des cosmétiques
+    // invocation ×5 : la pochette, puis les objets restent des cartes 3D qu'on retourne
     await page.evaluate(() => zSummon(5));
     t.check("invocation ×5 : la pochette 3D", await until(page, () => Open3D.state?.kind === "pack"));
     await page.evaluate(() => Open3D.open());
-    t.check("puis les objets se dévoilent comme avant", await until(page, () => !!document.getElementById("revealBtn"), 60000));
-    await page.click('[data-act="skip"]'); await page.waitForTimeout(400);
-    await page.click('[data-act="stage-close"]').catch(() => {}); await page.waitForTimeout(400);
+    t.check("puis les 5 objets sortent en cartes 3D", await until(page, () => Open3D.state?.phase === "cards" && Open3D.state.cards === 5, 60000));
+    await page.evaluate(() => Open3D.flipAll());
+    t.check("retournés, les boutons de fin apparaissent", await until(page, () => Open3D.state?.phase === "done", 60000));
+    await page.locator('[data-act="stage-close"]').first().dispatchEvent("click").catch(() => {}); await page.waitForTimeout(400);
 
     // seulement la 3D : plus de bouton pour la couper (et un ancien réglage « 0 » est ignoré)
     await page.evaluate(() => startOpening(false, null, 1));

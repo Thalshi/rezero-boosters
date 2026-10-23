@@ -265,13 +265,14 @@ function finalizeReserve(s) {
   emit(s, "reserve", { n: s.reserve.length, prets: s.reserve.filter((c) => c.pret).length });
 }
 
-/** Persos proposés. persoLibre : chacun choisit parmi ses propres cartes apportées (2 cartes de prêt s'il n'en a
- *  apporté aucune). Sinon, tirage serveur : deux personnages distincts par joueur, jamais la même instance deux fois. */
+/** Persos proposés. persoLibre (chacun son deck) : 2 de ses propres cartes tirées au hasard (complétées par ses
+ *  cartes de prêt s'il en a apporté moins de 2). Sinon, tirage serveur : deux personnages distincts par joueur, jamais la même instance deux fois. */
 function dealPropositions(s, now) {
   if (s.config.persoLibre) {
     for (const p of s.players) {
-      const own = p.contribution.map((c) => c.instanceId);
-      const props = own.length ? own : shuffle(s, "tirage", s.reserve.filter((c) => c.pret && c.apportePar === p.id).map((c) => c.instanceId)).slice(0, 2);
+      const own = shuffle(s, "tirage", p.contribution.map((c) => c.instanceId));
+      const loans = shuffle(s, "tirage", s.reserve.filter((c) => c.pret && c.apportePar === p.id).map((c) => c.instanceId));
+      const props = [...own, ...loans].slice(0, 2);
       p.propositions = props;
       emit(s, "propositions", { pid: p.id, propositions: props.map((iid) => s.reserve.find((c) => c.instanceId === iid)) }, [p.id]);
     }

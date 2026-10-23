@@ -63,8 +63,28 @@ const RG_FAMS = [["attaque", "Attaquer"], ["esquive", "Se défendre (hors de ton
 const RG_FAM_OF = (d) => (d.cat === "defausse" ? "vol" : d.cat === "zone" ? "duel" : d.cat === "visee" ? "defense" : d.cat);
 const RG_TOC = [["but", "But"], ["roles", "Rôles"], ["perso", "Personnage"], ["miseenplace", "Mise en place"], ["tour", "Le tour"], ["distance", "Distance"], ["combat", "Combat"], ["presage", "Présage"], ["cartes", "Cartes"], ["elim", "Élimination"], ["fin", "Fin"], ["petites", "2 et 3 joueurs"], ["temps", "Délais"]];
 
+// Le livret en livre : une page par chapitre, des marque-pages, on tourne les pages (au lieu d'un long texte)
+const RGB = { page: 0, dir: 0 };
 function viewRegles() {
-  if (!CF.cat) cfCat().then(() => { if (view === "confront" && param === "regles") draw(); });
+  const tmp = document.createElement("div"); tmp.innerHTML = rgFullHTML();
+  const quick = tmp.querySelector(".rg-quick"), secs = [...tmp.querySelectorAll(".rg-sec")];
+  const lab = Object.fromEntries(RG_TOC);
+  const pages = [{ t: "L'essentiel", h: quick ? quick.innerHTML : "" }, ...secs.map((x) => ({ t: lab[x.id.replace("rg-", "")] || x.querySelector("h2")?.textContent || "", h: x.innerHTML }))];
+  const k = Math.max(0, Math.min(pages.length - 1, RGB.page)), dir = RGB.dir; RGB.dir = 0;
+  return `<div class="wrap page rg rgb">${head("Confrontation · Livret", "Comment jouer", "Le livret de Re Zéro : Confrontation, page par page. De 2 à 7 joueurs, environ 20 à 40 minutes.")}
+    <div class="book">
+      <nav class="bk-tabs" aria-label="Chapitres">${pages.map((p, i) => `<button type="button" data-bk="${i}" ${i === k ? 'aria-current="page"' : ""}><b>${i || "★"}</b><span>${esc(p.t)}</span></button>`).join("")}</nav>
+      <div class="bk-body"><div class="bk-spine" aria-hidden="true"></div>
+        <article class="bk-page ${dir > 0 ? "turn-next" : dir < 0 ? "turn-prev" : ""}" aria-live="polite"><p class="bk-run">Chapitre ${k || "★"} · ${esc(pages[k].t)}</p>${pages[k].h}</article></div>
+      <div class="bk-nav"><button class="btn" type="button" data-bk="${k - 1}" ${k ? "" : "disabled"}>‹ Page précédente</button><span class="bk-no">${k + 1} / ${pages.length}</span>
+        ${k < pages.length - 1 ? `<button class="btn gold" type="button" data-bk="${k + 1}">Page suivante ›</button>` : `<button class="btn gold" type="button" data-nav="confront">Aller aux salons</button>`}</div>
+    </div></div>`;
+}
+function rgBook(i) { const n = document.querySelectorAll(".bk-tabs [data-bk]").length; i = Math.max(0, Math.min(n - 1, i)); if (i === RGB.page) return; RGB.dir = i > RGB.page ? 1 : -1; RGB.page = i; draw(); const bk = document.querySelector(".book"); if (bk && bk.getBoundingClientRect().top < 80) scrollTo({ top: scrollY + bk.getBoundingClientRect().top - 90, behavior: reduced ? "auto" : "smooth" }); }
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-bk]"); if (b && !b.disabled) rgBook(+b.dataset.bk); });
+document.addEventListener("keydown", (e) => { if (!document.querySelector(".book") || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return; if (e.key === "ArrowRight") rgBook(RGB.page + 1); if (e.key === "ArrowLeft") rgBook(RGB.page - 1); });
+function rgFullHTML() {
+  if (!CF.cat) cfCat().then(() => { if ((view === "confront" && param === "regles") || view === "regles") draw(); });
   const cat = CF.cat || { cartes: {}, branchIds: [], branches: {}, signes: [] };
   const defs = Object.entries(cat.cartes || {}), total = defs.reduce((a, [, d]) => a + (d.qte || 0), 0);
   const fam = (f) => defs.filter(([, d]) => RG_FAM_OF(d) === f);

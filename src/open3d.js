@@ -42,6 +42,8 @@ const Open3D = (() => {
     const inner = new THREE.PointLight("#ffffff", 0, 9, 1.6); inner.position.set(0, 1.1, 0.1); scene.add(inner);
     E = { THREE, canvas, renderer, scene, camera, composer, bloom, rim, rim2, inner, tweens: [], clockT: 0, shake: 0, last: performance.now(), on: false,
       cam: { pos: new THREE.Vector3(), look: new THREE.Vector3() }, pointer: { x: 0, y: 0, nx: 0, ny: 0 }, ray: new THREE.Raycaster(), ndc: new THREE.Vector2() };
+    // lumières des cartes toujours dans la scène : en ajouter ou en retirer force Three.js à recompiler tous les shaders (saccades)
+    E.cardLights = Array.from({ length: 10 }, () => { const l = new THREE.PointLight("#ffffff", 0, 4, 1.5); scene.add(l); return l; });
     buildTextures(); buildFloor(); buildChest(); buildKey(); buildPack(); buildParticles(); buildCardGeo();
     canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); canvas.addEventListener("pointerup", onUp);
     canvas.addEventListener("pointerleave", () => cur?.cards.forEach((c) => { c.hover = 0; })); canvas.addEventListener("click", onClick);
@@ -359,7 +361,35 @@ const Open3D = (() => {
   }
   const imgOf = (x) => { const k = imgKey(x.c); return k ? ART[k] || PHOTO[k] : null; };
   const loadImg = (src) => new Promise((r) => { if (!src) return r(null); const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  // objet du Sanctuaire : la carte montre l'effet (cadre, aura, ornement…) sur une silhouette de carte, avec son nom
+  function cosFaceTex(x) {
+    const col = colOf(x), cs = x.cos || {}, c1 = cs.c1 || col, c2 = cs.c2 || c1, slot = COS_SLOTS.find((s) => s.id === cs.slot)?.label || "Objet";
+    return canvasTex(600, 888, (g, w, h) => {
+      const fr = g.createLinearGradient(0, 0, w, h); fr.addColorStop(0, col); fr.addColorStop(.5, "#1a1230"); fr.addColorStop(1, col);
+      roundRect(g, 0, 0, w, h, 42); g.fillStyle = fr; g.fill();
+      roundRect(g, 14, 14, w - 28, h - 28, 32); const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, "#1d1636"); bg.addColorStop(1, "#0d0a1a"); g.fillStyle = bg; g.fill();
+      g.fillStyle = "#f0e6d2"; g.font = "600 30px Inter, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(slot.toUpperCase(), w / 2, 66);
+      // la mini-carte qui porte l'objet
+      const X = 150, Y = 130, W = 300, H = 430;
+      if (cs.slot === "fond") { const f = g.createLinearGradient(X, Y, X + W, Y + H); f.addColorStop(0, c1); f.addColorStop(1, c2); roundRect(g, X, Y, W, H, 24); g.fillStyle = f; g.fill(); }
+      if (cs.slot === "aura" || cs.slot === "pres") { const r = g.createRadialGradient(w / 2, Y + H / 2, 60, w / 2, Y + H / 2, 300); r.addColorStop(0, c1 + "cc"); r.addColorStop(1, c1 + "00"); g.fillStyle = r; g.fillRect(0, Y - 80, w, H + 160); }
+      if (cs.slot !== "fond") { roundRect(g, X, Y, W, H, 24); g.fillStyle = "#151025"; g.fill(); }
+      g.save(); roundRect(g, X, Y, W, H, 24); g.clip();
+      g.fillStyle = "#ffffff14"; g.beginPath(); g.arc(w / 2, Y + 170, 70, 0, 7); g.fill(); g.beginPath(); g.ellipse(w / 2, Y + 400, 130, 120, 0, Math.PI, 0); g.fill();
+      if (cs.slot === "holo") for (let i = -6; i < 12; i++) { const hh = (i * 40) % 360; g.fillStyle = `hsla(${hh}, 90%, 65%, .22)`; g.beginPath(); g.moveTo(X + i * 50, Y); g.lineTo(X + i * 50 + 30, Y); g.lineTo(X + i * 50 - 170, Y + H); g.lineTo(X + i * 50 - 200, Y + H); g.fill(); }
+      if (cs.slot === "part") for (let i = 0; i < 46; i++) { g.fillStyle = i % 2 ? c1 : c2 || c1; g.globalAlpha = .4 + Math.random() * .6; g.beginPath(); g.arc(X + Math.random() * W, Y + Math.random() * H, 3 + Math.random() * 6, 0, 7); g.fill(); }
+      g.globalAlpha = 1; g.restore();
+      if (cs.slot === "cadre") { const f = g.createLinearGradient(X, Y, X + W, Y + H); f.addColorStop(0, c1); f.addColorStop(.5, c2); f.addColorStop(1, c1); roundRect(g, X, Y, W, H, 24); g.lineWidth = 22; g.strokeStyle = f; g.stroke(); }
+      else { roundRect(g, X, Y, W, H, 24); g.lineWidth = 4; g.strokeStyle = "#ffffff33"; g.stroke(); }
+      if (cs.slot === "orn") { g.save(); g.translate(w / 2, Y - 6); g.fillStyle = c1; g.shadowColor = c1; g.shadowBlur = 24; g.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 22 : 54; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.fill(); g.restore(); }
+      if (cs.slot === "pres") { g.fillStyle = "#fff"; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; g.globalAlpha = .7; g.beginPath(); g.arc(w / 2 + Math.cos(a) * 200, Y + H / 2 + Math.sin(a) * 260, 4, 0, 7); g.fill(); } g.globalAlpha = 1; }
+      g.fillStyle = "#f0e6d2"; g.font = "700 40px Cinzel, serif"; const nm = cs.name || "Objet"; g.fillText(nm.length > 22 ? nm.slice(0, 21) + "…" : nm, w / 2, 640);
+      g.fillStyle = col; g.font = "700 30px Cinzel, serif"; g.fillText(LABEL(x.c.rar).toUpperCase(), w / 2, 700);
+      g.fillStyle = "#ffffff99"; g.font = "500 24px Inter, sans-serif"; g.fillText("Objet unique · à équiper à l'Atelier", w / 2, 770);
+    });
+  }
   function faceTex(x, img) {
+    if (x.cos) return cosFaceTex(x);
     const col = colOf(x), rar = x.c.rar;
     return canvasTex(600, 888, (g, w, h) => {
       const fr = g.createLinearGradient(0, 0, w, h); fr.addColorStop(0, col); fr.addColorStop(.5, x.gold ? "#3a2c0c" : "#1a1230"); fr.addColorStop(1, col);
@@ -388,15 +418,16 @@ const Open3D = (() => {
     const face = new THREE.Mesh(E.faceGeo, faceMat); face.position.z = -(CT / 2 + 0.007); face.rotation.y = Math.PI; flip.add(face);
     const back = new THREE.Mesh(E.faceGeo, E.backMat); back.position.z = CT / 2 + 0.007; flip.add(back);
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: E.radial, color: new THREE.Color(col), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 })); halo.scale.set(1.6, 2.1, 1); halo.position.z = -0.08; tilt.add(halo);
-    const light = new THREE.PointLight(col, 0, 4, 1.5); light.position.z = 0.6; tilt.add(light);
+    const light = E.cardLights[i % E.cardLights.length]; light.color.set(col); light.intensity = 0; light.position.set(0, -40, 0);
     const c = { x, img, rk, col, rar: x.gold ? "gold" : x.c.rar, root, tilt, flip, face, back, edge, edgeMat, faceMat, halo, light, flipped: false, busy: false, tiltX: 0, tiltY: 0, hover: 0, home: new THREE.Vector3(), homeRz: 0, s: 1, i };
     for (const m of [edge, face, back]) m.userData.card = c;
     return c;
   }
-  function clearCards() { for (const c of cur?.cards || []) { E.scene.remove(c.root); c.faceMat.map.dispose(); c.faceMat.dispose(); c.edgeMat.dispose(); } }
+  function clearCards() { for (const c of new Set([...(cur?.cards || []), ...(cur?.pre || [])])) { c.light.intensity = 0; E.scene.remove(c.root); c.faceMat.map.dispose(); c.faceMat.dispose(); c.edgeMat.dispose(); } }
 
   // ---------- mise en place selon l'écran ----------
   function slotsFor(n, portrait) {
+    if (n < 5) return Array.from({ length: n }, (_, i) => { const d = i - (n - 1) / 2; return { x: d * (portrait ? 1.1 : 1.4), y: portrait ? 2.1 : 1.75, z: 2.2, rz: -d * .04, s: n === 1 ? (portrait ? 1.1 : 1.0) : 1.0 }; });
     if (n <= 5) return portrait ? [[-1.2, 2.55], [0, 2.55], [1.2, 2.55], [-0.6, 0.85], [0.6, 0.85]].slice(0, n).map(([x, y]) => ({ x, y, z: 2.2, rz: 0, s: 1 })) : [-2.6, -1.3, 0, 1.3, 2.6].slice(0, n).map((x, i) => ({ x, y: 1.75 - Math.abs(i - 2) * 0.09, z: 2.2 - Math.abs(i - 2) * 0.08, rz: -(i - 2) * 0.045, s: 1 }));
     // coffre (10 cartes) : deux arcs comme le prototype, les cartes du bord tournées vers le joueur
     if (portrait) { const rows = [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9]]; const out = []; rows.forEach((r, j) => r.forEach((_, k) => { const d = k - (r.length - 1) / 2; out.push({ x: d * 0.86, y: 3.0 - j * 1.12 - Math.abs(d) * 0.06, z: 2.2 - Math.abs(d) * 0.08, rz: -d * 0.05, ry: -d * 0.12, s: 0.74 }); })); return out; }
@@ -444,8 +475,38 @@ const Open3D = (() => {
     cur = { o, kind, phase: "idle", run: Math.random(), cards: [], best: bestOf(o), imgs: o.cards.map(() => null) };
     // la meilleure carte de la Dorée compte comme une Légendaire pour la lumière
     if (o.cards.some((x) => x.gold) && RAR[cur.best].rank < 4) cur.best = "l";
-    Promise.all(o.cards.map((x, i) => (x.cos ? null : loadImg(imgOf(x)).then((im) => { cur && (cur.imgs[i] = im); }))));
+    const run = cur.run;
+    cur.ready = Promise.all(o.cards.map((x, i) => (x.cos ? null : loadImg(imgOf(x)).then((im) => im?.decode?.().then(() => im, () => im) || im).then((im) => { cur && (cur.imgs[i] = im); })))).then(() => prewarm(run));
     resetScene();
+    if (o.restore) restore(run); else if (o.single) single(run);
+  }
+  // invocation d'une seule carte : elle tombe du ciel au-dessus de l'autel et se retourne toute seule
+  async function single(run) {
+    E.ch.chest.visible = E.key.g.visible = E.pk.pack.visible = false; hint(""); cur.phase = "opening";
+    await cur.ready; if (!cur || cur.run !== run) return;
+    const tc = HEX[cur.best] || "#b072ff";
+    flash(tc, .2);
+    await dealCards(V3(0, 5, 1), tc, (c, i, s) => ({ p0: V3(0, 5.5, 1.2), rot0: 1.2, mid: V3(s.x, s.y + 1.4, s.z) }));
+    if (!cur || cur.run !== run) return;
+    await wait(250); if (cur?.run === run && cur.cards[0]) flipCard(cur.cards[0]);
+  }
+  // retour à une ouverture terminée (depuis une carte ou la collection) : les cartes déjà retournées, les boutons de fin
+  async function restore(run) {
+    E.ch.chest.visible = E.key.g.visible = E.pk.pack.visible = false; hint("");
+    cur.phase = "restoring"; await cur.ready; if (!cur || cur.run !== run) return;
+    cur.cards = cur.pre && cur.pre.every((c, i) => c.img === cur.imgs[i]) ? cur.pre : cur.o.cards.map((x, i) => makeCard(x, i, cur.imgs[i])); cur.pre = null;
+    cur.phase = "done"; resize();
+    for (const c of cur.cards) { c.root.visible = true; c.flipped = true; c.flip.rotation.set(0, Math.PI, 0); if (c.rk >= 3) c.halo.material.opacity = c.rk >= 4 ? 0.16 : 0.08; }
+    showRecap();
+  }
+  // pendant que tu regardes le coffre : cartes, textures et shaders préparés d'avance, pour que la sortie des cartes ne fige pas
+  function prewarm(run) {
+    if (!cur || cur.run !== run || cur.o.pk.cos || cur.cards.length) return;
+    const pre = cur.o.cards.map((x, i) => makeCard(x, i, cur.imgs[i]));
+    for (const c of pre) { c.root.position.set(0, -40, 0); c.root.scale.setScalar(0.001); E.renderer.initTexture(c.faceMat.map); }
+    const done = () => { for (const c of pre) c.root.visible = false; };
+    cur.pre = pre;
+    try { const p = E.renderer.compileAsync ? E.renderer.compileAsync(E.scene, E.camera) : E.renderer.compile(E.scene, E.camera); Promise.resolve(p).then(done, done); } catch (e) { done(); }
   }
   function resetScene() {
     const ch = E.ch, P = E.pk, K = E.key, THREE = E.THREE;
@@ -715,8 +776,9 @@ const Open3D = (() => {
   // les cartes sortent et viennent se poser devant toi ; les cosmétiques passent au dévoilement habituel
   async function dealCards(from, tc, path, gap = 70) {
     const me = cur.run, o = cur.o;
-    if (o.pk.cos) { await wait(500); if (!alive(me)) return; return handOff(); }
-    cur.cards = o.cards.map((x, i) => makeCard(x, i, cur.imgs[i])); E.lay.slots = slotsFor(cur.cards.length, E.lay.portrait);
+    cur.cards = cur.pre && cur.pre.every((c, i) => c.img === cur.imgs[i]) ? cur.pre : o.cards.map((x, i) => makeCard(x, i, cur.imgs[i]));
+    if (cur.pre && cur.cards !== cur.pre) for (const c of cur.pre) { c.light.intensity = 0; E.scene.remove(c.root); c.faceMat.map.dispose(); c.faceMat.dispose(); c.edgeMat.dispose(); }
+    cur.pre = null; E.lay.slots = slotsFor(cur.cards.length, E.lay.portrait);
     const camFrom = E.cam.pos.clone(), lookFrom = E.cam.look.clone();
     tween(1.0, (t) => { E.cam.pos.lerpVectors(camFrom, E.lay.cardCam.pos, t); E.cam.look.lerpVectors(lookFrom, E.lay.cardCam.look, t); });
     await Promise.all(cur.cards.map(async (c, i) => {
@@ -883,7 +945,7 @@ const Open3D = (() => {
     if (cur.phase === "cards" || cur.phase === "done") {
       const h = hit(e), c = h?.object.userData.card; if (!c) return;
       // carte déjà retournée, une fois tout retourné : sa fiche
-      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab) { const id = c.x.c.id; closeStage(); return nav("carte", id); }
+      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab && !c.x.cos) { const id = c.x.c.id; keepOpening(); closeStage(); return nav("carte", id); }
       flipCard(c);
     }
   }
@@ -909,6 +971,7 @@ const Open3D = (() => {
       c.tilt.position.z += ((hv ? 0.18 : 0) - c.tilt.position.z) * k;
       if (!c.flipped && c.rk >= 3 && !c.busy) { c.halo.material.opacity = (c.rk >= 4 ? 0.26 : 0.18) + Math.sin(E.clockT * 3 + c.i) * 0.06; c.edgeMat.emissiveIntensity = 0.5 + Math.sin(E.clockT * 3 + c.i) * 0.25; }
       if (!c.busy && !c.flipped) c.root.position.y = c.home.y + Math.sin(E.clockT * 1.4 + c.i) * 0.025;
+      if (c.light.intensity > 0) { c.tilt.getWorldPosition(c.light.position); c.light.position.z += 0.6; }
     }
     E.pointer.x += (E.pointer.nx - E.pointer.x) * 0.05; E.pointer.y += (E.pointer.ny - E.pointer.y) * 0.05;
     E.shake *= Math.exp(-dt * 5);

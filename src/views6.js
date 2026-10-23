@@ -11,7 +11,14 @@ async function cfLoadTable(gid) {
   clearTimeout(CF.timer);
   await cfCat();
   try { const t = await srv("confront/state", { gid }); if (JSON.stringify(t) !== JSON.stringify(CF.table)) { CF.table = t; if (view === "confront" && param === gid && !document.activeElement?.closest?.(".cf-keep")) draw(); } }
-  catch (e) { CF.table = { error: e.message }; if (view === "confront") draw(); return; }
+  catch (e) {
+    // une erreur passagère (réseau, serveur occupé) ne doit pas arrêter le suivi de la partie : on garde l'écran et on réessaie
+    CF.fails = (CF.fails || 0) + 1;
+    if (!CF.table || CF.table.error || CF.fails > 20) { CF.table = { error: e.message }; if (view === "confront") draw(); }
+    if (view === "confront" && param === gid && CF.fails <= 20) CF.timer = setTimeout(() => cfLoadTable(gid), 3000);
+    return;
+  }
+  CF.fails = 0;
   if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 8000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
 }
 async function cfAct(action) {
@@ -182,7 +189,7 @@ function cfParts(T) {
       ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
-    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
+    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Il te manquait des cartes : des persos prêtés complètent le tirage." : "2 persos tirés au hasard parmi ton deck : choisis celui que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
   }

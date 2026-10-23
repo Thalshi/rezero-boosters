@@ -520,7 +520,7 @@ const Arena = (() => {
     if (!p.role) return "";
     const R0 = ROLES[p.role] || { nom: p.role };
     const me = p.id === v.moi, cls = p.role === "gardien" ? "" : me ? "mine" : "brk";
-    return `<span class="ar-role ${cls}">${ico(p.role)} ${esc(R0.nom)}${me && p.role !== "gardien" ? " · toi seul le vois" : ""}</span>`;
+    return `<span class="ar-role ${cls}">${roleEmb(p.role)} ${esc(R0.nom)}${me && p.role !== "gardien" ? " · toi seul le vois" : ""}</span>`;
   }
   const weaponTxt = (j) => (j?.arme ? `${esc(defOf(j.arme).nom?.split(" ")[0] || j.arme.def)} · portée ${defOf(j.arme).portee || 1}` : "Dague · portée 1");
   function renderTags() {
@@ -550,7 +550,7 @@ const Arena = (() => {
     const v = CF.table?.vue; if (!v || !st) return;
     const n = v.joueurs.length, split = v.mode === "classique" ? ROLE_SPLIT[n] : null;
     const down = (r) => v.joueurs.filter((j) => j.role === r && !j.vivant).length;
-    $a("tblBd").innerHTML = (split ? `<div class="ar-rl">${ROLE_ORDER.map((r, i) => split[i] ? `<span style="--rc:${ROLE_COL[r]}">${ico(r)} ${split[i]} ${esc(ROLES[r].nom)}${split[i] > 1 ? "s" : ""}${down(r) ? ` · ${down(r)} tombé${down(r) > 1 ? "s" : ""}` : ""}</span>` : "").join("")}</div>` : `<p class="note">${v.mode === "duel" ? "Duel" : "Trio"} : pas de rôle, chacun pour soi.</p>`) +
+    $a("tblBd").innerHTML = (split ? `<div class="ar-rl">${ROLE_ORDER.map((r, i) => split[i] ? `<span style="--rc:${ROLE_COL[r]}">${roleEmb(r)} ${split[i]} ${esc(ROLES[r].nom)}${split[i] > 1 ? "s" : ""}${down(r) ? ` · ${down(r)} tombé${down(r) > 1 ? "s" : ""}` : ""}</span>` : "").join("")}</div>` : `<p class="note">${v.mode === "duel" ? "Duel" : "Trio"} : pas de rôle, chacun pour soi.</p>`) +
       st.champs.map((p) => { const j = p.j || {}, b = cfBranch(p.branch); return `<button type="button" class="ar-pl ${p.alive ? "" : "dead"}" data-pid="${esc(p.id)}" style="--bc:${col(p.branch)}"><span class="ar-av" style="background-image:url(${persoImg(p) || ""})"></span><span><b>${esc(nm(p.id))}</b><em style="color:${p.role ? ROLE_COL[p.role] : "var(--mut)"}">${p.role ? esc(ROLES[p.role]?.nom || p.role) : split ? "rôle caché" : ""}</em>
         <small>${esc(persoName(p))} · <i>${esc(b.nom)}</i> : ${esc(CF_POUVOIR_COURT(p.branch))}</small><small>${p.pv}/${p.pvMax} PV · ${weaponTxt(j)}${(j.equip || []).length ? " · " + j.equip.map((c) => esc(defOf(c).nom)).join(", ") : ""}</small></span></button>`; }).join("");
     $a("tblBd").querySelectorAll("[data-pid]").forEach((el) => { el.onclick = () => showInfo(champ(el.dataset.pid)); });

@@ -2088,9 +2088,9 @@ html.w3d-on body::after { display: none; }
 @keyframes bk-prev { from { transform: rotateY(18deg) translateX(-20px); opacity: .2; filter: brightness(.7); } to { transform: none; opacity: 1; } }
 .bk-run { margin: 0 0 6px; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8a6a3a; }
 .bk-page h2 { font-family: var(--disp, Cinzel), serif; color: #3a1d08; font-size: 30px; margin: 0 0 14px; }
-.bk-page h3 { color: #5a2c0a; } .bk-page p, .bk-page li { color: #2e2214; line-height: 1.6; } .bk-page b { color: #1a0f04; }
+.bk-page h3:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #5a2c0a; } .bk-page :is(p, li):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #2e2214; line-height: 1.6; } .bk-page b:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #1a0f04; }
 .bk-page .rg-n { display: none; }
-.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
+.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
 .bk-page :is(.rg-box, .rg-modes > div, .rg-steps li) :is(span, p) { color: #4a3a24 !important; }
 .bk-page .rg-tbl th, .bk-page .rg-tbl td { color: #2e2214; border-color: #c8a46a66; }
 .bk-page a { color: #8a3a10; }
@@ -2212,4 +2212,17 @@ svg.dk .flow > * { animation: dk-flow 7s linear infinite; } svg.dk .flow.rev > *
 .cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
 .cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }
 .cf-dl.big.low { color: #fff; background: #ff2e88; border-color: #ff2e88; animation: dk-pulse 1s ease-in-out infinite; }
+/* inventaire de l'Atelier : l'objet sur une carte vierge, et « Mettre sur cette carte » */
+.kc-ghost .kc-a { display: grid; place-items: end center; background: linear-gradient(180deg, #2a2240, #15102a); }
+.kc-sil { width: 78%; height: 88%; fill: #ffffff14; }
+.zt-inv { display: flex; flex-direction: column; }
+.zt-inv .zt-prev { display: grid; place-items: center; padding: 18px 10px 10px; min-height: 250px; overflow: visible; }
+.zt-as { display: flex; flex-direction: column; gap: 6px; padding: 0 12px 12px; margin-top: auto; }
+.zt-as select { width: 100%; font-size: 12px; padding: 6px 8px; }
+/* les fenêtres (partage du salon, fiches) passent au-dessus de l'arène 3D */
+body.ar-on .overlay { z-index: 95; }
+/* emblèmes des rôles en métal */
+.rl-ic:has(.role-emb) { background: radial-gradient(circle, color-mix(in srgb, var(--rc) 30%, transparent), transparent 70%) !important; border: 0 !important; box-shadow: none !important; }
+.rl-ic .role-emb { width: 56px; height: 56px; } .role-emb { width: 1.4em; height: 1.4em; vertical-align: middle; flex: none; }
+.ar-role .role-emb, .ar-rl .role-emb { width: 22px; height: 22px; }
 </style>

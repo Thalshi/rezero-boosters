@@ -120,7 +120,18 @@ setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("st
 connect();
 
 // le monde du QG en fond du site (même décor que l'arène 3D)
-try { if (typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table) document.documentElement.style.setProperty("--world", `url(${ILLUS_DECOR.table})`); } catch (e) {}
+// un panorama par rubrique (créations de Reichi) : fond 3D et en-tête des pages
+const DECOR_VIEW = { boosters: "v2", collection: "v1", wiki: "v1", carte: "v1", market: "v4", missions: "v5", pred: "v8", classement: "v6", profil: "v6", sanctuaire: "v7", boutique: "v3", atelier: "v3", defile: "v6", confront: "v4", regles: "v5", infos: "v5", raretes: "v1", nouveautes: "v2", avis: "v5" };
+function syncDecor() {
+  try {
+    if (typeof ILLUS_DECOR !== "object") return;
+    const v = location.hash.replace(/^#\/?/, "").split("/")[0] || "boosters", url = ILLUS_DECOR["v" + (DECOR_VIEW[v] || "v2").slice(1)] || ILLUS_DECOR.table;
+    if (!url) return;
+    document.documentElement.style.setProperty("--world", `url(${url})`);
+    World3D.setBg?.(url);
+  } catch (e) {}
+}
+syncDecor(); addEventListener("hashchange", syncDecor);
 // cartes : inclinaison et reflet qui suivent le doigt ou la souris
 (() => {
   let on = null;

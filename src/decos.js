@@ -78,9 +78,7 @@ function decoSVG(d, shape = "round") {
   return `<svg class="dk dk-${d.k} ${R ? "rect" : ""}" viewBox="${vb}" ${R ? 'preserveAspectRatio="none"' : ""} aria-hidden="true"><defs>${grad}</defs>${b}</svg>`;
 }
 // décoration portée par un joueur (la sienne vient de sa sauvegarde, celle des autres de leur profil public)
-function decoOfUid(uid) {
-  const id = uid === ME || uid === "moi" ? save.cos?.deco : (shared.players || []).find((p) => p.uid === uid)?.deco;
-  return id ? DECO_BY_ID[id] : null;
-}
+// les décorations se posent sur les cartes, plus autour des avatars
+function decoOfUid() { return null; }
 // un avatar avec sa décoration (même rendu que av(), entouré)
 const avd = (uid, cls = "", d = undefined) => { const dd = d === undefined ? decoOfUid(uid) : d; return dd ? `<span class="avd">${av(uid, cls)}${decoSVG(dd)}</span>` : av(uid, cls); };

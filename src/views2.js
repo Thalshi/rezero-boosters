@@ -371,12 +371,12 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av">${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
+      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av" ${isMe ? `data-pf-deco role="button" tabindex="0" title="Changer la décoration de ton avatar" style="cursor:pointer"` : ""}>${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Décoration de l'avatar</button>` : ""}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
@@ -422,9 +422,9 @@ function viewRegles() {
     </ol></div>`;
 }
 function viewInfos() {
-  return `<div class="wrap page">${head("Infos", "Re Zéro : LoL")}
+  return `<div class="wrap page">${head("Infos", "Re : LOL")}
     <div class="prose">
-      <p>Re Zéro : LoL est l'anime que Billy réalise sur les membres du serveur Discord <b>QG de Shinjuku</b>. Un épisode sort environ chaque mois. Ce jeu de cartes reprend tous ses persos.</p>
+      <p>Re : LOL est l'anime que Billy réalise sur les membres du serveur Discord <b>QG de Shinjuku</b>. Un épisode sort environ chaque mois. Ce jeu de cartes reprend tous ses persos.</p>
       <h2>L'histoire</h2>
       <p>Les membres du QG sont mystérieusement téléportés dans un monde inconnu et dispersés aux quatre coins de celui-ci. Certains apparaissent seuls, d'autres, comme Billy et Seb qui jouaient ensemble à ce moment-là, se retrouvent au même endroit. Chacun possède désormais un pouvoir unique qu'il devra apprendre à maîtriser pour survivre. Leur objectif : retrouver tous les membres du QG, se réunir et trouver un moyen de rentrer chez eux sans laisser personne derrière.</p>
       <p>Dans l'épisode 1, Billy et Seb arrivent ensemble dans une grande ville, Mojo se fait courser par les gardes, Byakko et Stalk tombent sur Nestor, qui les sauve sur son destrier volant. Shiro se réveille aux côtés de Sultran'Zahar, Mahed est forcé d'affronter Reichi, et Sasori, Iouaf et Sakuto se retrouvent dans une taverne… jusqu'à ce que la nuit tourne mal pour Sakuto.</p>

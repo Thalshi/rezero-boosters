@@ -1,6 +1,6 @@
-# Re Zéro : LoL — Boosters
+# Re : LOL — Boosters
 
-Jeu de collection de cartes inspiré de Kyara, autour de *Re Zéro : LoL*, l'anime de Billy sur le serveur Discord QG de Shinjuku.
+Jeu de collection de cartes inspiré de Kyara, autour de *Re : LOL*, l'anime de Billy sur le serveur Discord QG de Shinjuku.
 
 - `public/index.html` : l'app pour Cloudflare (connexion Discord incluse), générée par `build.py`.
 - `artifact.html` : la même app pour la version claude.ai, générée par `build.py`.

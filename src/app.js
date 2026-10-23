@@ -607,7 +607,7 @@ async function cancelSale(lid) {
 
 async function share(id, gold) {
   const c = byId[id], p = PEOPLE[c.who];
-  const txt = `J'ai eu ${p.name} « ${c.title} » ${gold ? "dorée" : RAR[c.rar].label.toLowerCase()} dans les boosters Re Zéro : LoL !`;
+  const txt = `J'ai eu ${p.name} « ${c.title} » ${gold ? "dorée" : RAR[c.rar].label.toLowerCase()} dans les boosters Re : LOL !`;
   try { await navigator.clipboard.writeText(txt); toast("Copié : colle-le où tu veux."); }
   catch (e) { toast(txt); }
 }
@@ -677,14 +677,14 @@ function badges() {
   const n = bellCount(), u = chat.open ? 0 : chatUnread();
   b.hidden = !n; b.textContent = n > 9 ? "9+" : n;
   c.hidden = !u; c.textContent = u > 9 ? "9+" : u;
-  document.title = (n + u ? `(${n + u}) ` : "") + "Re Zéro : LoL";
+  document.title = (n + u ? `(${n + u}) ` : "") + "Re : LOL";
 }
 
 // --- notifications de l'appareil (quand l'onglet est en arrière-plan) ---
 const pushOn = () => lsGet("rzlol-push") === "1" && "Notification" in window && Notification.permission === "granted";
 function pushOS(text) {
   if (!pushOn() || !document.hidden) return;
-  try { new Notification("Re Zéro : LoL", { body: text, tag: "rzlol-" + text.slice(0, 40) }); } catch (e) {}
+  try { new Notification("Re : LOL", { body: text, tag: "rzlol-" + text.slice(0, 40) }); } catch (e) {}
 }
 async function togglePush() {
   if (!("Notification" in window)) return toast("Ton navigateur ne gère pas les notifications.");

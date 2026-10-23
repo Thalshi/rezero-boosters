@@ -1,9 +1,9 @@
-<title>Re Zéro : LoL · Boosters</title>
+<title>Re : LOL · Boosters</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Même interface que Kyara (couleurs, polices, pilules, cartes), avec l'univers de Re Zéro : LoL. */
+/* Même interface que Kyara (couleurs, polices, pilules, cartes), avec l'univers de Re : LOL. */
 :root {
   --bg: #0e0d12; --bg2: #121117; --panel: #15141a; --panel2: #17161d; --raise: #1e1c26;
   --line: #25232c; --line2: #2e2b36; --line3: #3a3742;
@@ -2349,6 +2349,12 @@ svg.dk .fx-sway2 { animation: fx-sway2 1.8s ease-in-out infinite alternate; }
 .cr-car { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 4px 16px; } .cr-car > * { scroll-snap-align: start; flex: none; }
 .cr-strip { display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px; margin-top: 10px; border-top: 1px solid #ffffff14; } .cr-strip .cr-hd { flex: none; width: 92px; padding: 8px 4px; } .cr-strip .cr-hd-img { width: 54px; height: 54px; }
 @media (max-width: 600px) { .cr-sh-head { flex-wrap: wrap; justify-content: center; text-align: center; } .cr-sh-t .row { justify-content: center; } .cr-nav { display: none; } .cr-hds { grid-template-columns: repeat(3, 1fr); } }
+.brx-hb { display: flex; gap: 2px; justify-content: center; flex-wrap: wrap; } .brx-hb > * { width: 18px; height: 18px; }
+.brx-cc { flex: none; width: 170px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 14px; background: #120d22d9; border: 1px solid #ffffff14; }
+.brx-cc.mod { border-color: #e8c77e88; } .brx-cc .brx-sel { display: flex; align-items: center; gap: 6px; width: 100%; } .brx-cc select { flex: 1; min-width: 0; } .brx-cc small { text-align: center; font-size: 11px; line-height: 1.3; }
+.pfd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; margin: 12px 0 16px; }
+.pfd-t { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 6px 10px; border-radius: 14px; border: 1px solid #ffffff14; background: #120d22d9; color: var(--fg); cursor: pointer; }
+.pfd-t b { margin-top: 18px; font-size: 13px; text-align: center; } .pfd-t small { font-size: 11px; color: var(--mut, #b8aecb); } .pfd-t.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f66; } .pfd-t:hover { border-color: var(--gold, #e8c77e); }
 .cri-drop { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 34px 20px; border: 2px dashed #ffffff30; border-radius: 16px; background: #0b0916a8; margin: 14px 0; }
 .cri-drop.on { border-color: var(--gold, #e8c77e); background: #2a1d0ca8; } .cri-drop small { color: var(--mut, #b8aecb); max-width: 640px; }
 .cri-bar { justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
@@ -2417,7 +2423,7 @@ html.w3d-on body::before { background:
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
   <div class="wrap hd-in">
-    <button class="logo" type="button" data-nav="boosters" aria-label="Accueil"><span class="logo-mk"><i><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><circle cx="12" cy="12" r="4.5"/><path d="M12 4.8v2.7M12 16.5v2.7M5.6 8.4l2.4 1.4M16 14.2l2.4 1.4"/></svg></i></span><b>RE ZÉRO</b></button>
+    <button class="logo" type="button" data-nav="boosters" aria-label="Accueil"><span class="logo-mk"><i><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><circle cx="12" cy="12" r="4.5"/><path d="M12 4.8v2.7M12 16.5v2.7M5.6 8.4l2.4 1.4M16 14.2l2.4 1.4"/></svg></i></span><b>RE : LOL</b></button>
     <nav class="nav" id="nav" aria-label="Navigation"></nav>
     <div class="hd-r">
       <button class="wal" type="button" data-nav="boosters" aria-label="Ton stock"><span class="bar"><i id="wGauge"></i></span><span id="wFree">10/10</span><span class="sep"></span><span class="ess"><span class="dia"></span><span id="wChakra">0</span></span></button>
@@ -2432,7 +2438,7 @@ html.w3d-on body::before { background:
 <main id="view"></main>
 <nav class="tabbar" id="tabbar" aria-label="Navigation principale"></nav>
 <footer class="ft"><div class="wrap">
-  <p><b>RE ZÉRO : LOL</b> · Jeu de cartes fan du QG de Shinjuku. L'anime et ses persos appartiennent à Billy et aux membres du serveur.</p>
+  <p><b>RE : LOL</b> · Jeu de cartes fan du QG de Shinjuku. L'anime et ses persos appartiennent à Billy et aux membres du serveur.</p>
   <nav><button type="button" data-nav="raretes">Raretés</button><button type="button" data-nav="regles">Règles</button><button type="button" data-nav="infos">Infos</button><button type="button" data-nav="nouveautes">Nouveautés</button><button type="button" data-nav="classement">Classement</button><button type="button" data-nav="avis">Avis et bugs</button></nav>
 </div></footer>
 
@@ -3663,7 +3669,7 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 
 // ===== Interrupteurs par fonctionnalité (réglés par l'admin dans config/game, sans redéployer) =====
 // Absent = activé. Permet de déployer le code puis d'ouvrir chaque nouveauté quand ses valeurs sont validées.
-const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
+const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re : LOL · Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
 const ART = {
@@ -4441,7 +4447,7 @@ async function cancelSale(lid) {
 
 async function share(id, gold) {
   const c = byId[id], p = PEOPLE[c.who];
-  const txt = `J'ai eu ${p.name} « ${c.title} » ${gold ? "dorée" : RAR[c.rar].label.toLowerCase()} dans les boosters Re Zéro : LoL !`;
+  const txt = `J'ai eu ${p.name} « ${c.title} » ${gold ? "dorée" : RAR[c.rar].label.toLowerCase()} dans les boosters Re : LOL !`;
   try { await navigator.clipboard.writeText(txt); toast("Copié : colle-le où tu veux."); }
   catch (e) { toast(txt); }
 }
@@ -4511,14 +4517,14 @@ function badges() {
   const n = bellCount(), u = chat.open ? 0 : chatUnread();
   b.hidden = !n; b.textContent = n > 9 ? "9+" : n;
   c.hidden = !u; c.textContent = u > 9 ? "9+" : u;
-  document.title = (n + u ? `(${n + u}) ` : "") + "Re Zéro : LoL";
+  document.title = (n + u ? `(${n + u}) ` : "") + "Re : LOL";
 }
 
 // --- notifications de l'appareil (quand l'onglet est en arrière-plan) ---
 const pushOn = () => lsGet("rzlol-push") === "1" && "Notification" in window && Notification.permission === "granted";
 function pushOS(text) {
   if (!pushOn() || !document.hidden) return;
-  try { new Notification("Re Zéro : LoL", { body: text, tag: "rzlol-" + text.slice(0, 40) }); } catch (e) {}
+  try { new Notification("Re : LOL", { body: text, tag: "rzlol-" + text.slice(0, 40) }); } catch (e) {}
 }
 async function togglePush() {
   if (!("Notification" in window)) return toast("Ton navigateur ne gère pas les notifications.");
@@ -4893,7 +4899,7 @@ function packsForTab() {
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
-  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>${ico("logo")}</i>RE ZÉRO</span><span class="emb">${ico(packIcon(p))}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
+  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>${ico("logo")}</i>RE : LOL</span><span class="emb">${ico(packIcon(p))}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
 }
 function selPack() {
   const list = packsForTab();
@@ -5025,7 +5031,7 @@ function albumsHTML() {
 // ===== Wiki : tous les persos =====
 function viewWiki() {
   return `<div class="wrap page">
-    ${head("Wiki", "Les persos de l'anime", "Chaque perso apparu dans Re Zéro : LoL. Obtiens sa carte pour débloquer sa fiche complète : pouvoir, apparence, caractère, citations et cote au marché.")}
+    ${head("Wiki", "Les persos de l'anime", "Chaque perso apparu dans Re : LOL. Obtiens sa carte pour débloquer sa fiche complète : pouvoir, apparence, caractère, citations et cote au marché.")}
     ${Object.entries(FACTIONS).map(([f, F]) => { const list = CARDS.filter((c) => c.who === c.id && PEOPLE[c.who].fac === f || (c.id.endsWith("-1") && PEOPLE[c.who].fac === f && !CARDS.some((x) => x.id === c.who)));
       return `<section class="sec"><div class="sec-h"><h2 style="color:${F.color}">${F.label}</h2><span class="mono mut" style="font-size:13px">${list.filter((c) => visible(c)).length}/${list.length} connus</span></div>
         <div class="cgrid">${list.map((c) => cardFor(c, { click: true })).join("")}</div></section>`; }).join("")}
@@ -5091,7 +5097,7 @@ function viewCard() {
         ${got ? `<div class="card"><dl class="facts">
           ${MY_BR[c.id] ? `<dt>Style en Confrontation</dt><dd class="kc-brd">${cfEmb(MY_BR[c.id], "sm")} <b>${esc(cfBranch(MY_BR[c.id]).nom)}</b> · ${esc(cfBranch(MY_BR[c.id]).pouvoir || "")}</dd>` : ""}
           ${row("Pouvoir", esc(p.power))}${row("Apparence", esc(p.look))}${row("Caractère", esc(p.mood))}
-          <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re Zéro : LoL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
+          <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re : LOL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
           ${quotes.length ? `<dt>Citations</dt><dd class="quotes">${quotes.map((q) => `<q>${esc(q)}</q>`).join("")}</dd>` : ""}
           <dt>Exemplaires</dt><dd>${o.n} normale${o.n > 1 ? "s" : ""} · ${o.gold} dorée${o.gold > 1 ? "s" : ""}</dd>
           <dt>Recyclage</dt><dd>${R.chakra} ◆ (dorée : ${R.chakra * 3} ◆)</dd>
@@ -5479,12 +5485,12 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av">${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
+      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av" ${isMe ? `data-pf-deco role="button" tabindex="0" title="Changer la décoration de ton avatar" style="cursor:pointer"` : ""}>${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Décoration de l'avatar</button>` : ""}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
@@ -5530,9 +5536,9 @@ function viewRegles() {
     </ol></div>`;
 }
 function viewInfos() {
-  return `<div class="wrap page">${head("Infos", "Re Zéro : LoL")}
+  return `<div class="wrap page">${head("Infos", "Re : LOL")}
     <div class="prose">
-      <p>Re Zéro : LoL est l'anime que Billy réalise sur les membres du serveur Discord <b>QG de Shinjuku</b>. Un épisode sort environ chaque mois. Ce jeu de cartes reprend tous ses persos.</p>
+      <p>Re : LOL est l'anime que Billy réalise sur les membres du serveur Discord <b>QG de Shinjuku</b>. Un épisode sort environ chaque mois. Ce jeu de cartes reprend tous ses persos.</p>
       <h2>L'histoire</h2>
       <p>Les membres du QG sont mystérieusement téléportés dans un monde inconnu et dispersés aux quatre coins de celui-ci. Certains apparaissent seuls, d'autres, comme Billy et Seb qui jouaient ensemble à ce moment-là, se retrouvent au même endroit. Chacun possède désormais un pouvoir unique qu'il devra apprendre à maîtriser pour survivre. Leur objectif : retrouver tous les membres du QG, se réunir et trouver un moyen de rentrer chez eux sans laisser personne derrière.</p>
       <p>Dans l'épisode 1, Billy et Seb arrivent ensemble dans une grande ville, Mojo se fait courser par les gardes, Byakko et Stalk tombent sur Nestor, qui les sauve sur son destrier volant. Shiro se réveille aux côtés de Sultran'Zahar, Mahed est forcé d'affronter Reichi, et Sasori, Iouaf et Sakuto se retrouvent dans une taverne… jusqu'à ce que la nuit tourne mal pour Sakuto.</p>
@@ -6665,6 +6671,27 @@ document.addEventListener("change", (e) => {
   if (e.target.id === "zSkip") { zSkipAnim = e.target.checked; try { localStorage.setItem("rz-skip-summon", zSkipAnim ? "1" : "0"); } catch (err) {} }
 });
 
+// ===== Profil : changer la décoration de son avatar parmi celles qu'on possède =====
+function pfDecoSheet() {
+  const own = DECOS.filter((d) => decosOf(save)[d.id]).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank), cur = save.cos?.deco || "";
+  const tile = (d) => `<button type="button" class="pfd-t ${(d?.id || "") === cur ? "on" : ""}" data-pfd="${d?.id || ""}">${zMeAv(d, 74)}<b>${d ? esc(d.name) : "Aucune"}</b>${d ? `<small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>` : "<small>Avatar simple</small>"}</button>`;
+  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="Décoration de l'avatar"><div class="sheet-h"><h2>Décoration de l'avatar</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b">${own.length ? `<p class="note">Touche une décoration pour la porter. Elle se voit partout autour de ton avatar : en-tête, profil, classement, comptoir.</p><div class="pfd-grid">${tile(null)}${own.map(tile).join("")}</div>` : `<p class="note">Tu n'as encore aucune décoration.</p>`}
+      <button class="btn block" type="button" data-nav="boutique">${own.length ? "En voir d'autres à la Boutique" : "Voir les décorations à la Boutique"}</button></div></div>`;
+  $("overlay").hidden = false;
+}
+document.addEventListener("click", async (e) => {
+  if (e.target.closest("[data-pf-deco]")) return pfDecoSheet();
+  const t = e.target.closest("[data-pfd]"); if (!t) return;
+  const id = t.dataset.pfd || null;
+  try {
+    const r = await zCall("deco/equip", { id }, () => equipDecoS(save, id));
+    if (r?.state) Object.assign(save, r.state);
+    toast(id ? `${DECO_BY_ID[id].name} : portée.` : "Décoration retirée.");
+    header(); draw(); pfDecoSheet();
+  } catch (err) { toast(err.message); }
+});
+
 // ===== Admin : Galerie (toutes les cartes, contrôle qualité) et Laboratoire (partie de test isolée) =====
 // Réservé à l'admin et au dev. Rien ici ne donne de carte ni ne touche à la vraie partie :
 // la galerie n'affiche que des aperçus, le labo joue sur une sauvegarde à part gardée par le serveur.
@@ -6908,7 +6935,7 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("change", (e) => { if (e.target.id === "defPick") { DEF.pick = e.target.value; draw(); } });
 
-// ===== Re Zéro : Confrontation (2 à 7 joueurs) =====
+// ===== Re : LOL · Confrontation (2 à 7 joueurs) =====
 // Le serveur et son moteur décident de tout ; la page affiche la vue filtrée (viewFor) et propose les actions légales.
 ROUTES.push("confront");
 const CF = { cat: null, list: null, table: null, gid: null, timer: null, busy: false, sel: null, defausse: [], garder: [], contrib: {} };
@@ -7032,14 +7059,14 @@ async function cfShareDo(k) {
 }
 
 function viewConfront() {
-  if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
-  if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re Zéro : Confrontation");
+  if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re : LOL · Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
+  if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re : LOL · Confrontation");
   if (param === "regles") return viewRegles();
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
   const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · ${g.partage ? "cartes partagées" : "chacun son deck"} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
-  return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
+  return `<div class="wrap page">${head("Confrontation", "Re : LOL · Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>
@@ -7250,7 +7277,7 @@ document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if
 setInterval(() => { document.querySelectorAll("[data-cfdl]").forEach((el) => { const s = Math.max(0, Math.round((+el.dataset.cfdl - Date.now()) / 1000)); el.textContent = el.classList.contains("big") ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : `· ${s} s`; el.classList.toggle("low", s <= 20); }); }, 1000);
 
 // ===== Confrontation : livret de règles illustré (#/confront/regles) et fiches des rôles =====
-// Textes originaux, écrits pour Re Zéro à partir de docs/confrontation/REGLES.md (règles appliquées par le moteur).
+// Textes originaux, écrits pour Re : LOL à partir de docs/confrontation/REGLES.md (règles appliquées par le moteur).
 const RI = (d, vb = "0 0 64 64") => `<svg viewBox="${vb}" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ROLES = {
   gardien: {
@@ -7360,7 +7387,7 @@ function viewRegles() {
   const lab = Object.fromEntries(RG_TOC);
   const pages = [{ t: "L'essentiel", h: quick ? quick.innerHTML : "" }, ...secs.map((x) => ({ t: lab[x.id.replace("rg-", "")] || x.querySelector("h2")?.textContent || "", h: x.innerHTML }))];
   const k = Math.max(0, Math.min(pages.length - 1, RGB.page)), dir = RGB.dir; RGB.dir = 0;
-  return `<div class="wrap page rg rgb">${head("Confrontation · Livret", "Comment jouer", "Le livret de Re Zéro : Confrontation, page par page. De 2 à 7 joueurs, environ 20 à 40 minutes.")}
+  return `<div class="wrap page rg rgb">${head("Confrontation · Livret", "Comment jouer", "Le livret de Re : LOL · Confrontation, page par page. De 2 à 7 joueurs, environ 20 à 40 minutes.")}
     <div class="book">
       <nav class="bk-tabs" aria-label="Chapitres">${pages.map((p, i) => `<button type="button" data-bk="${i}" ${i === k ? 'aria-current="page"' : ""}><b>${i || "★"}</b><span>${esc(p.t)}</span></button>`).join("")}</nav>
       <div class="bk-body"><div class="bk-spine" aria-hidden="true"></div>
@@ -7378,7 +7405,7 @@ function rgFullHTML() {
   const defs = Object.entries(cat.cartes || {}), total = defs.reduce((a, [, d]) => a + (d.qte || 0), 0);
   const fam = (f) => defs.filter(([, d]) => RG_FAM_OF(d) === f);
   const sec = (id, n, title, body) => `<section class="sec rg-sec" id="rg-${id}"><p class="rg-n">${n}</p><h2>${title}</h2>${body}</section>`;
-  return `<div class="wrap page rg">${head("Confrontation · Livret", "Comment jouer", "Le livret complet de Re Zéro : Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
+  return `<div class="wrap page rg">${head("Confrontation · Livret", "Comment jouer", "Le livret complet de Re : LOL · Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
     <div class="row"><button class="btn sm" type="button" data-nav="confront">‹ Retour aux salons</button></div>
     <section class="sec rg-quick"><h2>En 30 secondes</h2><ol class="rg-steps">
       <li><b>Un camp</b><span>Gardien et Sentinelles contre Briseurs, à partir de 4 joueurs. Seul le Gardien est connu : à toi de deviner qui est avec toi.</span></li>
@@ -7482,20 +7509,66 @@ function viewBranches() {
   const ids = CF.cat?.branchIds || [], opts = (sel) => ids.map((b) => `<option value="${b}" ${b === sel ? "selected" : ""}>${esc(cfBranch(b).nom)}</option>`).join("");
   const count = Object.fromEntries(ids.map((b) => [b, 0])); for (const c of ALL_CARDS) count[brxOf(c.id)]++;
   const changed = Object.keys(BRX.data.choix).length;
-  const people = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac))
-    .map(([who, p]) => ({ who, p, cards: ALL_CARDS.filter((c) => c.who === who).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank) }))
-    .filter((x) => x.cards.length && (BRX.filtre !== "modif" || x.cards.some((c) => BRX.data.choix[c.id])) && (BRX.filtre !== "var" || new Set(x.cards.map((c) => brxOf(c.id))).size > 1));
-  return `<div class="wrap page" style="max-width:980px">${head("Admin · Confrontation", "Branches des cartes", "Chaque carte a une branche, qui donne son pouvoir en Confrontation. Proposition de départ : la branche du perso, et une deuxième branche pour ses cartes Épique, Légendaire et Mythique. Ce n'est jamais plus fort, juste différent. Tu changes ce que tu veux : c'est pris en compte dès la prochaine partie.")}
-    <div class="brx-sum">${ids.map((b) => `<span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} <b>${count[b]}</b></span>`).join("")}</div>
-    <p class="note">${changed ? `${changed} carte${changed > 1 ? "s" : ""} modifiée${changed > 1 ? "s" : ""} par toi.` : "Aucune modification : tout suit la proposition."} Cette page cite des persos pas encore débloqués : ne la montre pas aux joueurs.</p>
-    ${seg("brxF", [["", "Tous les persos"], ["var", "Avec variantes"], ["modif", "Modifiés"]], BRX.filtre)}
-    <div class="brx-list">${people.map(({ who, p, cards }) => `<div class="brx-p">
-      <div class="brx-h"><b>${esc(p.name)}</b><span class="note">${FACTIONS[p.fac]?.label || ""}</span>
-        <label class="brx-all">Toutes ses cartes <select data-brxall="${who}" aria-label="Branche de toutes les cartes de ${esc(p.name)}"><option value="">Choisir…</option>${opts("")}<option value="__prop">Revenir à la proposition</option></select></label></div>
-      <div class="brx-cards">${cards.map((c) => { const b = brxOf(c.id), mod = !!BRX.data.choix[c.id];
-        return `<label class="brx-c ${mod ? "mod" : ""}"><span class="brx-r" style="--rc:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="brx-t">${esc(subOf(c))}</span>
-          <span class="brx-sel">${cfEmb(b, "sm")}<select data-brx="${c.id}" aria-label="Branche de ${esc(p.name)} · ${esc(subOf(c))}">${opts(b)}</select></span>${mod ? `<small>modifiée · proposé : ${esc(cfBranch(BRX.data.proposees[c.id]).nom)}</small>` : ""}</label>`; }).join("")}</div></div>`).join("")}</div></div>`;
+  const keep = (who) => { const cards = ALL_CARDS.filter((c) => c.who === who); return cards.length && (BRX.filtre !== "modif" || cards.some((c) => BRX.data.choix[c.id])) && (BRX.filtre !== "var" || new Set(cards.map((c) => brxOf(c.id))).size > 1); };
+  const list = brxList(keep);
+  const top = `<div class="brx-sum">${ids.map((b) => `<span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} <b>${count[b]}</b></span>`).join("")}</div>
+    <p class="note">${changed ? `${changed} carte${changed > 1 ? "s" : ""} modifiée${changed > 1 ? "s" : ""} par toi.` : "Aucune modification : tout suit la proposition."} Cette page cite des persos pas encore débloqués : ne la montre pas aux joueurs.</p>`;
+  const body = BRX.p && PEOPLE[BRX.p] && list.includes(BRX.p) ? brxSheet(BRX.p, list, opts) : brxBoard(list);
+  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Confrontation", "Branches des cartes", "Chaque carte a une branche, qui donne son pouvoir en Confrontation. Proposition de départ : la branche du perso, et une deuxième branche pour ses cartes Épique, Légendaire et Mythique. Ce n'est jamais plus fort, juste différent. Touche un perso pour régler ses cartes.")}
+    ${top}${seg("brxF", [["", "Tous les persos"], ["var", "Avec variantes"], ["modif", "Modifiés"]], BRX.filtre)}${body}</div>`;
 }
+// les persos dans l'ordre des épisodes (filtre d'épisode et recherche, comme le Créateur)
+function brxList(keep) {
+  const q = criNorm(BRX.q || ""), ep = BRX.ep ?? "all";
+  return Object.entries(PEOPLE).filter(([k, p]) => !k.startsWith("__") && keep(k) && (!q || criNorm(p.name).includes(q)) && (ep === "all" || epOfCfg(CONFIG, k) === +ep))
+    .sort((a, b) => epOfCfg(CONFIG, a[0]) - epOfCfg(CONFIG, b[0]) || Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac) || a[1].name.localeCompare(b[1].name)).map(([k]) => k);
+}
+// la tête d'un perso, avec les emblèmes des branches de ses cartes
+const brxHead = (k, on = "") => { const bs = [...new Set(ALL_CARDS.filter((c) => c.who === k).map((c) => brxOf(c.id)))], mod = ALL_CARDS.some((c) => c.who === k && BRX.data.choix[c.id]);
+  return crHead(k, on).replace('data-cr-p="', 'data-brx-p="').replace("</small>", `</small><span class="brx-hb">${bs.map((b) => cfEmb(b, "sm")).join("")}</span>${mod ? `<span class="cr-b mod">Modifié</span>` : ""}`); };
+function brxBoard(list) {
+  const eps = [...new Set(list.map((k) => epOfCfg(CONFIG, k)))].sort((a, b) => a - b), ep = BRX.ep ?? "all", allEps = crEps();
+  const chips = `<div class="cr-eps">${[["all", "Tous"], ...allEps.map((e) => [String(e), epLabel(e)])].map(([v, l]) => `<button type="button" class="chip ${String(ep) === v ? "on" : ""}" data-brx-ep="${v}">${l}</button>`).join("")}</div>`;
+  return `<div class="row" style="margin-top:12px"><input class="in cr-q" type="search" id="brxQ" placeholder="Chercher un perso" value="${esc(BRX.q || "")}"></div>${chips}
+    ${eps.map((e) => { const l = list.filter((k) => epOfCfg(CONFIG, k) === e); return `<section class="cr-grp"><h3>${epLabel(e)} <small>${l.length} perso${l.length > 1 ? "s" : ""}</small></h3><div class="cr-hds">${l.map((k) => brxHead(k)).join("")}</div></section>`; }).join("") || `<p class="note">Aucun perso.</p>`}`;
+}
+function brxSheet(k, list, opts) {
+  const p = PEOPLE[k], i = list.indexOf(k), prev = list[(i - 1 + list.length) % list.length], next = list[(i + 1) % list.length];
+  const cards = ALL_CARDS.filter((c) => c.who === k).sort((a, b) => !!a.skin - !!b.skin || RAR[a.rar].rank - RAR[b.rar].rank);
+  const cell = (c) => { const b = brxOf(c.id), mod = !!BRX.data.choix[c.id];
+    return `<div class="brx-cc ${mod ? "mod" : ""}" title="${esc(cfBranch(b).nom)} : ${esc(cfBranch(b).pouvoir || "")}">${cardHTML(c, { w: 150 })}<label class="brx-sel">${cfEmb(b, "sm")}<select data-brx="${c.id}" aria-label="Branche de ${esc(p.name)} · ${esc(subOf(c))}">${opts(b)}</select></label>
+      ${mod ? `<small class="note">modifiée · proposé : ${esc(cfBranch(BRX.data.proposees[c.id]).nom)}</small>` : ""}</div>`; };
+  const base = cards.filter((c) => !c.skin), skins = cards.filter((c) => c.skin);
+  return `<div class="cr-sheet">
+    <div class="cr-sh-top"><button class="btn sm" type="button" data-brx-back>‹ Tous les persos</button><span class="note">${i + 1} / ${list.length} · glisse pour changer de perso</span></div>
+    <div class="cr-sh-head" id="brxSwipe">
+      ${list.length > 1 ? `<button class="cr-nav" type="button" data-brx-p="${prev}" aria-label="Perso précédent">‹</button>` : ""}
+      <span class="cr-sh-img">${thumb(crFace(k), "crh")}</span>
+      <div class="cr-sh-t"><h2>${esc(p.name)}</h2><p class="note">${FACTIONS[p.fac]?.label || ""} · ${epLabel(epOfCfg(CONFIG, k))} · ${cards.length} carte${cards.length > 1 ? "s" : ""}</p>
+        <div class="row"><label class="field cr-sh-ep">Toutes ses cartes <select data-brxall="${k}" aria-label="Branche de toutes les cartes de ${esc(p.name)}"><option value="">Choisir…</option>${opts("")}<option value="__prop">Revenir à la proposition</option></select></label></div></div>
+      ${list.length > 1 ? `<button class="cr-nav r" type="button" data-brx-p="${next}" aria-label="Perso suivant">›</button>` : ""}
+    </div>
+    <h3 class="cr-sh-h">Cartes <small>${base.length}</small></h3><div class="cr-car">${base.map(cell).join("")}</div>
+    ${skins.length ? `<h3 class="cr-sh-h">Skins <small>${skins.length}</small></h3><div class="cr-car">${skins.map(cell).join("")}</div>` : ""}
+    <div class="cr-strip">${list.map((x) => brxHead(x, x === k ? "on" : "")).join("")}</div></div>`;
+}
+function brxStep(d) {
+  const list = [...document.querySelectorAll(".cr-strip [data-brx-p]")].map((x) => x.dataset.brxP), i = list.indexOf(BRX.p); if (i < 0 || list.length < 2) return;
+  BRX.p = list[(i + d + list.length) % list.length]; draw();
+  $("brxSwipe")?.animate([{ transform: `translateX(${d * 40}px)`, opacity: .3 }, { transform: "none", opacity: 1 }], { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" });
+  requestAnimationFrame(() => document.querySelector(".cr-strip .on")?.scrollIntoView({ inline: "center", block: "nearest" }));
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const pp = t.closest("[data-brx-p]"); if (pp) { BRX.p = pp.dataset.brxP; draw(); scrollTo(0, 0); requestAnimationFrame(() => document.querySelector(".cr-strip .on")?.scrollIntoView({ inline: "center", block: "nearest" })); return; }
+  if (t.closest("[data-brx-back]")) { BRX.p = null; return draw(); }
+  const f = t.closest("[data-brx-ep]"); if (f) { BRX.ep = f.dataset.brxEp; return draw(); }
+});
+document.addEventListener("input", (e) => { if (e.target.id !== "brxQ") return; BRX.q = e.target.value; clearTimeout(BRX.qT); BRX.qT = setTimeout(() => { draw(); const i = $("brxQ"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); });
+let brxTouch = null;
+document.addEventListener("touchstart", (e) => { if (e.target.closest?.("#brxSwipe")) brxTouch = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
+document.addEventListener("touchend", (e) => { if (!brxTouch) return; const [x0, y0] = brxTouch, t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; brxTouch = null; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) brxStep(dx < 0 ? 1 : -1); });
+document.addEventListener("keydown", (e) => { if (view === "branches" && BRX.p && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName) && (e.key === "ArrowLeft" || e.key === "ArrowRight")) brxStep(e.key === "ArrowRight" ? 1 : -1); });
 VIEWS.branches = viewBranches;
 ADMIN_SEG.brxF = (v) => { BRX.filtre = v; };
 document.addEventListener("change", (e) => {
@@ -9446,7 +9519,7 @@ const Open3D = (() => {
         const cy = h * .47; g.beginPath(); g.arc(w / 2, cy, 170, 0, 7); g.fillStyle = "#0b0716"; g.fill(); g.strokeStyle = "#e8c77e"; g.lineWidth = 8; g.stroke();
         g.beginPath(); g.arc(w / 2, cy, 148, 0, 7); g.strokeStyle = "#ff2e8888"; g.lineWidth = 3; g.stroke();
         drawIcon(g, "logo", w / 2, cy, 9.5, "#e8c77e", 1.5);
-        g.textAlign = "center"; g.fillStyle = "#f0e6d2"; g.font = "900 86px Cinzel, serif"; g.fillText("RE ZÉRO", w / 2, h * .72);
+        g.textAlign = "center"; g.fillStyle = "#f0e6d2"; g.font = "900 86px Cinzel, serif"; g.fillText("RE : LOL", w / 2, h * .72);
         g.font = "700 30px Inter, sans-serif"; g.fillStyle = "#e8c77e"; g.fillText(E.packLine || "P O C H E T T E   ·   5   C A R T E S", w / 2, h * .72 + 56);
       } else { g.textAlign = "center"; drawIcon(g, "logo", w / 2, h * .5, 6, "#e8c77e88", 1.4); g.font = "700 26px Inter, sans-serif"; g.fillStyle = "#a99cc8"; g.fillText("QG DE SHINJUKU", w / 2, h * .66); }
     };

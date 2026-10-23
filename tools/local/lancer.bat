@@ -1,5 +1,5 @@
 @echo off
-rem Re Zero : lance le jeu en local avec une base de test riche (100 000 essence et 60 boosters par compte).
+rem Re : LOL : lance le jeu en local avec une base de test riche (100 000 essence et 60 boosters par compte).
 rem Double-clique ce fichier. Il faut Node.js (https://nodejs.org). Ferme la fenetre noire pour arreter.
 cd /d "%~dp0\..\.."
 if not exist public\index.html python build.py

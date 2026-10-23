@@ -1,4 +1,4 @@
-// ===== Re Zéro : Confrontation (2 à 7 joueurs) =====
+// ===== Re : LOL · Confrontation (2 à 7 joueurs) =====
 // Le serveur et son moteur décident de tout ; la page affiche la vue filtrée (viewFor) et propose les actions légales.
 ROUTES.push("confront");
 const CF = { cat: null, list: null, table: null, gid: null, timer: null, busy: false, sel: null, defausse: [], garder: [], contrib: {} };
@@ -122,14 +122,14 @@ async function cfShareDo(k) {
 }
 
 function viewConfront() {
-  if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
-  if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re Zéro : Confrontation");
+  if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re : LOL · Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
+  if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re : LOL · Confrontation");
   if (param === "regles") return viewRegles();
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
   const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · ${g.partage ? "cartes partagées" : "chacun son deck"} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
-  return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
+  return `<div class="wrap page">${head("Confrontation", "Re : LOL · Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>

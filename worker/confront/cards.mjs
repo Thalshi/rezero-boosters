@@ -1,7 +1,7 @@
 // Confrontation · catalogue des cartes d'action (pioche partagée).
 // Ces cartes n'ont rien à voir avec les cartes de collection : elles ne s'achètent pas, ne se
 // gagnent pas et n'existent que pendant une partie. Noms, textes et règles sont originaux
-// (univers Re Zéro). Détail complet : docs/confrontation/CARTES.md.
+// (univers Re : LOL). Détail complet : docs/confrontation/CARTES.md.
 
 /** Les quatre signes des présages (chaque carte d'action porte un signe et un rang de 1 à 10). */
 export const SIGNES = [

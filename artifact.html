@@ -7038,8 +7038,9 @@ const Open3D = (() => {
   let T = null, M = null, loading = null, failed = false, E = null, cur = null;
   const pref = () => { try { return localStorage.getItem(LS); } catch (e) { return null; } };
   const webgl = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } };
-  // les navigateurs pilotés par les tests gardent l'ancienne ouverture, sauf si un test demande la 3D
-  const usable = () => !failed && !reduced && pref() !== "0" && (!navigator.webdriver || pref() === "1") && webgl();
+  // seulement la 3D : l'ancienne ouverture ne sert plus que de secours (pas de WebGL, mouvements réduits) ;
+  // les navigateurs pilotés par les tests la gardent, sauf si un test demande la 3D
+  const usable = () => !failed && !reduced && (!navigator.webdriver || pref() === "1") && webgl();
   function load() {
     if (loading) return loading;
     const all = Promise.all([import("three"), import("three/addons/environments/RoomEnvironment.js"), import("three/addons/geometries/RoundedBoxGeometry.js"), import("three/addons/postprocessing/EffectComposer.js"), import("three/addons/postprocessing/RenderPass.js"), import("three/addons/postprocessing/UnrealBloomPass.js"), import("three/addons/postprocessing/OutputPass.js")]);
@@ -7426,7 +7427,7 @@ const Open3D = (() => {
       <div class="o3-title" id="o3Title"></div><p class="o3-hint" id="o3Hint"></p>
       <div class="o3-fx" id="o3Fx"><div class="o3-fx-bg"></div><canvas class="o3-fx-c" id="o3FxC"></canvas><div class="o3-fx-name" id="o3FxName"><b></b><span></span></div></div>
       <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button>
-        <div class="o3-tools"><button class="btn sm" type="button" id="o3Light">Version légère</button><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
+        <div class="o3-tools"><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
       <p class="o3-sub">${esc(o.pk.name)}${o.pk.daily || o.pk.cos ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
   }
   const hint = (t) => { const h = $("o3Hint"); if (h) { h.textContent = t; h.style.opacity = t ? 1 : 0; } };
@@ -7434,7 +7435,6 @@ const Open3D = (() => {
     el.innerHTML = stageHTML(o, top); el.dataset.o3 = o.o3id; el.dataset.cf = ""; delete el.dataset.rv;
     $("o3Host").appendChild(E.canvas);
     $("o3All").onclick = flipAll; $("o3Done").onclick = finish;
-    $("o3Light").onclick = () => { try { localStorage.setItem(LS, "0"); } catch (e) {} stop(); drawOpening(); toast("Version légère : l'ouverture en 3D est coupée sur cet appareil."); };
     $("o3Fx").onclick = () => cur?.fxSkip?.();
     if (!E.on) { E.on = true; E.last = performance.now(); requestAnimationFrame(frame); }
     resize(); hint(cur?.phase === "idle" ? cur.hint : cur?.phase === "cards" ? "Touche une carte pour la retourner" : "");

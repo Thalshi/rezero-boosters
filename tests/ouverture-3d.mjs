@@ -1,6 +1,6 @@
 // Ouvertures en 3D : la pochette (un booster, 5 cartes) se déchire, le coffre (2 boosters, 10 cartes) se brise,
 // les cartes se retournent puis le récapitulatif s'affiche ; les cosmétiques du Sanctuaire passent au dévoilement
-// habituel ; « Version légère » revient à l'ancienne ouverture. Les cartes sont celles tirées par le serveur.
+// habituel ; plus de « Version légère » (seulement la 3D). Les cartes sont celles tirées par le serveur.
 import { startServer, player, reporter, IDS, playwright, ROOT, grant } from "./lib.mjs";
 import { join } from "node:path";
 import { mkdirSync } from "node:fs";
@@ -84,13 +84,10 @@ try {
     await page.click('[data-act="skip"]'); await page.waitForTimeout(400);
     await page.click('[data-act="stage-close"]').catch(() => {}); await page.waitForTimeout(400);
 
-    // version légère : l'ancienne ouverture
+    // seulement la 3D : plus de bouton pour la couper (et un ancien réglage « 0 » est ignoré)
     await page.evaluate(() => startOpening(false, null, 1));
-    await until(page, () => !!document.getElementById("o3Light"));
-    await page.click("#o3Light"); await page.waitForTimeout(600);
-    t.check("version légère : l'ancien booster à tirer", (await page.locator("#pack").count()) === 1 && !(await page.locator("#o3").count()));
-    await page.click('[data-act="stage-back"]'); await page.waitForTimeout(300); await page.click('[data-act="stage-close"]').catch(() => {});
-    await page.evaluate(() => localStorage.setItem("rz-3d", "1"));
+    t.check("plus de bouton « Version légère », seulement la 3D", await until(page, () => Open3D.state?.kind === "pack") && !(await page.locator("#o3Light").count()));
+    await page.evaluate(() => { Open3D.stop(); closeStage(); });
     t.check("aucune erreur JavaScript", errors.length === 0, errors);
     await ctx.close();
   }

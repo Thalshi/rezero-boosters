@@ -179,6 +179,7 @@ const GOLD_EVERY = 10;
 const MYTHIC_PITY = 0;                 // Mythique garantie au bout de N boosters (0 = jamais : décidé par Reichi, seule la Légendaire est garantie)
 const LEGEND_PITY = 40;                // une Légendaire ou mieux garantie au plus tard au 40e booster (provisoire)
 const GOLD_CHANCE = 0.01;
+const NEW_BIAS = 0.4;                  // anti-frustration : 40 % des cartes tirées viennent de celles qui te manquent (dans la rareté tirée)
 const THEME_MIN = 5;                   // persos débloqués avant qu'un booster thématique s'ouvre (provisoire)
 const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
 const DAILY_LAST = { e: 90, l: 8.5, m: 1.5 }; // 5e carte du pack du jour : Épique ou mieux
@@ -504,10 +505,12 @@ function rollWith(table, rng) {
 }
 // La rareté est tirée d'abord. Le perso vient du thème ; si le thème n'a pas cette rareté, du Mix (même rareté) ;
 // si le Mix non plus, de la rareté inférieure la plus proche. Jamais d'une rareté plus haute.
-function pickWith(rar, pool, rng, mix = pool) {
+function pickWith(rar, pool, rng, mix = pool, missing = null) {
   for (let j = RANKS.indexOf(rar); j >= 0; j--) {
     for (const list of [pool, mix]) {
-      const l = list.filter((c) => c.rar === RANKS[j]);
+      let l = list.filter((c) => c.rar === RANKS[j]);
+      // une partie des tirages va d'office vers une carte qui manque encore (la rareté, elle, ne change pas)
+      if (l.length && missing && NEW_BIAS && rng() < NEW_BIAS) { const m = l.filter(missing); if (m.length) l = m; }
       if (l.length) return l[Math.floor(rng() * l.length)];
     }
   }
@@ -545,7 +548,8 @@ function openPackS(s, pk, pool, rng, now = Date.now(), mix = pool) {
   s.sinceGold++;
   if (MYTHIC_PITY && canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
   if (LEGEND_PITY && canLegend && s.sinceLegend >= LEGEND_PITY && !rars.some((r) => r === "l" || r === "m")) rars[PACK - 1] = "l";
-  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix), gold: rng() < GOLD_CHANCE }));
+  const missing = (c) => !hasCard(s, c.id);
+  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix, missing), gold: rng() < GOLD_CHANCE }));
   if (cards.some((x) => x.c.rar === "m")) s.sinceMythic = 0;
   if (cards.some((x) => x.c.rar === "l" || x.c.rar === "m")) s.sinceLegend = 0;
   cards.sort((a, b) => RANKS.indexOf(a.c.rar) - RANKS.indexOf(b.c.rar));
@@ -1048,4 +1052,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

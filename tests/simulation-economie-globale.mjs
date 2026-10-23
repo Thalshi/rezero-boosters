@@ -15,7 +15,8 @@ const T0 = Date.parse("2026-11-02T07:00:00+01:00");
 // les réglages comparés ; « actuel » = ce qui est en production
 const VARIANTS = process.env.FINAL ? [
   // le réglage final, tel qu'il est écrit dans le moteur (rien n'est remplacé sauf les prix déjà identiques)
-  { id: "final", nom: "Final · D + missions refaites (2 du jour, 5 de la semaine) + Légendaire garantie, Mythique jamais", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, confront: { partie: 10, victoire: 10, max: 3 } },
+  { id: "final-sans", nom: "Final sans anti-doublons", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, confront: { partie: 10, victoire: 10, max: 3 }, PROB: { NEW_BIAS: "0" } },
+  { id: "final", nom: "Final · D + missions refaites + Légendaire garantie + 40 % des tirages vers une carte manquante", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, confront: { partie: 10, victoire: 10, max: 3 } },
 ] : process.env.DURE ? [
   // économie dure : gains de C, boosters plus lents ou plus chers, et probabilités plus dures (D et E)
   { id: "g-quart", nom: "C · recyclage ÷ 4, missions ÷ 3 (probabilités actuelles)", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 10, victoire: 10, max: 3 } },

@@ -2035,6 +2035,7 @@ const GOLD_EVERY = 10;
 const MYTHIC_PITY = 0;                 // Mythique garantie au bout de N boosters (0 = jamais : décidé par Reichi, seule la Légendaire est garantie)
 const LEGEND_PITY = 40;                // une Légendaire ou mieux garantie au plus tard au 40e booster (provisoire)
 const GOLD_CHANCE = 0.01;
+const NEW_BIAS = 0.4;                  // anti-frustration : 40 % des cartes tirées viennent de celles qui te manquent (dans la rareté tirée)
 const THEME_MIN = 5;                   // persos débloqués avant qu'un booster thématique s'ouvre (provisoire)
 const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
 const DAILY_LAST = { e: 90, l: 8.5, m: 1.5 }; // 5e carte du pack du jour : Épique ou mieux
@@ -2360,10 +2361,12 @@ function rollWith(table, rng) {
 }
 // La rareté est tirée d'abord. Le perso vient du thème ; si le thème n'a pas cette rareté, du Mix (même rareté) ;
 // si le Mix non plus, de la rareté inférieure la plus proche. Jamais d'une rareté plus haute.
-function pickWith(rar, pool, rng, mix = pool) {
+function pickWith(rar, pool, rng, mix = pool, missing = null) {
   for (let j = RANKS.indexOf(rar); j >= 0; j--) {
     for (const list of [pool, mix]) {
-      const l = list.filter((c) => c.rar === RANKS[j]);
+      let l = list.filter((c) => c.rar === RANKS[j]);
+      // une partie des tirages va d'office vers une carte qui manque encore (la rareté, elle, ne change pas)
+      if (l.length && missing && NEW_BIAS && rng() < NEW_BIAS) { const m = l.filter(missing); if (m.length) l = m; }
       if (l.length) return l[Math.floor(rng() * l.length)];
     }
   }
@@ -2401,7 +2404,8 @@ function openPackS(s, pk, pool, rng, now = Date.now(), mix = pool) {
   s.sinceGold++;
   if (MYTHIC_PITY && canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
   if (LEGEND_PITY && canLegend && s.sinceLegend >= LEGEND_PITY && !rars.some((r) => r === "l" || r === "m")) rars[PACK - 1] = "l";
-  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix), gold: rng() < GOLD_CHANCE }));
+  const missing = (c) => !hasCard(s, c.id);
+  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix, missing), gold: rng() < GOLD_CHANCE }));
   if (cards.some((x) => x.c.rar === "m")) s.sinceMythic = 0;
   if (cards.some((x) => x.c.rar === "l" || x.c.rar === "m")) s.sinceLegend = 0;
   cards.sort((a, b) => RANKS.indexOf(a.c.rar) - RANKS.indexOf(b.c.rar));

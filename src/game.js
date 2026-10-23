@@ -600,7 +600,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
 // Tout est vérifié avant de prendre quoi que ce soit : jamais un seul des deux débité.
 const openEv = (r) => ({ open: r.cards.map((x) => ({ rar: CARD_BY_ID[x.id].rar, gold: x.gold })), divine: r.divine });
 function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
-  n = n === 2 ? 2 : 1;
+  n = n === 10 ? 10 : n === 2 ? 2 : 1; // 10 boosters = 5 coffres de 10 cartes ouverts d'affilée
   if (n === 1) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (!r.error) r.titles = grantTitlesS(s, openEv(r), now); return r; }
   if (packId === "jour") return { error: "Le pack du jour s'ouvre un seul à la fois." };
   regenS(s, now);
@@ -609,7 +609,8 @@ function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
   const runs = [];
   for (let k = 0; k < n; k++) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (r.error) return r; runs.push(r); }
   const cards = runs.flatMap((r) => r.cards), divine = runs.some((r) => r.divine);
-  return { pack: runs[0].pack, n, cards, divine, scenario: pickScenarioS(cards, rng, now), titles: grantTitlesS(s, openEv({ cards, divine }), now) };
+  const scenarios = []; for (let i = 0; i < cards.length; i += 10) scenarios.push(pickScenarioS(cards.slice(i, i + 10), rng, now));
+  return { pack: runs[0].pack, n, cards, divine, scenario: scenarios[0], scenarios, titles: grantTitlesS(s, openEv({ cards, divine }), now) };
 }
 function packChance(rar, k = 1, last = LAST) {
   const a = boosted(SLOT, k), b = boosted(last, k);
@@ -625,9 +626,29 @@ function dupesValueS(s) {
   for (const c of ALL_CARDS) { const o = ownOf(s, c.id); v += Math.max(0, o.n - 1) * cardValue(c.id, false) + Math.max(0, o.gold - 1) * cardValue(c.id, true); }
   return v;
 }
-function recycleS(s, now = Date.now()) {
-  const v = dupesValueS(s); if (!v) return 0;
-  for (const c of ALL_CARDS) { const o = ownOf(s, c.id); if (o.n > 1 || o.gold > 1) s.owned[c.id] = { ...o, n: Math.min(o.n, 1), gold: Math.min(o.gold, 1) }; }
+// doublons du joueur, carte par carte : le joueur choisit lui-même ce qu'il recycle ou combine
+function dupeListS(s) {
+  const out = [];
+  for (const c of ALL_CARDS) { const o = ownOf(s, c.id); if (o.n > 1) out.push({ id: c.id, gold: false, extra: o.n - 1, value: cardValue(c.id, false) }); if (o.gold > 1) out.push({ id: c.id, gold: true, extra: o.gold - 1, value: cardValue(c.id, true) }); }
+  return out;
+}
+// pick : [{ id, gold, n }] ; sans pick, tous les doublons (ancien comportement)
+function recycleS(s, now = Date.now(), pick = null) {
+  if (!pick) {
+    const v = dupesValueS(s); if (!v) return 0;
+    for (const c of ALL_CARDS) { const o = ownOf(s, c.id); if (o.n > 1 || o.gold > 1) s.owned[c.id] = { ...o, n: Math.min(o.n, 1), gold: Math.min(o.gold, 1) }; }
+    s.chakra += v; trackS(s, "recycle", 1, now);
+    return v;
+  }
+  const dl = dupeListS(s), want = [];
+  for (const p of Array.isArray(pick) ? pick : []) {
+    const d = dl.find((x) => x.id === p.id && x.gold === !!p.gold), n = Math.floor(+p.n || 0);
+    if (!d || n < 1 || n > d.extra) return { error: "Ces doublons ne sont plus disponibles." };
+    want.push([d, n]);
+  }
+  let v = 0;
+  for (const [d, n] of want) { for (let i = 0; i < n; i++) removeCardS(s, d.id, d.gold); v += d.value * n; }
+  if (!want.length) return 0;
   s.chakra += v; trackS(s, "recycle", 1, now);
   return v;
 }
@@ -642,9 +663,16 @@ function craftableDupes(s) {
   for (const c of ALL_CARDS) { const o = ownOf(s, c.id); for (let i = 1; i < o.n; i++) list.push(c); }
   return list.sort((a, b) => RANKS.indexOf(a.rar) - RANKS.indexOf(b.rar));
 }
-function craftS(s, cfg, uid, rng, now = Date.now()) {
-  const dupes = craftableDupes(s);
+// pick : les ids des 3 doublons choisis par le joueur (le même id peut revenir s'il en a plusieurs)
+function craftS(s, cfg, uid, rng, now = Date.now(), pick = null) {
+  let dupes = craftableDupes(s);
   if (dupes.length < CRAFT_COST) return { error: `Il te faut ${CRAFT_COST} doublons (tu en as ${dupes.length}).` };
+  if (pick) {
+    if (!Array.isArray(pick) || pick.length !== CRAFT_COST) return { error: `Choisis exactement ${CRAFT_COST} doublons.` };
+    const left = [...dupes], chosen = [];
+    for (const id of pick) { const i = left.findIndex((c) => c.id === id); if (i < 0) return { error: "Ces doublons ne sont plus disponibles." }; chosen.push(left.splice(i, 1)[0]); }
+    dupes = chosen;
+  }
   const pool = SKINS.filter((c) => canPackFor(cfg, c, uid));
   // une Commune au moins : le tirage ne remonte jamais en rareté, il trouve donc toujours un skin
   if (!pool.some((c) => c.rar === "c")) return { error: "Aucun skin n'est encore débloqué pour toi." };
@@ -669,6 +697,17 @@ function statsS(s) {
     ach: Object.keys(s.ach || {}).length, predwin: s.counts?.predwin || 0, since: s.created || (firsts.length ? Math.min(...firsts) : 0) };
 }
 const itemsValue = (items) => (items || []).reduce((a, it) => a + (CARD_BY_ID[it.id] ? cardValue(it.id, it.gold) * (it.n || 1) : 0), 0);
+// Échanges : carte contre carte de même rareté (la Dorée compte à part), et un nombre limité par semaine
+const TRADE_WEEK = 3;                 // échanges réussis par joueur et par semaine
+const tradesLeftS = (s, now = Date.now()) => TRADE_WEEK - (s.tradeWeek?.k === weekKey(now) ? s.tradeWeek.n : 0);
+function useTradeS(s, now = Date.now()) { const k = weekKey(now); s.tradeWeek = { k, n: (s.tradeWeek?.k === k ? s.tradeWeek.n : 0) + 1 }; }
+const tradeRarKey = (it) => CARD_BY_ID[it.id].rar + (it.gold ? "*" : "");
+function tradeSameRar(give, want) {
+  const c = {};
+  for (const it of give) c[tradeRarKey(it)] = (c[tradeRarKey(it)] || 0) + (it.n || 1);
+  for (const it of want) c[tradeRarKey(it)] = (c[tradeRarKey(it)] || 0) - (it.n || 1);
+  return Object.values(c).every((v) => v === 0);
+}
 function tradeFair(give, want, chakraGive = 0) {
   const a = itemsValue(give) + chakraGive, b = itemsValue(want);
   if (Math.max(a, b) <= TRADE_FREE_VALUE) return true;
@@ -702,7 +741,9 @@ function importSaveS(cand, now = Date.now()) {
 }
 // Un vote compte s'il a été enregistré avant la fermeture de la question.
 // Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
-const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
+// Billy peut fixer une fin des votes (endsAt) : passé cette heure, la question est fermée toute seule
+const predOpen = (q, now = Date.now()) => q.status === "open" && !(q.endsAt && now >= q.endsAt);
+const predVoteOk = (q, v) => { const at = v?.at?.[q.id], end = Math.min(q.closedAt || Infinity, q.endsAt || Infinity); return !(end < Infinity && at && at > end); };
 
 // ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
 // Aucun cosmétique ne donne de bonus. Ils ne cachent jamais le visage : cadres et auras autour de la carte,

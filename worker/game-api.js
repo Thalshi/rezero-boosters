@@ -315,7 +315,7 @@ export async function gameRoute(req, env, user, path) {
 
     if (path === "/api/game/open") {
       const r = await mutate(env, user.id, (s, now) => {
-        const out = G.openManyS(s, body.pack, !!body.paid, +body.n === 2 ? 2 : 1, cfg, user.id, rng, now);
+        const out = G.openManyS(s, body.pack, !!body.paid, [2, 10].includes(+body.n) ? +body.n : 1, cfg, user.id, rng, now);
         return out.error ? { abort: true, error: out.error } : out;
       });
       if (r.error) return fail(400, r.error);
@@ -331,8 +331,8 @@ export async function gameRoute(req, env, user, path) {
       return json(r.state ? r : { ok: true });
     }
     if (path === "/api/game/recycle") {
-      const r = await mutate(env, user.id, (s, now) => ({ value: G.recycleS(s, now) }));
-      return json(r);
+      const r = await mutate(env, user.id, (s, now) => { const v = G.recycleS(s, now, Array.isArray(body.pick) ? body.pick : null); return v?.error ? { abort: true, error: v.error } : { value: v }; });
+      return r.error ? fail(400, r.error) : json(r);
     }
     if (path === "/api/game/disenchant") {
       const r = await mutate(env, user.id, (s, now) => {
@@ -344,7 +344,7 @@ export async function gameRoute(req, env, user, path) {
       return r.error ? fail(400, r.error) : json(r);
     }
     if (path === "/api/game/craft") {
-      const r = await mutate(env, user.id, (s, now) => { const o = G.craftS(s, cfg, user.id, rng, now); return o.error ? { abort: true, error: o.error } : o; });
+      const r = await mutate(env, user.id, (s, now) => { const o = G.craftS(s, cfg, user.id, rng, now, Array.isArray(body.pick) ? body.pick : null); return o.error ? { abort: true, error: o.error } : o; });
       if (r.error) return fail(400, r.error);
       await postFeed(env, user.id, [r.card]);
       return json(r);
@@ -387,9 +387,19 @@ export async function gameRoute(req, env, user, path) {
       const now = Date.now(), qid = String(body.qid || ""), idx = Number(body.idx);
       const q = qid && (await readDoc(env, "predq/" + qid))?.data;
       if (!q) return fail(404, "Cette question n'existe plus.");
-      if (q.status !== "open") return fail(409, "Les votes sont fermés pour cette question.");
+      if (!G.predOpen(q, now)) return fail(409, "Les votes sont fermés pour cette question.");
       if (!Number.isInteger(idx) || idx < 0 || idx >= (q.options || []).length) return fail(400, "Réponse invalide.");
       return json(await writeVote(env, user.id, qid, idx, now));
+    }
+    if (path === "/api/game/pred/voters") {
+      // qui a voté quoi : visible seulement une fois la bonne réponse révélée
+      const qs = (await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'predq'").all()).results.map((q) => ({ id: q.id, ...JSON.parse(q.data) })).filter((q) => q.status === "resolved");
+      const out = {}; for (const q of qs) out[q.id] = [];
+      if (qs.length) {
+        const vs = (await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'votes'").all()).results;
+        for (const row of vs) { const v = JSON.parse(row.data), uid = v.uid || row.id; for (const q of qs) { const a = v.answers?.[q.id]; if (a != null && G.predVoteOk(q, v)) out[q.id].push([uid, a]); } }
+      }
+      return json({ voters: out });
     }
     if (path === "/api/game/predictions") {
       // crédite les bonnes prédictions validées par Billy, et la mission « fais une prédiction »
@@ -479,13 +489,16 @@ export async function gameRoute(req, env, user, path) {
       if (!to || to === user.id) return fail(400, "Choisis avec qui échanger.");
       if (!give.length && !chakra) return fail(400, "Propose au moins une carte ou de l'essence.");
       if (!want.length) return fail(400, "Choisis au moins une carte à recevoir.");
-      if (!G.tradeFair(give, want, chakra)) return fail(400, "Échange trop déséquilibré : les gros dons sont bloqués, comme sur Kyara.");
+      if (chakra) return fail(400, "Les échanges se font carte contre carte. Pour l'essence, passe par le marché.");
+      if (!G.tradeSameRar(give, want)) return fail(400, "Échange refusé : il faut autant de cartes de chaque rareté des deux côtés (une Rare contre une Rare, une Dorée contre une Dorée).");
       const other = await loadRow(env, to);
       if (!other) return fail(404, "Ce joueur n'a pas encore de collection.");
+      if (G.tradesLeftS(JSON.parse(other.data)) <= 0) return fail(400, `Ce joueur a déjà fait ses ${G.TRADE_WEEK} échanges de la semaine.`);
       const tid = newId();
       // les cartes proposées sont mises de côté jusqu'à la réponse
       const r = await mutate(env, user.id, (s) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
+        if (G.tradesLeftS(s) <= 0) return { abort: true, error: `Tu as déjà fait tes ${G.TRADE_WEEK} échanges de la semaine. Reviens lundi.` };
         if (s.chakra < chakra) return { abort: true, error: "Pas assez d'essence." };
         for (const it of give) { if (confrontLocked(s, it.id)) return { abort: true, error: "Une de ces cartes est engagée dans une partie de Confrontation en cours." }; }
         for (const it of give) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
@@ -518,14 +531,15 @@ export async function gameRoute(req, env, user, path) {
       }
       const r = await mutate(env, user.id, (s, now) => {
         if (!canMarket(user, s)) return { abort: true, error: marketBlock(s) };
+        if (G.tradesLeftS(s, now) <= 0) return { abort: true, error: `Tu as déjà fait tes ${G.TRADE_WEEK} échanges de la semaine. Reviens lundi.` };
         for (const it of t.want) { if (confrontLocked(s, it.id)) return { abort: true, error: "Une de ces cartes est engagée dans une partie de Confrontation en cours." }; }
         for (const it of t.want) if (!G.removeCardS(s, it.id, it.gold, it.n)) return { abort: true, error: `Tu n'as plus assez de ${G.PEOPLE[G.CARD_BY_ID[it.id].who].name}.` };
         for (const it of t.give) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now);
-        s.chakra += t.chakra; s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now);
+        s.chakra += t.chakra; s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now); G.useTradeS(s, now);
         return {};
       });
       if (r.error) { await writeDoc(env, "trades", body.tid, t); return fail(400, r.error); }
-      await mutate(env, t.from, (s, now) => { for (const it of t.want) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now); return {}; });
+      await mutate(env, t.from, (s, now) => { for (const it of t.want) for (let i = 0; i < it.n; i++) G.addCardS(s, it.id, it.gold, now); s.trades = (s.trades || 0) + 1; G.trackS(s, "trade", 1, now); G.useTradeS(s, now); return {}; });
       await notify(env, t.from, "trade", `${user.name} a accepté ton échange !`, { go: "trades" });
       return json(r);
     }

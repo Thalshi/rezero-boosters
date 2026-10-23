@@ -1,6 +1,6 @@
 // Règles de confidentialité et d'accès : qui peut lire et écrire quoi.
 // Ces règles devront rester identiques avec la future route /api/game/sync.
-import { startServer, player, reporter, IDS, grant } from "./lib.mjs";
+import { startServer, player, reporter, IDS, grant, samePair } from "./lib.mjs";
 
 const srv = await startServer({ port: +(process.env.PORT || 8803) });
 const t = reporter("API · confidentialité et accès");
@@ -35,7 +35,8 @@ try {
 
   t.section("Échanges privés");
   const s1 = (await P1.api("state")).state, s2 = (await P2.api("state")).state;
-  const tp = await P1.api("trade/propose", { to: P2.id, give: [{ id: Object.keys(s1.owned)[0], n: 1 }], want: [{ id: Object.keys(s2.owned)[0], n: 1 }] });
+  const [x1, x2] = samePair(s1, s2);
+  const tp = await P1.api("trade/propose", { to: P2.id, give: [{ id: x1, n: 1 }], want: [{ id: x2, n: 1 }] });
   t.check("échange créé entre Joueur1 et Joueur2", tp.status === 200, tp.error);
   t.check("Joueur1 voit l'échange", (await P1.coll("GET", "trades")).body.docs.some((d) => d.id === tp.tid));
   t.check("Joueur2 voit l'échange", (await P2.coll("GET", "trades")).body.docs.some((d) => d.id === tp.tid));

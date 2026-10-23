@@ -1,7 +1,7 @@
 // Étape 1 de l'optimisation : compteurs de version par section (table sync_rev).
 // Vérifie que chaque écriture fait monter le compteur de sa section, qu'une action refusée n'en fait
 // monter aucun, et que la migration se fait sans perte sur une base créée par la version de main.
-import { startServer, player, reporter, IDS, ROOT, grant } from "./lib.mjs";
+import { startServer, player, reporter, IDS, ROOT, grant, samePair } from "./lib.mjs";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -56,7 +56,7 @@ try {
   const s2 = await R.api("market/sell", { id: card2, price: 10 });
   await diff("retrait d'une annonce : market", () => R.api("market/cancel", { lid: s2.lid }), ["market"]);
   const sA = (await A.api("state")).state, sT = (await T.api("state")).state;
-  const tp = await diff("proposition d'échange : trades + notifs", () => A.api("trade/propose", { to: T.id, give: [{ id: Object.keys(sA.owned).find((id) => sA.owned[id].n > 0), n: 1 }], want: [{ id: Object.keys(sT.owned).find((id) => sT.owned[id].n > 0), n: 1 }] }), ["trades", "notifs"]);
+  const tp = await diff("proposition d'échange : trades + notifs", () => A.api("trade/propose", { to: T.id, give: [{ id: samePair(sA, sT)[0], n: 1 }], want: [{ id: samePair(sA, sT)[1], n: 1 }] }), ["trades", "notifs"]);
   await diff("réponse à l'échange : trades", () => T.api("trade/answer", { tid: tp.tid, action: "refuse" }), ["trades"]);
   const msg = await diff("message au comptoir : chat", () => T.api("chat/send", { text: "Salut @Billy" }), ["chat", "notifs"]);
   const mid = (await A.api("pulse", { after: null })).chat.find((m) => m.kind === "msg").id;

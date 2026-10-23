@@ -2054,6 +2054,92 @@ html.w3d-on body::after { display: none; }
 .ar-pre-body.ph-choix .cf-prop .cf-pb small { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; font-size: 11px; }
 .ar-pre-body.ph-choix .cf-prop .btn { width: 100%; }
 @media (max-width: 600px) { .ar-pre-body.ph-choix .cf-prop { width: calc(50% - 8px); } }
+/* bouton Retour : pastille en relief, en haut à gauche de la page */
+#view{position:relative}
+.backrow{position:relative;z-index:5;padding-top:14px;margin-bottom:-6px}
+.backbtn{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px 0 10px;border-radius:10px;border:1px solid #e8c77e66;background:linear-gradient(#221a34ee,#120c20ee);color:#f0d38c;font:700 13px Inter,system-ui,sans-serif;box-shadow:0 4px 0 #0a0612,0 8px 18px #0008,inset 0 1px 0 #ffffff22;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.backbtn:hover{transform:translateY(-1px);box-shadow:0 5px 0 #0a0612,0 10px 22px #0009,0 0 16px #e8c77e44,inset 0 1px 0 #ffffff22}
+.backbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #0a0612,0 4px 10px #0008}
+.backbtn svg{width:18px;height:18px}
+@media (max-width:700px){.backrow{padding-top:10px}.backbtn{height:34px}}
+.dup-sheet{max-width:980px;width:min(980px,calc(100vw - 24px))}
+.dup-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:14px;max-height:min(58vh,560px);overflow:auto;padding:6px 4px 10px}
+.dup-it{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:12px;border:1px solid transparent;transition:background .15s,border-color .15s}
+.dup-it.on{background:#e8c77e14;border-color:#e8c77e88;box-shadow:0 0 18px #e8c77e22}
+.dup-ct{display:flex;align-items:center;gap:8px}.dup-ct b{min-width:44px;text-align:center;font:700 15px 'JetBrains Mono',monospace;color:#f0d38c}.dup-ct small{color:var(--mut,#9a90ad);font-size:11px}
+.dup-v{font:600 11px 'JetBrains Mono',monospace;color:var(--mut,#9a90ad)}
+.dup-foot{justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap}
+.wish-h.on{color:var(--wish,#ff7ab8);border-color:var(--wish,#ff7ab8)}
+.pq-who{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px 14px}
+.pq-v{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 2px;border-radius:99px;background:#ffffff0c;border:1px solid #ffffff1a;font-size:12px}
+.pq-v img{width:20px;height:20px;border-radius:50%;object-fit:cover}.pq-v b{font-weight:600}
+.pq-more{font:600 12px 'JetBrains Mono',monospace;color:var(--mut,#9a90ad);align-self:center}
+/* carte piochée montrée en grand au centre de l'arène */
+.ar-hc.ar-draw{position:fixed;left:0;top:0;bottom:auto;margin:0;z-index:60;pointer-events:none;transform-origin:50% 50%;transition:none;box-shadow:0 24px 60px #000d,0 0 0 2px var(--cc,#e8c77e),0 0 42px color-mix(in srgb,var(--cc,#e8c77e) 55%,transparent);backface-visibility:hidden}
+/* Sanctuaire : la colonne de lumière passe derrière l'objet (sinon, en 3D, elle en cache la moitié quand il tourne) */
+.zo-art { transform-style: flat; perspective: 520px; isolation: isolate; }
+.zo-art::after { z-index: 0; } .zo-art::before { z-index: 0; }
+/* ===== Livret de règles en livre ===== */
+.book { position: relative; margin-top: 18px; display: grid; grid-template-columns: 210px 1fr; grid-template-rows: auto auto; gap: 0 18px; }
+.bk-tabs { grid-row: 1 / 3; display: flex; flex-direction: column; gap: 6px; position: sticky; top: 90px; align-self: start; }
+.bk-tabs button { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px 4px 4px 10px; border: 1px solid #ffffff14; background: linear-gradient(90deg, #1a1430, #120d22); color: var(--fg); font: 600 13px var(--body, Inter); text-align: left; cursor: pointer; box-shadow: 0 3px 0 #07050d; transition: transform .2s, background .2s; }
+.bk-tabs button b { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: #ffffff10; color: #e8c77e; font: 700 12px 'JetBrains Mono', monospace; flex: none; }
+.bk-tabs button:hover { transform: translateX(4px); }
+.bk-tabs button[aria-current] { background: linear-gradient(90deg, #4a3414, #2a1d0c); border-color: #e8c77e88; color: #fff3d0; transform: translateX(8px); }
+.bk-tabs button[aria-current] b { background: #e8c77e; color: #1a1405; }
+.bk-body { position: relative; perspective: 1800px; border-radius: 6px 16px 16px 6px; padding: 10px; background: linear-gradient(90deg, #3a2410, #5a3a1a 3%, #3a2410 6%, #2a1a0c); box-shadow: 0 10px 0 #120a04, 0 30px 60px #000c, inset 0 1px 0 #ffffff22; }
+.bk-spine { position: absolute; left: 0; top: 0; bottom: 0; width: 22px; border-radius: 6px 0 0 6px; background: linear-gradient(90deg, #1e1206, #6a4a1e 50%, #1e1206); }
+.bk-page { position: relative; min-height: 520px; margin-left: 14px; padding: 34px 40px 40px; border-radius: 4px 12px 12px 4px; color: #2a1d10;
+  background: radial-gradient(ellipse at 30% 0%, #fff8e6, transparent 60%), linear-gradient(90deg, #d9c39a, #f3e6c8 5%, #f6ecd4 50%, #efe0bf); box-shadow: inset 12px 0 18px -10px #7a5a2a88, inset 0 0 40px #c8a46a55; transform-origin: 0 50%; }
+.bk-page.turn-next { animation: bk-next .55s cubic-bezier(.3,.7,.2,1); } .bk-page.turn-prev { animation: bk-prev .55s cubic-bezier(.3,.7,.2,1); }
+@keyframes bk-next { from { transform: rotateY(-28deg); opacity: .2; filter: brightness(.7); } to { transform: none; opacity: 1; } }
+@keyframes bk-prev { from { transform: rotateY(18deg) translateX(-20px); opacity: .2; filter: brightness(.7); } to { transform: none; opacity: 1; } }
+.bk-run { margin: 0 0 6px; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8a6a3a; }
+.bk-page h2 { font-family: var(--disp, Cinzel), serif; color: #3a1d08; font-size: 30px; margin: 0 0 14px; }
+.bk-page h3 { color: #5a2c0a; } .bk-page p, .bk-page li { color: #2e2214; line-height: 1.6; } .bk-page b { color: #1a0f04; }
+.bk-page .rg-n { display: none; }
+.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
+.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li) :is(span, p) { color: #4a3a24 !important; }
+.bk-page .rg-tbl th, .bk-page .rg-tbl td { color: #2e2214; border-color: #c8a46a66; }
+.bk-page a { color: #8a3a10; }
+.bk-nav { grid-column: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.bk-no { font: 700 14px 'JetBrains Mono', monospace; color: #e8c77e; }
+@media (max-width: 760px) {
+  .book { grid-template-columns: 1fr; }
+  .bk-tabs { grid-row: auto; position: static; flex-direction: row; overflow-x: auto; padding-bottom: 8px; }
+  .bk-tabs button { flex: none; border-radius: 10px; } .bk-tabs button[aria-current] { transform: translateY(-3px); }
+  .bk-page { padding: 22px 18px 28px; min-height: 60vh; } .bk-page h2 { font-size: 24px; } .bk-nav { grid-column: 1; }
+}
+/* Missions : deux colonnes qui s'empilent chacune de leur côté (plus de trous), et un perso du jour */
+.mcols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.mcol { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+@media (max-width: 860px) { .mcols { grid-template-columns: 1fr; } }
+.mhero { flex-direction: row !important; align-items: center; gap: 18px !important; overflow: hidden; position: relative;
+  background: radial-gradient(ellipse at 15% 50%, #ff2e8826, transparent 60%), radial-gradient(ellipse at 90% 0%, #2ee6ff1c, transparent 55%), linear-gradient(160deg, #1f1838, #0e0a1e) !important; }
+.mhero-art { flex: none; transform: rotate(-4deg); filter: drop-shadow(0 16px 20px #000c); }
+.mhero-t { min-width: 0; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.mhero-t h2 { margin: 0; } .mhero-q { margin: 0; font-style: italic; color: #f0d38c; }
+@media (max-width: 480px) { .mhero { flex-direction: column !important; text-align: center; } .mhero-t { align-items: center; } }
+/* finish de Confrontation (façon TFT) */
+.ar-fin { position: fixed; inset: 0; z-index: 70; pointer-events: none; }
+.ar-fin .lb { position: absolute; left: 0; right: 0; height: 0; background: #000; transition: height .45s cubic-bezier(.3,.7,.2,1); }
+.ar-fin .lb.t { top: 0; } .ar-fin .lb.b { bottom: 0; }
+.ar-fin.on .lb { height: 11vh; } .ar-fin.out .lb { height: 0; }
+.ar-fin::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 35%, #000a 100%); opacity: 0; transition: opacity .4s; }
+.ar-fin.on::after { opacity: 1; } .ar-fin.out::after { opacity: 0; }
+.fin-crack { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+.fin-crack path { fill: none; stroke: #fff; stroke-width: .35; vector-effect: non-scaling-stroke; stroke-width: 2.5; filter: drop-shadow(0 0 6px var(--fc)); stroke-dasharray: 400; stroke-dashoffset: 400; }
+.ar-fin.hit .fin-crack { opacity: .9; } .ar-fin.hit .fin-crack path { animation: fin-crack .35s ease-out forwards; }
+.ar-fin.out .fin-crack { opacity: 0; transition: opacity .4s; }
+@keyframes fin-crack { to { stroke-dashoffset: 0; } }
+.fin-ban { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 60px; opacity: 0; scale: 2.2;
+  background: linear-gradient(90deg, transparent, #0b0916ee 18%, #0b0916ee 82%, transparent); border-block: 2px solid var(--fc); text-align: center; }
+.fin-ban small { font: 800 15px Cinzel, Georgia, serif; letter-spacing: .5em; text-transform: uppercase; color: var(--fc); text-shadow: 0 0 14px var(--fc); }
+.fin-ban b { font: 800 clamp(30px, 5vw, 56px) Cinzel, Georgia, serif; color: #fff; text-shadow: 0 0 22px var(--fc), 3px 3px 0 #000; line-height: 1.05; }
+.fin-ban span { font: 600 15px Inter, system-ui, sans-serif; color: #f0e6d2; }
+.ar-fin.hit .fin-ban { animation: fin-ban .5s cubic-bezier(.2,1.4,.3,1) .12s forwards; }
+.ar-fin.out .fin-ban { opacity: 0; transition: opacity .35s; animation: none; }
+@keyframes fin-ban { from { opacity: 0; scale: 2.2; filter: blur(6px); } to { opacity: 1; scale: 1; filter: none; } }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -2796,7 +2882,7 @@ function takeAndOpenS(s, packId, paid, cfg, uid, rng, now = Date.now()) {
 // Tout est vérifié avant de prendre quoi que ce soit : jamais un seul des deux débité.
 const openEv = (r) => ({ open: r.cards.map((x) => ({ rar: CARD_BY_ID[x.id].rar, gold: x.gold })), divine: r.divine });
 function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
-  n = n === 2 ? 2 : 1;
+  n = n === 10 ? 10 : n === 2 ? 2 : 1; // 10 boosters = 5 coffres de 10 cartes ouverts d'affilée
   if (n === 1) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (!r.error) r.titles = grantTitlesS(s, openEv(r), now); return r; }
   if (packId === "jour") return { error: "Le pack du jour s'ouvre un seul à la fois." };
   regenS(s, now);
@@ -2805,7 +2891,8 @@ function openManyS(s, packId, paid, n, cfg, uid, rng, now = Date.now()) {
   const runs = [];
   for (let k = 0; k < n; k++) { const r = takeAndOpenS(s, packId, paid, cfg, uid, rng, now); if (r.error) return r; runs.push(r); }
   const cards = runs.flatMap((r) => r.cards), divine = runs.some((r) => r.divine);
-  return { pack: runs[0].pack, n, cards, divine, scenario: pickScenarioS(cards, rng, now), titles: grantTitlesS(s, openEv({ cards, divine }), now) };
+  const scenarios = []; for (let i = 0; i < cards.length; i += 10) scenarios.push(pickScenarioS(cards.slice(i, i + 10), rng, now));
+  return { pack: runs[0].pack, n, cards, divine, scenario: scenarios[0], scenarios, titles: grantTitlesS(s, openEv({ cards, divine }), now) };
 }
 function packChance(rar, k = 1, last = LAST) {
   const a = boosted(SLOT, k), b = boosted(last, k);
@@ -2821,9 +2908,29 @@ function dupesValueS(s) {
   for (const c of ALL_CARDS) { const o = ownOf(s, c.id); v += Math.max(0, o.n - 1) * cardValue(c.id, false) + Math.max(0, o.gold - 1) * cardValue(c.id, true); }
   return v;
 }
-function recycleS(s, now = Date.now()) {
-  const v = dupesValueS(s); if (!v) return 0;
-  for (const c of ALL_CARDS) { const o = ownOf(s, c.id); if (o.n > 1 || o.gold > 1) s.owned[c.id] = { ...o, n: Math.min(o.n, 1), gold: Math.min(o.gold, 1) }; }
+// doublons du joueur, carte par carte : le joueur choisit lui-même ce qu'il recycle ou combine
+function dupeListS(s) {
+  const out = [];
+  for (const c of ALL_CARDS) { const o = ownOf(s, c.id); if (o.n > 1) out.push({ id: c.id, gold: false, extra: o.n - 1, value: cardValue(c.id, false) }); if (o.gold > 1) out.push({ id: c.id, gold: true, extra: o.gold - 1, value: cardValue(c.id, true) }); }
+  return out;
+}
+// pick : [{ id, gold, n }] ; sans pick, tous les doublons (ancien comportement)
+function recycleS(s, now = Date.now(), pick = null) {
+  if (!pick) {
+    const v = dupesValueS(s); if (!v) return 0;
+    for (const c of ALL_CARDS) { const o = ownOf(s, c.id); if (o.n > 1 || o.gold > 1) s.owned[c.id] = { ...o, n: Math.min(o.n, 1), gold: Math.min(o.gold, 1) }; }
+    s.chakra += v; trackS(s, "recycle", 1, now);
+    return v;
+  }
+  const dl = dupeListS(s), want = [];
+  for (const p of Array.isArray(pick) ? pick : []) {
+    const d = dl.find((x) => x.id === p.id && x.gold === !!p.gold), n = Math.floor(+p.n || 0);
+    if (!d || n < 1 || n > d.extra) return { error: "Ces doublons ne sont plus disponibles." };
+    want.push([d, n]);
+  }
+  let v = 0;
+  for (const [d, n] of want) { for (let i = 0; i < n; i++) removeCardS(s, d.id, d.gold); v += d.value * n; }
+  if (!want.length) return 0;
   s.chakra += v; trackS(s, "recycle", 1, now);
   return v;
 }
@@ -2838,9 +2945,16 @@ function craftableDupes(s) {
   for (const c of ALL_CARDS) { const o = ownOf(s, c.id); for (let i = 1; i < o.n; i++) list.push(c); }
   return list.sort((a, b) => RANKS.indexOf(a.rar) - RANKS.indexOf(b.rar));
 }
-function craftS(s, cfg, uid, rng, now = Date.now()) {
-  const dupes = craftableDupes(s);
+// pick : les ids des 3 doublons choisis par le joueur (le même id peut revenir s'il en a plusieurs)
+function craftS(s, cfg, uid, rng, now = Date.now(), pick = null) {
+  let dupes = craftableDupes(s);
   if (dupes.length < CRAFT_COST) return { error: `Il te faut ${CRAFT_COST} doublons (tu en as ${dupes.length}).` };
+  if (pick) {
+    if (!Array.isArray(pick) || pick.length !== CRAFT_COST) return { error: `Choisis exactement ${CRAFT_COST} doublons.` };
+    const left = [...dupes], chosen = [];
+    for (const id of pick) { const i = left.findIndex((c) => c.id === id); if (i < 0) return { error: "Ces doublons ne sont plus disponibles." }; chosen.push(left.splice(i, 1)[0]); }
+    dupes = chosen;
+  }
   const pool = SKINS.filter((c) => canPackFor(cfg, c, uid));
   // une Commune au moins : le tirage ne remonte jamais en rareté, il trouve donc toujours un skin
   if (!pool.some((c) => c.rar === "c")) return { error: "Aucun skin n'est encore débloqué pour toi." };
@@ -2865,6 +2979,17 @@ function statsS(s) {
     ach: Object.keys(s.ach || {}).length, predwin: s.counts?.predwin || 0, since: s.created || (firsts.length ? Math.min(...firsts) : 0) };
 }
 const itemsValue = (items) => (items || []).reduce((a, it) => a + (CARD_BY_ID[it.id] ? cardValue(it.id, it.gold) * (it.n || 1) : 0), 0);
+// Échanges : carte contre carte de même rareté (la Dorée compte à part), et un nombre limité par semaine
+const TRADE_WEEK = 3;                 // échanges réussis par joueur et par semaine
+const tradesLeftS = (s, now = Date.now()) => TRADE_WEEK - (s.tradeWeek?.k === weekKey(now) ? s.tradeWeek.n : 0);
+function useTradeS(s, now = Date.now()) { const k = weekKey(now); s.tradeWeek = { k, n: (s.tradeWeek?.k === k ? s.tradeWeek.n : 0) + 1 }; }
+const tradeRarKey = (it) => CARD_BY_ID[it.id].rar + (it.gold ? "*" : "");
+function tradeSameRar(give, want) {
+  const c = {};
+  for (const it of give) c[tradeRarKey(it)] = (c[tradeRarKey(it)] || 0) + (it.n || 1);
+  for (const it of want) c[tradeRarKey(it)] = (c[tradeRarKey(it)] || 0) - (it.n || 1);
+  return Object.values(c).every((v) => v === 0);
+}
 function tradeFair(give, want, chakraGive = 0) {
   const a = itemsValue(give) + chakraGive, b = itemsValue(want);
   if (Math.max(a, b) <= TRADE_FREE_VALUE) return true;
@@ -2898,7 +3023,9 @@ function importSaveS(cand, now = Date.now()) {
 }
 // Un vote compte s'il a été enregistré avant la fermeture de la question.
 // Les votes d'avant cette règle n'ont pas d'heure : ils restent valables.
-const predVoteOk = (q, v) => { const at = v?.at?.[q.id]; return !(q.closedAt && at && at > q.closedAt); };
+// Billy peut fixer une fin des votes (endsAt) : passé cette heure, la question est fermée toute seule
+const predOpen = (q, now = Date.now()) => q.status === "open" && !(q.endsAt && now >= q.endsAt);
+const predVoteOk = (q, v) => { const at = v?.at?.[q.id], end = Math.min(q.closedAt || Infinity, q.endsAt || Infinity); return !(end < Infinity && at && at > end); };
 
 // ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
 // Aucun cosmétique ne donne de bonus. Ils ne cachent jamais le visage : cadres et auras autour de la carte,
@@ -3313,6 +3440,7 @@ const ILLUS_DECOR = {
 // ===== Icônes néon (esprit hextech d'Arcane) : remplacent les kanji partout dans l'interface =====
 // Traits 24×24, couleur héritée (currentColor) ; la lueur vient de la classe .ic.
 const ICON = {
+  back: '<path d="M15 5l-7 7 7 7"/>',
   logo: '<path d="M12 2l8.5 5v10L12 22l-8.5-5V7z"/><circle cx="12" cy="12" r="4.5"/><path d="M12 4.8v2.7M12 16.5v2.7M5.6 8.4l2.4 1.4M16 14.2l2.4 1.4"/>',
   // rôles de Confrontation
   gardien: '<path d="M4.5 9.5l3.5 3 4-6.5 4 6.5 3.5-3-1.7 9.5H6.2z"/><path d="M6 21.5h12"/><circle cx="12" cy="13.5" r="1.3"/>',
@@ -3553,7 +3681,7 @@ function creditPredictions() {
 }
 async function vote(qid, idx) {
   const q = pred.questions.find((x) => x.id === qid);
-  if (!q || q.status !== "open") return toast("Les votes sont fermés pour cette question.");
+  if (!q || !predOpen(q)) return toast("Les votes sont fermés pour cette question.");
   const first = pred.mine[qid] == null, prev = pred.mine;
   pred.mine = { ...pred.mine, [qid]: idx }; draw();
   try {
@@ -3578,7 +3706,8 @@ async function adminPred(action, qid, value) {
   const ref = DB.doc("predq/" + qid);
   try {
     if (action === "close") await ref.update({ status: "closed" });
-    if (action === "open") await ref.update({ status: "open", answer: null });
+    if (action === "open") await ref.update({ status: "open", answer: null, endsAt: null });
+    if (action === "deadline") { const t = value ? new Date(value).getTime() : null; await ref.update({ endsAt: t }); pred.questions = pred.questions.map((q) => (q.id === qid ? { ...q, endsAt: t } : q)); toast(t ? "Fin des votes enregistrée." : "Plus de limite de temps."); draw(); }
     if (action === "resolve") { await ref.update({ status: "resolved", answer: value }); pred.questions = pred.questions.map((q) => (q.id === qid ? { ...q, status: "resolved", answer: value } : q)); await recomputeScores(); toast("Bonne réponse validée, points mis à jour."); }
     if (action === "reward") { await ref.update({ reward: predRewardOf({ reward: value }) }); toast("Récompense mise à jour."); }
     if (action === "delete") { await ref.delete(); pred.questions = pred.questions.filter((q) => q.id !== qid); await recomputeScores(); toast("Question supprimée."); }
@@ -3586,10 +3715,11 @@ async function adminPred(action, qid, value) {
 }
 async function addQuestion(form) {
   const text = $("pqText").value.trim(), options = $("pqOptions").value.split("\n").map((s) => s.trim()).filter(Boolean);
+  const dur = +($("pqDur")?.value || 0), endsAt = dur ? Date.now() + dur * 3600000 : null;
   const ep = +$("pqEp").value || 2, points = Math.max(1, Math.min(10, +$("pqPoints").value || 1)), reward = predRewardOf({ reward: $("pqReward").value });
   if (!text || options.length < 2) return toast("Écris une question et au moins 2 réponses (une par ligne).");
   try {
-    await DB.collection("predq").add({ ep, text, options: options.slice(0, 6), points, reward, status: "open", answer: null, t: Date.now() });
+    await DB.collection("predq").add({ ep, text, options: options.slice(0, 6), points, reward, status: "open", answer: null, endsAt, t: Date.now() });
     form.reset(); document.activeElement?.blur(); toast("Question publiée."); draw();
   } catch (e) { toast("Publication refusée : il faut être éditeur de l'app."); }
 }
@@ -3798,12 +3928,14 @@ function tradeOptions(owned, keepOne) {
 function tradeSelection() {
   const f = $("tradeForm"); if (!f) return null;
   const pick = (side) => [...f.querySelectorAll(`input[data-side=${side}]:checked`)].map((i) => ({ id: i.dataset.id, gold: !!i.dataset.gold, n: 1 }));
-  return { to: f.dataset.to, give: pick("give"), want: pick("want"), chakra: Math.max(0, Math.round(+$("tradeEss").value || 0)) };
+  return { to: f.dataset.to, give: pick("give"), want: pick("want"), chakra: 0 };
 }
 function updateTradeFair() {
   const s = tradeSelection(); if (!s) return;
-  const a = itemsValue(s.give) + s.chakra, b = itemsValue(s.want);
-  $("tradeFair").textContent = !s.want.length ? "Choisis au moins une carte à recevoir." : tradeFair(s.give, s.want, s.chakra) ? `Échange équilibré (${a} ◆ contre ${b} ◆ en valeur de recyclage).` : `Trop déséquilibré (${a} ◆ contre ${b} ◆) : les gros dons sont bloqués.`;
+  const rl = (l) => Object.entries(l.reduce((m, it) => { const k = tradeRarKey(it); m[k] = (m[k] || 0) + 1; return m; }, {})).map(([k, n]) => `${n} ${k.endsWith("*") ? "Dorée" : RAR[k].label}`).join(", ") || "rien";
+  const ok = s.give.length && s.want.length && tradeSameRar(s.give, s.want);
+  $("tradeFair").textContent = !s.give.length || !s.want.length ? "Choisis des cartes des deux côtés : même nombre de cartes de chaque rareté." : ok ? `Échange valable : ${rl(s.give)} contre ${rl(s.want)}.` : `Pas la même rareté : tu donnes ${rl(s.give)}, tu reçois ${rl(s.want)}.`;
+  const b2 = $("tradeForm").querySelector('[type="submit"]'); if (b2) b2.disabled = !ok;
 }
 async function sendTrade() {
   const s = tradeSelection();
@@ -3815,12 +3947,12 @@ async function sendTrade() {
 async function toggleWish(id) {
   if (!SRV) return toast(offlineMsg("garder une liste d'envies").replace(/<[^>]+>/g, ""));
   const on = wishSet().has(id);
-  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); draw(); }
+  try { await srv("wish", on ? { remove: [id] } : { add: [id] }); toast(on ? "Retirée de tes envies." : "Ajoutée à tes envies : tu seras prévenu quand elle sera en vente."); draw(); if ($("overlay").dataset.sheet === "wish" && !$("overlay").hidden) wishSheet(); }
   catch (e) { toast(e.message); }
 }
-async function wishAllMissing() {
-  const ids = ALL_CARDS.filter((c) => !has(c.id) && visible(c)).map((c) => c.id);
-  try { await srv("wish", { add: ids }); toast(`${ids.length} cartes ajoutées à tes envies.`); draw(); } catch (e) { toast(e.message); }
+async function wishClear() {
+  const ids = [...wishSet()]; if (!ids.length) return;
+  try { await srv("wish", { remove: ids }); toast("Envies vidées."); draw(); wishSheet(); } catch (e) { toast(e.message); }
 }
 async function toggleShowcase(id) {
   const cur = (save.showcase || []).filter((x) => has(x));
@@ -3869,6 +4001,7 @@ let busy = false;
 // n = 1 : une pochette (5 cartes) ; n = 2 : 10 cartes dans le coffre
 async function startOpening(paid, packId, n = 1) {
   if (busy) return;
+  lastOpening = null;
   busy = true;
   let r;
   try {
@@ -3880,7 +4013,16 @@ async function startOpening(paid, packId, n = 1) {
   const pk = r.pack === "jour" ? dailyPack() : packOf(r.pack);
   const cards = r.cards.map((x) => ({ c: byId[x.id], gold: x.gold, isNew: x.isNew }));
   opening = { phase: "pack", cards, i: 0, flipped: false, paid, pk, n, divine: r.divine, scenario: r.scenario, titles: takeTitles() };
+  // ×10 : 5 coffres de 10 cartes à la suite
+  if (cards.length > 10) Object.assign(opening, { cards: cards.slice(0, 10), chain: { all: cards, scenarios: r.scenarios || [], k: 0, total: Math.ceil(cards.length / 10) } });
   closeMenu(); $("overlay").hidden = true;
+  draw();
+}
+// coffre suivant d'une ouverture ×10
+function nextChest() {
+  const o = opening, ch = o?.chain; if (!ch || ch.k + 1 >= ch.total) return;
+  const k = ch.k + 1;
+  opening = { ...o, phase: "pack", cards: ch.all.slice(k * 10, k * 10 + 10), i: 0, flipped: false, o3id: null, restore: false, scenario: ch.scenarios[k] || o.scenario, titles: [], chain: { ...ch, k } };
   draw();
 }
 // Invocation du Sanctuaire, déjà tirée par le serveur : ×1 une carte qui se retourne seule, ×5 une pochette, ×10 le coffre
@@ -3888,10 +4030,10 @@ const SUMMON_PK = { 1: "Invocation", 5: "Pochette du Sanctuaire", 10: "Coffre du
 function summonOpening(got, scenario, extra = {}) {
   const n = got.length, pk = { id: "summon", cos: true, name: SUMMON_PK[n] || "Invocation", sub: "Cosmétiques uniques", kanji: "", color: "#b072ff", count: n };
   const cards = got.map((x) => ({ c: { id: x.id, rar: x.rar }, cos: COS_BY_ID[x.id], gold: false, isNew: !!x.isNew }));
-  opening = { phase: n === 1 ? "cards" : "pack", cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, titles: takeTitles(), ...extra };
+  opening = { phase: "pack", single: n === 1, cards, i: 0, flipped: false, paid: true, pk, n, scenario: n === 10 ? scenario : null, titles: takeTitles(), ...extra };
   closeMenu(); $("overlay").hidden = true; $("stage").dataset.cf = "";
   draw();
-  if (n === 1) { const o = opening; setTimeout(() => { if (opening === o && !o.flipped) Reveal.tap(); }, reduced ? 0 : 650); }
+
 }
 // une ouverture contient des cartes (boosters) ou des cosmétiques (Sanctuaire)
 const itemName = (x) => (x.cos ? x.cos.name : nameOf(x.c));
@@ -3977,11 +4119,12 @@ async function share(id, gold) {
   catch (e) { toast(txt); }
 }
 
-async function recycle() {
-  const v = dupesValue(); if (!v) return;
+async function recycle(pick) {
+  if (!pick?.length) return toast("Choisis au moins un doublon.");
   try {
-    const got = SRV ? (await srv("recycle")).value : recycleS(save);
-    persist(); draw(); toast(`Doublons recyclés : +${got} ◆`);
+    const got = SRV ? (await srv("recycle", { pick })).value : recycleS(save, Date.now(), pick);
+    if (got?.error) throw new Error(got.error);
+    persist(); $("overlay").hidden = true; dupSel = null; draw(); toast(`Doublons recyclés : +${got} ◆`);
   } catch (e) { toast(e.message); }
 }
 
@@ -3994,9 +4137,11 @@ async function claim(kind, id) {
   } catch (e) { toast(e.message); }
 }
 
-async function craft() {
+async function craft(pick) {
+  if (pick?.length !== CRAFT_COST) return toast(`Choisis exactement ${CRAFT_COST} doublons.`);
   try {
-    const r = SRV ? await srv("craft") : craftS(save, CONFIG, ME, Math.random);
+    const r = SRV ? await srv("craft", { pick }) : craftS(save, CONFIG, ME, Math.random, Date.now(), pick);
+    dupSel = null;
     if (r.error) throw new Error(r.error);
     persist();
     unlocked(r.card);
@@ -4180,11 +4325,14 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if (chat
 const ROUTES = ["dev", "boosters", "collection", "wiki", "carte", "market", "missions", "pred", "classement", "profil", "raretes", "regles", "infos", "nouveautes", "avis", "admin"];
 let param = null;
 function nav(v, p = null) {
-  if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord.");
+  if (opening && opening.phase !== "done" && !opening.restore) return toast("Finis d'ouvrir ton booster d'abord.");
   const h = "#/" + v + (p ? "/" + encodeURIComponent(p) : "");
   if (location.hash !== h) location.hash = h; else route();
 }
+// pages visitées dans l'app, pour le bouton « Retour »
+const navStack = []; let lastHash = location.hash;
 function route() {
+  if (location.hash !== lastHash) { if (navStack[navStack.length - 1] === location.hash) navStack.pop(); else navStack.push(lastHash); if (navStack.length > 30) navStack.shift(); lastHash = location.hash; }
   const [v, p] = location.hash.replace(/^#\/?/, "").split("/");
   view = ROUTES.includes(v) ? v : "boosters";
   param = p ? decodeURIComponent(p) : null;
@@ -4430,7 +4578,9 @@ function boosterZone() {
   // 2 boosters d'un coup : 10 cartes dans le coffre
   if (packOpen(pk) && !pk.daily && !(shop && pk.limited)) btn += shop
     ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="2" ${save.chakra < PRICE * 2 ? "disabled" : ""}><b>Acheter 2 · coffre</b><span>${fmtN(PRICE * 2)} ◆ · 10 cartes</span></button>`
-    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`;
+      + (save.chakra >= PRICE * 10 ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="10"><b>Acheter ×10 · 5 coffres</b><span>${fmtN(PRICE * 10)} ◆ · 50 cartes</span></button>` : "")
+    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`
+      + (save.free >= 10 ? `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="10"><b>Ouvrir ×10 · 5 coffres</b><span>50 cartes d'affilée</span></button>` : "");
   return `<section class="sec" id="boosters">
     <div class="sec-h"><h2>Choisis ton booster</h2></div>
     ${seg("packTab", [["free", "Gratuits"], ["day", "Du jour & limités", save.dailyPack !== dayKey()], ["shop", "Boutique"]], packTab, "gold")}
@@ -4513,9 +4663,9 @@ function viewCollection() {
   return `<div class="wrap page">
     ${head("Album", "Ma collection")}
     <div class="bigstats"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${Math.round(st.unique / ALL_CARDS.length * 100)} %</b><span>Complétion</span></div><div><b>${dupes}</b><span>Doublons</span></div></div>
-    <div class="row"><button class="btn sq" type="button" data-act="recycle" ${dv ? "" : "disabled"}>♻ Recycler les doublons${dv ? ` · +${dv} ◆` : ""}</button>
-      <button class="btn sq" type="button" data-act="craft" ${craftableDupes(save).length >= CRAFT_COST ? "" : "disabled"}>✦ Combiner ${CRAFT_COST} doublons → 1 skin</button>
-      ${SRV ? `<button class="btn sq" type="button" data-act="wish-all">♡ Manquantes en envies</button>` : ""}</div>
+    <div class="row"><button class="btn sq" type="button" data-act="dup-open" data-mode="recycle" ${dupes ? "" : "disabled"}>♻ Recycler des doublons</button>
+      <button class="btn sq" type="button" data-act="dup-open" data-mode="craft" ${craftableDupes(save).length >= CRAFT_COST ? "" : "disabled"}>✦ Combiner ${CRAFT_COST} doublons → 1 skin</button>
+      ${SRV ? `<button class="btn sq" type="button" data-act="wish-open">♡ Mes envies${wishSet().size ? ` · ${wishSet().size}` : ""}</button>` : ""}</div>
     <div class="sbars">${bars.map(([f, n, t]) => `<button class="sbar" type="button" data-seg="colFac" data-v="${f}"><span>${facLabel(f)}</span><span class="m"><i style="width:${n / t * 100}%"></i></span><span class="v">${n}/${t}</span></button>`).join("")}</div>
     <div class="search">${icon.search}<input class="in" id="colQ" type="search" placeholder="Rechercher un perso ou une faction…" value="${esc(col.q)}"></div>
     ${seg("colTab", [["cards", "Cartes"], ["albums", "Albums"]], col.tab, "light")}
@@ -4757,12 +4907,12 @@ function openTradeBuilder(uid) {
   $("overlay").innerHTML = `<form class="sheet" id="tradeForm" data-to="${uid}" aria-label="Proposer un échange" style="max-width:760px">
     <div class="sheet-h"><h2>Échange avec <span data-uid="${uid}">…</span></h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b"><div class="trade-cols">
-      <fieldset><legend>Tu donnes</legend><div class="pick-list">${mine.map((o) => opt(o, "give")).join("") || '<p class="note">Rien à donner.</p>'}</div>
-        <label class="field" for="tradeEss">Essence en plus ◆<input id="tradeEss" type="number" min="0" max="${save.chakra}" value="0"></label></fieldset>
+      <fieldset><legend>Tu donnes</legend><div class="pick-list">${mine.map((o) => opt(o, "give")).join("") || '<p class="note">Rien à donner.</p>'}</div></fieldset>
       <fieldset><legend>Tu reçois</legend><div class="pick-list">${theirs.map((o) => opt(o, "want")).join("") || '<p class="note">Rien à recevoir.</p>'}</div></fieldset>
     </div>
-    <p class="note" id="tradeFair" style="text-align:center">Choisis des cartes des deux côtés.</p>
-    <button class="btn acc big block" type="submit">Envoyer la proposition</button></div>
+    <p class="note" style="text-align:center">Carte contre carte de même rareté · ${Math.max(0, tradesLeftS(save))}/${TRADE_WEEK} échanges restants cette semaine</p>
+    <p class="note" id="tradeFair" style="text-align:center">Choisis des cartes des deux côtés : même nombre de cartes de chaque rareté.</p>
+    <button class="btn acc big block" type="submit" disabled>Envoyer la proposition</button></div>
   </form>`;
   $("overlay").hidden = false;
   fillNames();
@@ -4791,25 +4941,45 @@ function viewMissions() {
     ${head("Missions", "Missions <em>&</em> succès")}
     <div><button class="btn acc big" type="button" data-claim="all" ${n ? "" : "disabled"}>Tout réclamer${n ? ` · ${n}` : ""}</button></div>
     <p class="lead">Reviens chaque jour : connexion, pack du jour, missions et prédictions donnent de l'essence et des boosters en plus des gratuits.</p>
-    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
+    <div class="mcols"><div class="mcol"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
         ${st.canClaim ? `<button class="btn gold" type="button" data-claim="streak">Jour ${st.next} · ${rewardText(STREAK[st.next - 1])}</button>` : `<span class="pill">Reviens demain</span>`}</div>
       <div class="days">${STREAK.map((r, i) => { const dd = i + 1, done = dd <= st.n, now = st.canClaim && dd === st.next; return `<div class="day ${done ? "done" : ""} ${now ? "now" : ""} ${dd === 7 ? "last" : ""}">J${dd}<i>${KDAY[i]}</i><span>${r.chakra ? `+${r.chakra}` : ""}${r.chakra && r.boosters ? " " : ""}${r.boosters ? `${r.boosters}B` : ""}</span></div>`; }).join("")}</div>
       <p class="mono mut" style="margin:0;font-size:12px">${fmtN(save.counts?.login || 0) ? "" : ""}Série actuelle : ${st.n} jour${st.n > 1 ? "s" : ""} · B = booster</p></div>
-    ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
-      ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}</div>
-    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
       ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div></div>
-    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
-      <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div></div>
+      <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>
+    ${missionHero()}</div>
+    <div class="mcol">${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
+      ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div></div></div>
     <section class="sec"><div class="sec-h"><div><p class="eyebrow">Succès</p><h2>Succès <span class="mono mut" style="font-size:18px">${doneAch}/${as.length}</span></h2></div>${seg("achF", [["all", "Tous"], ["todo", "À faire"], ["done", "Obtenus"]], achF)}</div>
       <div class="ach-grid">${achList.map((a) => { const ok = a.prog >= a.goal; return `<div class="ach ${a.claimed ? "ok" : ""}"><span class="ic">${a.claimed ? "✦" : "?"}</span><div class="bd"><b>${esc(a.label)}</b><p>${esc(a.desc)}</p><div class="bar"><i style="width:${Math.min(1, a.prog / a.goal) * 100}%"></i></div><small>${fmtN(a.prog)}/${fmtN(a.goal)} · ${rewardShort(a.reward)}</small></div>${!a.claimed && ok ? `<button class="btn gold sm" type="button" data-claim="ach" data-id="${a.id}">Réclamer</button>` : ""}</div>`; }).join("") || empty("Rien ici pour l'instant.")}</div></section>
   </div>`;
 }
 
+// une illustration de l'univers pour habiller la page : un perso du QG, différent chaque jour
+function missionHero() {
+  const pool = CARDS.filter((c) => !c.skin && visible(c) && imgKey(c)); if (!pool.length) return "";
+  const c = pool[hashOf(dayKey()) % pool.length], p = PEOPLE[c.who], q = [p.quote, ...(MORE[c.who] || [])].filter(Boolean)[0];
+  return `<div class="mbox mhero"><div class="mhero-art">${cardHTML(c, { w: 150, click: true })}</div><div class="mhero-t"><p class="eyebrow">Perso du jour</p><h2>${esc(p.name)}</h2>${q ? `<p class="mhero-q">« ${esc(q)} »</p>` : ""}
+    <p class="note">${has(c.id) ? "Déjà dans ta collection." : "Pas encore dans ta collection : il peut sortir de ton prochain booster."}</p><button class="btn gold" type="button" data-nav="boosters">Ouvrir un booster</button></div></div>`;
+}
+
 // ===== Prédictions (en plus de Kyara) =====
+const localDT = (t) => new Date(t - new Date(t).getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+function predLeft(t) {
+  const m = Math.max(0, Math.round((t - Date.now()) / 60000));
+  return m >= 2880 ? `encore ${Math.round(m / 1440)} jours` : m >= 120 ? `encore ${Math.round(m / 60)} h` : `encore ${m} min`;
+}
+// qui a voté quoi, chargé une fois la bonne réponse révélée (rafraîchi toutes les minutes au plus)
+function predVoters() {
+  if (predVoters.busy || Date.now() - (predVoters.t || 0) < 60000) return;
+  predVoters.busy = true;
+  srv("pred/voters").then((r) => { predVoters.data = r.voters || {}; predVoters.t = Date.now(); if (view === "pred") draw(); }).catch(() => { predVoters.t = Date.now(); }).finally(() => { predVoters.busy = false; });
+}
 function viewPred() {
   if (!DB) return `<div class="wrap page">${head("Prédictions", "Prédis la <em>suite</em>")}<div class="card">${offlineMsg("faire tes prédictions")}</div></div>`;
   const qs = pred.questions, eps = [...new Set(qs.map((q) => q.ep))].sort((a, b) => b - a);
@@ -4817,19 +4987,23 @@ function viewPred() {
   const board = Object.entries(pred.scores).sort((a, b) => b[1] - a[1]);
   const myPts = pred.scores[ME] || 0, good = qs.filter((q) => q.status === "resolved" && pred.mine[q.id] === q.answer), earned = good.reduce((t, q) => t + predRewardOf(q), 0);
   const rank = board.findIndex(([u]) => u === ME) + 1;
+  if (SRV && qs.some((q) => q.status === "resolved")) predVoters();
   const qHTML = (q) => {
-    const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0, res = q.status === "resolved";
+    const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0, res = q.status === "resolved", open = predOpen(q);
+    const who = res ? (predVoters.data?.[q.id] || []) : [];
+    const whoHTML = (i) => { const l = who.filter(([, a]) => a === i).map(([u]) => u); return l.length ? `<span class="pq-who">${l.slice(0, 10).map((u) => `<span class="pq-v">${av(u)}${nm(u)}</span>`).join("")}${l.length > 10 ? `<span class="pq-more">+${l.length - 10}</span>` : ""}</span>` : ""; };
     return `<article class="pq ${q.status}">
-      <div class="pq-h"><span class="pill gold">+${predRewardOf(q)} ◆ si bonne réponse</span><span class="pill">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pill ${q.status === "open" ? "ok" : ""}">${res ? "Résultat" : q.status === "closed" ? "Votes fermés" : "Votes ouverts"}</span></div>
+      <div class="pq-h"><span class="pill gold">+${predRewardOf(q)} ◆ si bonne réponse</span><span class="pill">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pill ${open ? "ok" : ""}">${res ? "Résultat" : !open ? "Votes fermés" : q.endsAt ? `Votes ouverts · ${predLeft(q.endsAt)}` : "Votes ouverts"}</span></div>
       <h3>${esc(q.text)}</h3>
       <div class="pq-o">${q.options.map((o, i) => { const cls = [mine === i ? "mine" : "", res && q.answer === i ? "good" : "", res && mine === i && q.answer !== i ? "bad" : ""].join(" ");
-        return `<button class="${cls}" type="button" data-vote="${q.id}" data-idx="${i}" ${q.status !== "open" || !canShare ? "disabled" : ""} aria-pressed="${mine === i}">${c && tot ? `<span class="fill" style="width:${c[i] / tot * 100}%"></span>` : ""}<span>${esc(o)}</span>${c ? `<em>${c[i]} vote${c[i] > 1 ? "s" : ""}${tot ? ` · ${Math.round(c[i] / tot * 100)} %` : ""}</em>` : ""}${res && q.answer === i ? "<em>✓ bonne réponse</em>" : mine === i && !res ? "<em>ton choix</em>" : ""}</button>`; }).join("")}</div>
-      ${res ? `<p class="pq-res">${mine == null ? "Tu n'avais pas voté." : mine === q.answer ? `<b style="color:var(--ok)">Bien vu !</b> +${q.points || 1} pt et +${predRewardOf(q)} ◆` : "Raté cette fois."}</p>` : mine != null ? `<p class="pq-res">Ton choix est enregistré. Tu peux le changer tant que les votes sont ouverts.</p>` : ""}
+        return `<button class="${cls}" type="button" data-vote="${q.id}" data-idx="${i}" ${!open || !canShare ? "disabled" : ""} aria-pressed="${mine === i}">${c && tot ? `<span class="fill" style="width:${c[i] / tot * 100}%"></span>` : ""}<span>${esc(o)}</span>${c ? `<em>${c[i]} vote${c[i] > 1 ? "s" : ""}${tot ? ` · ${Math.round(c[i] / tot * 100)} %` : ""}</em>` : ""}${res && q.answer === i ? "<em>✓ bonne réponse</em>" : mine === i && !res ? "<em>ton choix</em>" : ""}</button>${whoHTML(i)}`; }).join("")}</div>
+      ${res ? `<p class="pq-res">${mine == null ? "Tu n'avais pas voté." : mine === q.answer ? `<b style="color:var(--ok)">Bien vu !</b> +${q.points || 1} pt et +${predRewardOf(q)} ◆` : "Raté cette fois."}</p>` : mine != null ? `<p class="pq-res">Ton choix est enregistré. Tu peux le changer tant que les votes sont ouverts. Les votes de chacun se dévoilent avec la bonne réponse.</p>` : ""}
       ${IS_ADMIN ? `<div class="pq-adm">
-        ${q.status === "open" ? `<button class="btn sm" type="button" data-pq="close" data-q="${q.id}">Fermer les votes</button>` : `<button class="btn sm" type="button" data-pq="open" data-q="${q.id}">Rouvrir</button>`}
+        ${open ? `<button class="btn sm" type="button" data-pq="close" data-q="${q.id}">Fermer les votes</button>` : `<button class="btn sm" type="button" data-pq="open" data-q="${q.id}">Rouvrir</button>`}
         <select aria-label="Bonne réponse" data-pq-answer="${q.id}"><option value="">Bonne réponse…</option>${q.options.map((o, i) => `<option value="${i}" ${q.answer === i ? "selected" : ""}>${esc(o)}</option>`).join("")}</select>
         <button class="btn gold sm" type="button" data-pq="resolve" data-q="${q.id}">Valider</button>
         <label class="note">Récompense <input type="number" min="0" max="5000" value="${predRewardOf(q)}" data-pq-reward="${q.id}" aria-label="Récompense en essence"> ◆</label>
+        <label class="note">Fin des votes <input type="datetime-local" value="${q.endsAt ? localDT(q.endsAt) : ""}" data-pq-end="${q.id}" aria-label="Fin des votes"></label>
         <button class="btn sm" type="button" data-pq="delete" data-q="${q.id}">Supprimer</button></div>` : ""}
     </article>`;
   };
@@ -4848,7 +5022,8 @@ function viewPred() {
       <label class="field" for="pqOptions">Réponses possibles (une par ligne, 6 max)<textarea id="pqOptions" rows="4" placeholder="Kuradai&#10;Stalk&#10;Personne"></textarea></label>
       <div class="row"><label class="field" for="pqEp" style="flex:1">Épisode<input id="pqEp" type="number" min="1" max="50" value="${eps[0] || 2}"></label>
         <label class="field" for="pqPoints" style="flex:1">Points<input id="pqPoints" type="number" min="1" max="10" value="1"></label>
-        <label class="field" for="pqReward" style="flex:1">Récompense ◆<input id="pqReward" type="number" min="0" max="5000" value="${PRED_REWARD}"></label></div>
+        <label class="field" for="pqReward" style="flex:1">Récompense ◆<input id="pqReward" type="number" min="0" max="5000" value="${PRED_REWARD}"></label>
+        <label class="field" for="pqDur" style="flex:1">Temps pour répondre<select id="pqDur">${[[0, "Sans limite"], [1, "1 heure"], [3, "3 heures"], [6, "6 heures"], [12, "12 heures"], [24, "24 heures"], [48, "2 jours"], [72, "3 jours"], [168, "1 semaine"]].map(([h, l]) => `<option value="${h}" ${h === 48 ? "selected" : ""}>${l}</option>`).join("")}</select></label></div>
       <button class="btn acc" type="submit">Publier la question</button></form>` : ""}
   </div>`;
 }
@@ -5146,6 +5321,8 @@ function drawOpening() {
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
   const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">${ico("labo")} Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
   if (Open3D.draw(el, o, top)) return;
+  if (o.restore) { o.restore = false; o.phase = "done"; } // sans 3D : retour direct aux boutons de fin
+  if (o.single && o.phase === "pack") { o.single = false; o.phase = "cards"; setTimeout(() => { if (opening === o && !o.flipped) Reveal.tap(); }, reduced ? 0 : 650); } // sans 3D : la carte se retourne seule
   if ((Coffre.isChest(o.pk) || o.scenario) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
@@ -5174,7 +5351,7 @@ function recapParts(o) {
   const actions = `<div class="row" style="justify-content:center">
       ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
         : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
-        : o.pk.daily ? "" : againBtn(o)}
+        : o.pk.daily ? "" : o.chain && o.chain.k + 1 < o.chain.total ? `<button class="btn gold big" type="button" data-act="next-chest">Coffre suivant · ${o.chain.k + 2}/${o.chain.total}</button>` : againBtn(o)}
       ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
       ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
       <button class="btn big" type="button" data-act="stage-close">Fermer</button></div>`;
@@ -5183,9 +5360,12 @@ function recapParts(o) {
 // « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
 function againBtn(o) {
   const n = o.n || 1;
-  if (save.free) { const k = Math.min(n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>`; }
+  // ×10 en plus quand on en a assez : 5 coffres d'affilée
+  const ten = o.pk.daily ? "" : save.free >= 10 ? `<button class="btn gold big" type="button" data-act="again" data-n="10">×10 · 5 coffres</button>`
+    : !save.free && save.chakra >= PRICE * 10 ? `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="10">Acheter ×10 · ${fmtN(PRICE * 10)} ◆</button>` : "";
+  if (save.free) { const k = Math.min(n === 10 ? 2 : n, save.free); return `<button class="btn gold big" type="button" data-act="again" data-n="${k}">${k > 1 ? "Encore 2 · coffre" : "Encore un"} · ${save.free}</button>${ten}`; }
   const k = n > 1 && save.chakra >= PRICE * 2 ? 2 : 1;
-  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>`;
+  return `<button class="btn acc big" type="button" data-act="again" data-paid="1" data-n="${k}" ${save.chakra < PRICE ? "disabled" : ""}>${k > 1 ? "Acheter 2 · coffre" : "Acheter"} · ${fmtN(PRICE * k)} ◆</button>${ten}`;
 }
 function bindPull(p) {
   let y0 = null, dy = 0;
@@ -5207,6 +5387,65 @@ async function tearPack() {
     await sleep(560);
   }
   opening.phase = "cards"; drawOpening();
+}
+// « Retour » depuis une carte ou la collection : on rouvre l'ouverture terminée, cartes retournées
+let lastOpening = null;
+function keepOpening() { if (opening && !opening.lab && !opening.pk.cos) lastOpening = opening; }
+function backToOpening() {
+  const o = lastOpening; if (!o) return; lastOpening = null;
+  opening = { ...o, phase: "pack", restore: true, o3id: null, i: 0, flipped: false, titles: [] };
+  closeMenu(); $("overlay").hidden = true; draw();
+}
+function backBtnHTML() {
+  if (lastOpening && ["carte", "collection", "wiki"].includes(view)) return `<div class="wrap backrow"><button class="backbtn" type="button" data-act="go-back">${ico("back")}<span>Retour à l'ouverture</span></button></div>`;
+  if (navStack.length && ["carte", "profil", "wiki", "classement", "raretes", "regles", "infos", "nouveautes", "avis"].includes(view)) return `<div class="wrap backrow"><button class="backbtn" type="button" data-act="go-back">${ico("back")}<span>Retour</span></button></div>`;
+  return "";
+}
+// ===== choisir ses doublons (recycler ou combiner) et ses envies =====
+// dupSel : { mode: "recycle" | "craft", sel: { "id" ou "id*" (dorée) : nombre } }
+let dupSel = null;
+const dupKey = (d) => d.id + (d.gold ? "*" : "");
+function dupSheet() {
+  if (!dupSel) return;
+  const craft = dupSel.mode === "craft", sel = dupSel.sel;
+  const list = dupeListS(save).filter((d) => !craft || !d.gold).map((d) => ({ ...d, c: byId[d.id] })).sort((a, b) => RAR[a.c.rar].rank - RAR[b.c.rar].rank || nameOf(a.c).localeCompare(nameOf(b.c)));
+  const count = Object.values(sel).reduce((a, n) => a + n, 0);
+  const value = list.reduce((a, d) => a + (sel[dupKey(d)] || 0) * d.value, 0);
+  const full = craft && count >= CRAFT_COST;
+  const ov = $("overlay"); ov.dataset.sheet = "dup";
+  ov.innerHTML = `<div class="sheet dup-sheet" role="dialog" aria-modal="true" aria-label="${craft ? "Combiner des doublons" : "Recycler des doublons"}"><div class="sheet-h"><h2>${craft ? `Choisis ${CRAFT_COST} doublons à combiner` : "Choisis les doublons à recycler"}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">${craft ? `Les ${CRAFT_COST} doublons choisis disparaissent et te donnent 1 skin au hasard. Ta dernière carte de chaque perso est toujours gardée.` : "Seuls les exemplaires en trop sont proposés : ta dernière carte de chaque perso est toujours gardée. Garde ceux que tu veux vendre ou échanger."}</p>
+      ${list.length ? `<div class="dup-grid">${list.map((d) => { const k = dupKey(d), n = sel[k] || 0; return `<div class="dup-it ${n ? "on" : ""}">${cardHTML(d.c, { gold: d.gold, w: 120 })}
+        <div class="dup-ct"><button class="btn sm" type="button" data-act="dup-dec" data-k="${k}" ${n ? "" : "disabled"} aria-label="Un de moins">−</button><b>${n}<small>/${d.extra}</small></b><button class="btn sm" type="button" data-act="dup-inc" data-k="${k}" ${n >= d.extra || full ? "disabled" : ""} aria-label="Un de plus">+</button></div>
+        ${craft ? "" : `<span class="dup-v">${d.value} ◆ l'unité</span>`}</div>`; }).join("")}</div>` : `<p class="note">Aucun doublon pour l'instant.</p>`}
+      <div class="row dup-foot">${craft ? "" : `<button class="btn" type="button" data-act="dup-all">Tout choisir</button>`}<button class="btn" type="button" data-act="dup-none" ${count ? "" : "disabled"}>Tout enlever</button>
+        <button class="btn gold big" type="button" data-act="dup-go" ${craft ? (count === CRAFT_COST ? "" : "disabled") : count ? "" : "disabled"}>${craft ? `Combiner · ${count}/${CRAFT_COST}` : `Recycler ${count} carte${count > 1 ? "s" : ""} · +${fmtN(value)} ◆`}</button></div></div></div>`;
+  ov.hidden = false;
+}
+function dupAct(act, k) {
+  if (!dupSel) return;
+  const craft = dupSel.mode === "craft", list = dupeListS(save).filter((d) => !craft || !d.gold), sel = dupSel.sel;
+  const count = Object.values(sel).reduce((a, n) => a + n, 0);
+  if (act === "dup-inc") { const d = list.find((x) => dupKey(x) === k); if (d && (sel[k] || 0) < d.extra && !(craft && count >= CRAFT_COST)) sel[k] = (sel[k] || 0) + 1; }
+  if (act === "dup-dec") { if (sel[k] > 1) sel[k]--; else delete sel[k]; }
+  if (act === "dup-all") for (const d of list) sel[dupKey(d)] = d.extra;
+  if (act === "dup-none") dupSel.sel = {};
+  if (act === "dup-go") {
+    const pick = Object.entries(sel).filter(([, n]) => n > 0).map(([key, n]) => ({ id: key.replace("*", ""), gold: key.endsWith("*"), n }));
+    return craft ? craft_(pick) : recycle(pick);
+  }
+  dupSheet();
+}
+const craft_ = (pick) => craft(pick.flatMap((p) => Array(p.n).fill(p.id)));
+// envies : les cartes qui te manquent, un cœur à toucher sur chacune
+function wishSheet() {
+  const ws = wishSet(), miss = ALL_CARDS.filter((c) => !has(c.id) && visible(c));
+  const ov = $("overlay"); ov.dataset.sheet = "wish";
+  ov.innerHTML = `<div class="sheet dup-sheet" role="dialog" aria-modal="true" aria-label="Mes envies"><div class="sheet-h"><h2>Mes envies · ${ws.size}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">Touche le cœur des cartes que tu veux : tu es prévenu dès qu'elles arrivent au marché.</p>
+      ${miss.length ? `<div class="dup-grid">${miss.map((c) => `<div class="dup-it ${ws.has(c.id) ? "on" : ""}">${cardHTML(c, { w: 120, locked: true })}<button class="btn sm wish-h ${ws.has(c.id) ? "on" : ""}" type="button" data-wish="${c.id}">${ws.has(c.id) ? "♥ Dans mes envies" : "♡ Envie"}</button></div>`).join("")}</div>` : `<p class="note">Il ne te manque aucune carte.</p>`}
+      <div class="row dup-foot"><button class="btn" type="button" data-act="wish-clear" ${ws.size ? "" : "disabled"}>Vider mes envies</button><button class="btn gold big" type="button" data-act="close">Terminé</button></div></div></div>`;
+  ov.hidden = false;
 }
 function closeStage() { Coffre.stop(); Reveal.stop(); Open3D.stop(); opening = null; setTimeout(flushTitles, 0); loadStyles(); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
@@ -5267,7 +5506,7 @@ const VIEWS = { boosters: viewBoosters, collection: viewCollection, wiki: viewWi
 function draw() {
   header(); drawNav();
   if (menuOpen) drawMenu();
-  $("view").innerHTML = (VIEWS[view] || viewBoosters)();
+  $("view").innerHTML = backBtnHTML() + (VIEWS[view] || viewBoosters)();
   if (opening) drawOpening(); else $("stage").hidden = true;
   $("chatFab").hidden = chat.open;
   fillNames(); afterViews();
@@ -5742,7 +5981,14 @@ async function cfLoadTable(gid) {
   clearTimeout(CF.timer);
   await cfCat();
   try { const t = await srv("confront/state", { gid }); if (JSON.stringify(t) !== JSON.stringify(CF.table)) { CF.table = t; if (view === "confront" && param === gid && !document.activeElement?.closest?.(".cf-keep")) draw(); } }
-  catch (e) { CF.table = { error: e.message }; if (view === "confront") draw(); return; }
+  catch (e) {
+    // une erreur passagère (réseau, serveur occupé) ne doit pas arrêter le suivi de la partie : on garde l'écran et on réessaie
+    CF.fails = (CF.fails || 0) + 1;
+    if (!CF.table || CF.table.error || CF.fails > 20) { CF.table = { error: e.message }; if (view === "confront") draw(); }
+    if (view === "confront" && param === gid && CF.fails <= 20) CF.timer = setTimeout(() => cfLoadTable(gid), 3000);
+    return;
+  }
+  CF.fails = 0;
   if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 8000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
 }
 async function cfAct(action) {
@@ -5913,7 +6159,7 @@ function cfParts(T) {
       ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
-    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
+    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Il te manquait des cartes : des persos prêtés complètent le tirage." : "2 persos tirés au hasard parmi ton deck : choisis celui que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
   }
@@ -6130,8 +6376,28 @@ const RG_FAMS = [["attaque", "Attaquer"], ["esquive", "Se défendre (hors de ton
 const RG_FAM_OF = (d) => (d.cat === "defausse" ? "vol" : d.cat === "zone" ? "duel" : d.cat === "visee" ? "defense" : d.cat);
 const RG_TOC = [["but", "But"], ["roles", "Rôles"], ["perso", "Personnage"], ["miseenplace", "Mise en place"], ["tour", "Le tour"], ["distance", "Distance"], ["combat", "Combat"], ["presage", "Présage"], ["cartes", "Cartes"], ["elim", "Élimination"], ["fin", "Fin"], ["petites", "2 et 3 joueurs"], ["temps", "Délais"]];
 
+// Le livret en livre : une page par chapitre, des marque-pages, on tourne les pages (au lieu d'un long texte)
+const RGB = { page: 0, dir: 0 };
 function viewRegles() {
-  if (!CF.cat) cfCat().then(() => { if (view === "confront" && param === "regles") draw(); });
+  const tmp = document.createElement("div"); tmp.innerHTML = rgFullHTML();
+  const quick = tmp.querySelector(".rg-quick"), secs = [...tmp.querySelectorAll(".rg-sec")];
+  const lab = Object.fromEntries(RG_TOC);
+  const pages = [{ t: "L'essentiel", h: quick ? quick.innerHTML : "" }, ...secs.map((x) => ({ t: lab[x.id.replace("rg-", "")] || x.querySelector("h2")?.textContent || "", h: x.innerHTML }))];
+  const k = Math.max(0, Math.min(pages.length - 1, RGB.page)), dir = RGB.dir; RGB.dir = 0;
+  return `<div class="wrap page rg rgb">${head("Confrontation · Livret", "Comment jouer", "Le livret de Re Zéro : Confrontation, page par page. De 2 à 7 joueurs, environ 20 à 40 minutes.")}
+    <div class="book">
+      <nav class="bk-tabs" aria-label="Chapitres">${pages.map((p, i) => `<button type="button" data-bk="${i}" ${i === k ? 'aria-current="page"' : ""}><b>${i || "★"}</b><span>${esc(p.t)}</span></button>`).join("")}</nav>
+      <div class="bk-body"><div class="bk-spine" aria-hidden="true"></div>
+        <article class="bk-page ${dir > 0 ? "turn-next" : dir < 0 ? "turn-prev" : ""}" aria-live="polite"><p class="bk-run">Chapitre ${k || "★"} · ${esc(pages[k].t)}</p>${pages[k].h}</article></div>
+      <div class="bk-nav"><button class="btn" type="button" data-bk="${k - 1}" ${k ? "" : "disabled"}>‹ Page précédente</button><span class="bk-no">${k + 1} / ${pages.length}</span>
+        ${k < pages.length - 1 ? `<button class="btn gold" type="button" data-bk="${k + 1}">Page suivante ›</button>` : `<button class="btn gold" type="button" data-nav="confront">Aller aux salons</button>`}</div>
+    </div></div>`;
+}
+function rgBook(i) { const n = document.querySelectorAll(".bk-tabs [data-bk]").length; i = Math.max(0, Math.min(n - 1, i)); if (i === RGB.page) return; RGB.dir = i > RGB.page ? 1 : -1; RGB.page = i; draw(); const bk = document.querySelector(".book"); if (bk && bk.getBoundingClientRect().top < 80) scrollTo({ top: scrollY + bk.getBoundingClientRect().top - 90, behavior: reduced ? "auto" : "smooth" }); }
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-bk]"); if (b && !b.disabled) rgBook(+b.dataset.bk); });
+document.addEventListener("keydown", (e) => { if (!document.querySelector(".book") || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return; if (e.key === "ArrowRight") rgBook(RGB.page + 1); if (e.key === "ArrowLeft") rgBook(RGB.page - 1); });
+function rgFullHTML() {
+  if (!CF.cat) cfCat().then(() => { if ((view === "confront" && param === "regles") || view === "regles") draw(); });
   const cat = CF.cat || { cartes: {}, branchIds: [], branches: {}, signes: [] };
   const defs = Object.entries(cat.cartes || {}), total = defs.reduce((a, [, d]) => a + (d.qte || 0), 0);
   const fam = (f) => defs.filter(([, d]) => RG_FAM_OF(d) === f);
@@ -6918,7 +7184,7 @@ const Arena = (() => {
     for (const [x, z, c] of [[-5, -3, "#ff9a4a"], [5, -3, "#ff9a4a"], [-4.5, 3, "#ff7ab8"], [4.5, 3, "#ff7ab8"]]) { const l = new THREE.PointLight(c, 10, 9, 1.6); l.position.set(x, 1.8, z); scene.add(l); }
     R = { renderer, scene, camera, composer, bloom, tweens: [], clockT: 0, shake: 0, cam: { pos: new THREE.Vector3(), look: new THREE.Vector3(), base: { pos: new THREE.Vector3(), look: new THREE.Vector3() } }, ray: new THREE.Raycaster(), ndc: new THREE.Vector2(), glyphs: {}, last: performance.now(), on: false, portrait: false };
     R.radial = canvasTex(128, 128, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, "#fff"); r.addColorStop(.3, "#ffffffaa"); r.addColorStop(1, "#fff0"); g.fillStyle = r; g.fillRect(0, 0, w, w); });
-    buildDecor(); buildParticles();
+    buildDecor(); buildParticles(); buildPile();
     canvas.addEventListener("pointermove", (e) => { if (drag) return; const p = champAt(e), ok = targeting && p && targetsFor(p).length; hover(ok ? p : null); canvas.style.cursor = ok ? "crosshair" : p ? "pointer" : "default"; });
     canvas.addEventListener("click", (e) => { const p = champAt(e); if (!p) return; if (targeting) pickTarget(p); else showInfo(p); });
     addEventListener("resize", () => { if (R.on) resize(); });
@@ -6954,6 +7220,45 @@ const Arena = (() => {
       const roof = new THREE.Mesh(new THREE.ConeGeometry(.34, .22, 4), new THREE.MeshStandardMaterial({ color: "#1d1626" })); roof.position.set(x, 1.86, z); roof.rotation.y = Math.PI / 4; scene.add(roof);
       const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: R.radial, color: "#ff9a4a", blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: .45 })); gl.scale.set(1.6, 1.6, 1); gl.position.copy(lamp.position); scene.add(gl);
     }
+  }
+  // la pioche : un vrai paquet de cartes posé au centre de la table, sa hauteur suit le nombre de cartes
+  const PILE_Y = .06, PILE_MAX = 26;
+  function buildPile() {
+    const back = canvasTex(256, 360, (g, w, h) => {
+      const bg = g.createLinearGradient(0, 0, w, h); bg.addColorStop(0, "#2b1d4a"); bg.addColorStop(1, "#120b22"); g.fillStyle = bg; g.fillRect(0, 0, w, h);
+      g.strokeStyle = "#e8c77e"; g.lineWidth = 8; g.strokeRect(10, 10, w - 20, h - 20); g.lineWidth = 2; g.strokeRect(24, 24, w - 48, h - 48);
+      g.save(); g.translate(w / 2, h / 2); g.scale(5, 5); g.translate(-12, -12); g.strokeStyle = "#e8c77e"; g.lineWidth = 1.2; g.lineJoin = "round";
+      for (const d of iconPaths("logo")) g.stroke(new Path2D(d)); g.beginPath(); g.arc(12, 12, 4.5, 0, 7); g.stroke(); g.restore();
+    });
+    const side = new THREE.MeshStandardMaterial({ color: "#d8c08a", roughness: .7 }), face = new THREE.MeshStandardMaterial({ map: back, roughness: .45, metalness: .1 });
+    const geo = new THREE.BoxGeometry(.62, .012, .88), mats = [side, side, face, side, side, side];
+    const g = new THREE.Group(); g.position.set(1.9, PILE_Y, .9); g.rotation.y = -.35; R.scene.add(g);
+    R.pile = { g, cards: Array.from({ length: PILE_MAX }, (_, i) => { const m = new THREE.Mesh(geo, mats); m.position.set((Math.random() - .5) * .025, i * .014, (Math.random() - .5) * .025); m.rotation.y = (Math.random() - .5) * .06; m.castShadow = m.receiveShadow = true; g.add(m); return m; }), n: PILE_MAX };
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: R.radial, color: "#e8c77e", blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: .35 })); glow.scale.set(1.8, 1.8, 1); glow.position.y = .2; g.add(glow);
+  }
+  function setPile(n) {
+    if (!R?.pile) return;
+    const k = Math.max(n > 0 ? 1 : 0, Math.min(PILE_MAX, Math.ceil(n / 2)));
+    R.pile.cards.forEach((m, i) => { m.visible = i < k; }); R.pile.n = k;
+  }
+  // position à l'écran du dessus de la pioche
+  function pileScreen() { if (!R?.pile) return null; const v = new THREE.Vector3(0, R.pile.n * .014 + .05, 0); R.pile.g.localToWorld(v); return screenOf(v); }
+  // une carte piochée : elle sort du paquet, s'affiche en grand au centre, puis rejoint la main
+  function showDraw(h, i, total) {
+    const from = pileScreen(), to = h.el.getBoundingClientRect(); if (!from) return;
+    const big = cardEl(h.c); big.classList.add("ar-draw"); $a("root")?.appendChild(big) || document.body.appendChild(big);
+    const w = big.offsetWidth || 120, hh = big.offsetHeight || 174, cx = innerWidth / 2, cy = innerHeight * .42, sc = Math.min(2.1, innerHeight * .46 / hh);
+    const at = (x, y, s, r = 0) => `translate(${x - w / 2}px, ${y - hh / 2}px) rotate(${r}deg) scale(${s})`;
+    const quick = total > 3, dur = (quick ? 900 : 1500) / (window.__arSpeed || 1);
+    h.el.style.opacity = "0";
+    const a = big.animate([
+      { transform: at(from[0], from[1], .22, -8) + " rotateY(180deg)", opacity: .6 },
+      { transform: at(cx, cy, sc * 1.05, 0), opacity: 1, offset: .28 },
+      { transform: at(cx, cy, sc, 0), opacity: 1, offset: quick ? .55 : .7 },
+      { transform: at(to.left + to.width / 2, to.top + to.height / 2, to.width / w, 0), opacity: 1 },
+    ], { duration: dur, delay: i * dur * (quick ? .45 : .75), easing: "cubic-bezier(.3,.7,.2,1)", fill: "both" });
+    const done = () => { big.remove(); h.el.style.opacity = ""; };
+    a.onfinish = done; a.oncancel = done;
   }
   // étincelles et pétales
   const NP = 1400;
@@ -7192,6 +7497,43 @@ const Arena = (() => {
     $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
+  // finish façon TFT : ralenti, bandes cinéma, la caméra plonge sur la victime, le coup final, image figée, bannière
+  const FIN_KINDS = ["foudre", "meteore", "lames"];
+  async function finisher(p, killer, e) {
+    if (reduced || !R) { pop(p, "Éliminé", "#ff4d5e", true); eliminateFx(p); return wait(900); }
+    const kc = killer && killer !== p ? col(killer.branch) : "#ff4d5e", kind = FIN_KINDS[[...(p.id + (killer?.id || ""))].reduce((h, ch) => h + ch.charCodeAt(0), 0) % 3];
+    const ov = document.createElement("div"); ov.className = "ar-fin"; ov.style.setProperty("--fc", kc);
+    const role = e.role && typeof ROLES === "object" && ROLES[e.role] ? ROLES[e.role].nom : "";
+    ov.innerHTML = `<i class="lb t"></i><i class="lb b"></i><svg class="fin-crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M50 48 L38 30 L41 12 M50 48 L66 34 L80 30 L97 22 M50 48 L58 66 L54 84 L60 100 M50 48 L30 56 L12 52 L0 60 M50 48 L70 60 L88 74"/></svg>
+      <div class="fin-ban"><small>Finish</small><b>${killer && killer !== p ? esc(nm(killer.id)) : "Éliminé"}</b><span>${killer && killer !== p ? "élimine " : ""}${esc(nm(p.id))}${role ? ` · c'était ${/^[AEIOUÉ]/.test(role) ? "l'" : "le "}${esc(role)}` : ""}</span></div>`;
+    $a("root").appendChild(ov); requestAnimationFrame(() => ov.classList.add("on"));
+    const c = R.cam, p0 = c.pos.clone(), l0 = c.look.clone(), vp = worldOf(p, 1);
+    const side = new THREE.Vector3(vp.x, 0, vp.z).normalize().multiplyScalar(-1.2);
+    const camP = vp.clone().add(new THREE.Vector3(side.x, 2.1, 4.6)), camL = vp.clone().add(new THREE.Vector3(0, .1, 0));
+    R.timeScale = 1; await tween(.55, (t) => { c.pos.lerpVectors(p0, camP, t); c.look.lerpVectors(l0, camL, t); }, easeOut);
+    R.timeScale = .4;
+    if (kind === "foudre") {
+      const pil = new THREE.Mesh(new THREE.CylinderGeometry(.7, 1.1, 16, 20, 1, true), additive({ color: new THREE.Color(kc).multiplyScalar(2), side: THREE.DoubleSide, opacity: 0 }));
+      pil.position.set(vp.x, 8, vp.z + .2); R.scene.add(pil);
+      await tween(.35, (t) => { pil.material.opacity = t; pil.scale.set(.2 + t, 1, .2 + t); }, easeIn);
+      setTimeout(() => tween(.6, (t) => { pil.material.opacity = 1 - t; }).then(() => R.scene.remove(pil)), 200);
+    } else if (kind === "meteore") {
+      const m = new THREE.Mesh(new THREE.IcosahedronGeometry(.42, 1), new THREE.MeshStandardMaterial({ color: "#2a1a10", emissive: kc, emissiveIntensity: 2.2, flatShading: true })); R.scene.add(m);
+      const a = vp.clone().add(new THREE.Vector3(3, 9, -3));
+      await tween(.6, (t) => { m.position.lerpVectors(a, vp, t); m.rotation.x += .2; emit(4, m.position, kc, { speed: .4, life: .6, grav: -.5 }); }, easeIn);
+      R.scene.remove(m);
+    } else {
+      for (let i = 0; i < 5; i++) { slash(vp.clone().add(new THREE.Vector3((Math.random() - .5) * .5, (Math.random() - .5) * .6, 0)), i % 2 ? kc : "#ffffff"); await wait(70); }
+    }
+    // l'impact : image figée, éclair blanc, onde de choc, écran fendu
+    R.timeScale = .06; flash("#ffffff", .85, 520); R.shake = .55; ov.classList.add("hit");
+    emit(420, vp, kc, { speed: 6, life: 1.4, grav: 1 }); ring(new THREE.Vector3(vp.x, .05, vp.z), kc, 5, .9); ring(new THREE.Vector3(vp.x, .06, vp.z), "#ffffff", 3, .6);
+    eliminateFx(p);
+    await wait(450); R.timeScale = .5; await wait(1500);
+    R.timeScale = 1; ov.classList.add("out");
+    await tween(.6, (t) => { c.pos.lerpVectors(camP, c.base.pos, t); c.look.lerpVectors(camL, c.base.look, t); }, easeIO);
+    setTimeout(() => ov.remove(), 500);
+  }
   function eliminateFx(p) {
     if (!p) return;
     emit(140, worldOf(p, 1), col(p.branch), { speed: 3, life: 1.2, grav: 1 });
@@ -7367,7 +7709,8 @@ const Arena = (() => {
     if (st) st.discard = st.discard.filter((u) => keep.has(u));
     layoutHand();
     const hr = el.getBoundingClientRect();
-    hand.filter((h) => h.fresh).forEach((h, i) => { h.fresh = false; if (reduced) return; h.el.animate([{ transform: `translate(${deck.left - hr.left}px, ${deck.top - hr.top}px) rotate(20deg) scale(.4)`, opacity: .2 }, { transform: h.el.style.transform, opacity: 1 }], { duration: 420, delay: i * 110, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }); });
+    const fresh = hand.filter((h) => h.fresh);
+    fresh.forEach((h, i) => { h.fresh = false; if (reduced) return; if (R?.pile) return showDraw(h, i, fresh.length); h.el.animate([{ transform: `translate(${deck.left - hr.left}px, ${deck.top - hr.top}px) rotate(20deg) scale(.4)`, opacity: .2 }, { transform: h.el.style.transform, opacity: 1 }], { duration: 420, delay: i * 110, easing: "cubic-bezier(.2,.8,.2,1)", fill: "backwards" }); });
   }
   function layoutHand() {
     if (!R || !st) return;
@@ -7474,7 +7817,7 @@ const Arena = (() => {
   const LBL = { parer: "Parer", riposter: "Riposter", encaisser: "Encaisser (−1 PV)", defausser: "Défausser une Frappe", elixir: "Boire un Élixir (+1 PV)", survie: "Ténacité : défausser 2 cartes (+1 PV)" };
   function renderSide() {
     const v = CF.table.vue, fin = finAct(), btn = $a("end");
-    $a("deckN").textContent = v.pioche;
+    $a("deckN").textContent = v.pioche; setPile(v.pioche);
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }
@@ -7549,7 +7892,7 @@ const Arena = (() => {
       case "riposte": if (p) { shield(p); pop(p, "Riposte !", "#2ee6ff", true); } await wait(300); await attackFx(p, champ(e.cible)); break;
       case "esquive": if (p) { shield(p, "#5ac8fa"); pop(p, "Esquivé !", "#5ac8fa", true); } await wait(520); break;
       case "kanji_absorbe": if (p) { pop(p, "Garde : aucun dégât", "#e8c77e", true); emit(50, worldOf(p, 1.3), "#e8c77e", { speed: 2.5, life: .8, grav: 0 }); } await wait(500); break;
-      case "elimination": if (p) { pop(p, "Éliminé", "#ff4d5e", true); p.alive = false; eliminateFx(p); if (e.role) p.role = e.role; renderTags(); } await wait(900); break;
+      case "elimination": if (p) { p.alive = false; if (e.role) p.role = e.role; await finisher(p, champ(e.par), e); renderTags(); } break;
       case "presage": omen(p, e); await wait(1300); break;
       case "orbe_explose": if (p) { setOrb(p, false); const o = worldOf(p, 1.6); emit(160, o, "#ff7a1a", { speed: 5, life: 1, grav: 2 }); ring(new THREE.Vector3(o.x, .05, o.z), "#ff7a1a", 4, .8); flash("#ff7a1a", .4); R.shake = .3; } await wait(700); break;
       case "orbe_passe": { const a = champ(e.de), b = champ(e.a); if (a) setOrb(a, false); await beam(a, b, "#ff7a1a", .5); if (b) setOrb(b, true); break; }
@@ -7606,7 +7949,7 @@ const Arena = (() => {
   // ---------- boucle ----------
   function frame(now) {
     if (!R.on) return;
-    const dt = Math.min(.05, (now - R.last) / 1000) * (window.__arSpeed || 1); R.last = now; R.clockT += dt;
+    const dt = Math.min(.05, (now - R.last) / 1000) * (window.__arSpeed || 1) * (R.timeScale ?? 1); R.last = now; R.clockT += dt;
     for (const tw of [...R.tweens]) { const k = Math.min(1, (R.clockT - tw.t0) / tw.dur); tw.fn(tw.ease(k), k); if (k >= 1) { R.tweens.splice(R.tweens.indexOf(tw), 1); tw.res(); } }
     for (const p of st?.champs || []) {
       p.bill.rotation.y = Math.atan2(R.camera.position.x - p.root.position.x, R.camera.position.z - p.root.position.z);
@@ -7717,6 +8060,8 @@ const Open3D = (() => {
     const inner = new THREE.PointLight("#ffffff", 0, 9, 1.6); inner.position.set(0, 1.1, 0.1); scene.add(inner);
     E = { THREE, canvas, renderer, scene, camera, composer, bloom, rim, rim2, inner, tweens: [], clockT: 0, shake: 0, last: performance.now(), on: false,
       cam: { pos: new THREE.Vector3(), look: new THREE.Vector3() }, pointer: { x: 0, y: 0, nx: 0, ny: 0 }, ray: new THREE.Raycaster(), ndc: new THREE.Vector2() };
+    // lumières des cartes toujours dans la scène : en ajouter ou en retirer force Three.js à recompiler tous les shaders (saccades)
+    E.cardLights = Array.from({ length: 10 }, () => { const l = new THREE.PointLight("#ffffff", 0, 4, 1.5); scene.add(l); return l; });
     buildTextures(); buildFloor(); buildChest(); buildKey(); buildPack(); buildParticles(); buildCardGeo();
     canvas.addEventListener("pointerdown", onDown); canvas.addEventListener("pointermove", onMove); canvas.addEventListener("pointerup", onUp);
     canvas.addEventListener("pointerleave", () => cur?.cards.forEach((c) => { c.hover = 0; })); canvas.addEventListener("click", onClick);
@@ -8034,7 +8379,35 @@ const Open3D = (() => {
   }
   const imgOf = (x) => { const k = imgKey(x.c); return k ? ART[k] || PHOTO[k] : null; };
   const loadImg = (src) => new Promise((r) => { if (!src) return r(null); const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+  // objet du Sanctuaire : la carte montre l'effet (cadre, aura, ornement…) sur une silhouette de carte, avec son nom
+  function cosFaceTex(x) {
+    const col = colOf(x), cs = x.cos || {}, c1 = cs.c1 || col, c2 = cs.c2 || c1, slot = COS_SLOTS.find((s) => s.id === cs.slot)?.label || "Objet";
+    return canvasTex(600, 888, (g, w, h) => {
+      const fr = g.createLinearGradient(0, 0, w, h); fr.addColorStop(0, col); fr.addColorStop(.5, "#1a1230"); fr.addColorStop(1, col);
+      roundRect(g, 0, 0, w, h, 42); g.fillStyle = fr; g.fill();
+      roundRect(g, 14, 14, w - 28, h - 28, 32); const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, "#1d1636"); bg.addColorStop(1, "#0d0a1a"); g.fillStyle = bg; g.fill();
+      g.fillStyle = "#f0e6d2"; g.font = "600 30px Inter, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(slot.toUpperCase(), w / 2, 66);
+      // la mini-carte qui porte l'objet
+      const X = 150, Y = 130, W = 300, H = 430;
+      if (cs.slot === "fond") { const f = g.createLinearGradient(X, Y, X + W, Y + H); f.addColorStop(0, c1); f.addColorStop(1, c2); roundRect(g, X, Y, W, H, 24); g.fillStyle = f; g.fill(); }
+      if (cs.slot === "aura" || cs.slot === "pres") { const r = g.createRadialGradient(w / 2, Y + H / 2, 60, w / 2, Y + H / 2, 300); r.addColorStop(0, c1 + "cc"); r.addColorStop(1, c1 + "00"); g.fillStyle = r; g.fillRect(0, Y - 80, w, H + 160); }
+      if (cs.slot !== "fond") { roundRect(g, X, Y, W, H, 24); g.fillStyle = "#151025"; g.fill(); }
+      g.save(); roundRect(g, X, Y, W, H, 24); g.clip();
+      g.fillStyle = "#ffffff14"; g.beginPath(); g.arc(w / 2, Y + 170, 70, 0, 7); g.fill(); g.beginPath(); g.ellipse(w / 2, Y + 400, 130, 120, 0, Math.PI, 0); g.fill();
+      if (cs.slot === "holo") for (let i = -6; i < 12; i++) { const hh = (i * 40) % 360; g.fillStyle = `hsla(${hh}, 90%, 65%, .22)`; g.beginPath(); g.moveTo(X + i * 50, Y); g.lineTo(X + i * 50 + 30, Y); g.lineTo(X + i * 50 - 170, Y + H); g.lineTo(X + i * 50 - 200, Y + H); g.fill(); }
+      if (cs.slot === "part") for (let i = 0; i < 46; i++) { g.fillStyle = i % 2 ? c1 : c2 || c1; g.globalAlpha = .4 + Math.random() * .6; g.beginPath(); g.arc(X + Math.random() * W, Y + Math.random() * H, 3 + Math.random() * 6, 0, 7); g.fill(); }
+      g.globalAlpha = 1; g.restore();
+      if (cs.slot === "cadre") { const f = g.createLinearGradient(X, Y, X + W, Y + H); f.addColorStop(0, c1); f.addColorStop(.5, c2); f.addColorStop(1, c1); roundRect(g, X, Y, W, H, 24); g.lineWidth = 22; g.strokeStyle = f; g.stroke(); }
+      else { roundRect(g, X, Y, W, H, 24); g.lineWidth = 4; g.strokeStyle = "#ffffff33"; g.stroke(); }
+      if (cs.slot === "orn") { g.save(); g.translate(w / 2, Y - 6); g.fillStyle = c1; g.shadowColor = c1; g.shadowBlur = 24; g.beginPath(); for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 22 : 54; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.fill(); g.restore(); }
+      if (cs.slot === "pres") { g.fillStyle = "#fff"; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2; g.globalAlpha = .7; g.beginPath(); g.arc(w / 2 + Math.cos(a) * 200, Y + H / 2 + Math.sin(a) * 260, 4, 0, 7); g.fill(); } g.globalAlpha = 1; }
+      g.fillStyle = "#f0e6d2"; g.font = "700 40px Cinzel, serif"; const nm = cs.name || "Objet"; g.fillText(nm.length > 22 ? nm.slice(0, 21) + "…" : nm, w / 2, 640);
+      g.fillStyle = col; g.font = "700 30px Cinzel, serif"; g.fillText(LABEL(x.c.rar).toUpperCase(), w / 2, 700);
+      g.fillStyle = "#ffffff99"; g.font = "500 24px Inter, sans-serif"; g.fillText("Objet unique · à équiper à l'Atelier", w / 2, 770);
+    });
+  }
   function faceTex(x, img) {
+    if (x.cos) return cosFaceTex(x);
     const col = colOf(x), rar = x.c.rar;
     return canvasTex(600, 888, (g, w, h) => {
       const fr = g.createLinearGradient(0, 0, w, h); fr.addColorStop(0, col); fr.addColorStop(.5, x.gold ? "#3a2c0c" : "#1a1230"); fr.addColorStop(1, col);
@@ -8063,15 +8436,16 @@ const Open3D = (() => {
     const face = new THREE.Mesh(E.faceGeo, faceMat); face.position.z = -(CT / 2 + 0.007); face.rotation.y = Math.PI; flip.add(face);
     const back = new THREE.Mesh(E.faceGeo, E.backMat); back.position.z = CT / 2 + 0.007; flip.add(back);
     const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: E.radial, color: new THREE.Color(col), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0 })); halo.scale.set(1.6, 2.1, 1); halo.position.z = -0.08; tilt.add(halo);
-    const light = new THREE.PointLight(col, 0, 4, 1.5); light.position.z = 0.6; tilt.add(light);
+    const light = E.cardLights[i % E.cardLights.length]; light.color.set(col); light.intensity = 0; light.position.set(0, -40, 0);
     const c = { x, img, rk, col, rar: x.gold ? "gold" : x.c.rar, root, tilt, flip, face, back, edge, edgeMat, faceMat, halo, light, flipped: false, busy: false, tiltX: 0, tiltY: 0, hover: 0, home: new THREE.Vector3(), homeRz: 0, s: 1, i };
     for (const m of [edge, face, back]) m.userData.card = c;
     return c;
   }
-  function clearCards() { for (const c of cur?.cards || []) { E.scene.remove(c.root); c.faceMat.map.dispose(); c.faceMat.dispose(); c.edgeMat.dispose(); } }
+  function clearCards() { for (const c of new Set([...(cur?.cards || []), ...(cur?.pre || [])])) { c.light.intensity = 0; E.scene.remove(c.root); c.faceMat.map.dispose(); c.faceMat.dispose(); c.edgeMat.dispose(); } }
 
   // ---------- mise en place selon l'écran ----------
   function slotsFor(n, portrait) {
+    if (n < 5) return Array.from({ length: n }, (_, i) => { const d = i - (n - 1) / 2; return { x: d * (portrait ? 1.1 : 1.4), y: portrait ? 2.1 : 1.75, z: 2.2, rz: -d * .04, s: n === 1 ? (portrait ? 1.1 : 1.0) : 1.0 }; });
     if (n <= 5) return portrait ? [[-1.2, 2.55], [0, 2.55], [1.2, 2.55], [-0.6, 0.85], [0.6, 0.85]].slice(0, n).map(([x, y]) => ({ x, y, z: 2.2, rz: 0, s: 1 })) : [-2.6, -1.3, 0, 1.3, 2.6].slice(0, n).map((x, i) => ({ x, y: 1.75 - Math.abs(i - 2) * 0.09, z: 2.2 - Math.abs(i - 2) * 0.08, rz: -(i - 2) * 0.045, s: 1 }));
     // coffre (10 cartes) : deux arcs comme le prototype, les cartes du bord tournées vers le joueur
     if (portrait) { const rows = [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9]]; const out = []; rows.forEach((r, j) => r.forEach((_, k) => { const d = k - (r.length - 1) / 2; out.push({ x: d * 0.86, y: 3.0 - j * 1.12 - Math.abs(d) * 0.06, z: 2.2 - Math.abs(d) * 0.08, rz: -d * 0.05, ry: -d * 0.12, s: 0.74 }); })); return out; }
@@ -8119,8 +8493,38 @@ const Open3D = (() => {
     cur = { o, kind, phase: "idle", run: Math.random(), cards: [], best: bestOf(o), imgs: o.cards.map(() => null) };
     // la meilleure carte de la Dorée compte comme une Légendaire pour la lumière
     if (o.cards.some((x) => x.gold) && RAR[cur.best].rank < 4) cur.best = "l";
-    Promise.all(o.cards.map((x, i) => (x.cos ? null : loadImg(imgOf(x)).then((im) => { cur && (cur.imgs[i] = im); }))));
+    const run = cur.run;
+    cur.ready = Promise.all(o.cards.map((x, i) => (x.cos ? null : loadImg(imgOf(x)).then((im) => im?.decode?.().then(() => im, () => im) || im).then((im) => { cur && (cur.imgs[i] = im); })))).then(() => prewarm(run));
     resetScene();
+    if (o.restore) restore(run); else if (o.single) single(run);
+  }
+  // invocation d'une seule carte : elle tombe du ciel au-dessus de l'autel et se retourne toute seule
+  async function single(run) {
+    E.ch.chest.visible = E.key.g.visible = E.pk.pack.visible = false; hint(""); cur.phase = "opening";
+    await cur.ready; if (!cur || cur.run !== run) return;
+    const tc = HEX[cur.best] || "#b072ff";
+    flash(tc, .2);
+    await dealCards(V3(0, 5, 1), tc, (c, i, s) => ({ p0: V3(0, 5.5, 1.2), rot0: 1.2, mid: V3(s.x, s.y + 1.4, s.z) }));
+    if (!cur || cur.run !== run) return;
+    await wait(250); if (cur?.run === run && cur.cards[0]) flipCard(cur.cards[0]);
+  }
+  // retour à une ouverture terminée (depuis une carte ou la collection) : les cartes déjà retournées, les boutons de fin
+  async function restore(run) {
+    E.ch.chest.visible = E.key.g.visible = E.pk.pack.visible = false; hint("");
+    cur.phase = "restoring"; await cur.ready; if (!cur || cur.run !== run) return;
+    cur.cards = cur.pre && cur.pre.every((c, i) => c.img === cur.imgs[i]) ? cur.pre : cur.o.cards.map((x, i) => makeCard(x, i, cur.imgs[i])); cur.pre = null;
+    cur.phase = "done"; resize();
+    for (const c of cur.cards) { c.root.visible = true; c.flipped = true; c.flip.rotation.set(0, Math.PI, 0); if (c.rk >= 3) c.halo.material.opacity = c.rk >= 4 ? 0.16 : 0.08; }
+    showRecap();
+  }
+  // pendant que tu regardes le coffre : cartes, textures et shaders préparés d'avance, pour que la sortie des cartes ne fige pas
+  function prewarm(run) {
+    if (!cur || cur.run !== run || cur.o.pk.cos || cur.cards.length) return;
+    const pre = cur.o.cards.map((x, i) => makeCard(x, i, cur.imgs[i]));
+    for (const c of pre) { c.root.position.set(0, -40, 0); c.root.scale.setScalar(0.001); E.renderer.initTexture(c.faceMat.map); }
+    const done = () => { for (const c of pre) c.root.visible = false; };
+    cur.pre = pre;
+    try { const p = E.renderer.compileAsync ? E.renderer.compileAsync(E.scene, E.camera) : E.renderer.compile(E.scene, E.camera); Promise.resolve(p).then(done, done); } catch (e) { done(); }
   }
   function resetScene() {
     const ch = E.ch, P = E.pk, K = E.key, THREE = E.THREE;
@@ -8390,8 +8794,9 @@ const Open3D = (() => {
   // les cartes sortent et viennent se poser devant toi ; les cosmétiques passent au dévoilement habituel
   async function dealCards(from, tc, path, gap = 70) {
     const me = cur.run, o = cur.o;
-    if (o.pk.cos) { await wait(500); if (!alive(me)) return; return handOff(); }
-    cur.cards = o.cards.map((x, i) => makeCard(x, i, cur.imgs[i])); E.lay.slots = slotsFor(cur.cards.length, E.lay.portrait);
+    cur.cards = cur.pre && cur.pre.every((c, i) => c.img === cur.imgs[i]) ? cur.pre : o.cards.map((x, i) => makeCard(x, i, cur.imgs[i]));
+    if (cur.pre && cur.cards !== cur.pre) for (const c of cur.pre) { c.light.intensity = 0; E.scene.remove(c.root); c.faceMat.map.dispose(); c.faceMat.dispose(); c.edgeMat.dispose(); }
+    cur.pre = null; E.lay.slots = slotsFor(cur.cards.length, E.lay.portrait);
     const camFrom = E.cam.pos.clone(), lookFrom = E.cam.look.clone();
     tween(1.0, (t) => { E.cam.pos.lerpVectors(camFrom, E.lay.cardCam.pos, t); E.cam.look.lerpVectors(lookFrom, E.lay.cardCam.look, t); });
     await Promise.all(cur.cards.map(async (c, i) => {
@@ -8558,7 +8963,7 @@ const Open3D = (() => {
     if (cur.phase === "cards" || cur.phase === "done") {
       const h = hit(e), c = h?.object.userData.card; if (!c) return;
       // carte déjà retournée, une fois tout retourné : sa fiche
-      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab) { const id = c.x.c.id; closeStage(); return nav("carte", id); }
+      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab && !c.x.cos) { const id = c.x.c.id; keepOpening(); closeStage(); return nav("carte", id); }
       flipCard(c);
     }
   }
@@ -8584,6 +8989,7 @@ const Open3D = (() => {
       c.tilt.position.z += ((hv ? 0.18 : 0) - c.tilt.position.z) * k;
       if (!c.flipped && c.rk >= 3 && !c.busy) { c.halo.material.opacity = (c.rk >= 4 ? 0.26 : 0.18) + Math.sin(E.clockT * 3 + c.i) * 0.06; c.edgeMat.emissiveIntensity = 0.5 + Math.sin(E.clockT * 3 + c.i) * 0.25; }
       if (!c.busy && !c.flipped) c.root.position.y = c.home.y + Math.sin(E.clockT * 1.4 + c.i) * 0.025;
+      if (c.light.intensity > 0) { c.tilt.getWorldPosition(c.light.position); c.light.position.z += 0.6; }
     }
     E.pointer.x += (E.pointer.nx - E.pointer.x) * 0.05; E.pointer.y += (E.pointer.ny - E.pointer.y) * 0.05;
     E.shake *= Math.exp(-dt * 5);
@@ -8781,6 +9187,7 @@ document.addEventListener("click", (e) => {
   const ab = t.closest("[data-act]"), act = ab?.dataset.act;
   if (act === "open-day") return startOpening(false, "jour");
   if (act === "open-pack") return startOpening(!!ab.dataset.paid, ab.dataset.p, +ab.dataset.n || 1);
+  if (act === "next-chest") return nextChest();
   if (act === "again") return startOpening(!!ab.dataset.paid, opening?.pk?.id || save.pack, +ab.dataset.n || 1);
   if (act === "summon-again") { const n = opening?.n || 1; closeStage(); return zSummon(n); }
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
@@ -8797,12 +9204,14 @@ document.addEventListener("click", (e) => {
   if (act === "cf-sound") return Coffre.toggleSound();
   if (act === "stage-back") { Reveal.stop(); Open3D.stop(); if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
-  if (act === "to-col") { closeStage(); return nav("collection"); }
+  if (act === "go-back") { if (lastOpening && ["carte", "collection", "wiki"].includes(view)) return backToOpening(); return history.back(); }
+  if (act === "to-col") { keepOpening(); closeStage(); return nav("collection"); }
   if (act === "to-atelier") { closeStage(); return nav("atelier"); }
   if (act === "dev-refresh") { devData.stats = null; devData.audit = null; draw(); return loadDev(true); }
-  if (act === "recycle") return recycle();
-  if (act === "craft") return craft();
-  if (act === "wish-all") return wishAllMissing();
+  if (act === "dup-open") { dupSel = { mode: ab.dataset.mode, sel: {} }; return dupSheet(); }
+  if (act?.startsWith("dup-")) return dupAct(act, ab.dataset.k);
+  if (act === "wish-open") return wishSheet();
+  if (act === "wish-clear") return wishClear();
   if (act === "reset-col") { Object.assign(col, { rar: "", fac: "", own: "all", sort: "num", q: "" }); return draw(); }
   if (act === "market-for") { const c = byId[ab.dataset.p]; mk.q = c ? nameOf(c) : ""; marketTab = "buy"; return nav("market"); }
   if (act === "copy-link") { const u = location.href; navigator.clipboard?.writeText(u).then(() => toast("Lien copié."), () => toast(u)); return; }
@@ -8833,6 +9242,7 @@ document.addEventListener("change", (e) => {
   const t = e.target;
   const SEL = { colFac: (v) => { col.fac = v; }, colOwn: (v) => { col.own = v; }, colSort: (v) => { col.sort = v; }, mkFac: (v) => { mk.fac = v; }, mkSort: (v) => { mk.sort = v; } };
   if (SEL[t.dataset.sel]) { SEL[t.dataset.sel](t.value); return draw(); }
+  if (t.dataset.pqEnd) return adminPred("deadline", t.dataset.pqEnd, t.value);
   if (t.dataset.pqReward) return adminPred("reward", t.dataset.pqReward, t.value);
   if (t.closest?.("#tradeForm")) updateTradeFair();
 });

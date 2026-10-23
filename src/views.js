@@ -2,11 +2,14 @@
 const ROUTES = ["dev", "boosters", "collection", "wiki", "carte", "market", "missions", "pred", "classement", "profil", "raretes", "regles", "infos", "nouveautes", "avis", "admin"];
 let param = null;
 function nav(v, p = null) {
-  if (opening && opening.phase !== "done") return toast("Finis d'ouvrir ton booster d'abord.");
+  if (opening && opening.phase !== "done" && !opening.restore) return toast("Finis d'ouvrir ton booster d'abord.");
   const h = "#/" + v + (p ? "/" + encodeURIComponent(p) : "");
   if (location.hash !== h) location.hash = h; else route();
 }
+// pages visitées dans l'app, pour le bouton « Retour »
+const navStack = []; let lastHash = location.hash;
 function route() {
+  if (location.hash !== lastHash) { if (navStack[navStack.length - 1] === location.hash) navStack.pop(); else navStack.push(lastHash); if (navStack.length > 30) navStack.shift(); lastHash = location.hash; }
   const [v, p] = location.hash.replace(/^#\/?/, "").split("/");
   view = ROUTES.includes(v) ? v : "boosters";
   param = p ? decodeURIComponent(p) : null;
@@ -252,7 +255,9 @@ function boosterZone() {
   // 2 boosters d'un coup : 10 cartes dans le coffre
   if (packOpen(pk) && !pk.daily && !(shop && pk.limited)) btn += shop
     ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="2" ${save.chakra < PRICE * 2 ? "disabled" : ""}><b>Acheter 2 · coffre</b><span>${fmtN(PRICE * 2)} ◆ · 10 cartes</span></button>`
-    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`;
+      + (save.chakra >= PRICE * 10 ? `<button class="bigopen two acc" type="button" data-act="open-pack" data-p="${pk.id}" data-paid="1" data-n="10"><b>Acheter ×10 · 5 coffres</b><span>${fmtN(PRICE * 10)} ◆ · 50 cartes</span></button>` : "")
+    : `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="2" ${save.free >= 2 ? "" : "disabled"}><b>Ouvrir 2 · coffre</b><span>${save.free >= 2 ? "10 cartes" : "2 gratuits requis"}</span></button>`
+      + (save.free >= 10 ? `<button class="bigopen two" type="button" data-act="open-pack" data-p="${pk.id}" data-n="10"><b>Ouvrir ×10 · 5 coffres</b><span>50 cartes d'affilée</span></button>` : "");
   return `<section class="sec" id="boosters">
     <div class="sec-h"><h2>Choisis ton booster</h2></div>
     ${seg("packTab", [["free", "Gratuits"], ["day", "Du jour & limités", save.dailyPack !== dayKey()], ["shop", "Boutique"]], packTab, "gold")}
@@ -335,9 +340,9 @@ function viewCollection() {
   return `<div class="wrap page">
     ${head("Album", "Ma collection")}
     <div class="bigstats"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${Math.round(st.unique / ALL_CARDS.length * 100)} %</b><span>Complétion</span></div><div><b>${dupes}</b><span>Doublons</span></div></div>
-    <div class="row"><button class="btn sq" type="button" data-act="recycle" ${dv ? "" : "disabled"}>♻ Recycler les doublons${dv ? ` · +${dv} ◆` : ""}</button>
-      <button class="btn sq" type="button" data-act="craft" ${craftableDupes(save).length >= CRAFT_COST ? "" : "disabled"}>✦ Combiner ${CRAFT_COST} doublons → 1 skin</button>
-      ${SRV ? `<button class="btn sq" type="button" data-act="wish-all">♡ Manquantes en envies</button>` : ""}</div>
+    <div class="row"><button class="btn sq" type="button" data-act="dup-open" data-mode="recycle" ${dupes ? "" : "disabled"}>♻ Recycler des doublons</button>
+      <button class="btn sq" type="button" data-act="dup-open" data-mode="craft" ${craftableDupes(save).length >= CRAFT_COST ? "" : "disabled"}>✦ Combiner ${CRAFT_COST} doublons → 1 skin</button>
+      ${SRV ? `<button class="btn sq" type="button" data-act="wish-open">♡ Mes envies${wishSet().size ? ` · ${wishSet().size}` : ""}</button>` : ""}</div>
     <div class="sbars">${bars.map(([f, n, t]) => `<button class="sbar" type="button" data-seg="colFac" data-v="${f}"><span>${facLabel(f)}</span><span class="m"><i style="width:${n / t * 100}%"></i></span><span class="v">${n}/${t}</span></button>`).join("")}</div>
     <div class="search">${icon.search}<input class="in" id="colQ" type="search" placeholder="Rechercher un perso ou une faction…" value="${esc(col.q)}"></div>
     ${seg("colTab", [["cards", "Cartes"], ["albums", "Albums"]], col.tab, "light")}

@@ -142,21 +142,25 @@ function viewConfront() {
 function cfTableHTML() {
   const T = CF.table;
   if (!T) return `<div class="wrap page"><p class="note">Chargement de la table…</p></div>`;
+  if (T.ferme && T.vue?.phase === "lobby") return `<div class="wrap page">${empty("Ce salon a été fermé par l'hôte.")}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
   if (T.error) return `<div class="wrap page">${empty(esc(T.error))}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
   const v = T.vue, acts = v.actions || [], has1 = (t) => acts.find((a) => a.type === t);
   const top = `<div class="cf-top"><div><p class="eyebrow">Confrontation · ${esc(PHASE_LABEL[v.phase])}${v.mode ? ` · ${{ duel: "Duel", trio: "Trio", classique: "Classique" }[v.mode]}` : ""}</p><h1 class="cf-h">${esc(T.nom)}</h1>
     <p class="note">Code <b class="mono">${T.gid}</b>${T.spectateur ? " · tu regardes en spectateur" : ""}</p></div>
     <div class="row"><button class="btn sm" type="button" data-nav="confront">Salons</button>${v.phase !== "fin" ? `<button class="btn sm" type="button" data-act="cf-share">Partager le salon</button>` : ""}
+      ${v.phase === "lobby" && !T.spectateur && (v.hote === ME || T.createur === ME) && !T.ferme ? `<button class="btn sm" type="button" data-act="cf-close">Fermer le salon</button>` : ""}
       ${has1("quitter") ? `<button class="btn sm acc" type="button" data-cfa='{"type":"quitter"}'>Quitter le salon</button>` : has1("abandon") && (v.phase === "contributions" || v.phase === "choix") ? `<button class="btn sm acc" type="button" data-act="cf-leave">Quitter la table</button>` : has1("abandon") ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Abandonner</button>` : ""}</div></div>`;
   let body = "";
   if (v.phase === "lobby") {
+    const attente = v.joueurs.filter((p) => p.id !== v.hote && !/^bot:/.test(p.id) && !T.prets?.[p.id]).length;
     const host = v.hote === ME, M = CF_MODES.find((m) => m[0] === (T.partage ? "partage" : "deck"));
     const modeBox = `<section class="sec cf-modebox"><h2>Cartes de la table</h2>${T.duel ? `<p class="note"><b>Duel</b> : chacun joue son deck.${T.refuse ? " <b>Ton défi a été refusé.</b>" : v.joueurs.length < 2 ? " En attente de la réponse…" : ""}</p>`
       : host ? `<div class="cf-modes">${CF_MODES.map(([k, l, d]) => `<button type="button" class="cf-mode ${k === M[0] ? "on" : ""}" data-cfmode="${k}" aria-pressed="${k === M[0]}"><b>${l}</b><small>${d}</small></button>`).join("")}</div><p class="note">Tout le monde voit ce choix : rejoindre la table, c'est l'accepter.</p>`
       : `<div class="cf-modes"><div class="cf-mode on"><b>${M[1]}</b><small>${M[2]}</small></div></div><p class="note">Choisi par l'hôte. Rejoindre la table, c'est l'accepter.</p>`}</section>`;
-    body = `${modeBox}<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : ""}</span>`).join("")}</div>
+    body = `${modeBox}<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.id === v.hote || /^bot:/.test(p.id) || T.prets?.[p.id] ? "cf-ready" : ""}">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : /^bot:/.test(p.id) || T.prets?.[p.id] ? " · prêt" : " · pas prêt"}</span>`).join("")}</div>
       <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : `Mode Classique, avec des rôles secrets : ${ROLE_SPLIT[v.joueurs.length].map((x, i) => x ? `${x} ${ROLES[ROLE_ORDER[i]].nom}${x > 1 ? "s" : ""}` : "").filter(Boolean).join(", ")} (${ROLE_BONUS[v.joueurs.length]}).`} <a href="#/confront/regles">Comment jouer</a></p>
-      <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
+      <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? (attente ? `<button class="btn gold" type="button" disabled>En attente : ${attente} pas prêt${attente > 1 ? "s" : ""}</button>` : `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>`) : ""}
+      ${!T.spectateur && v.hote !== ME ? `<button class="btn ${T.prets?.[ME] ? "" : "gold"}" type="button" data-cfready="${T.prets?.[ME] ? "0" : "1"}">${T.prets?.[ME] ? "Pas prêt finalement" : "Je suis prêt"}</button>` : ""}
       ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {
     const me = v.joueurs.find((p) => p.id === v.moi);
@@ -293,6 +297,7 @@ document.addEventListener("click", (e) => {
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));
   const c = t.closest("[data-cfc]"); if (c) return cfSelect(c.dataset.cfc);
   const dr = t.closest("[data-cfdrop]"); if (dr) { delete CF.contrib[dr.dataset.cfdrop]; return draw(); }
+  const rd = t.closest("[data-cfready]"); if (rd) return srv("confront/pret", { gid: CF.gid, pret: rd.dataset.cfready === "1" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   const sh = t.closest("[data-cfsh]"); if (sh) return cfShareDo(sh.dataset.cfsh);
   const md = t.closest("[data-cfmode]"); if (md) return srv("confront/reglage", { gid: CF.gid, partage: md.dataset.cfmode === "partage" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   const ac = t.closest("[data-cfaccept]"); if (ac) return srv("confront/act", { gid: ac.dataset.cfaccept, action: { type: "rejoindre" } }).then(() => { CF.list = null; nav("confront", ac.dataset.cfaccept); }).catch((err) => toast(err.message));
@@ -311,6 +316,7 @@ document.addEventListener("click", (e) => {
   if (act === "cf-deck-save") return srv("confront/deck", { cartes: Object.values(CF.contrib).filter(Boolean) }).then((r) => { if (CF.list) CF.list.deck = r.deck; toast("Deck enregistré : tu pourras le reprendre en un toucher."); draw(); }).catch((err) => toast(err.message));
   if (act === "cf-reload") { CF.list = null; cfLoadList(); return draw(); }
   if (act === "cf-share") return cfShare(CF.gid, CF.table?.nom);
+  if (act === "cf-close" && sure(t.closest("[data-act]"), "Fermer pour tout le monde")) return srv("confront/fermer", { gid: CF.gid }).then(() => { CF.list = null; toast("Salon fermé."); nav("confront"); }).catch((err) => toast(err.message));
   if (act === "cf-leave" && sure(t.closest("[data-act]"), "Quitter : la partie est annulée")) return cfAct({ type: "abandon" }).then(() => nav("confront"));
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });

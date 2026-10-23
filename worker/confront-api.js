@@ -93,7 +93,7 @@ const names = async (env, ids) => {
 const SALON_MAX = 40, SALON_LEN = 120, SALON_GAP = 2000, SALON_EMOTES = ["salut", "haha", "respect", "defi", "grr", "quoi", "ouin", "pardon"];
 async function viewOf(env, g, uid) {
   const me = g.state.players.some((p) => p.id === uid) ? uid : null;
-  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, partage: !g.state.config.persoLibre, invite: g.invite || null, duel: g.duel || null, refuse: !!g.refuse, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me), salon: (g.salon || []).slice(-SALON_MAX) };
+  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, partage: !g.state.config.persoLibre, invite: g.invite || null, duel: g.duel || null, refuse: !!g.refuse, ferme: !!g.ferme, prets: g.prets || {}, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me), salon: (g.salon || []).slice(-SALON_MAX) };
 }
 // cartes de collection apportables : celles du joueur, avec leur branche (rien d'autre du catalogue n'est envoyé)
 // proposition : branche donnée à la création (carte, puis perso créé depuis l'app), sinon la table proposée
@@ -156,6 +156,7 @@ export async function confrontRoute(env, user, path, body, h) {
     const rows = (await env.DB.prepare("SELECT data FROM docs WHERE coll = 'confront' AND updated > ? ORDER BY updated DESC LIMIT 60").bind(since).all()).results.map((r) => JSON.parse(r.data));
     const pub = (g) => ({ gid: g.id, nom: g.nom, phase: g.state.phase, joueurs: g.state.players.length, createur: g.createur, partage: !g.state.config.persoLibre, invite: g.invite || null });
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
+    rows.splice(0, rows.length, ...rows.filter((g) => !g.ferme));
     return json({ salons: rows.filter((g) => g.public && g.state.phase === "lobby").map(pub), enCours: rows.filter((g) => g.public && g.state.phase !== "lobby" && g.state.phase !== "fin").map(pub),
       miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub),
       defis: rows.filter((g) => g.invite === user.id && g.state.phase === "lobby" && !g.state.players.some((p) => p.id === user.id)).map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], deck: s?.cfDeck || [], verrou: s?.confront || null });
@@ -198,9 +199,31 @@ export async function confrontRoute(env, user, path, body, h) {
       if (g.state.hote !== user.id) return { error: "Seul l'hôte règle la table.", status: 403 };
       if (g.state.phase !== "lobby") return { error: "La partie est lancée.", status: 400 };
       if (g.duel) return { error: "Un duel se joue chacun avec son deck.", status: 400 };
+      // le mode change : chacun doit redire qu'il est prêt
+      if (g.state.config.persoLibre !== !body.partage) g.prets = {};
       g.state.config.persoLibre = !body.partage; return {};
     });
     return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
+  }
+  // « prêt » : l'hôte ne lance que quand tous les autres joueurs le sont (les bots le sont d'office)
+  if (a === "pret") {
+    const r = await edit(env, h, gid, (g) => {
+      if (g.state.phase !== "lobby") return { error: "La partie est lancée.", status: 400 };
+      if (!g.state.players.some((p) => p.id === user.id)) return { error: "Assieds-toi d'abord à la table.", status: 400 };
+      g.prets ||= {}; if (body.pret === false) delete g.prets[user.id]; else g.prets[user.id] = true; return {};
+    });
+    return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
+  }
+  // fermer le salon (créateur ou hôte, avant le lancement) : plus personne ne peut s'y asseoir, les joueurs sont prévenus
+  if (a === "fermer") {
+    const r = await edit(env, h, gid, (g) => {
+      if (g.createur !== user.id && g.state.hote !== user.id && !user.admin) return { error: "Seul l'hôte ferme le salon.", status: 403 };
+      if (g.state.phase !== "lobby") return { error: "La partie est lancée : chacun peut la quitter.", status: 400 };
+      g.ferme = true; return {};
+    });
+    if (r.error) return fail(r.status || 400, r.error);
+    for (const p of r.g.state.players) if (p.id !== user.id && !isBot(p.id)) await h.notify(env, p.id, "confront", `${user.name} a fermé le salon « ${r.g.nom} ».`, { go: "confront" }).catch(() => null);
+    return json({ ok: true });
   }
   // défi refusé : la table est fermée et le joueur qui a défié est prévenu
   if (a === "refuser") {
@@ -246,6 +269,12 @@ export async function confrontRoute(env, user, path, body, h) {
       // table de duel : seule la personne défiée peut s'asseoir
       if (action.type === "rejoindre" && g.duel && g.duel !== user.id) return { error: "Cette table est un duel privé.", status: 403 };
       if (action.type === "rejoindre" && g.refuse) return { error: "Ce défi a été refusé.", status: 400 };
+      if (g.ferme) return { error: "Ce salon a été fermé par l'hôte.", status: 400 };
+      if (action.type === "lancer" && g.state.hote === user.id) {
+        const attente = g.state.players.filter((p) => p.id !== user.id && !isBot(p.id) && !g.prets?.[p.id]);
+        if (attente.length) return { error: `Tout le monde n'est pas prêt (${attente.length} en attente).`, status: 400, code: "PAS_PRETS" };
+      }
+      if ((action.type === "rejoindre" || action.type === "quitter") && g.prets) delete g.prets[user.id];
       const out = act(g.state, user.id, action, now);
       if (out.error) return { error: out.error.message, code: out.error.code };
       g.state = out.state; return {};

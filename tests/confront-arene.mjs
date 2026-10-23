@@ -120,8 +120,10 @@ try {
     await page.click("#ar-sheet .ar-x");
     // seulement l'arène : plus de bouton pour passer à la vue classique
     t.check("plus de bouton « Vue classique »", (await page.locator("#ar-classic").count()) === 0 && (await page.locator('[data-act="cf-arene"]').count()) === 0);
-    await page.click("#ar-back"); await page.waitForTimeout(800);
-    t.check("bouton Salons : l'arène se ferme", await page.locator("#ar-root").isHidden());
+    t.check("« Quitter la partie » toujours visible en jeu", (await page.locator("#ar-quit").isVisible()) && (await page.locator("#ar-quit").innerText()).includes("Quitter la partie"));
+    await page.click("#ar-quit"); await page.waitForTimeout(200); await page.click("#ar-quit"); await page.waitForTimeout(1500);
+    const quitted = (await A.api("confront/state", { gid })).vue;
+    t.check("quitter la partie : abandon confirmé, retour aux salons", (await page.locator("#ar-root").isHidden()) && page.url().endsWith("#/confront") && (quitted.phase === "fin" || quitted.joueurs.find((j) => j.id === A.id)?.vivant === false), quitted.phase);
     t.check("aucune erreur JavaScript", errors.length === 0, errors);
     await A.api("confront/act", { gid, action: { type: "abandon" } });
     await ctx.close();

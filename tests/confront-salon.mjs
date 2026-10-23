@@ -20,11 +20,15 @@ try {
   await B.api("confront/act", { gid: t1.gid, action: { type: "rejoindre" } });
   t.check("un autre joueur ne peut pas changer le mode", (await B.api("confront/reglage", { gid: t1.gid, partage: true })).status === 403);
   t.check("l'hôte change le mode dans le salon", (await A.api("confront/reglage", { gid: t1.gid, partage: true })).partage === true && (await A.api("confront/reglage", { gid: t1.gid, partage: false })).partage === false);
+  t.check("changer de mode remet les « prêt » à zéro", (await B.api("confront/pret", { gid: t1.gid, pret: true })).prets[B.id] === true && Object.keys((await A.api("confront/reglage", { gid: t1.gid, partage: true })).prets).length === 0);
+  await A.api("confront/reglage", { gid: t1.gid, partage: false }); await B.api("confront/pret", { gid: t1.gid, pret: true });
   await A.api("confront/act", { gid: t1.gid, action: { type: "lancer" } });
   t.check("chacun son deck : venir sans carte quand on en a, refusé", (await A.api("confront/act", { gid: t1.gid, action: { type: "contribuer", cartes: [] } })).status === 400);
   t.check("le mode ne change plus une fois lancé", (await A.api("confront/reglage", { gid: t1.gid, partage: true })).status === 400);
   await A.api("confront/act", { gid: t1.gid, action: { type: "abandon" } });
   await B.api("confront/act", { gid: t2.gid, action: { type: "rejoindre" } });
+  t.check("l'hôte ne lance pas tant qu'un joueur n'est pas prêt", (await A.api("confront/act", { gid: t2.gid, action: { type: "lancer" } })).status === 400);
+  await B.api("confront/pret", { gid: t2.gid, pret: true });
   await A.api("confront/act", { gid: t2.gid, action: { type: "lancer" } });
   t.check("cartes partagées : venir avec des persos prêtés, accepté", (await A.api("confront/act", { gid: t2.gid, action: { type: "contribuer", cartes: [] } })).vue?.phase != null);
   await A.api("confront/act", { gid: t2.gid, action: { type: "abandon" } });
@@ -34,6 +38,14 @@ try {
   await B.api("confront/act", { gid: t3.gid, action: { type: "rejoindre" } });
   const q = await B.api("confront/act", { gid: t3.gid, action: { type: "quitter" } });
   t.check("quitter le salon avant de lancer : on n'y est plus", q.spectateur === true && q.vue.joueurs.length === 1);
+
+  t.section("Fermer le salon");
+  const t4 = await A.api("confront/create", { nom: "Fermer", public: true });
+  await B.api("confront/act", { gid: t4.gid, action: { type: "rejoindre" } });
+  t.check("un joueur qui n'a pas créé le salon ne peut pas le fermer", (await B.api("confront/fermer", { gid: t4.gid })).status === 403);
+  t.check("le créateur ferme le salon", (await A.api("confront/fermer", { gid: t4.gid })).ok === true);
+  t.check("salon fermé : plus dans la liste, plus personne ne s'assoit", !(await C.api("confront/list")).salons.some((g) => g.gid === t4.gid) && (await C.api("confront/act", { gid: t4.gid, action: { type: "rejoindre" } })).status === 400);
+  t.check("les joueurs du salon sont prévenus", (await B.api("pulse", { after: null })).notifs.items.some((n) => n.kind === "confront" && n.text.includes("fermé")));
 
   t.section("Duel depuis un profil");
   const d1 = await A.api("confront/create", { invite: IDS.p2 });

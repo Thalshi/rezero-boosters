@@ -1911,6 +1911,80 @@ h1 { background: linear-gradient(180deg, #fff8e8 0%, #f0e6d2 45%, #d9c49a 100%);
 /* champs de saisie : creusés dans le verre */
 input[type="text"], input[type="search"], input:not([type]), textarea, select, .in, .search input {
   background: #07060fe6 !important; box-shadow: inset 0 3px 6px #000c, inset 0 -1px 0 #ffffff14 !important; border-color: #e8c77e33 !important; }
+
+/* ===== Relief partout, suite : menu, Sanctuaire (autels), tirage d'un objet, rubriques ===== */
+/* tuiles en relief : menu, compte, listes, onglets de gestion */
+.mgrid button, .acc-stats > div, .gest-tabs button, .rank-list > *, .adm-row, .zrates span, .def-e, .cf-br, .rl-card, .ach, .ttl-i, .mr, .np-item {
+  background: linear-gradient(180deg, #1f1838 0%, #120d24 60%, #0b0916 100%) !important; border: 1px solid #e8c77e2e !important;
+  box-shadow: inset 0 1px 0 #ffffff1c, inset 0 -3px 0 #0009, 0 4px 0 #05040b, 0 10px 22px #000a; transition: transform .14s, box-shadow .14s, border-color .14s; }
+.mgrid button:hover, .gest-tabs button:hover, .np-item:hover, .cf-br:hover, .rl-card:hover { transform: translateY(-2px); border-color: #e8c77e66 !important; box-shadow: inset 0 1px 0 #ffffff26, inset 0 -3px 0 #0009, 0 6px 0 #05040b, 0 16px 28px #000b, 0 0 18px #e8c77e1f; }
+.mgrid button:active, .gest-tabs button:active, .np-item:active { transform: translateY(3px); box-shadow: inset 0 1px 0 #ffffff14, 0 1px 0 #05040b; }
+.mgrid button[aria-current="page"] { border-color: #ff2e88 !important; box-shadow: inset 0 1px 0 #ffffff26, inset 0 -3px 0 #0009, 0 4px 0 #4a0828, 0 0 22px #ff2e8844; }
+.mgrid button i { filter: drop-shadow(0 0 6px color-mix(in srgb, currentColor 45%, transparent)); }
+.menu { background: #0b0916d9 !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 20px 60px #000d, inset 0 1px 0 #ffffff14; }
+.acc-card { background: linear-gradient(180deg, #241a44, #0e0a1e) !important; box-shadow: inset 0 1px 0 #ffffff26, 0 6px 0 #05040b, 0 16px 30px #000b; }
+.ring-av { border: 0 !important; background: conic-gradient(from 210deg, #f0d38c, #6a4a14, #e8c77e, #3a2a10, #f0d38c); box-shadow: inset 0 2px 2px #fff6, inset 0 -2px 3px #0009, 0 4px 0 #05040b, 0 0 20px #e8c77e33; }
+
+/* Sanctuaire : chaque offre est un autel, l'objet flotte au-dessus d'un socle de runes */
+.zoffers { perspective: 1100px; }
+.zoffer { transform-style: preserve-3d; overflow: visible; background: linear-gradient(180deg, #1f1838 0%, #0e0a1e 70%, #07060f 100%) !important;
+  box-shadow: inset 0 1px 0 #ffffff1f, inset 0 -4px 0 #0009, 0 6px 0 #05040b, 0 20px 40px #000c; transition: transform .25s ease-out, box-shadow .25s; }
+.zoffer:hover:not(:disabled) { transform: translateY(-6px) rotateX(6deg); box-shadow: inset 0 1px 0 #ffffff2a, inset 0 -4px 0 #0009, 0 10px 0 #05040b, 0 30px 50px #000d, 0 0 40px #b072ff44; }
+.zoffer.n10:hover:not(:disabled) { box-shadow: inset 0 1px 0 #ffffff2a, inset 0 -4px 0 #0009, 0 10px 0 #05040b, 0 30px 50px #000d, 0 0 40px #f5c51844; }
+.zo-art { position: relative; height: 150px; transform-style: preserve-3d; }
+.zo-art::before { content: ""; position: absolute; left: 50%; bottom: -52px; width: 150px; height: 150px; transform: translateX(-50%) rotateX(72deg); border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--zc, #b072ff) 55%, transparent), transparent 70%), repeating-conic-gradient(from 0deg, #e8c77e55 0 4deg, transparent 4deg 22deg);
+  -webkit-mask: radial-gradient(closest-side, #000 60%, transparent 62%, transparent 74%, #000 76%, #000 92%, transparent 94%); mask: radial-gradient(closest-side, #000 60%, transparent 62%, transparent 74%, #000 76%, #000 92%, transparent 94%);
+  animation: z-runes 12s linear infinite; }
+.zo-art::after { content: ""; position: absolute; left: 50%; bottom: 20px; width: 70px; height: 120px; transform: translateX(-50%); pointer-events: none;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--zc, #b072ff) 45%, transparent), transparent); filter: blur(6px); opacity: .6; }
+.zoffer.n10 { --zc: #f5c518; } .zoffer.n5 { --zc: #b072ff; } .zoffer.n1 { --zc: #2ee6ff; }
+.zo-card, .zo-pouch, .zo-chest { position: relative; z-index: 1; animation: z-float 3.2s ease-in-out infinite; transform-style: preserve-3d; }
+.zo-card { box-shadow: 0 0 22px #2ee6ff66, 4px 4px 0 #0e0a1e, 5px 5px 0 #2ee6ff55, 0 18px 24px #000c; border-color: #2ee6ff; }
+.zo-pouch { filter: drop-shadow(0 0 16px #b072ff88) drop-shadow(0 16px 14px #000c); }
+.zo-chest { box-shadow: 0 0 30px #f5c51866, inset 0 2px 0 #fff3, inset 0 -6px 0 #0008, 0 16px 22px #000c; }
+.zoffer:nth-child(2) .zo-pouch { animation-delay: -1s; } .zoffer:nth-child(3) .zo-chest { animation-delay: -2s; }
+.zo-p { box-shadow: inset 0 1px 0 #fff8, inset 0 -2px 0 #0004, 0 3px 0 #6a4a14, 0 8px 14px #000a; }
+.zoffer.n1 .zo-p { background: linear-gradient(180deg, #7ef2ff, #1aa8c4); color: #04161a; box-shadow: inset 0 1px 0 #fff8, 0 3px 0 #0a4a58, 0 8px 14px #000a; }
+.zoffer.n5 .zo-p { background: linear-gradient(180deg, #d6b4ff, #7a3cd0); color: #fff; box-shadow: inset 0 1px 0 #fff8, 0 3px 0 #3a1868, 0 8px 14px #000a; }
+@keyframes z-float { 0%, 100% { transform: translateY(0) rotateY(-10deg); } 50% { transform: translateY(-10px) rotateY(10deg); } }
+@keyframes z-runes { from { transform: translateX(-50%) rotateX(72deg) rotate(0deg); } to { transform: translateX(-50%) rotateX(72deg) rotate(360deg); } }
+.zoffer:disabled { opacity: 1; filter: saturate(.55) brightness(.78); }
+
+/* tirage d'un seul objet (et chaque carte dévoilée une à une) : la carte flotte au-dessus d'un autel de runes, dans une colonne de lumière */
+.rv .rv-deck { perspective: 1200px; }
+.rv .rv-deck::before { content: ""; position: absolute; left: 50%; bottom: -70px; width: min(520px, 110vw); height: 150px; transform: translateX(-50%) rotateX(68deg); border-radius: 50%; pointer-events: none; z-index: -1;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--rc, #b072ff) 45%, transparent), transparent 75%), repeating-conic-gradient(from 0deg, #e8c77e66 0 3deg, transparent 3deg 15deg);
+  -webkit-mask: radial-gradient(closest-side, #000 52%, transparent 54%, transparent 66%, #000 68%, #000 90%, transparent 92%); mask: radial-gradient(closest-side, #000 52%, transparent 54%, transparent 66%, #000 68%, #000 90%, transparent 92%);
+  animation: rv-runes 16s linear infinite; }
+.rv .rv-deck::before { height: min(520px, 110vw); bottom: calc(min(520px, 110vw) * -0.42); }
+.rv .rv-deck::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 260px; height: 520px; transform: translateX(-50%); pointer-events: none; z-index: -1;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--rc, #b072ff) 40%, transparent), transparent 85%); filter: blur(10px); opacity: .55; }
+.rv .reveal-card:not(.on) { animation: rv-float 3.4s ease-in-out infinite; }
+.rv .reveal-card .face { filter: drop-shadow(6px 6px 0 #0e0a1e) drop-shadow(0 24px 30px #000d); }
+@keyframes rv-float { 0%, 100% { translate: 0 0; rotate: y -6deg; } 50% { translate: 0 -12px; rotate: y 6deg; } }
+@keyframes rv-runes { from { transform: translateX(-50%) rotateX(72deg) rotate(0deg); } to { transform: translateX(-50%) rotateX(72deg) rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .zo-card, .zo-pouch, .zo-chest, .rv .reveal-card, .zo-art::before, .rv .rv-deck::before { animation: none !important; } }
+
+/* objets des autels : plus grands, habillés comme les vrais (dos de carte doré, pochette métallisée, coffre en or) */
+.zo-card { width: 86px; height: 124px; border-radius: 9px; border: 3px solid #e8c77e; color: #e8c77e; font-size: 34px;
+  background: radial-gradient(circle at 50% 46%, #3a2464 0 30%, transparent 31%), repeating-linear-gradient(60deg, #ffffff08 0 2px, transparent 2px 12px), linear-gradient(160deg, #2a1a52, #120a26 55%, #3a1240); }
+.zo-pouch { width: 98px; height: 132px; color: #e8c77e; font-size: 34px;
+  background: linear-gradient(115deg, transparent 30%, #ffffff30 42%, transparent 54%), repeating-linear-gradient(170deg, #ffffff0a 0 3px, transparent 3px 9px), linear-gradient(160deg, #6a3cc8, #2a1450 60%, #4a1a60); border-color: #e8c77e; }
+.zo-chest { width: 140px; height: 96px; color: #fff3c4; font-size: 34px; background: linear-gradient(180deg, #8a5a24, #4a2a10 55%, #24140a); border-color: #f0d38c; }
+.zo-chest i { background: linear-gradient(180deg, #a06a2a, #5a3414); border-color: #f0d38c; top: -30px; height: 32px; }
+.zo-card b, .zo-pouch b, .zo-chest b { filter: drop-shadow(0 0 8px currentColor); }
+
+/* logo : losange d'or en relief qui tourne doucement, nom gravé dans l'or */
+.logo { perspective: 400px; }
+.logo-mk { position: relative; border: 0 !important; background: conic-gradient(from 45deg, #fff1c2, #b88a3e, #f0d38c, #6a4a14, #fff1c2) !important;
+  box-shadow: inset 0 0 0 3px #0b0916, 3px 3px 0 #5a3f12, 5px 5px 10px #000c, 0 0 18px #e8c77e55 !important; animation: logo-turn 7s ease-in-out infinite; }
+.logo-mk::before { content: ""; position: absolute; inset: 4px; background: radial-gradient(circle at 40% 35%, #3a2464, #0b0916 70%); }
+.logo-mk i { position: relative; z-index: 1; filter: drop-shadow(0 0 6px #e8c77e) drop-shadow(1px 1px 0 #5a3f12); }
+.logo b { padding-top: 4px; line-height: 1.15 !important; background: linear-gradient(180deg, #fff8e8 0%, #f0d38c 45%, #b88a3e 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 #5a3f12) drop-shadow(0 2px 0 #2a1d08) drop-shadow(0 4px 8px #000c); }
+@keyframes logo-turn { 0%, 100% { transform: rotate(45deg) rotateX(0deg) rotateY(0deg); } 50% { transform: rotate(45deg) rotateX(18deg) rotateY(-18deg); } }
+@media (prefers-reduced-motion: reduce) { .logo-mk { animation: none; } }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">

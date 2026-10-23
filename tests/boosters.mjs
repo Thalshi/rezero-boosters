@@ -176,7 +176,7 @@ t.section("Économie");
   const s3 = G.freshSave(T0); s3.free = 0; s3.freeTs = T0;
   G.regenS(s3, T0 + G.REGEN * 10);
   t.check(`recharge : +1 toutes les ${G.REGEN / 3600e3} h, réserve plafonnée à ${G.FREE_MAX}`, s3.free === G.FREE_MAX);
-  t.check("valeurs de recyclage C/PC/R/E/L/M", RANKS.map((r) => G.RAR[r].chakra).join("/") === "1/2/5/15/40/100", RANKS.map((r) => G.RAR[r].chakra).join("/"));
+  t.check("valeurs de recyclage C/PC/R/E/L/M", RANKS.map((r) => G.RAR[r].chakra).join("/") === "0/1/1/4/10/25", RANKS.map((r) => G.RAR[r].chakra).join("/"));
 }
 
 t.section("Constantes partagées avec le serveur");

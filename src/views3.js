@@ -157,7 +157,10 @@ function viewBoutique() {
 // fiche d'un objet : aperçu sur ton profil et sur ta carte vedette (avec son design actuel), puis achat
 function zOpenItem(id) {
   const c = COS_BY_ID[id]; if (!c) return; zItem = id;
-  const card = zSample(), cur = has(card.id) ? designOfS(save, card.id) || {} : {}, design = { ...cur, [c.slot]: c.id };
+  if (!zPrevCard || !has(zPrevCard)) zPrevCard = zSample()?.id;
+  const card = byId[zPrevCard] || zSample(), cur = has(card.id) ? designOfS(save, card.id) || {} : {}, design = { ...cur, [c.slot]: c.id };
+  const mineC = [...CARDS, ...SKINS].filter((x) => has(x.id));
+  const pick = mineC.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mineC.map((x) => `<option value="${x.id}" ${x.id === card.id ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : "";
   const owned = !!cosOf(save).own[c.id], price = COS_PRICE[c.rar], col = zCollOf(c.id), name = ACCT?.name || "Toi";
   const act = c.only ? `<button class="btn gold big block" type="button" data-nav="sanctuaire">Invoquer au Sanctuaire</button><p class="note">Objet exclusif : il ne s'achète pas, il s'obtient seulement par invocation.</p>`
     : owned ? `<button class="btn gold big block" type="button" data-nav="atelier" data-p="${card.id}">Équiper à l'Atelier</button><p class="note">Tu l'as déjà : il s'utilise sur autant de cartes que tu veux.</p>`
@@ -168,8 +171,8 @@ function zOpenItem(id) {
         <div class="zs-prof"><span class="zs-av">${esc(name[0].toUpperCase())}</span><div><b>${esc(name)}</b><small>Aperçu sur ton profil</small></div></div>
         <div class="zs-prev-card">${cardHTML(card, { design, present: true, gold: has(card.id) && !own(card.id).n && own(card.id).gold > 0 })}</div></div>
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${col ? `<span class="pill">${ico(COLL_ICON[col.id] || "logo")} ${esc(col.name)}</span>` : ""}<span class="pill">Aucun bonus de jeu</span></div>
-      ${act}</div></div>`;
-  $("overlay").hidden = false;
+      ${pick}${act}</div></div>`;
+  $("overlay").hidden = false; $("overlay").dataset.zdrop = ""; $("overlay").dataset.zitem = id;
 }
 const ZS_SEG = { zShopF: (v) => { zShopFilter = v; } };
 
@@ -229,7 +232,7 @@ function zInventory() {
     ...cos.inst.filter((it) => COS_BY_ID[it.c]).map((it) => ({ c: COS_BY_ID[it.c], slot: COS_BY_ID[it.c].slot, ref: "i:" + it.i, kind: used[it.i] ? `Instance · sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique · libre" }))]
     .filter((x) => !zInvSlot || x.slot === zInvSlot);
   const tile = (x) => { const on = onCard(x.ref, x.slot), it = x.deco || x.c;
-    return `<div class="zt zt-inv r-${it.rar}"><div class="zt-prev">${zGhost(x.c, x.deco)}</div>
+    return `<div class="zt zt-inv r-${it.rar}"><div class="zt-prev" ${x.c ? `data-zdrop="${x.c.id}" role="button" tabindex="0" style="cursor:pointer"` : ""}>${zGhost(x.c, x.deco)}</div>
       <div class="zt-t"><b>${esc(it.name)}</b><span style="color:${RAR[it.rar].color}">${RAR[it.rar].label}</span><small>${x.kind}${on.length && !x.ref.startsWith("i:") ? ` · sur ${on.length} carte${on.length > 1 ? "s" : ""}` : ""}</small></div>
       ${mine.length ? `<div class="zt-as"><select class="in" aria-label="Carte à décorer" id="zas-${esc(x.ref)}">${mine.map((c) => `<option value="${c.id}" ${on.includes(c.id) ? "selected" : ""}>${esc(nameOf(c))} · ${esc(c.title)}${on.includes(c.id) ? " ✓" : ""}</option>`).join("")}</select>
         <button class="btn sm gold" type="button" data-zas="${esc(x.ref)}" data-slot="${x.slot}">Mettre sur cette carte</button></div>` : `<p class="note">Ouvre un booster pour avoir une carte à décorer.</p>`}</div>`; };
@@ -280,14 +283,14 @@ function zDropOpen(id) {
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${c.only ? `<span class="pill">Exclusif du Sanctuaire</span>` : ""}</div>
       ${mine.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mine.map((x) => `<option value="${x.id}" ${x.id === zPrevCard ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : `<p class="note">Ouvre un booster pour le voir sur une de tes cartes.</p>`}
       ${ref && card ? `<button class="btn gold big block" type="button" data-zas-ref="${ref}" data-slot="${c.slot}">Mettre sur cette carte</button>` : `<p class="note">${ref ? "" : "Pas encore à toi : il sort des invocations."}</p>`}</div></div>`;
-  $("overlay").hidden = false; $("overlay").dataset.zdrop = id;
+  $("overlay").hidden = false; $("overlay").dataset.zdrop = id; $("overlay").dataset.zitem = "";
 }
 document.addEventListener("click", (e) => {
   const d = e.target.closest("[data-zdrop]"); if (d) return zDropOpen(d.dataset.zdrop);
   const b = e.target.closest("[data-zas-ref]"); if (b) { const card = zPrevCard, slot = b.dataset.slot, design = { ...(cosOf(save).designs[card] || {}), [slot]: b.dataset.zasRef };
     zCall("design", { card, design }, () => saveDesignS(save, card, design)).then(() => { toast(`Posé sur ${nameOf(byId[card])}.`); $("overlay").hidden = true; draw(); }).catch((err) => toast(err.message)); }
 });
-document.addEventListener("change", (e) => { if (e.target.id === "zPrevCard") { zPrevCard = e.target.value; zDropOpen($("overlay").dataset.zdrop); } });
+document.addEventListener("change", (e) => { if (e.target.id === "zPrevCard") { zPrevCard = e.target.value; const o = $("overlay").dataset; if (o.zitem) zOpenItem(o.zitem); else zDropOpen(o.zdrop); } });
 // tout ce qu'une invocation peut donner, rareté par rareté, avec la chance de chaque objet et ce que tu as déjà
 let zDropR = "";
 function zDrops() {

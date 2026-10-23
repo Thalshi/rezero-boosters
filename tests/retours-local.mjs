@@ -70,6 +70,17 @@ try {
   await Q.api("confront/act", { gid: s2.gid, action: { type: "quitter" } });
   t.check("le dernier quitte : le salon se ferme", !(await P.api("confront/list")).salons.some((g) => g.gid === s2.gid));
 
+  t.section("compte vierge");
+  const sw = await fetch(`${srv.base}/auth/test`, { headers: { cookie: A.cookie }, redirect: "manual" });
+  const tc = (sw.headers.get("set-cookie") || "").split(";")[0];
+  const meT = await (await fetch(`${srv.base}/api/me`, { headers: { cookie: tc } })).json();
+  t.check("le compte vierge est un autre compte", meT.test === true && meT.id === "t" + A.id.slice(1) && /\(test\)$/.test(meT.name), meT);
+  const stT = await (await fetch(`${srv.base}/api/game/state`, { method: "POST", headers: { cookie: tc, "content-type": "application/json" }, body: "{}" })).json();
+  t.check("il démarre vide", Object.keys(stT.state?.owned || {}).length === 0);
+  t.check("un joueur normal n'y a pas droit", (await fetch(`${srv.base}/auth/test`, { headers: { cookie: P.cookie }, redirect: "manual" })).status === 403);
+  const bk = await fetch(`${srv.base}/auth/test?back=1`, { headers: { cookie: tc }, redirect: "manual" }), rc = (bk.headers.get("set-cookie") || "").split(";")[0];
+  t.check("retour au vrai compte", (await (await fetch(`${srv.base}/api/me`, { headers: { cookie: rc } })).json()).id === A.id);
+
   t.section("prédictions");
   const q1 = await A.coll("POST", "predq", { ep: 2, text: "Qui gagne ?", options: ["Kuradai", "Sasori"], points: 1, reward: 50, status: "open", answer: null, endsAt: Date.now() - 1000, t: Date.now() });
   const q2 = await A.coll("POST", "predq", { ep: 2, text: "Qui perd ?", options: ["Mahed", "Les 4"], points: 1, reward: 50, status: "open", answer: null, endsAt: Date.now() + 3600000, t: Date.now() });
@@ -90,6 +101,10 @@ try {
   await page.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await page.waitForTimeout(2500);
   await page.goto(`${srv.base}/#/boosters`); await page.waitForTimeout(1500);
   await page.screenshot({ path: "/tmp/claude-0/-home-user-rezero-boosters/1145acdc-bf55-528c-b0d2-aec63051172b/scratchpad/shots/x10.png" });
+  t.check("les 36 décorations se dessinent (avatar et carte)", (await page.evaluate(() => DECOS.flatMap((d) => ["round", "rect"].map((sh) => { try { return decoSVG(d, sh).includes("<svg") ? "" : d.id; } catch (e) { return d.id + " " + e.message; } })).filter(Boolean))).length === 0);
+  await page.goto(`${srv.base}/#/boutique`); await page.waitForTimeout(1500);
+  t.check("la Boutique s'affiche", (await page.locator(".zd-tile").count()) === 36);
+  await page.goto(`${srv.base}/#/boosters`); await page.waitForTimeout(1500);
   t.check("Boosters : bouton ×10 · 5 coffres", await page.locator('[data-act="open-pack"][data-n="10"]').first().isVisible());
   await page.locator('[data-act="open-pack"][data-n="10"]').first().click(); await page.waitForTimeout(1500);
   await page.locator('[data-act="skip"]').first().click().catch(() => {}); await page.waitForTimeout(800);

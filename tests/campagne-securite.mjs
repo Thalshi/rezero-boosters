@@ -64,7 +64,7 @@ try {
   t.note(`1 000 objets invoqués : ${G.RANKS.map((r) => `${G.RAR[r].label} ${freq[r].toFixed(1)} % (annoncé ${G.SUMMON_RATES[r]} %)`).join(", ")}`);
   t.check("1 000 invocations : chaque rareté dans ±5 points du taux annoncé (le plancher ×5 relève un peu les Rares)", G.RANKS.every((r) => Math.abs(freq[r] - G.SUMMON_RATES[r]) <= 5 + (r === "r" ? 4 : 0)), freq);
   const sV = (await V.api("state")).state;
-  t.check("pity d'invocation : jamais plus de 80 objets sans Mythique", (() => { let gap = 0, max = 0; for (const x of got) { gap = x.rar === "m" ? 0 : gap + 1; max = Math.max(max, gap); } return max < G.SUMMON_PITY_M; })());
+  t.check(`pity d'invocation : jamais plus de ${G.SUMMON_PITY_L} objets sans Légendaire ou mieux`, (() => { let gap = 0, max = 0; for (const x of got) { gap = x.rar === "l" || x.rar === "m" ? 0 : gap + 1; max = Math.max(max, gap); } return max < G.SUMMON_PITY_L; })());
   t.check("chaque ×5 contient au moins une Rare", (() => { for (let i = 0; i < got.length; i += 5) if (!got.slice(i, i + 5).some((x) => G.RANKS.indexOf(x.rar) >= 2)) return false; return true; })());
   t.check("tous les objets invoqués sont dans l'inventaire, sans doublon d'identifiant", sV.cos.inst.length === n && new Set(sV.cos.inst.map((x) => x.i)).size === n);
   grant(srv, [X], { free: 999 });

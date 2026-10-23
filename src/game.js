@@ -175,7 +175,8 @@ const FREE_MAX = 3;                    // réserve de boosters gratuits
 const REGEN = 2 * 3600e3;              // un booster gratuit de plus toutes les 2 h
 const PRICE = 100;                     // prix d'un booster en boutique (◆)
 const GOLD_EVERY = 10;
-const MYTHIC_PITY = 120;
+const MYTHIC_PITY = 0;                 // Mythique garantie au bout de N boosters (0 = jamais : décidé par Reichi, seule la Légendaire est garantie)
+const LEGEND_PITY = 40;                // une Légendaire ou mieux garantie au plus tard au 40e booster (provisoire)
 const GOLD_CHANCE = 0.02;
 const THEME_MIN = 5;                   // persos débloqués avant qu'un booster thématique s'ouvre (provisoire)
 const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
@@ -231,7 +232,7 @@ const dayKey = (ts = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone:
 const prevDay = (ts = Date.now()) => dayKey(ts - 86400e3);
 
 function freshSave(now = Date.now()) {
-  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, history: [], updated: 0, pack: "saison1",
+  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, sinceLegend: 0, history: [], updated: 0, pack: "saison1",
     streak: { last: "", n: 0 }, daily: null, paid: [], sales: 0, predPaid: [], trades: 0, crafted: 0 };
 }
 function normalizeSave(s, now = Date.now()) {
@@ -530,11 +531,16 @@ function openPackS(s, pk, pool, rng, now = Date.now(), mix = pool) {
   for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : pk.last || LAST, k), rng));
   // le pity ne compte que les boosters qui peuvent donner une Mythique (sinon il forcerait une carte impossible)
   const canMythic = pool.some((c) => c.rar === "m") || mix.some((c) => c.rar === "m");
+  // la Légendaire garantie ne compte que les boosters qui peuvent en donner une (Légendaire ou Mythique)
+  const canLegend = canMythic || pool.some((c) => c.rar === "l") || mix.some((c) => c.rar === "l");
   if (canMythic) s.sinceMythic++;
+  if (canLegend) s.sinceLegend = (s.sinceLegend || 0) + 1;
   s.sinceGold++;
-  if (canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
+  if (MYTHIC_PITY && canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
+  if (LEGEND_PITY && canLegend && s.sinceLegend >= LEGEND_PITY && !rars.some((r) => r === "l" || r === "m")) rars[PACK - 1] = "l";
   const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix), gold: rng() < GOLD_CHANCE }));
   if (cards.some((x) => x.c.rar === "m")) s.sinceMythic = 0;
+  if (cards.some((x) => x.c.rar === "l" || x.c.rar === "m")) s.sinceLegend = 0;
   cards.sort((a, b) => RANKS.indexOf(a.c.rar) - RANKS.indexOf(b.c.rar));
   if (s.sinceGold >= GOLD_EVERY) cards[PACK - 1].gold = true;
   if (cards.some((x) => x.gold)) s.sinceGold = 0;
@@ -769,7 +775,8 @@ const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
 const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
 const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
 const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
-const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
+const SUMMON_PITY_M = 0;              // Mythique garantie au bout de N invocations (0 = jamais)
+const SUMMON_PITY_L = 50;             // une Légendaire ou mieux garantie au plus tard à la 50e invocation (provisoire)
 const SUMMON_5_FLOOR = "r";           // ×5 et ×10 : au moins une Rare ou mieux
 const SUMMON_10_FLOOR = "e";          // ×10 : au moins une Épique ou mieux
 const SUMMON_COUNTS = [1, 5, 10];     // ×1 : une carte ; ×5 : une pochette ; ×10 : le coffre
@@ -780,6 +787,7 @@ function cosOf(s) {
   if (!Array.isArray(c.inst)) c.inst = [];
   if (!c.designs || typeof c.designs !== "object") c.designs = {};
   if (typeof c.sinceM !== "number") c.sinceM = 0;
+  if (typeof c.sinceL !== "number") c.sinceL = 0;
   return c;
 }
 // références d'un design : « a:<id> » pour un cosmétique de compte, « i:<instance> » pour une instance
@@ -813,7 +821,7 @@ function summonS(s, n, rng, now = Date.now()) {
   if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
-  for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
+  for (let k = 0; k < n; k++) { cos.sinceM++; cos.sinceL++; let r = rollWith(SUMMON_RATES, rng); if (SUMMON_PITY_M && cos.sinceM >= SUMMON_PITY_M) r = "m"; if (SUMMON_PITY_L && cos.sinceL >= SUMMON_PITY_L && r !== "m") r = "l"; if (r === "m") cos.sinceM = 0; if (r === "l" || r === "m") cos.sinceL = 0; rars.push(r); }
   // ×5 : au moins une Rare ou mieux
   if (n >= 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
   if (n === 10 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_10_FLOOR))) rars[n - 2] = SUMMON_10_FLOOR;

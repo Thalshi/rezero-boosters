@@ -44,12 +44,14 @@ export async function labRoute(env, user, path, body, cfg) {
   if (path === "/api/game/lab/state") { /* lecture seule */ }
   else if (path === "/api/game/lab/reset") {
     s = freshLab(now);
-    for (const [k, max] of [["chakra", 1e7], ["free", 999], ["sinceMythic", 999], ["sinceGold", 999]]) if (body[k] != null) s[k] = num(body[k], max);
+    for (const [k, max] of [["chakra", 1e7], ["free", 999], ["sinceMythic", 999], ["sinceLegend", 999], ["sinceGold", 999]]) if (body[k] != null) s[k] = num(body[k], max);
     if (body.sinceM != null) G.cosOf(s).sinceM = num(body.sinceM, 999);
+    if (body.sinceL != null) G.cosOf(s).sinceL = num(body.sinceL, 999);
     if (body.full) for (const c of G.ALL_CARDS) G.addCardS(s, c.id, false, now);
   } else if (path === "/api/game/lab/set") {
-    for (const [k, max] of [["chakra", 1e7], ["free", 999], ["sinceMythic", 999], ["sinceGold", 999]]) if (body[k] != null) s[k] = num(body[k], max);
+    for (const [k, max] of [["chakra", 1e7], ["free", 999], ["sinceMythic", 999], ["sinceLegend", 999], ["sinceGold", 999]]) if (body[k] != null) s[k] = num(body[k], max);
     if (body.sinceM != null) G.cosOf(s).sinceM = num(body.sinceM, 999);
+    if (body.sinceL != null) G.cosOf(s).sinceL = num(body.sinceL, 999);
   } else if (path === "/api/game/lab/open") {
     const sc = body.scenario ? String(body.scenario) : null;
     if (sc && !G.CHEST_BY_ID[sc]) return fail(400, "Scénario inconnu.");

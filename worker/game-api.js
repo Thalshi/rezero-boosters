@@ -108,7 +108,7 @@ async function auditPlayers(env) {
     const golds = Object.values(s.owned).reduce((a, o) => a + (o.gold || 0), 0);
     if (s.free > 40) why.push(`${s.free} boosters gratuits en réserve (normal : 10 à 40)`);
     if (s.chakra > 2000 + n * 40) why.push(`${s.chakra} ◆ pour ${n} boosters ouverts`);
-    if (st.mythics > Math.ceil(n * 0.06) + 2 + Math.floor(n / G.MYTHIC_PITY)) why.push(`${st.mythics} Mythiques pour ${n} boosters`);
+    if (st.mythics > Math.ceil(n * 0.06) + 2 + (G.MYTHIC_PITY ? Math.floor(n / G.MYTHIC_PITY) : 0)) why.push(`${st.mythics} Mythiques pour ${n} boosters`);
     if (golds > Math.ceil(n * 0.25) + 3) why.push(`${golds} cartes dorées pour ${n} boosters`);
     if (st.total > n * G.PACK * 1.5 + 50) why.push(`${st.total} cartes pour ${n} boosters`);
     if (why.length) flagged.push({ uid: row.uid, name: row.name, opened: n, free: s.free, chakra: s.chakra, mythics: st.mythics, why });

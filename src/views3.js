@@ -163,7 +163,7 @@ function viewSanctuaire() {
   const cos = cosOf(save);
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
   return `<div class="wrap page">${head("Sanctuaire des Invocations", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
-    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Mythique garantie dans <b>${Math.max(0, SUMMON_PITY_M - cos.sinceM)}</b> invocations</span></div>
+    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Légendaire garantie dans <b>${Math.max(0, SUMMON_PITY_L - cos.sinceL)}</b> invocations</span></div>
     <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${save.chakra < summonCost(n) || zBusy ? "disabled" : ""}>
       <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${ico(k)}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${ico(k)}</b></span>` : `<span class="zo-card"><b>${ico(k)}</b></span>`}</span>
       <span class="zo-n">×${n}</span><b class="zo-t">${t}</b><span class="zo-s">${sub}</span>

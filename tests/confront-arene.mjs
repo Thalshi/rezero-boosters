@@ -21,7 +21,16 @@ async function table(A) {
 }
 // toucher une carte de la main par son coin visible (elles se chevauchent)
 const idle = (page) => page.waitForFunction(() => !Arena.st?.running && !document.querySelector("#ar-react.on"), null, { timeout: 15000 }).catch(() => null);
-async function tap(page, uid) { await idle(page); const l = page.locator(`.ar-hc[data-cu="${uid}"]`); if (!(await l.waitFor({ timeout: 6000 }).then(() => true).catch(() => false))) return; const b = await l.boundingBox(); await page.mouse.click(b.x + b.width * .25, Math.min(b.y + 20, page.viewportSize().height - 4)); }
+async function tap(page, uid) {
+  await idle(page);
+  const l = page.locator(`.ar-hc[data-cu="${uid}"]`); if (!(await l.waitFor({ timeout: 6000 }).then(() => true).catch(() => false))) return;
+  const pt = await pointOn(page, uid);
+  if (pt) await page.mouse.click(pt[0], pt[1]);
+}
+// un point de la carte qui n'est pas recouvert par une voisine
+function pointOn(page, uid) {
+  return page.evaluate((u) => { const el = document.querySelector(`.ar-hc[data-cu="${u}"]`), r = el.getBoundingClientRect(); for (let y = r.top + 12; y < Math.min(r.bottom, innerHeight - 2); y += 10) for (let x = r.left + 8; x < r.right; x += 10) if (document.elementFromPoint(x, y)?.closest(".ar-hc") === el) return [x, y]; return null; }, uid);
+}
 try {
   const A = await player(srv.base, IDS.p1, "Aiko");
   await A.api("state");
@@ -69,7 +78,7 @@ try {
         const def = v.main.find((c) => c.uid === play.carte).def, card = page.locator(`.ar-hc[data-cu="${play.carte}"]`); await card.waitFor({ timeout: 8000 }).catch(() => null); await idle(page);
         if (play.cible) { // glisser la carte sur l'étiquette du champion visé
           const a = await card.boundingBox(), b = await page.locator(`.ar-tag[data-pid="${play.cible}"] .ar-nm`).boundingBox();
-          const ax = a.x + a.width * .3, ay = a.y + 24; await page.mouse.move(ax, ay); await page.mouse.down();
+          const [ax, ay] = (await pointOn(page, play.carte)) || [a.x + a.width * .5, a.y + 24]; await page.mouse.move(ax, ay); await page.mouse.down();
           for (let k = 1; k <= 12; k++) await page.mouse.move(ax + (b.x + b.width / 2 - ax) * k / 12, ay + (b.y + b.height / 2 - ay) * k / 12);
           await page.screenshot({ path: join(OUT, `arene-${label}-2-viser.png`) });
           await page.mouse.up();

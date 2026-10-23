@@ -551,7 +551,7 @@ const Arena = (() => {
     if (st.running) return hint("Un instant : l'action en cours se termine.");
     if (reactTap(c)) return;
     const ps = plays(uid);
-    if (fin?.aDefausser > 0 && (st.discMode || !ps.length)) { st.discard = st.discard.includes(uid) ? st.discard.filter((x) => x !== uid) : [...st.discard, uid].slice(-fin.aDefausser); layoutHand(); return renderSide(); }
+    if (fin?.aDefausser > 0 && st.discMode) { st.discard = st.discard.includes(uid) ? st.discard.filter((x) => x !== uid) : [...st.discard, uid].slice(-fin.aDefausser); layoutHand(); return renderSide(); }
     if (targeting && targeting.uid !== uid) cancelTarget();
     if (st.sel === uid) { st.sel = null; const free = ps.find((a) => !a.cible); cancelTarget(); layoutHand(); if (free) act(free); return; }
     st.sel = uid; layoutHand(); hint(tipFor(c));

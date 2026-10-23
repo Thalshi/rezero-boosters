@@ -41,6 +41,12 @@ def main():
         full = ROOT / "assets/decor" / f"{name}.jpg"   # pleine taille (2400 px) pour le site, s'il existe
         (ROOT / "public/decor" / f"{name}.jpg").write_bytes(full.read_bytes() if full.exists() else data)
         site = site.replace("data:image/jpeg;base64," + base64.b64encode(data).decode(), f"/decor/{name}.jpg")
+    # portraits des persos : pareil, des fichiers à part sur le site (assets/persos, recadrés et nettoyés)
+    (ROOT / "public/persos").mkdir(exist_ok=True)
+    for old in (ROOT / "public/persos").glob("*.jpg"): old.unlink()
+    for f in sorted((ROOT / "assets/persos").glob("*.jpg")):
+        data = f.read_bytes(); (ROOT / "public/persos" / f.name).write_bytes(data)
+        site = site.replace("data:image/jpeg;base64," + base64.b64encode(data).decode(), f"/persos/{f.name}")
     (ROOT / "public/index.html").write_text(SKELETON + site + "\n</body>\n</html>\n", encoding="utf8")
     print("public/index.html", len(site), "· artifact.html", len(page))
 

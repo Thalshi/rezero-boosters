@@ -6486,7 +6486,7 @@ const Arena = (() => {
     if ($a("root")) return;
     const d = document.createElement("div"); d.id = "ar-root"; d.className = "ar"; d.hidden = true;
     d.innerHTML = `<canvas id="ar-c"></canvas><div class="ar-vign"></div><div id="ar-tags"></div><div id="ar-pops"></div><div class="ar-flash" id="ar-flash"></div>
-      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm" type="button" id="ar-classic">Vue classique</button><button class="btn sm acc" type="button" id="ar-quit" hidden>Abandonner</button></div>
+      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm" type="button" id="ar-classic">Vue classique</button><button class="btn sm acc" type="button" id="ar-quit">Quitter la partie</button></div>
       <div class="ar-hint" id="ar-hint"></div>
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
@@ -6509,7 +6509,13 @@ const Arena = (() => {
     document.body.appendChild(d);
     $a("back").onclick = () => nav("confront");
     $a("classic").onclick = () => { setWanted(false); hide(); draw(); };
-    $a("quit").onclick = (e) => { if (sure(e.currentTarget, "Confirmer l'abandon")) cfAct({ type: "abandon" }); };
+    // quitter la partie : en vie, c'est un abandon (confirmé) ; éliminé, spectateur ou partie finie, on sort simplement
+    $a("quit").onclick = async (e) => {
+      const v = CF.table?.vue, live = v?.phase === "partie" && (v.actions || []).some((a) => a.type === "abandon");
+      if (!live) return nav("confront");
+      if (!sure(e.currentTarget, "Quitter = abandonner, confirmer")) return;
+      await cfAct({ type: "abandon" }); nav("confront");
+    };
     $a("tabLog").onclick = () => panel("log"); $a("tabChat").onclick = () => panel("chat"); $a("logArr").onclick = () => panel();
     $a("tblBtn").onclick = () => { const t = $a("tbl"); t.classList.toggle("open"); $a("tblArr").textContent = t.classList.contains("open") ? "▴" : "▾"; };
     $a("emoBtn").onclick = () => $a("emoW").classList.toggle("on");
@@ -7093,7 +7099,7 @@ const Arena = (() => {
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }
-    $a("quit").hidden = !(v.actions || []).some((a) => a.type === "abandon") || v.phase !== "partie";
+    if (!$a("quit").dataset.sure) $a("quit").textContent = v.phase === "partie" && (v.actions || []).some((a) => a.type === "abandon") ? "Quitter la partie" : "Quitter";
     const me = v.joueurs.find((j) => j.id === v.moi), pr = v.attente;
     $a("chatForm").hidden = $a("qp").hidden = $a("emoBtn").hidden = !me;
     if (!me) hint("Tu regardes la partie en spectateur.");

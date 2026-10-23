@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-23 — 20 paysages, un décor par page (9e mise en ligne)
+- Reichi a fourni 20 paysages (zip 3000 px) : un décor différent par rubrique, plus aucun doublon. Pleine taille (2400 px) sur le site dans `public/decor/`, version légère (1200 px) dans la version claude.ai.
+- L'interface prend les couleurs de chaque décor ; voile allégé en haut, panneaux plus opaques et texte détouré pour garder le contenu lisible ; changement de décor net, sans mélange avec l'ancien.
+- Tout effacer définitivement (dev et admin) : vide le compte actuel, pas un compte à part.
+
 ## 2026-10-23 — Décorations façon Discord, salons, compte à rebours (8e mise en ligne)
 - Boutique : onglet « Décorations d'avatar » (36 décorations animées créées pour le QG, 7 collections ; Reichi a choisi de ne pas reprendre les images de Discord). Visibles autour de l'avatar partout (en-tête, profil, classement, comptoir, prédictions) et posables sur les cartes à l'Atelier, en version rectangle (pour le Défilé).
 - Confrontation : un seul salon ouvert par personne ; le créateur qui quitte passe la main au joueur suivant, ou le salon se ferme ; salons inactifs 30 min retirés de la liste. Compte à rebours visible pour le choix des cartes (3 min) et du perso ; l'écran suit le changement d'étape même en plein choix. Une ancienne table finie ou quittée ne bloque plus les cartes.

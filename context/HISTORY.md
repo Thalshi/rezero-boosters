@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-10-23 — Décorations de cartes spectaculaires, arène plus lisible (10e mise en ligne)
+- Décorations : uniquement pour les cartes (plus autour des avatars), aperçu et pose depuis la Boutique. Nouvelle collection « Légendes du QG » : dragons qui tournent autour de la carte (derrière puis devant), phénix, lames jumelles, aura enflammée, flammes spectrales, foudre, tempête de sakura, néons. Ornements et particules de l'Atelier redessinés.
+- Arène : la carte touchée s'affiche en grand dans un panneau avec « Jouer » ou « Viser … » ; main remontée ; on voit les autres piocher (cartes de dos qui volent) ; présage montré en grand (carte retournée, ce qu'il faut, réussi ou raté) ; bouton Émotes de nouveau visible ; une animation ne peut plus figer la partie.
+- Livre des règles lisible (cases sombres en texte clair). Décors chargés sans gel au changement de rubrique.
+- À trancher : remettre l'Errant (rôle solitaire retiré pour l'équilibre 50/50) ? Étal signalé figé, pas reproduit (serveur OK).
+
 ## 2026-10-23 — 20 paysages, un décor par page (9e mise en ligne)
 - Reichi a fourni 20 paysages (zip 3000 px) : un décor différent par rubrique, plus aucun doublon. Pleine taille (2400 px) sur le site dans `public/decor/`, version légère (1200 px) dans la version claude.ai.
 - L'interface prend les couleurs de chaque décor ; voile allégé en haut, panneaux plus opaques et texte détouré pour garder le contenu lisible ; changement de décor net, sans mélange avec l'ancien.

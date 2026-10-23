@@ -261,7 +261,21 @@ export default {
       return new Response(null, { status: 302, headers: { location: "/", "set-cookie": `rz_session=${token}; Path=/; HttpOnly; SameSite=Lax` } });
     }
     const user = await currentUser(req, env);
-    if (p === "/api/me") return user ? json(user) : fail(401, "not_signed_in", "Pas connecté.");
+    if (p === "/api/me") return user ? json({ ...user, test: user.id.startsWith("t") }) : fail(401, "not_signed_in", "Pas connecté.");
+    // compte vierge des devs et admins : un 2e compte « t<id Discord> », sa propre collection, à côté du vrai compte « d<id> »
+    if (p === "/auth/test") {
+      if (!user || !(user.admin || user.dev)) return new Response("Réservé au dev et à l'admin.", { status: 403 });
+      const back = url.searchParams.get("back") === "1", uid = (back ? "d" : "t") + user.id.slice(1), token = randomToken();
+      const base = user.name.replace(/ \(test\)$/, "");
+      await env.DB.batch([
+        ...(back ? [] : [env.DB.prepare("INSERT INTO users (id, name, avatar, member, updated) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET name = excluded.name, avatar = excluded.avatar, member = excluded.member, updated = excluded.updated")
+          .bind(uid, base + " (test)", user.avatar, user.member ? 1 : 0, Date.now())]),
+        env.DB.prepare("INSERT INTO sessions (token, uid, expires) VALUES (?, ?, ?)").bind(token, uid, Date.now() + SESSION_DAYS * 86400e3),
+      ]);
+      await bumpRev(env, "users");
+      const secure = url.protocol === "https:" ? " Secure;" : "";
+      return new Response(null, { status: 302, headers: { location: "/#/tests", "set-cookie": `rz_session=${token}; Path=/; HttpOnly;${secure} SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}` } });
+    }
     if (!user) return fail(401, "not_signed_in", "Connecte-toi avec Discord.");
     // synchro (étape 2) : les compteurs de version de toutes les sections, en une seule lecture
     if (p === "/api/sync") { const r = await env.DB.prepare("SELECT k, v FROM sync_rev").all(); return json({ revs: Object.fromEntries(r.results.map((x) => [x.k, x.v])) }); }

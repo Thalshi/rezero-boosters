@@ -68,7 +68,7 @@ const Arena = (() => {
     $a("back").onclick = () => nav("confront");
     // quitter la partie : en vie, c'est un abandon (confirmé) ; éliminé, spectateur ou partie finie, on sort simplement
     $a("quit").onclick = async (e) => {
-      const v = CF.table?.vue, live = v?.phase === "partie" && (v.actions || []).some((a) => a.type === "abandon");
+      const v = CF.table?.vue, live = v?.phase === "partie" && !!v.joueurs?.find((j) => j.id === v.moi)?.vivant;
       if (!live) return nav("confront");
       if (!sure(e.currentTarget, "Quitter = abandonner, confirmer")) return;
       await cfAct({ type: "abandon" }); nav("confront");
@@ -656,7 +656,7 @@ const Arena = (() => {
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }
-    if (!$a("quit").dataset.sure) $a("quit").textContent = v.phase === "partie" && (v.actions || []).some((a) => a.type === "abandon") ? "Quitter la partie" : "Quitter";
+    if (!$a("quit").dataset.sure) $a("quit").textContent = v.phase === "partie" && v.joueurs?.find((j) => j.id === v.moi)?.vivant ? "Quitter la partie" : "Quitter";
     const me = v.joueurs.find((j) => j.id === v.moi), pr = v.attente;
     $a("chatForm").hidden = $a("qp").hidden = $a("emoBtn").hidden = !me;
     if (!me) hint("Tu regardes la partie en spectateur.");

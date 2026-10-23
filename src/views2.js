@@ -275,7 +275,7 @@ function viewClassement() {
   const q = rankQ.trim().toLowerCase();
   return `<div class="wrap page" style="max-width:900px">
     ${head("Classement", "Les meilleurs collectionneurs")}
-    <div class="chips">${BOARDS.map(([k, kj, l]) => `<button class="chip" type="button" data-seg="rankTab" data-v="${k}" aria-pressed="${boardTab === k}"><span class="kj">${ico(kj)}</span>${l}</button>`).join("")}</div>
+    <div class="chips chips-wrap">${BOARDS.map(([k, kj, l]) => `<button class="chip" type="button" data-seg="rankTab" data-v="${k}" aria-pressed="${boardTab === k}"><span class="kj">${ico(kj)}</span>${l}</button>`).join("")}</div>
     <p class="lead">${desc}</p>
     <div class="search">${icon.search}<input class="in" id="rankQ" type="search" placeholder="Chercher un joueur pour se comparer…" value="${esc(rankQ)}"></div>
     ${list.length ? `${q ? "" : podiumHTML(list, score, unit)}

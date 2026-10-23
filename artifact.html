@@ -2232,6 +2232,8 @@ body.ar-on .overlay { z-index: 95; }
 .zdrop { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px 10px; border-radius: 12px; background: linear-gradient(180deg, #1a1430, #0e0a1e); border: 1px solid #ffffff12; text-align: center; overflow: visible; }
 .zdrop .kcw { --w: 92px !important; } .zdrop b { font-size: 12px; } .zdrop small { font-size: 10.5px; color: var(--mut, #9a90ad); }
 .zdrop.got { border-color: #3fdc8f66; } .zdrop.got small { color: #3fdc8f; }
+.chips.chips-wrap { flex-wrap: wrap; overflow: visible; mask-image: none; -webkit-mask-image: none; }
+.chip[aria-pressed="true"], .utabs button[aria-pressed="true"], .seg button[aria-pressed="true"] { color: #fff3d0 !important; border-color: #e8c77e99 !important; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -5103,7 +5105,7 @@ function viewClassement() {
   const q = rankQ.trim().toLowerCase();
   return `<div class="wrap page" style="max-width:900px">
     ${head("Classement", "Les meilleurs collectionneurs")}
-    <div class="chips">${BOARDS.map(([k, kj, l]) => `<button class="chip" type="button" data-seg="rankTab" data-v="${k}" aria-pressed="${boardTab === k}"><span class="kj">${ico(kj)}</span>${l}</button>`).join("")}</div>
+    <div class="chips chips-wrap">${BOARDS.map(([k, kj, l]) => `<button class="chip" type="button" data-seg="rankTab" data-v="${k}" aria-pressed="${boardTab === k}"><span class="kj">${ico(kj)}</span>${l}</button>`).join("")}</div>
     <p class="lead">${desc}</p>
     <div class="search">${icon.search}<input class="in" id="rankQ" type="search" placeholder="Chercher un joueur pour se comparer…" value="${esc(rankQ)}"></div>
     ${list.length ? `${q ? "" : podiumHTML(list, score, unit)}

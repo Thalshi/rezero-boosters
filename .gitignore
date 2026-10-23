@@ -3,3 +3,4 @@ node_modules/
 tests/node_modules/
 tests/reports/
 tools/preview/dist/
+.local-db/

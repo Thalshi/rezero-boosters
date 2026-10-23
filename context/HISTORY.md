@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-10-23 — Sixième mise en production : économie dure, salons de Confrontation
+- En production (accord de Reichi, « déploie tout ») : économie dure (gratuit toutes les 3 h, booster et invocation 150 ◆, probabilités dures, recyclage 0/1/1/4/10/25, Légendaire garantie au 40e booster, Mythique jamais garantie, anti-doublons 40 %), missions refaites (2 du jour, 5 de la semaine avec bonus dès 3, série surtout en boosters ; anciens tirages refaits), Confrontation récompensée sur 3 parties par jour.
+- Confrontation : chacun son deck ou cartes partagées, « Je suis prêt » avant le lancement, fermer le salon (créateur), partager le salon (chat du QG, lien), défier en duel depuis un profil (accepter, refuser), seulement l'arène 3D, « Quitter la partie » à tout moment (avant : seulement pendant son tour).
+- Aussi : seulement la 3D aux ouvertures, Gestion à onglets, notifications qui disparaissent une fois touchées, aperçu du Défilé, compteur discret de l'inventaire.
+- Maquettes du salon et du choix des cartes en 3D dans le décor de l'arène, à valider : https://claude.ai/artifact/16p1nCHePT95TFvBcpojSU
+- Reichi va repartir de zéro avec son compte pour tester la nouvelle économie.
+
 ## 2026-10-23 — Seulement la 3D, Gestion à onglets, économie dure décidée
 - Ouvertures : plus de bouton « Version légère » ; un ancien réglage qui coupait la 3D est ignoré (Reichi ne pouvait plus revenir en arrière). L'ancienne ouverture reste seulement en secours (pas de WebGL, mouvements réduits).
 - Gestion : Admin, Créateur, Branches, Galerie, Labo, Compte de test et Dev regroupés dans une seule rubrique à onglets (sur `dev/re-zero-complet`, pas en ligne).

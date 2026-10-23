@@ -131,3 +131,5 @@ try { if (typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table) document.documen
   document.addEventListener("pointerleave", () => { if (on) { reset(on); on = null; } });
   document.addEventListener("pointerup", (e) => { if (e.pointerType === "touch" && on) { reset(on); on = null; } });
 })();
+// changement de page : le contenu arrive en profondeur (la classe ne reste que le temps de l'animation)
+addEventListener("hashchange", () => { const v = document.getElementById("view"); if (!v) return; v.classList.remove("v-enter"); void v.offsetWidth; v.classList.add("v-enter"); clearTimeout(v._vt); v._vt = setTimeout(() => v.classList.remove("v-enter"), 800); });

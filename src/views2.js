@@ -371,7 +371,7 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
+      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av">${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
@@ -697,7 +697,7 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avd0 = decoOfUid(m.uid), avi = `${avd0 ? `<span class="avd">` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${decoSVG(avd0)}</span>` : ""}`;
+  const avd0 = decoOfUid(m.uid), L0 = avDecoHTML(avd0, true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());

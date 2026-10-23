@@ -2218,7 +2218,11 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 .zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
 .zd-cstage { height: 230px; padding: 24px 0; overflow: hidden; }
 .zd-big { display: grid; place-items: center; padding: 70px 20px 60px; margin-bottom: 14px; border-radius: 16px; overflow: hidden; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--h1) 38%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
-.zd-big .kcw { pointer-events: none; } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
+.zd-big .kcw { pointer-events: none; }
+.zd-big { grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 56px; }
+.zd-pv { display: flex; flex-direction: column; align-items: center; gap: 30px; } .zd-pv .eyebrow { margin: 0; }
+.zd-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .zd-acts .btn { width: 100%; }
+@media (max-width: 560px) { .zd-big { gap: 26px; padding: 50px 10px 40px; } .zd-acts { grid-template-columns: 1fr; } } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
 .zd-hero-cards { gap: 34px; padding: 18px 0; }
 .zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
 .zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
@@ -2304,6 +2308,33 @@ svg.dk .fx-wander { transform-box: view-box; transform-origin: 0 0; animation: f
 @keyframes fx-w0 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(14px, -10px); } 66% { transform: translate(-8px, -18px); } }
 @keyframes fx-w1 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(-12px, 8px); } 66% { transform: translate(10px, 14px); } }
 @keyframes fx-w2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(16px, 10px); } }
+svg.dk .fx-ripple { animation: fx-ripple 3.3s ease-out infinite; }
+svg.dk .fx-flapx { animation: fx-flapx .32s ease-in-out infinite alternate; }
+svg.dk .fx-smoke { transform-box: view-box; transform-origin: 0 0; animation: fx-smoke var(--d, 4s) ease-out infinite; }
+svg.dk .fx-spin.fast { animation-duration: .5s; }
+svg.dk .fx-rattle { animation: fx-rattle 2.6s steps(1) infinite; } svg.dk .fx-rattle.b { animation-delay: -1.3s; }
+svg.dk .fx-shine { animation: fx-shine 3s ease-in-out infinite; }
+svg.dk .fx-dash path, svg.dk .fx-dash rect, svg.dk .fx-dash circle, svg.dk path.fx-dash { animation: fx-dash 6s linear infinite; } svg.dk .fx-dash.rev path, svg.dk .fx-dash.rev rect, svg.dk .fx-dash.rev circle, svg.dk path.fx-dash.rev { animation-direction: reverse; animation-duration: 9s; }
+svg.dk .fx-glitch { animation: fx-glitch 3.4s steps(1) infinite; }
+svg.dk .fx-scan { transform-box: view-box; animation: fx-scan 2.6s linear infinite; }
+svg.dk .fx-tendril { transform-box: view-box; animation: fx-tendril 3.2s ease-in-out infinite alternate; }
+svg.dk .fx-wind { animation: fx-wind 3.3s linear infinite; }
+svg.dk .fx-sway2 { animation: fx-sway2 1.8s ease-in-out infinite alternate; }
+@keyframes fx-ripple { 0% { transform: scale(.96); opacity: .9; } 100% { transform: scale(1.3); opacity: 0; } }
+@keyframes fx-flapx { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
+@keyframes fx-smoke { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(var(--dx, 0), -40px) scale(1.6); opacity: 0; } }
+@keyframes fx-rattle { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(.6px, -.4px); } 12% { transform: translate(-.5px, .3px); } 14% { transform: translate(0, 0); } }
+@keyframes fx-shine { 0%, 100% { opacity: .85; filter: brightness(1); } 50% { opacity: 1; filter: brightness(1.35); } }
+@keyframes fx-dash { to { stroke-dashoffset: -300; } }
+@keyframes fx-glitch { 0%, 88%, 100% { transform: translate(0, 0); opacity: 1; } 89% { transform: translate(2px, -1px); opacity: .6; } 91% { transform: translate(-2px, 1px); } 93% { transform: translate(0, 0); opacity: .9; } }
+@keyframes fx-scan { from { transform: translateY(0); } to { transform: translateY(var(--h, 120px)); } }
+@keyframes fx-tendril { from { transform: rotate(-9deg); } to { transform: rotate(11deg); } }
+@keyframes fx-wind { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -166; } }
+@keyframes fx-sway2 { from { transform: rotate(-24deg) translateX(-3px); } to { transform: rotate(24deg) translateX(3px); } }
+/* décorations d'avatar : couche derrière la photo, couche devant */
+.avd > svg.dk.back, .av-btn > svg.dk.back, .pf-av > svg.dk.back, .zd-av > svg.dk.back { z-index: 0; }
+.avd > img, .avd > .av, .zd-av > img, .zd-av > .zd-ini, .pf-av > img, .pf-av > span:not(.x) { position: relative; z-index: 1; }
+.av-btn > #avImg { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { svg.dk [class*="fx-"] { animation: none !important; } }
 .cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
 .cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }

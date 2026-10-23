@@ -2226,7 +2226,11 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 .zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
 .zd-cstage { height: 230px; padding: 24px 0; overflow: hidden; }
 .zd-big { display: grid; place-items: center; padding: 70px 20px 60px; margin-bottom: 14px; border-radius: 16px; overflow: hidden; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--h1) 38%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
-.zd-big .kcw { pointer-events: none; } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
+.zd-big .kcw { pointer-events: none; }
+.zd-big { grid-template-columns: auto auto; justify-content: center; align-items: center; gap: 56px; }
+.zd-pv { display: flex; flex-direction: column; align-items: center; gap: 30px; } .zd-pv .eyebrow { margin: 0; }
+.zd-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .zd-acts .btn { width: 100%; }
+@media (max-width: 560px) { .zd-big { gap: 26px; padding: 50px 10px 40px; } .zd-acts { grid-template-columns: 1fr; } } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
 .zd-hero-cards { gap: 34px; padding: 18px 0; }
 .zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
 .zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
@@ -2312,6 +2316,33 @@ svg.dk .fx-wander { transform-box: view-box; transform-origin: 0 0; animation: f
 @keyframes fx-w0 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(14px, -10px); } 66% { transform: translate(-8px, -18px); } }
 @keyframes fx-w1 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(-12px, 8px); } 66% { transform: translate(10px, 14px); } }
 @keyframes fx-w2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(16px, 10px); } }
+svg.dk .fx-ripple { animation: fx-ripple 3.3s ease-out infinite; }
+svg.dk .fx-flapx { animation: fx-flapx .32s ease-in-out infinite alternate; }
+svg.dk .fx-smoke { transform-box: view-box; transform-origin: 0 0; animation: fx-smoke var(--d, 4s) ease-out infinite; }
+svg.dk .fx-spin.fast { animation-duration: .5s; }
+svg.dk .fx-rattle { animation: fx-rattle 2.6s steps(1) infinite; } svg.dk .fx-rattle.b { animation-delay: -1.3s; }
+svg.dk .fx-shine { animation: fx-shine 3s ease-in-out infinite; }
+svg.dk .fx-dash path, svg.dk .fx-dash rect, svg.dk .fx-dash circle, svg.dk path.fx-dash { animation: fx-dash 6s linear infinite; } svg.dk .fx-dash.rev path, svg.dk .fx-dash.rev rect, svg.dk .fx-dash.rev circle, svg.dk path.fx-dash.rev { animation-direction: reverse; animation-duration: 9s; }
+svg.dk .fx-glitch { animation: fx-glitch 3.4s steps(1) infinite; }
+svg.dk .fx-scan { transform-box: view-box; animation: fx-scan 2.6s linear infinite; }
+svg.dk .fx-tendril { transform-box: view-box; animation: fx-tendril 3.2s ease-in-out infinite alternate; }
+svg.dk .fx-wind { animation: fx-wind 3.3s linear infinite; }
+svg.dk .fx-sway2 { animation: fx-sway2 1.8s ease-in-out infinite alternate; }
+@keyframes fx-ripple { 0% { transform: scale(.96); opacity: .9; } 100% { transform: scale(1.3); opacity: 0; } }
+@keyframes fx-flapx { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
+@keyframes fx-smoke { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(var(--dx, 0), -40px) scale(1.6); opacity: 0; } }
+@keyframes fx-rattle { 0%, 100% { transform: translate(0, 0); } 10% { transform: translate(.6px, -.4px); } 12% { transform: translate(-.5px, .3px); } 14% { transform: translate(0, 0); } }
+@keyframes fx-shine { 0%, 100% { opacity: .85; filter: brightness(1); } 50% { opacity: 1; filter: brightness(1.35); } }
+@keyframes fx-dash { to { stroke-dashoffset: -300; } }
+@keyframes fx-glitch { 0%, 88%, 100% { transform: translate(0, 0); opacity: 1; } 89% { transform: translate(2px, -1px); opacity: .6; } 91% { transform: translate(-2px, 1px); } 93% { transform: translate(0, 0); opacity: .9; } }
+@keyframes fx-scan { from { transform: translateY(0); } to { transform: translateY(var(--h, 120px)); } }
+@keyframes fx-tendril { from { transform: rotate(-9deg); } to { transform: rotate(11deg); } }
+@keyframes fx-wind { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -166; } }
+@keyframes fx-sway2 { from { transform: rotate(-24deg) translateX(-3px); } to { transform: rotate(24deg) translateX(3px); } }
+/* décorations d'avatar : couche derrière la photo, couche devant */
+.avd > svg.dk.back, .av-btn > svg.dk.back, .pf-av > svg.dk.back, .zd-av > svg.dk.back { z-index: 0; }
+.avd > img, .avd > .av, .zd-av > img, .zd-av > .zd-ini, .pf-av > img, .pf-av > span:not(.x) { position: relative; z-index: 1; }
+.av-btn > #avImg { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { svg.dk [class*="fx-"] { animation: none !important; } }
 .cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
 .cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }
@@ -3371,6 +3402,9 @@ function designOfS(s, cardId) {
 // Créées pour le QG (aucune image reprise de Discord). k : forme animée ; c1, c2 : couleurs ; coll : collection.
 const DECO_COLLS = [
   { id: "legendes", name: "Légendes du QG", kanji: "龍", tag: "Dragons, katanas, flammes et néons : les décorations les plus folles.", c1: "#ffb020", c2: "#2a0e08" },
+  { id: "esprits", name: "Esprits du Japon", kanji: "霊", tag: "Carpes koï, masques d'oni, lotus et papillons.", c1: "#ff6a8a", c2: "#2a0a1a" },
+  { id: "cosmos", name: "Cosmos", kanji: "星", tag: "Galaxies, comètes et lune de sang.", c1: "#8a6dff", c2: "#0a0a2a" },
+  { id: "elements", name: "Éléments", kanji: "元", tag: "Givre, marée, ombres, chaînes et vent.", c1: "#4dd6ff", c2: "#0a1a2a" },
   { id: "sakura", name: "Sakura du QG", kanji: "花", tag: "Pétales, fleurs et lanternes des ruelles de Shinjuku.", c1: "#ff8fc0", c2: "#3a1430" },
   { id: "neon", name: "Néon de Shinjuku", kanji: "電", tag: "Anneaux de néon, casques et bugs d'écran.", c1: "#2ee6ff", c2: "#2a0e4a" },
   { id: "feu", name: "Feu et foudre", kanji: "火", tag: "Pour ceux qui frappent fort.", c1: "#ff6a2e", c2: "#2a0a08" },
@@ -3390,6 +3424,29 @@ const DECOS = [
   { id: "deco-tempete", coll: "legendes", name: "Tempête de sakura", k: "tempete", c1: "#ffb3d1", c2: "#e0508a", rar: "l" },
   { id: "deco-neon-kabuki", coll: "legendes", name: "Néon de Kabukichō", k: "neon", c1: "#ff3df0", c2: "#3de8ff", rar: "e" },
   { id: "deco-neon-cyber", coll: "legendes", name: "Néon cyber", k: "neon2", c1: "#3dff9e", c2: "#ffd24d", rar: "e" },
+  { id: "deco-koi", coll: "esprits", name: "Carpes koï", k: "koi", c1: "#ff6a2e", c2: "#1a1a1a", rar: "l" },
+  { id: "deco-koi-azur", coll: "esprits", name: "Koï d'azur", k: "koi", c1: "#4dd6ff", c2: "#ffd24d", rar: "e" },
+  { id: "deco-oni", coll: "esprits", name: "Masque d'oni", k: "oni", c1: "#e8202e", c2: "#3a0608", rar: "l" },
+  { id: "deco-oni-bleu", coll: "esprits", name: "Oni bleu", k: "oni", c1: "#3a7aff", c2: "#0a1440", rar: "e" },
+  { id: "deco-lotus", coll: "esprits", name: "Lotus sacré", k: "lotus", c1: "#ff9ec4", c2: "#e05090", rar: "e" },
+  { id: "deco-lotus-or", coll: "esprits", name: "Lotus d'or", k: "lotus", c1: "#ffd24d", c2: "#b8862a", rar: "l" },
+  { id: "deco-papillons", coll: "esprits", name: "Envol de papillons", k: "papillons", c1: "#ffb3e6", c2: "#8a6dff", rar: "e" },
+  { id: "deco-papillons-feu", coll: "esprits", name: "Papillons de feu", k: "papillons", c1: "#ffb020", c2: "#ff4d2e", rar: "l" },
+  { id: "deco-galaxie", coll: "cosmos", name: "Galaxie", k: "galaxie", c1: "#b072ff", c2: "#2a6fff", rar: "l" },
+  { id: "deco-galaxie-rose", coll: "cosmos", name: "Nébuleuse rose", k: "galaxie", c1: "#ff6ad5", c2: "#6a2aff", rar: "m" },
+  { id: "deco-comete", coll: "cosmos", name: "Pluie de comètes", k: "comete", c1: "#8fe3ff", c2: "#2a3aff", rar: "e" },
+  { id: "deco-comete-or", coll: "cosmos", name: "Comètes d'or", k: "comete", c1: "#ffd24d", c2: "#ff7a2e", rar: "l" },
+  { id: "deco-lunesang", coll: "cosmos", name: "Lune de sang", k: "lunesang", c1: "#ff3a3a", c2: "#4a0410", rar: "l" },
+  { id: "deco-glace", coll: "elements", name: "Couronne de givre", k: "glace", c1: "#8fe3ff", c2: "#2a6fff", rar: "l" },
+  { id: "deco-maree", coll: "elements", name: "Marée", k: "maree", c1: "#4dd6ff", c2: "#0a3a6a", rar: "e" },
+  { id: "deco-ombre", coll: "elements", name: "Ombres vivantes", k: "ombre", c1: "#b072ff", c2: "#2a0a4a", rar: "l" },
+  { id: "deco-ombre-sang", coll: "elements", name: "Ombres de sang", k: "ombre", c1: "#ff3a4d", c2: "#3a0410", rar: "m" },
+  { id: "deco-chaines", coll: "elements", name: "Chaînes spectrales", k: "chaines", c1: "#c8c8f0", c2: "#4a2a7a", rar: "e" },
+  { id: "deco-plumes", coll: "elements", name: "Plumes du vent", k: "plumes", c1: "#f4f0ff", c2: "#b8c8e8", rar: "r" },
+  { id: "deco-plumes-noires", coll: "elements", name: "Plumes de corbeau", k: "plumes", c1: "#3a3a4a", c2: "#8a2a4a", rar: "e" },
+  { id: "deco-holo", coll: "neon", name: "Hologramme", k: "holo", c1: "#3de8ff", c2: "#ff3df0", rar: "e" },
+  { id: "deco-holo-vert", coll: "neon", name: "Viseur cyber", k: "holo", c1: "#3dff9e", c2: "#3de8ff", rar: "l" },
+  { id: "deco-shuriken", coll: "neon", name: "Pluie de shurikens", k: "shuriken", c1: "#ff2e4d", c2: "#2a1a2a", rar: "e" },
   { id: "deco-sakura", coll: "sakura", name: "Sakura", k: "sakura", c1: "#ff9ec4", c2: "#ffd6e8", rar: "r" },
   { id: "deco-sakura-blanc", coll: "sakura", name: "Sakura blanc", k: "sakura", c1: "#ffffff", c2: "#ffd6e8", rar: "e" },
   { id: "deco-petales", coll: "sakura", name: "Pluie de pétales", k: "petales", c1: "#ff9ec4", c2: "#ff5a9e", rar: "pc" },
@@ -4799,7 +4856,15 @@ function toggleMenu(force) {
   header();
 }
 const closeMenu = () => { if (menuOpen) toggleMenu(false); };
+// décoration autour de l'avatar de l'en-tête (remplacée seulement quand elle change, pour ne pas relancer l'animation)
+function syncAvDeco() {
+  const b = $("avBtn"); if (!b) return; const id = save.cos?.deco || "";
+  if (b.dataset.deco === id) return; b.dataset.deco = id;
+  b.querySelectorAll("svg.dk").forEach((x) => x.remove());
+  if (id && DECO_BY_ID[id]) { const L = avDecoHTML(DECO_BY_ID[id], false); b.insertAdjacentHTML("afterbegin", L.back); b.insertAdjacentHTML("beforeend", L.front); }
+}
 function header() {
+  syncAvDeco();
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = fmtN(save.chakra);
@@ -5465,7 +5530,7 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
+      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av">${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
@@ -5791,7 +5856,7 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avd0 = decoOfUid(m.uid), avi = `${avd0 ? `<span class="avd">` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${decoSVG(avd0)}</span>` : ""}`;
+  const avd0 = decoOfUid(m.uid), L0 = avDecoHTML(avd0, true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
@@ -5922,13 +5987,23 @@ function decoSVG(d, shape = "round") {
   return `<svg class="dk dk-${d.k} ${R ? "rect" : ""}" viewBox="${vb}" ${R ? 'preserveAspectRatio="none"' : ""} aria-hidden="true"><defs>${grad}</defs>${b}</svg>`;
 }
 // décoration portée par un joueur (la sienne vient de sa sauvegarde, celle des autres de leur profil public)
-// les décorations se posent sur les cartes, plus autour des avatars
-function decoOfUid() { return null; }
+// (la même décoration se porte autour de l'avatar et se pose sur les cartes)
+function decoOfUid(uid) {
+  const id = uid === ME || uid === "moi" ? save.cos?.deco : (shared.players || []).find((p) => p.uid === uid)?.deco;
+  return id ? DECO_BY_ID[id] : null;
+}
+// décoration autour d'un avatar : les effets (fx.js) ont une couche derrière la photo et une devant ;
+// lite : version allégée pour les listes (classement, chat), où beaucoup d'avatars s'affichent à la fois
+function avDecoHTML(d, lite = true) {
+  if (!d) return { back: "", front: "" };
+  return (typeof fxBuild === "function" && fxBuild(d.k, d.c1, d.c2 || d.c1, "round", lite)) || { back: "", front: decoSVG(d) };
+}
 // un avatar avec sa décoration (même rendu que av(), entouré)
-const avd = (uid, cls = "", d = undefined) => { const dd = d === undefined ? decoOfUid(uid) : d; return dd ? `<span class="avd">${av(uid, cls)}${decoSVG(dd)}</span>` : av(uid, cls); };
+const avd = (uid, cls = "", d = undefined, lite = true) => { const dd = d === undefined ? decoOfUid(uid) : d; if (!dd) return av(uid, cls); const L = avDecoHTML(dd, lite); return `<span class="avd">${L.back}${av(uid, cls)}${L.front}</span>`; };
 
-// ===== Effets de cartes : décorations spectaculaires, ornements et particules =====
-// Repère commun avec decoSVG(d, "rect") : la carte va de (-36, -52) à (36, 52), la vue déborde de 18 tout autour.
+// ===== Effets de cartes et d'avatars : décorations spectaculaires, ornements et particules =====
+// Repère commun avec decoSVG : la carte va de (-36, -52) à (36, 52) (« rect »), l'avatar est un disque de rayon 40
+// (« round ») ; la vue déborde de 18 tout autour.
 // Chaque effet a deux couches : « back » derrière la carte, « front » devant. Ce qui tourne autour de la carte
 // (dragons, pétales) est dessiné dans les deux : la couche de devant ne garde que la moitié basse de l'orbite,
 // si bien qu'il passe derrière la carte en haut et devant en bas.
@@ -5946,8 +6021,8 @@ const FX_FLAKE = (c) => `<g stroke="${c}" stroke-width=".7" stroke-linecap="roun
 const FX_SPARK = (c, r = 3) => `<path d="M0 ${-r}Q0 0 ${r * .35} 0Q0 0 0 ${r}Q0 0 ${-r * .35} 0Q0 0 0 ${-r}Z" fill="${c}"/><path d="M${-r} 0Q0 0 0 ${r * .3}Q0 0 ${r} 0Q0 0 0 ${-r * .3}Q0 0 ${-r} 0Z" fill="${c}" opacity=".8"/>`;
 
 // --- un dragon serpent : la tête et ~30 anneaux suivent la même orbite, chacun un peu en retard ---
-function fxDragon(u, c1, c2, rx, ry, T, belly = "#fff3c4") {
-  const N = 52, path = fxOrbit(rx, ry), dt = .03 * T / 7, mot = (i) => `<animateMotion dur="${T}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-(N + 4 - i) * dt)}s" path="${path}"/>`;
+function fxDragon(u, c1, c2, rx, ry, T, belly = "#fff3c4", N = 52) {
+  const path = fxOrbit(rx, ry), dt = .03 * T / 7 * 52 / N, mot = (i) => `<animateMotion dur="${T}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-(N + 4 - i) * dt)}s" path="${path}"/>`;
   let body = "";
   for (let i = N; i >= 1; i--) {
     const r = 6 * (1 - i / N * .75), leg = i === 8 || i === 26;
@@ -5985,17 +6060,24 @@ function fxKatana(u, L, wrap, steel) {
 }
 
 // --- les effets : back / front en SVG (contenu), defs partagées ---
-function fxBuild(k, c1, c2) {
-  const u = "fx" + ++fxN, HW = FX_HW, HH = FX_HH, R = fxRand(k.length * 977 + c1.length * 31 + (c1.charCodeAt(1) || 7));
+// shape : « rect » (carte) ou « round » (avatar) ; lite : version allégée pour les listes (moins d'éléments)
+function fxBuild(k, c1, c2, shape = "rect", lite = false) {
+  const u = "fx" + ++fxN, RD = shape === "round", HW = RD ? 40 : FX_HW, HH = RD ? 40 : FX_HH, R = fxRand(k.length * 977 + c1.length * 31 + (c1.charCodeAt(1) || 7));
+  const Q = (n) => Math.max(2, Math.round(n * (lite ? .45 : 1)));
+  // le contour (carte ou avatar), un point du contour (t : degrés depuis le haut, sens horaire) et sa normale
+  const ringEl = (off, attrs) => RD ? `<circle r="${40 + off}" ${attrs}/>` : `<rect x="${-HW - off}" y="${-HH - off}" width="${2 * (HW + off)}" height="${2 * (HH + off)}" rx="${f1x(8 + off * .5)}" ${attrs}/>`;
+  const edge = (t, off = 0) => { const a = (t - 90) * Math.PI / 180, c = Math.cos(a), si = Math.sin(a); if (RD) return [f1x(c * (40 + off)), f1x(si * (40 + off))]; const w = HW + off, h = HH + off, kk = Math.min(Math.abs(c) > 1e-6 ? w / Math.abs(c) : 1e9, Math.abs(si) > 1e-6 ? h / Math.abs(si) : 1e9); return [f1x(c * kk), f1x(si * kk)]; };
+  const normal = (t) => { const [x0, y0] = edge(t, 0), [x1, y1] = edge(t, 8), l = Math.hypot(x1 - x0, y1 - y0) || 1; return [(x1 - x0) / l, (y1 - y0) / l]; };
+  const ORB = RD ? [56, 46] : [HW + 17, HH + 10], SC = RD ? .72 : 1;
   let defs = fxGlow(u), back = "", front = "";
   switch (k) {
     // ===== Dragons qui volent autour de la carte =====
     case "dragon": case "dragon2": {
-      const tilt = -14, rx = HW + 17, ry = HH + 10, T = k === "dragon2" ? 6.2 : 7;
+      const tilt = RD ? -18 : -14, [rx, ry] = ORB, T = k === "dragon2" ? 6.2 : 7;
       defs += fxDragonDefs(u, c1, c2) + fxFrontMask(u, tilt);
-      const orbit = `<g transform="rotate(${tilt})">${fxDragon(u, c1, c2, rx, ry, T)}</g>`;
+      const orbit = `<g transform="rotate(${tilt})">${fxDragon(u, c1, c2, rx, ry, T, "#fff3c4", lite ? 16 : 52)}</g>`;
       const clouds = [[-HW - 6, HH - 4, 1], [HW + 4, -HH + 8, -1]].map(([x, y, sx], i) => `<g transform="translate(${x} ${y}) scale(${sx} 1)"><g class="fx-bob" style="animation-delay:${-i * 1.3}s"><path d="M-12 2C-14 -3 -8 -6 -5 -3C-4 -8 4 -8 5 -3C8 -6 14 -3 12 2Z" fill="${c1}" opacity=".22"/><path d="M-9 1C-8 -2 -5 -3 -3 -1M2 -2C4 -4 7 -3 8 0" stroke="${c1}" stroke-width=".8" fill="none" opacity=".8"/></g></g>`).join("");
-      back = `<rect x="${-HW - 6}" y="${-HH - 6}" width="${2 * HW + 12}" height="${2 * HH + 12}" rx="10" fill="${c1}" opacity=".18" filter="url(#${u}b)" class="fx-pulse"/>${orbit}`;
+      back = `${ringEl(6, `fill="${c1}" opacity=".18" filter="url(#${u}b)" class="fx-pulse"`)}${orbit}`;
       front = `<g mask="url(#${u}m)">${orbit}</g>${clouds}`;
       break;
     }
@@ -6003,11 +6085,11 @@ function fxBuild(k, c1, c2) {
     case "katanas": {
       defs += `<linearGradient id="${u}s" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#aab3c2"/><stop offset="1" stop-color="#5a6272"/></linearGradient>
         <linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
-      back = [1, -1].map((sx) => `<g transform="scale(${sx} 1) translate(-62 84) rotate(-57)">${fxKatana(u + (sx > 0 ? "a" : "c"), 172, c2, "#fff")}</g>`).join("")
+      back = `<g transform="scale(${SC})">` + [1, -1].map((sx) => `<g transform="scale(${sx} 1) translate(-62 84) rotate(-57)">${fxKatana(u + (sx > 0 ? "a" : "c"), 172, c2, "#fff")}</g>`).join("").concat("</g>")
         .replace(/url\(#(fx\d+)[ac]s\)/g, "url(#$1s)").replace(/url\(#(fx\d+)[ac]g\)/g, "url(#$1g)");
       const slash = (d, i) => `<g class="fx-slash" style="animation-delay:${-i * 1.4}s"><path d="${d}" stroke="${c1}" stroke-width="6" fill="none" opacity=".5" filter="url(#${u}b)" pathLength="100"/><path d="${d}" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" pathLength="100"/></g>`;
       front = slash(`M${-HW - 14} ${-HH + 10}Q0 -6 ${HW + 14} ${HH - 22}`, 0) + slash(`M${HW + 14} ${-HH + 26}Q4 4 ${-HW - 14} ${HH - 8}`, 1)
-        + Array.from({ length: 7 }, (_, i) => fxP("fx-fall", -HW + R() * 2 * HW, -HH - 14, 4.5 + R() * 3, -R() * 7, FX_PETAL("#ffb3cf", "#ff6fa3"), (R() - .5) * 30, .9)).join("");
+        + Array.from({ length: Q(7) }, (_, i) => fxP("fx-fall", -HW + R() * 2 * HW, -HH - 14, 4.5 + R() * 3, -R() * 7, FX_PETAL("#ffb3cf", "#ff6fa3"), (R() - .5) * 30, .9)).join("");
       break;
     }
     // ===== Aura enflammée : vraies flammes ondulantes autour de la carte =====
@@ -6018,37 +6100,40 @@ function fxBuild(k, c1, c2) {
       // langues de feu qui montent toujours vers le haut, plus hautes sur les côtés et au sommet
       const tongue = (x, y, h, w, fill, i, cls = "fx-flame") => `<path class="${cls}" style="animation-delay:${f1x(-i * .13)}s;animation-duration:${f1x(.7 + (i % 5) * .12)}s" d="M${f1x(x - w)} ${y}C${f1x(x - w)} ${f1x(y - h * .4)} ${f1x(x - w * .2)} ${f1x(y - h * .6)} ${f1x(x + w * .15)} ${f1x(y - h)}C${f1x(x + w * .3)} ${f1x(y - h * .55)} ${f1x(x + w)} ${f1x(y - h * .35)} ${f1x(x + w)} ${y}Z" fill="${fill}"/>`;
       const ring = (fill, sc, cls) => { let s = "", i = 0;
+        if (RD) { for (let t = 0; t < 360; t += lite ? 24 : 14) { const [x, y] = edge(t, 1); s += tongue(x, y, (12 + R() * 9) * sc * (1 + Math.max(0, -y) / 70), 6 * sc, fill, i++, cls); } return s; }
         for (let y = HH; y >= -HH; y -= 9) for (const sx of [-1, 1]) s += tongue(sx * (HW + 1), y, (14 + R() * 10) * sc, 6 * sc, fill, i++, cls);
         for (let x = -HW; x <= HW; x += 8) s += tongue(x, -HH + 2, (20 + R() * 14) * sc, 6 * sc, fill, i++, cls);
         return s; };
-      back = `<rect x="${-HW - 4}" y="${-HH - 8}" width="${2 * HW + 8}" height="${2 * HH + 12}" rx="10" fill="${c1}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"/>
+      back = `${ringEl(4, `fill="${c1}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"`)}
         <g filter="url(#${u}t)">${ring(`url(#${u}f)`, 1.15)}${ring(`url(#${u}y)`, .65)}</g>`;
-      let bot = ""; for (let x = -HW + 2; x <= HW - 2; x += 7) bot += tongue(x, HH + 3, 7 + R() * 7, 4.5, `url(#${u}f)`, x + 40);
+      let bot = "";
+      if (RD) for (let t = 130; t <= 230; t += 16) { const [x, y] = edge(t, 2); bot += tongue(x, y, 7 + R() * 7, 4.5, `url(#${u}f)`, t); }
+      else for (let x = -HW + 2; x <= HW - 2; x += 7) bot += tongue(x, HH + 3, 7 + R() * 7, 4.5, `url(#${u}f)`, x + 40);
       front = `<g filter="url(#${u}t)" opacity=".9">${bot}</g>`
-        + Array.from({ length: 14 }, (_, i) => fxP("fx-rise", -HW - 8 + R() * (2 * HW + 16), HH, 2.2 + R() * 2.2, -R() * 4, `<circle r="${f1x(.6 + R() * .9)}" fill="${i % 3 ? c1 : "#fff3b0"}"/><circle r="2.2" fill="${c1}" opacity=".3"/>`, (R() - .5) * 26)).join("");
+        + Array.from({ length: Q(14) }, (_, i) => fxP("fx-rise", -HW - 8 + R() * (2 * HW + 16), HH, 2.2 + R() * 2.2, -R() * 4, `<circle r="${f1x(.6 + R() * .9)}" fill="${i % 3 ? c1 : "#fff3b0"}"/><circle r="2.2" fill="${c1}" opacity=".3"/>`, (R() - .5) * 26)).join("");
       break;
     }
     // ===== Néon de Shinjuku : tubes qui grésillent, enseigne en kanji, pluie =====
     case "neon": case "neon2": {
-      const tube = (off, c, w, extra = "") => `<rect x="${-HW - off}" y="${-HH - off}" width="${2 * (HW + off)}" height="${2 * (HH + off)}" rx="${7 + off * .5}" fill="none" stroke="${c}" stroke-width="${w}" ${extra}/>`;
+      const tube = (off, c, w, extra = "") => ringEl(off, `fill="none" stroke="${c}" stroke-width="${w}" ${extra}`);
       const lit = (inner, cls = "") => `<g class="${cls}"><g filter="url(#${u}b)" opacity=".9">${inner}</g>${inner}</g>`;
-      const sx = HW + 13, sign = (txt, x, y, c, cls) => `<g transform="translate(${x} ${y})"><rect x="-6.5" y="-15" width="13" height="30" rx="2.5" fill="#07060fcc" stroke="#ffffff22" stroke-width=".6"/>${lit(`<rect x="-5" y="-13.5" width="10" height="27" rx="2" fill="none" stroke="${c}" stroke-width=".7"/>${[...txt].map((ch, i) => `<text y="${-4 + i * 11}" text-anchor="middle" font-size="9" font-weight="800" fill="none" stroke="${c}" stroke-width=".7">${ch}</text>`).join("")}`, cls)}<path d="M-6.5 -10H${-sx + HW + 4}M-6.5 10H${-sx + HW + 4}" stroke="#6a6f80" stroke-width=".8"/></g>`;
-      back = `<rect x="${-HW - 10}" y="${-HH - 10}" width="${2 * HW + 20}" height="${2 * HH + 20}" rx="14" fill="${c1}" opacity=".22" filter="url(#${u}b)" class="fx-pulse"/>`;
+      const sx = HW + 13, sign = (txt, x, y, c, cls) => `<g transform="translate(${x} ${y}) scale(${SC})"><rect x="-6.5" y="-15" width="13" height="30" rx="2.5" fill="#07060fcc" stroke="#ffffff22" stroke-width=".6"/>${lit(`<rect x="-5" y="-13.5" width="10" height="27" rx="2" fill="none" stroke="${c}" stroke-width=".7"/>${[...txt].map((ch, i) => `<text y="${-4 + i * 11}" text-anchor="middle" font-size="9" font-weight="800" fill="none" stroke="${c}" stroke-width=".7">${ch}</text>`).join("")}`, cls)}<path d="M-6.5 -10H${-sx + HW + 4}M-6.5 10H${-sx + HW + 4}" stroke="#6a6f80" stroke-width=".8"/></g>`;
+      back = ringEl(10, `fill="${c1}" opacity=".22" filter="url(#${u}b)" class="fx-pulse"`);
       front = lit(tube(4, c1, 1.6, `stroke-dasharray="150 8 60 6 400"`), "fx-hum") + lit(tube(9, c2, 1.1, `stroke-dasharray="26 ${2 * HW + 2 * HH} 26 0"`), "fx-neonflick")
-        + `<circle r="1.6" fill="#fff"><animateMotion dur="3.2s" repeatCount="indefinite" path="M${-HW - 4} ${-HH + 3}V${HH - 3}Q${-HW - 4} ${HH + 4} ${-HW + 3} ${HH + 4}H${HW - 3}Q${HW + 4} ${HH + 4} ${HW + 4} ${HH - 3}V${-HH + 3}Q${HW + 4} ${-HH - 4} ${HW - 3} ${-HH - 4}H${-HW + 3}Q${-HW - 4} ${-HH - 4} ${-HW - 4} ${-HH + 3}"/></circle>`
+        + `<circle r="1.6" fill="#fff"><animateMotion dur="3.2s" repeatCount="indefinite" path="${RD ? fxOrbit(44, 44) : `M${-HW - 4} ${-HH + 3}V${HH - 3}Q${-HW - 4} ${HH + 4} ${-HW + 3} ${HH + 4}H${HW - 3}Q${HW + 4} ${HH + 4} ${HW + 4} ${HH - 3}V${-HH + 3}Q${HW + 4} ${-HH - 4} ${HW - 3} ${-HH - 4}H${-HW + 3}Q${-HW - 4} ${-HH - 4} ${-HW - 4} ${-HH + 3}`}"/></circle>`
         + sign(k === "neon2" ? "電脳" : "新宿", sx, -18, c2, "fx-neonflick b") + sign(k === "neon2" ? "夜" : "QG", -sx, 22, c1, "fx-hum")
-        + Array.from({ length: 16 }, () => fxP("fx-rain", -HW - 16 + R() * (2 * HW + 32), -HH - 20, .6 + R() * .5, -R() * 2, `<path d="M0 0L-2 9" stroke="${R() > .5 ? c1 : c2}" stroke-width=".5" opacity=".55"/>`)).join("");
+        + Array.from({ length: Q(16) }, () => fxP("fx-rain", -HW - 16 + R() * (2 * HW + 32), -HH - 20, .6 + R() * .5, -R() * 2, `<path d="M0 0L-2 9" stroke="${R() > .5 ? c1 : c2}" stroke-width=".5" opacity=".55"/>`)).join("");
       break;
     }
     // ===== Tempête de foudre : éclairs qui frappent la carte, arc électrique sur le bord =====
     case "foudre": {
       const bolt = (x0, y0, x1, y1) => { let s = `M${x0} ${y0}`, br = ""; for (let i = 1; i <= 6; i++) { const t = i / 6, x = x0 + (x1 - x0) * t + (i < 6 ? (R() - .5) * 12 : 0), y = y0 + (y1 - y0) * t + (i < 6 ? (R() - .5) * 6 : 0); s += `L${f1x(x)} ${f1x(y)}`; if (i === 3) br = `M${f1x(x)} ${f1x(y)}l${f1x((R() - .5) * 16)} ${f1x(6 + R() * 8)}l${f1x((R() - .5) * 8)} ${f1x(4 + R() * 6)}`; } return s + br; };
-      const strikes = [[-HW - 20, -HH - 26, -HW + 6, -HH], [HW + 22, -HH - 10, HW, -12], [-HW - 22, 14, -HW, HH - 10], [HW + 12, HH + 22, 10, HH], [8, -HH - 30, -4, -HH]];
+      const strikes = [-40, 70, 230, 160, 8].slice(0, lite ? 3 : 5).map((t, i) => { const [a, b] = edge(t + 12, 24 + i * 2), [c, d] = edge(t, 0); return [a, b, c, d]; });
       const zap = strikes.map(([a, b, c, d], i) => `<g class="fx-strike" style="animation-delay:${f1x(-i * .73)}s"><path d="${bolt(a, b, c, d)}" stroke="${c2}" stroke-width="3.4" fill="none" filter="url(#${u}b)"/><path d="${bolt(a, b, c, d)}" stroke="#fff" stroke-width="1" fill="none" stroke-linejoin="bevel"/><circle cx="${c}" cy="${d}" r="5" fill="${c1}" opacity=".7" filter="url(#${u}b)"/></g>`).join("");
-      const arc = (j) => { let s = ""; const n = 40; for (let i = 0; i <= n; i++) { const t = i / n * 2 * Math.PI, ex = Math.cos(t), ey = Math.sin(t), kx = Math.min(1, Math.abs(1 / ex) * .0001 + 1), x = Math.max(-1, Math.min(1, ex * 1.6)) * (HW + 3), y = Math.max(-1, Math.min(1, ey * 1.4)) * (HH + 3); s += `${i ? "L" : "M"}${f1x(x + (R() - .5) * 3 * kx)} ${f1x(y + (R() - .5) * 3)}`; } return `<path class="fx-arc a${j}" d="${s}Z" stroke="${c1}" stroke-width=".8" fill="none"/>`; };
-      back = `<rect x="${-HW - 8}" y="${-HH - 8}" width="${2 * HW + 16}" height="${2 * HH + 16}" rx="12" fill="${c2}" opacity=".35" filter="url(#${u}b)" class="fx-storm"/>`;
+      const arc = (j) => { let s = ""; const n = 40; for (let i = 0; i <= n; i++) { const [x, y] = edge(i / n * 360, 3); s += `${i ? "L" : "M"}${f1x(x + (R() - .5) * 3)} ${f1x(y + (R() - .5) * 3)}`; } return `<path class="fx-arc a${j}" d="${s}Z" stroke="${c1}" stroke-width=".8" fill="none"/>`; };
+      back = ringEl(8, `fill="${c2}" opacity=".35" filter="url(#${u}b)" class="fx-storm"`);
       front = `<g filter="url(#${u}b)" opacity=".6">${arc(0)}</g>${arc(0)}${arc(1)}${arc(2)}${zap}`
-        + Array.from({ length: 8 }, (_, i) => fxP("fx-spark", (R() - .5) * (2 * HW + 10), (R() > .5 ? -1 : 1) * (HH + 2), .9 + R(), -R() * 2, FX_SPARK(i % 2 ? "#fff" : c1, 2.2), (R() - .5) * 20)).join("");
+        + Array.from({ length: Q(8) }, (_, i) => { const [x, y] = edge(R() * 360, 2); return fxP("fx-spark", x, y, .9 + R(), -R() * 2, FX_SPARK(i % 2 ? "#fff" : c1, 2.2), (R() - .5) * 20); }).join("");
       break;
     }
     // ===== Phénix : ailes de feu qui battent derrière la carte, queue et braises =====
@@ -6057,20 +6142,178 @@ function fxBuild(k, c1, c2) {
       const feather = (len, rot, w) => `<path transform="rotate(${rot})" d="M0 0C${f1x(len * .3)} ${f1x(-w)} ${f1x(len * .8)} ${f1x(-w * .7)} ${len} 0C${f1x(len * .8)} ${f1x(w * .5)} ${f1x(len * .3)} ${f1x(w * .6)} 0 0Z" fill="url(#${u}w)" stroke="#fff6" stroke-width=".3"/>`;
       const wing = (sx) => `<g transform="translate(${sx * (HW - 6)} ${-HH + 18}) scale(${sx} 1)"><g class="fx-wing">${[[64, -58, 7], [70, -40, 8], [72, -22, 8], [66, -5, 8], [56, 12, 7], [44, 28, 6], [32, 44, 5]].map(([l, r, w]) => feather(l, r, w)).join("")}
         ${[[38, -50, 5], [42, -30, 5], [40, -12, 5], [32, 6, 4]].map(([l, r, w]) => feather(l, r, w).replace(`url(#${u}w)`, c2)).join("")}</g></g>`;
-      back = `<g filter="url(#${u}b)" opacity=".55">${wing(-1)}${wing(1)}</g>${wing(-1)}${wing(1)}
+      back = `<g transform="scale(${SC})"><g filter="url(#${u}b)" opacity=".55">${wing(-1)}${wing(1)}</g>${wing(-1)}${wing(1)}
         <g transform="translate(0 ${HH - 6})">${[-24, -10, 0, 10, 24].map((r, i) => `<g class="fx-tail" style="animation-delay:${-i * .3}s">${feather(46 - Math.abs(r) * .6, 90 + r, 5)}</g>`).join("")}</g>
-        <g transform="translate(0 ${-HH - 4})"><g class="fx-bob"><path d="M-6 6C-6 -2 -2 -8 4 -8C8 -8 10 -6 12 -4L8 -3C9 0 6 4 4 6Z" fill="url(#${u}w)"/>${[-10, -4, 2].map((x, i) => `<path class="fx-flame" style="animation-delay:${-i * .2}s" d="M${x} -6C${x - 2} -12 ${x + 1} -16 ${x + 4} -20C${x + 4} -14 ${x + 6} -10 ${x + 4} -6Z" fill="${c1}"/>`).join("")}<circle cx="5" cy="-4.4" r=".9" fill="#fff"/></g></g>`;
-      front = Array.from({ length: 12 }, (_, i) => fxP("fx-rise", (R() - .5) * (2 * HW + 30), HH + 4, 2.4 + R() * 2, -R() * 4, `<circle r="${f1x(.6 + R())}" fill="${i % 2 ? c1 : "#fff3b0"}"/><circle r="2.4" fill="${c1}" opacity=".3"/>`, (R() - .5) * 30)).join("");
+        <g transform="translate(0 ${-HH - 4})"><g class="fx-bob"><path d="M-6 6C-6 -2 -2 -8 4 -8C8 -8 10 -6 12 -4L8 -3C9 0 6 4 4 6Z" fill="url(#${u}w)"/>${[-10, -4, 2].map((x, i) => `<path class="fx-flame" style="animation-delay:${-i * .2}s" d="M${x} -6C${x - 2} -12 ${x + 1} -16 ${x + 4} -20C${x + 4} -14 ${x + 6} -10 ${x + 4} -6Z" fill="${c1}"/>`).join("")}<circle cx="5" cy="-4.4" r=".9" fill="#fff"/></g></g></g>`;
+      front = Array.from({ length: Q(12) }, (_, i) => fxP("fx-rise", (R() - .5) * (2 * HW + 30), HH + 4, 2.4 + R() * 2, -R() * 4, `<circle r="${f1x(.6 + R())}" fill="${i % 2 ? c1 : "#fff3b0"}"/><circle r="2.4" fill="${c1}" opacity=".3"/>`, (R() - .5) * 30)).join("");
       break;
     }
     // ===== Tempête de sakura : un tourbillon de pétales et une branche en fleur =====
     case "tempete": {
       const tilt = 12; defs += fxFrontMask(u, tilt);
-      const swirl = `<g transform="rotate(${tilt})">${Array.from({ length: 22 }, (_, i) => { const rx = HW + 8 + R() * 14, ry = HH + 4 + R() * 12, T = 4 + R() * 3;
+      const swirl = `<g transform="rotate(${tilt})">${Array.from({ length: Q(22) }, (_, i) => { const rx = ORB[0] - 9 + R() * 14, ry = ORB[1] - 6 + R() * 12, T = 4 + R() * 3;
         return `<g><animateMotion dur="${f1x(T)}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-R() * T)}s" path="${fxOrbit(f1x(rx), f1x(ry))}"/><g class="fx-flip" style="animation-delay:${f1x(-R() * 2)}s"><g transform="scale(${f1x(.8 + R() * .6)})">${FX_PETAL(i % 3 ? c1 : "#fff0f6", c2)}</g></g></g>`; }).join("")}</g>`;
       const flower = (x, y, r) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map((a) => `<ellipse cy="${-r * .55}" rx="${f1x(r * .42)}" ry="${f1x(r * .6)}" fill="${c1}" stroke="${c2}" stroke-width=".4" transform="rotate(${a})"/>`).join("")}<circle r="${f1x(r * .26)}" fill="#ffd24d"/></g>`;
       back = swirl;
-      front = `<g mask="url(#${u}m)">${swirl}</g><g transform="translate(${-HW - 10} ${-HH - 6})"><g class="fx-sway"><path d="M0 0C10 4 18 8 30 6C36 5 42 8 50 14M14 4C16 10 22 14 28 14M30 6C34 0 40 -2 46 0" stroke="#4a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>${flower(14, 3, 6)}${flower(28, 14, 5)}${flower(33, 4, 7)}${flower(46, 0, 5)}${flower(50, 14, 6)}</g></g>`;
+      front = `<g mask="url(#${u}m)">${swirl}</g><g transform="translate(${-HW - 10} ${-HH - 6}) scale(${SC})"><g class="fx-sway"><path d="M0 0C10 4 18 8 30 6C36 5 42 8 50 14M14 4C16 10 22 14 28 14M30 6C34 0 40 -2 46 0" stroke="#4a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>${flower(14, 3, 6)}${flower(28, 14, 5)}${flower(33, 4, 7)}${flower(46, 0, 5)}${flower(50, 14, 6)}</g></g>`;
+      break;
+    }
+
+    // ===== Carpes koï : deux poissons (yin et yang) nagent autour, des ondes à la surface =====
+    case "koi": {
+      const tilt = RD ? -10 : -8; defs += fxFrontMask(u, tilt);
+      const fish = (col, spot, off) => { const N = Q(12), path = fxOrbit(ORB[0] - 4, ORB[1] - 4), T = 6.5, mot = (i) => `<animateMotion dur="${T}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-off - (N + 2 - i) * .075)}s" path="${path}"/>`;
+        let b = `<g>${mot(N + 2)}<path class="fx-flick" d="M2 0C-4 -7 -9 -8 -12 -6C-9 -2 -9 2 -12 6C-9 8 -4 7 2 0Z" fill="${col}" opacity=".85"/></g>`;
+        for (let i = N; i >= 1; i--) { const r = 4.4 * (1 - i / N * .7); b += `<g>${mot(i)}<ellipse rx="${f1x(r * 1.3)}" ry="${f1x(r)}" fill="${col}"/>${i % 3 === 1 ? `<circle cx="${f1x(-r * .2)}" cy="${f1x(-r * .3)}" r="${f1x(r * .5)}" fill="${spot}"/>` : ""}</g>`; }
+        return b + `<g>${mot(0)}<path d="M-1 -4C-4 -9 -8 -9 -10 -8C-7 -6 -5 -4 -3 -3ZM-1 4C-4 9 -8 9 -10 8C-7 6 -5 4 -3 3Z" fill="${col}" opacity=".8"/><ellipse cx="2" rx="6.4" ry="4.6" fill="${col}"/><circle cx="-1" r="2.2" fill="${spot}"/><circle cx="5.4" cy="-1.9" r=".8" fill="#111"/><circle cx="5.4" cy="1.9" r=".8" fill="#111"/></g>`; };
+      const orbit = `<g transform="rotate(${tilt})">${fish(c1, "#fff6ee", 0)}${fish("#f6f1ea", c2, 3.25)}</g>`;
+      back = `${ringEl(6, `fill="#2a8ac8" opacity=".22" filter="url(#${u}b)" class="fx-pulse"`)}${[0, 1, 2].map((i) => `<g class="fx-ripple" style="animation-delay:${-i * 1.1}s">${ringEl(3, `fill="none" stroke="${c1}" stroke-width="1" opacity=".6"`)}</g>`).join("")}${orbit}`;
+      front = `<g mask="url(#${u}m)">${orbit}</g>` + Array.from({ length: Q(6) }, () => { const [x, y] = edge(140 + R() * 80, 4); return fxP("fx-rise", x, y, 2.6 + R() * 2, -R() * 4, `<circle r="${f1x(1 + R() * 1.4)}" fill="none" stroke="#cfefff" stroke-width=".6"/>`, (R() - .5) * 10); }).join("");
+      break;
+    }
+    // ===== Papillons : une nuée qui virevolte autour, ailes qui battent =====
+    case "papillons": {
+      const tilt = 6; defs += fxFrontMask(u, tilt);
+      const fly = (i) => { const rx = ORB[0] - 8 + R() * 18, ry = ORB[1] - 6 + R() * 16, T = 5 + R() * 4, sc = .75 + R() * .5, col = i % 2 ? c1 : c2;
+        return `<g><animateMotion dur="${f1x(T)}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-R() * T)}s" path="${fxOrbit(f1x(rx), f1x(ry))}"/><g transform="rotate(90) scale(${f1x(sc)})"><g class="fx-flapx" style="animation-delay:${f1x(-R())}s">
+          <path d="M0 0C-3 -7 -10 -9 -11 -3C-11 1 -5 2 0 0ZM0 0C-2 4 -7 8 -9 5C-9 3 -4 1 0 0Z" fill="${col}" stroke="#2a1a3a" stroke-width=".4"/><path d="M0 0C3 -7 10 -9 11 -3C11 1 5 2 0 0ZM0 0C2 4 7 8 9 5C9 3 4 1 0 0Z" fill="${col}" stroke="#2a1a3a" stroke-width=".4"/>
+          <circle cx="-6" cy="-3.5" r="1.3" fill="#fff" opacity=".7"/><circle cx="6" cy="-3.5" r="1.3" fill="#fff" opacity=".7"/></g><rect x="-.6" y="-4.5" width="1.2" height="9" rx=".6" fill="#2a1a10"/></g></g>`; };
+      const swarm = `<g transform="rotate(${tilt})">${Array.from({ length: Q(9) }, (_, i) => fly(i)).join("")}</g>`;
+      back = `${ringEl(6, `fill="${c1}" opacity=".18" filter="url(#${u}b)" class="fx-pulse"`)}${swarm}`;
+      front = `<g mask="url(#${u}m)">${swarm}</g>` + Array.from({ length: Q(8) }, () => { const [x, y] = edge(R() * 360, 6 + R() * 8); return `<g transform="translate(${x} ${y})"><g class="fx-tw" style="animation-delay:${f1x(-R() * 2)}s">${FX_SPARK("#fff", 1.6)}</g></g>`; }).join("");
+      break;
+    }
+    // ===== Galaxie : bras de nébuleuse qui tournent derrière, une planète en orbite, des étoiles =====
+    case "galaxie": {
+      defs += `<radialGradient id="${u}n"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".3" stop-color="${c1}" stop-opacity=".6"/><stop offset=".75" stop-color="${c2}" stop-opacity=".22"/><stop offset="1" stop-color="${c2}" stop-opacity="0"/></radialGradient>
+        <radialGradient id="${u}q" cx=".35" cy=".35"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient>`;
+      const arm = (rot, col) => `<path transform="rotate(${rot})" d="M0 0C${f1x(HW * .7)} ${f1x(-HH * .3)} ${f1x(HW * 1.3)} ${f1x(HH * .35)} ${f1x(HW * .9)} ${f1x(HH * 1.15)}" stroke="${col}" stroke-width="9" fill="none" opacity=".42" filter="url(#${u}b)" stroke-linecap="round"/>`;
+      const stars = Array.from({ length: Q(34) }, () => { const a = R() * 6.283, r = .3 + R() * .95; return `<circle cx="${f1x(Math.cos(a) * (HW + 18) * r)}" cy="${f1x(Math.sin(a) * (HH + 16) * r)}" r="${f1x(.3 + R() * .7)}" fill="#fff" opacity="${f1x(.4 + R() * .6)}"/>`; }).join("");
+      const planet = `<g><animateMotion dur="9s" repeatCount="indefinite" path="${fxOrbit(ORB[0] - 2, ORB[1] - 10)}"/><circle r="5" fill="${c1}" opacity=".4" filter="url(#${u}b)"/><circle r="4" fill="url(#${u}q)"/><ellipse rx="8.5" ry="2.2" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".8" transform="rotate(-22)"/></g>`;
+      defs += fxFrontMask(u, 0);
+      defs += `<radialGradient id="${u}g"><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><mask id="${u}gm" maskUnits="userSpaceOnUse" x="-120" y="-120" width="240" height="240"><ellipse rx="${HW + 22}" ry="${HH + 18}" fill="url(#${u}g)"/></mask>`;
+      back = `<ellipse rx="${HW + 24}" ry="${HH + 20}" fill="url(#${u}n)" opacity=".6"/><g mask="url(#${u}gm)"><g class="fx-spin slow">${arm(0, c1)}${arm(120, c2)}${arm(240, c1)}</g></g><g class="fx-spin slow">${stars}</g>${planet}`;
+      front = `<g mask="url(#${u}m)">${planet}</g>` + Array.from({ length: Q(9) }, () => { const [x, y] = edge(R() * 360, 4 + R() * 12); return `<g transform="translate(${x} ${y})"><g class="fx-tw" style="animation-delay:${f1x(-R() * 2)}s">${FX_SPARK(R() > .5 ? "#fff" : c1, 1.4 + R() * 1.6)}</g></g>`; }).join("");
+      break;
+    }
+    // ===== Masque d'oni : le démon veille au-dessus, fumée rouge, yeux qui brûlent =====
+    case "oni": {
+      defs += `<linearGradient id="${u}o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
+        <linearGradient id="${u}h" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#f4e6c8"/><stop offset="1" stop-color="#b8a07a"/></linearGradient>`;
+      const mask = `<g transform="translate(0 ${-HH - 2}) scale(${RD ? .85 : 1})"><g class="fx-bob">
+        <path d="M-11 -12C-16 -20 -17 -28 -13 -35C-11 -27 -7 -21 -3 -17ZM11 -12C16 -20 17 -28 13 -35C11 -27 7 -21 3 -17Z" fill="url(#${u}h)" stroke="#3a2a10" stroke-width=".7"/>
+        <path d="M-15 -4C-15 -14 -8 -19 0 -19C8 -19 15 -14 15 -4C15 6 9 12 0 13C-9 12 -15 6 -15 -4Z" fill="url(#${u}o)" stroke="#1a0404" stroke-width="1"/>
+        <path d="M-12 -9L-3 -5.5M12 -9L3 -5.5" stroke="#1a0404" stroke-width="2.6" stroke-linecap="round"/><path d="M-3 -1L0 2L3 -1" stroke="#1a0404" stroke-width="1.2" fill="none"/>
+        <g filter="url(#${u}b)"><ellipse cx="-6.5" cy="-2.5" rx="3" ry="1.8" fill="#ffe14d"/><ellipse cx="6.5" cy="-2.5" rx="3" ry="1.8" fill="#ffe14d"/></g>
+        <g class="fx-blink"><ellipse cx="-6.5" cy="-2.5" rx="2.4" ry="1.4" fill="#fff6a0"/><ellipse cx="6.5" cy="-2.5" rx="2.4" ry="1.4" fill="#fff6a0"/></g>
+        <path d="M-9 5Q0 11 9 5Q0 8 -9 5Z" fill="#1a0404"/><path d="M-6.5 5.6L-5.4 10L-4.2 6.3ZM6.5 5.6L5.4 10L4.2 6.3Z" fill="#fff"/></g></g>`;
+      const smoke = (n, y0) => Array.from({ length: Q(n) }, () => { const [x, y] = edge(R() * 360, 2); return fxP("fx-smoke", x, y0 ?? y, 3 + R() * 2.5, -R() * 5, `<circle r="${f1x(4 + R() * 4)}" fill="${R() > .5 ? c2 : "#1a0608"}" opacity=".55" filter="url(#${u}b)"/>`, (R() - .5) * 16); }).join("");
+      back = `${ringEl(6, `fill="${c2}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"`)}${smoke(12)}`;
+      front = mask + smoke(5, HH);
+      break;
+    }
+    // ===== Shurikens : trois étoiles d'acier en orbite, traînées et étincelles =====
+    case "shuriken": {
+      const tilt = -12; defs += fxFrontMask(u, tilt) + `<linearGradient id="${u}s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#9aa4b4"/><stop offset="1" stop-color="#4a5262"/></linearGradient>
+        <linearGradient id="${u}t" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="${c1}" stop-opacity=".8"/><stop offset="1" stop-color="${c1}" stop-opacity="0"/></linearGradient>`;
+      const star = `<path d="M0 -7L1.7 -1.7L7 0L1.7 1.7L0 7L-1.7 1.7L-7 0L-1.7 -1.7Z" fill="url(#${u}s)" stroke="#20242e" stroke-width=".5"/><circle r="1.5" fill="#14161c"/><circle r="1.5" fill="none" stroke="${c1}" stroke-width=".5"/>`;
+      const orbit = `<g transform="rotate(${tilt})">${[0, 1, 2].map((i) => `<g><animateMotion dur="3.6s" repeatCount="indefinite" rotate="auto" begin="${-i * 1.2}s" path="${fxOrbit(ORB[0] - 2, ORB[1] - 2)}"/><path d="M-2 0L-30 -2.6L-30 2.6Z" fill="url(#${u}t)"/><g class="fx-spin fast">${star}</g></g>`).join("")}</g>`;
+      back = `${ringEl(5, `fill="${c1}" opacity=".15" filter="url(#${u}b)" class="fx-pulse"`)}${orbit}`;
+      front = `<g mask="url(#${u}m)">${orbit}</g>` + Array.from({ length: Q(7) }, (_, i) => { const [x, y] = edge(R() * 360, 3); return fxP("fx-spark", x, y, .8 + R(), -R() * 2, FX_SPARK(i % 2 ? "#fff" : c1, 2), (R() - .5) * 18); }).join("");
+      break;
+    }
+    // ===== Chaînes spectrales : une chaîne fait le tour, une autre barre le dos, un cadenas =====
+    case "chaines": {
+      defs += `<linearGradient id="${u}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8ecf4"/><stop offset=".5" stop-color="${c1}"/><stop offset="1" stop-color="#3a3a4a"/></linearGradient>`;
+      const link = (x, y, ang, flat) => flat ? `<rect x="-3.4" y="-.7" width="6.8" height="1.4" rx=".7" fill="url(#${u}c)" transform="translate(${x} ${y}) rotate(${f1x(ang)})"/>` : `<rect x="-3.4" y="-1.7" width="6.8" height="3.4" rx="1.7" fill="none" stroke="url(#${u}c)" stroke-width="1.3" transform="translate(${x} ${y}) rotate(${f1x(ang)})"/>`;
+      const loop = (off) => { let s = "", i = 0; const step = RD ? 7.2 : 4.6; for (let t = 0; t < 360; t += step) { const [x, y] = edge(t, off), [x2, y2] = edge(t + 1, off); s += link(x, y, Math.atan2(y2 - y, x2 - x) * 180 / Math.PI, i++ % 2); } return s; };
+      const diag = (x0, y0, x1, y1) => { const n = Math.round(Math.hypot(x1 - x0, y1 - y0) / 5.4), a = Math.atan2(y1 - y0, x1 - x0) * 180 / Math.PI; return Array.from({ length: n }, (_, i) => link(f1x(x0 + (x1 - x0) * i / n), f1x(y0 + (y1 - y0) * i / n), a, i % 2)).join(""); };
+      back = `${ringEl(7, `fill="${c2}" opacity=".35" filter="url(#${u}b)" class="fx-pulse"`)}<g class="fx-rattle">${diag(-HW - 14, -HH - 6, HW + 14, HH + 6)}${diag(HW + 14, -HH - 6, -HW - 14, HH + 6)}</g>`;
+      front = `<g filter="url(#${u}b)" opacity=".6">${ringEl(5, `fill="none" stroke="${c1}" stroke-width="3"`)}</g><g class="fx-rattle b">${loop(5)}</g>
+        <g transform="translate(0 ${HH + 7})"><g class="fx-bob"><path d="M-4 -2V-6A4 4 0 0 1 4 -6V-2" fill="none" stroke="url(#${u}c)" stroke-width="1.6"/><rect x="-6" y="-2.5" width="12" height="9.5" rx="2" fill="url(#${u}c)" stroke="#2a2a3a" stroke-width=".6"/><circle cy="1.5" r="1.4" fill="#14141c"/><path d="M0 2V5" stroke="#14141c" stroke-width="1"/><circle cy="2" r="6" fill="${c1}" opacity=".3" filter="url(#${u}b)" class="fx-pulse"/></g></g>`;
+      break;
+    }
+    // ===== Glace : des pics de givre jaillissent du bord, brume froide, neige =====
+    case "glace": {
+      defs += `<linearGradient id="${u}i" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c2}" stop-opacity=".9"/><stop offset=".6" stop-color="${c1}" stop-opacity=".85"/><stop offset="1" stop-color="#fff"/></linearGradient>`;
+      let spikes = "";
+      for (let t = 0; t < 360; t += lite ? 20 : 11) { const [x, y] = edge(t + R() * 4, -2), [nx, ny] = normal(t), L = 8 + R() * (t > 300 || t < 60 ? 14 : 9), w = 2.6 + R() * 1.8;
+        spikes += `<path d="M${f1x(x - ny * w)} ${f1x(y + nx * w)}L${f1x(x + nx * L)} ${f1x(y + ny * L)}L${f1x(x + ny * w)} ${f1x(y - nx * w)}Z" fill="url(#${u}i)" stroke="#ffffff99" stroke-width=".35" transform="rotate(${f1x((R() - .5) * 14)} ${x} ${y})"/>`; }
+      back = `${ringEl(6, `fill="${c1}" opacity=".35" filter="url(#${u}b)" class="fx-pulse"`)}<g class="fx-shine">${spikes}</g>`;
+      front = Array.from({ length: Q(10) }, (_, i) => fxP("fx-fall", (R() - .5) * 2 * (HW + 10), -HH - 10, 5 + R() * 4, -R() * 9, FX_FLAKE(i % 2 ? "#fff" : c1), (R() - .5) * 20, .6 + R() * .5)).join("")
+        + [[-1, -1], [1, 1]].map(([sx, sy]) => { const [x, y] = [sx * (HW + 2), sy * (HH + 2)]; return `<g transform="translate(${x} ${y}) scale(${sx} ${sy})">${[[-12, 0, 10], [-4, -4, 16], [4, -12, 10]].map(([a, b, l]) => `<path d="M${a} ${b}L${a - 4 - l * .3} ${b - l}L${a + 3} ${b - 2}Z" fill="url(#${u}i)" stroke="#fff" stroke-width=".3"/>`).join("")}</g>`; }).join("");
+      break;
+    }
+    // ===== Marée : deux vagues qui courent sur le bord, bulles, éclaboussures =====
+    case "maree": {
+      const wave = (off, amp, freq) => { let s = ""; for (let t = 0; t <= 360; t += 3) { const [x, y] = edge(t, off + Math.sin(t * freq * Math.PI / 180) * amp); s += `${t ? "L" : "M"}${x} ${y}`; } return s + "Z"; };
+      back = `${ringEl(6, `fill="${c2}" opacity=".35" filter="url(#${u}b)" class="fx-pulse"`)}`;
+      front = `<g filter="url(#${u}b)" opacity=".7"><path d="${wave(4, 1.6, 9)}" fill="none" stroke="${c1}" stroke-width="3"/></g>
+        <path class="fx-dash" d="${wave(4, 1.6, 9)}" fill="none" stroke="${c1}" stroke-width="2.2" stroke-dasharray="22 8" stroke-linecap="round"/>
+        <path class="fx-dash rev" d="${wave(8, 2.2, 6)}" fill="none" stroke="#e8fbff" stroke-width="1.2" stroke-dasharray="10 14" stroke-linecap="round" opacity=".85"/>`
+        + Array.from({ length: Q(12) }, () => { const [x, y] = edge(110 + R() * 140, 3); return fxP("fx-rise", x, y, 2.4 + R() * 2.4, -R() * 4, `<circle r="${f1x(.9 + R() * 1.6)}" fill="${c1}" fill-opacity=".2" stroke="#e8fbff" stroke-width=".5"/>`, (R() - .5) * 12); }).join("")
+        + Array.from({ length: Q(6) }, () => { const [x, y] = edge(R() * 360, 5); return fxP("fx-spark", x, y, 1 + R(), -R() * 2, `<circle r="1.2" fill="#e8fbff"/>`, (R() - .5) * 16); }).join("");
+      break;
+    }
+    // ===== Lotus : fleurs au pied, rayons de lumière derrière, pollen doré =====
+    case "lotus": {
+      defs += `<linearGradient id="${u}l" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c2}"/><stop offset="1" stop-color="#fff"/></linearGradient>`;
+      const flower = (x, y, sc) => `<g transform="translate(${x} ${y}) scale(${sc})"><ellipse cy="3" rx="12" ry="3" fill="#2a7a4a" opacity=".85"/>${[-60, -30, 0, 30, 60].map((a) => `<path transform="rotate(${a})" d="M0 0C-3.5 -4 -3.5 -10 0 -14C3.5 -10 3.5 -4 0 0Z" fill="url(#${u}l)" stroke="${c1}" stroke-width=".4"/>`).join("")}${[-20, 20].map((a) => `<path transform="rotate(${a})" d="M0 0C-2.5 -3 -2.5 -8 0 -10C2.5 -8 2.5 -3 0 0Z" fill="#fff" opacity=".9"/>`).join("")}<circle cy="-2" r="2" fill="#ffd24d"/></g>`;
+      const rays = Array.from({ length: 12 }, (_, i) => `<path transform="rotate(${i * 30})" d="M0 0L-4 ${-(HH + 20)}L4 ${-(HH + 20)}Z" fill="${c1}" opacity=".1"/>`).join("");
+      back = `${ringEl(6, `fill="${c1}" opacity=".3" filter="url(#${u}b)" class="fx-pulse"`)}<g class="fx-spin slow">${rays}</g>`;
+      front = flower(-HW * .62, HH + 3, .85) + flower(HW * .62, HH + 3, .85) + flower(0, HH + 6, 1.15)
+        + Array.from({ length: Q(12) }, () => fxP("fx-rise", (R() - .5) * 2 * HW, HH, 3 + R() * 2.5, -R() * 5, `<circle r="${f1x(.6 + R() * .8)}" fill="#ffe08a"/><circle r="2" fill="#ffd24d" opacity=".3"/>`, (R() - .5) * 18)).join("");
+      break;
+    }
+    // ===== Hologramme : viseur, anneaux qui tournent, ligne de balayage, pluie de données =====
+    case "holo": {
+      defs += `<linearGradient id="${u}v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c1}" stop-opacity="0"/><stop offset=".5" stop-color="${c1}" stop-opacity=".55"/><stop offset="1" stop-color="${c1}" stop-opacity="0"/></linearGradient>
+        <clipPath id="${u}k">${ringEl(0, "")}</clipPath>`;
+      const lit = (inner) => `<g filter="url(#${u}b)" opacity=".8">${inner}</g>${inner}`;
+      const brackets = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sy]) => `<path d="M${sx * (HW + 6)} ${sy * (HH + 6) - sy * 11}V${sy * (HH + 6)}H${sx * (HW + 6) - sx * 11}" fill="none" stroke="${c1}" stroke-width="1.5"/>`).join("");
+      back = `${ringEl(9, `fill="${c1}" opacity=".16" filter="url(#${u}b)" class="fx-pulse"`)}<g class="fx-dash">${ringEl(11, `fill="none" stroke="${c2}" stroke-width=".8" stroke-dasharray="3 5"`)}</g>`;
+      front = `<g class="fx-glitch">${lit(brackets)}</g><g class="fx-dash rev">${ringEl(4, `fill="none" stroke="${c1}" stroke-width="1" stroke-dasharray="30 12 6 12" opacity=".8"`)}</g>
+        <g clip-path="url(#${u}k)"><rect class="fx-scan" x="${-HW}" y="${-HH - 6}" width="${2 * HW}" height="6" fill="url(#${u}v)" style="--h:${2 * HH + 12}px"/></g>`
+        + Array.from({ length: Q(16) }, () => { const sx = R() > .5 ? 1 : -1; return fxP("fx-fall", sx * (HW + 6 + R() * 10), -HH - 10, 1.4 + R() * 1.6, -R() * 3, `<path d="M0 0V${f1x(2 + R() * 5)}" stroke="${R() > .3 ? c1 : c2}" stroke-width="1" opacity=".8"/>`); }).join("");
+      break;
+    }
+    // ===== Ombre : vrilles d'ombre qui ondulent, des yeux s'ouvrent dans le noir =====
+    case "ombre": {
+      let tendrils = "";
+      for (let i = 0, t = 20; t < 360; t += lite ? 48 : 30, i++) { const [x, y] = edge(t, -1), [nx, ny] = normal(t), L = 16 + R() * 12, cx = x + nx * L * .5 - ny * 8, cy = y + ny * L * .5 + nx * 8;
+        tendrils += `<path class="fx-tendril" style="animation-delay:${f1x(-R() * 3)}s;transform-origin:${x}px ${y}px" d="M${f1x(x - ny * 3)} ${f1x(y + nx * 3)}Q${f1x(cx)} ${f1x(cy)} ${f1x(x + nx * L)} ${f1x(y + ny * L)}Q${f1x(cx + ny * 4)} ${f1x(cy - nx * 4)} ${f1x(x + ny * 3)} ${f1x(y - nx * 3)}Z" fill="#0a0612" stroke="${c1}" stroke-width=".5" stroke-opacity=".6"/>`; }
+      const eyes = Array.from({ length: Q(6) }, () => { const [x, y] = edge(R() * 360, 10 + R() * 8); return `<g transform="translate(${x} ${y})"><g class="fx-blink" style="animation-delay:${f1x(-R() * 4)}s;animation-duration:${f1x(3 + R() * 3)}s"><ellipse cx="-2.2" rx="1.4" ry=".7" fill="${c1}"/><ellipse cx="2.2" rx="1.4" ry=".7" fill="${c1}"/></g></g>`; }).join("");
+      back = `${ringEl(10, `fill="#05030a" opacity=".85" filter="url(#${u}b)"`)}${ringEl(6, `fill="${c2}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"`)}${tendrils}`;
+      front = eyes + Array.from({ length: Q(7) }, () => { const [x, y] = edge(R() * 360, 2); return fxP("fx-smoke", x, y, 3 + R() * 2, -R() * 5, `<circle r="${f1x(3 + R() * 3)}" fill="#0a0612" opacity=".6" filter="url(#${u}b)"/>`, (R() - .5) * 14); }).join("");
+      break;
+    }
+    // ===== Comètes : trois comètes tournent autour avec leur queue, ciel étoilé derrière =====
+    case "comete": {
+      const tilt = -16; defs += fxFrontMask(u, tilt) + `<linearGradient id="${u}t" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#fff"/><stop offset=".25" stop-color="${c1}" stop-opacity=".8"/><stop offset="1" stop-color="${c2}" stop-opacity="0"/></linearGradient>`;
+      const orbit = `<g transform="rotate(${tilt})">${[0, 1, 2].map((i) => { const rx = ORB[0] - 4 + i * 5, ry = ORB[1] - 4 + i * 4, T = 4.2 + i * 1.3; return `<g><animateMotion dur="${T}s" repeatCount="indefinite" rotate="auto" begin="${-i * 1.7}s" path="${fxOrbit(rx, ry)}"/><path d="M1 0L-34 -3.4L-34 3.4Z" fill="url(#${u}t)"/><circle r="3" fill="${c1}" opacity=".6" filter="url(#${u}b)"/><circle r="1.8" fill="#fff"/></g>`; }).join("")}</g>`;
+      const stars = Array.from({ length: Q(22) }, () => { const [x, y] = edge(R() * 360, 4 + R() * 16); return `<circle cx="${x}" cy="${y}" r="${f1x(.3 + R() * .6)}" fill="#fff" class="fx-tw" style="animation-delay:${f1x(-R() * 2)}s"/>`; }).join("");
+      back = `${ringEl(8, `fill="${c2}" opacity=".3" filter="url(#${u}b)"`)}${stars}${orbit}`;
+      front = `<g mask="url(#${u}m)">${orbit}</g>`;
+      break;
+    }
+    // ===== Lune de sang : une lune rouge derrière, des chauves-souris passent, brume =====
+    case "lunesang": {
+      defs += `<radialGradient id="${u}m2" cx=".4" cy=".4"><stop offset="0" stop-color="#ffd0c0"/><stop offset=".45" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient>`;
+      const [mx, my] = RD ? [36, -38] : [HW * .55, -HH * .62], mr = 22 * SC;
+      const bat = (y0, y1, T, dl, sc, sx) => `<g><animateMotion dur="${T}s" repeatCount="indefinite" begin="${dl}s" path="M${sx * (-HW - 34)} ${y0}C${-sx * 10} ${y0 - 24} ${sx * 10} ${y1 + 24} ${sx * (HW + 34)} ${y1}"/><g transform="scale(${sx * sc} ${sc})"><g class="fx-flapx"><path d="M0 0C-3 -4 -8 -5 -12 -2C-9 -2 -8 0 -9 2C-6 0 -4 1 -3 3C-2 1 -1 1 0 1C1 1 2 1 3 3C4 1 6 0 9 2C8 0 9 -2 12 -2C8 -5 3 -4 0 0Z" fill="#14060a"/></g><circle cx="-.8" cy="-.4" r=".35" fill="#ff4d4d"/><circle cx=".8" cy="-.4" r=".35" fill="#ff4d4d"/></g></g>`;
+      back = `${ringEl(8, `fill="${c2}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"`)}<circle cx="${mx}" cy="${my}" r="${f1x(mr + 8)}" fill="${c1}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"/><circle cx="${mx}" cy="${my}" r="${f1x(mr)}" fill="url(#${u}m2)"/>
+        ${[[-6, -5, 4], [5, 4, 3], [-3, 8, 2.4], [8, -7, 2]].map(([x, y, r]) => `<circle cx="${f1x(mx + x * SC)}" cy="${f1x(my + y * SC)}" r="${f1x(r * SC)}" fill="${c2}" opacity=".35"/>`).join("")}
+        ${bat(-HH * .2, -HH * .7, 6.5, -1, .9, 1)}${bat(-HH * .5, -HH * .1, 8, -4, .7, -1)}`;
+      front = (lite ? "" : bat(HH * .3, -HH * .3, 5.5, -2.5, 1.1, 1) + bat(HH * .6, HH * .1, 7.2, -5.5, .8, -1))
+        + Array.from({ length: Q(6) }, () => { const [x] = edge(140 + R() * 80, 0); return fxP("fx-smoke", x, HH + 2, 4 + R() * 3, -R() * 6, `<ellipse rx="${f1x(8 + R() * 6)}" ry="3" fill="${c1}" opacity=".35" filter="url(#${u}b)"/>`, (R() - .5) * 20); }).join("");
+      break;
+    }
+    // ===== Plumes : des plumes qui tombent en se balançant, souffle de vent =====
+    case "plumes": {
+      const feather = (col) => `<path d="M0 -9C3.5 -6 3.6 3 0 9C-3.6 3 -3.5 -6 0 -9Z" fill="${col}" stroke="#ffffff66" stroke-width=".3"/><path d="M0 -9V11" stroke="#ffffffaa" stroke-width=".45"/>${[-5, -2, 1, 4].map((y) => `<path d="M0 ${y}L2.6 ${y - 2.2}M0 ${y}L-2.6 ${y - 2.2}" stroke="#ffffff55" stroke-width=".3"/>`).join("")}`;
+      const wind = (y, i) => `<path class="fx-wind" style="animation-delay:${-i * 1.1}s" d="M${-HW - 26} ${y}C${-HW / 2} ${y - 10} ${HW / 2} ${y + 8} ${HW + 26} ${y - 4}" fill="none" stroke="${c1}" stroke-width="1" stroke-linecap="round" stroke-dasharray="26 140" opacity=".7"/>`;
+      back = `${ringEl(6, `fill="${c1}" opacity=".2" filter="url(#${u}b)" class="fx-pulse"`)}${wind(-HH * .3, 0)}${wind(HH * .4, 1)}`;
+      front = wind(-HH * .7, 2) + Array.from({ length: Q(9) }, (_, i) => fxP("fx-fall", (R() - .5) * 2 * (HW + 12), -HH - 14, 5.5 + R() * 4, -R() * 9, `<g class="fx-sway2" style="animation-delay:${f1x(-R() * 2)}s">${feather(i % 2 ? c1 : c2)}</g>`, (R() - .5) * 40, .7 + R() * .5)).join("");
       break;
     }
 
@@ -6109,6 +6352,9 @@ function fxBuild(k, c1, c2) {
         + Array.from({ length: 8 }, (_, i) => fxP("fx-rise", (R() - .5) * 50, HH - 6, 3 + R() * 2, -R() * 5, `<text text-anchor="middle" font-size="6" fill="${c1}" opacity=".9">${G[i]}</text>`, (R() - .5) * 10)).join(""); break; }
     default: return null;
   }
+  const fixIds = (side, x) => (side === "back" || !back ? x : x.replace(/id="(fx\d+)/g, 'id="$1F').replace(/url\(#(fx\d+)/g, "url(#$1F"));
+  if (RD) { const svgR = (inner, side) => inner ? `<svg class="dk fx fx-${k} ${side}" viewBox="-58 -58 116 116" aria-hidden="true"><defs>${fixIds(side, defs)}</defs>${fixIds(side, inner)}</svg>` : "";
+    return { back: svgR(back, "back"), front: svgR(front, "front") }; }
   const svg = (inner, side) => inner ? `<span class="kc-dk fx ${side}" aria-hidden="true"><svg class="dk fx-${k}" viewBox="${-HW - 18} ${-HH - 18} ${2 * HW + 36} ${2 * HH + 36}" preserveAspectRatio="none"><defs>${side === "back" || !back ? defs : defs.replace(/id="(fx\d+)/g, 'id="$1F')}</defs>${side === "back" || !back ? inner : inner.replace(/url\(#(fx\d+)/g, "url(#$1F")}</svg></span>` : "";
   return { back: svg(back, "back"), front: svg(front, "front") };
 }
@@ -6192,20 +6438,25 @@ function zShopTile(c) {
 }
 // ===== Boutique : décorations de cartes (onglet par défaut) et objets pour les cartes =====
 let zBoutTab = "deco", zDecoItem = null;
-const zbTabs = () => utabs("zBout", [["deco", "Décorations de cartes"], ["cartes", "Objets pour tes cartes"]], zBoutTab);
+const zbTabs = () => utabs("zBout", [["deco", "Décorations · avatar et cartes"], ["cartes", "Objets pour tes cartes"]], zBoutTab);
 const zDecoColl = () => DECO_COLLS[Math.floor(Date.now() / 86400e3) % DECO_COLLS.length];
 // une de tes cartes (avec son design actuel) entourée d'une décoration
 function zDecoCard(d, w, card) {
   const c = card || zSample(), cur = has(c.id) ? designOfS(save, c.id) || {} : {};
   return cardHTML(c, { design: { ...cur, deco: d ? d.id : null }, present: true, w });
 }
+// ton avatar (photo Discord, sinon ton initiale) entouré d'une décoration
+function zMeAv(d, size = 84) {
+  const name = ACCT?.name || "Toi", img = ACCT?.avatar ? `<img src="${esc(ACCT.avatar)}" alt="">` : `<span class="zd-ini">${esc(name[0].toUpperCase())}</span>`, L = avDecoHTML(d, false);
+  return `<span class="avd zd-av" style="--s:${size}px">${L.back}${img}${L.front}</span>`;
+}
 const zDecoUses = (id) => Object.values(cosOf(save).designs || {}).filter((x) => x?.deco === id).length;
 function zDecoTile(d) {
-  const own = !!decosOf(save)[d.id], n = own ? zDecoUses(d.id) : 0, C = DECO_COLLS.find((c) => c.id === d.coll) || {};
+  const own = !!decosOf(save)[d.id], n = own ? zDecoUses(d.id) : 0, worn = save.cos?.deco === d.id, C = DECO_COLLS.find((c) => c.id === d.coll) || {};
   return `<button type="button" class="zd-tile r-${d.rar} ${n ? "on" : ""}" data-zdeco="${d.id}" style="--h1:${C.c1};--h2:${C.c2};--rc:${RAR[d.rar].color}" aria-label="${esc(d.name)}, ${RAR[d.rar].label}">
     <span class="zd-stage zd-cstage">${zDecoCard(d, 96)}</span>
     <span class="zd-meta"><b>${esc(d.name)}</b><small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>
-      <span class="zs-price ${own ? "own" : ""}">${n ? `✓ Sur ${n} carte${n > 1 ? "s" : ""}` : own ? "Possédée" : `${fmtN(COS_PRICE[d.rar])} ◆`}</span></span></button>`;
+      <span class="zs-price ${own ? "own" : ""}">${worn || n ? `✓ ${[worn ? "Avatar" : "", n ? `${n} carte${n > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ")}` : own ? "Possédée" : `${fmtN(COS_PRICE[d.rar])} ◆`}</span></span></button>`;
 }
 function viewDecos() {
   const F = zDecoColl(), fd = DECOS.filter((d) => d.coll === F.id), n = Object.keys(decosOf(save)).length;
@@ -6214,10 +6465,11 @@ function viewDecos() {
         <button class="btn gold" type="button" data-zdcoll="${F.id}">Voir la collection</button></div>
       <div class="zd-hero-avs zd-hero-cards">${fd.slice(0, 3).map((d, i) => `<span class="zd-hero-av h${i}">${zDecoCard(d, i === 1 ? 150 : 112)}</span>`).join("")}</div>
       <span class="zd-hero-k" aria-hidden="true">${F.kanji}</span></section>`;
-  const mine = `<div class="zd-mine"><div><b>Une décoration habille tes cartes</b><small>Achète-la une fois, pose-la sur autant de cartes que tu veux : elle se voit dans ta collection, sur ta carte vedette (profil) et au Défilé.${n ? ` · ${n} possédée${n > 1 ? "s" : ""}` : ""}</small></div></div>`;
+  const cur = save.cos?.deco ? DECO_BY_ID[save.cos.deco] : null;
+  const mine = `<div class="zd-mine">${zMeAv(cur, 56)}<div><b>${cur ? `Sur ton avatar : ${esc(cur.name)}` : "Une décoration, deux usages"}</b><small>Achète-la une fois : porte-la autour de ton avatar (en-tête, profil, classement, comptoir) et pose-la sur autant de cartes que tu veux (collection, carte vedette, Défilé).${n ? ` · ${n} possédée${n > 1 ? "s" : ""}` : ""}</small></div>${cur ? `<button class="btn sm" type="button" data-zdequip="">Retirer de l'avatar</button>` : ""}</div>`;
   const rows = DECO_COLLS.map((C) => `<section class="sec zs-row" id="zdcoll-${C.id}"><div class="zs-row-h" style="--h1:${C.c1}"><span class="zs-k zd-k">${C.kanji}</span><div><h2>${esc(C.name)}</h2><p class="note">${esc(C.tag)}</p></div></div>
       <div class="zd-grid">${DECOS.filter((d) => d.coll === C.id).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zDecoTile).join("")}</div></section>`).join("");
-  return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des décorations animées autour de tes cartes, et des objets pour les personnaliser. Aucun bonus de jeu : juste du style.")}
+  return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des décorations animées pour ton avatar et tes cartes, et des objets pour les personnaliser. Aucun bonus de jeu : juste du style.")}
     ${zbTabs()}<div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span></div>
     ${mine}${hero}${rows}</div>`;
 }
@@ -6228,21 +6480,30 @@ function zOpenDeco(id) {
   const card = byId[zPrevCard] || zSample(), mineC = [...CARDS, ...SKINS].filter((x) => has(x.id));
   const own = !!decosOf(save)[id], on = has(card.id) && designOfS(save, card.id)?.deco === id, price = COS_PRICE[d.rar], C = DECO_COLLS.find((c) => c.id === d.coll) || {};
   const pick = mineC.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mineC.map((x) => `<option value="${x.id}" ${x.id === card.id ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : `<p class="note">Ouvre un booster pour la voir sur une de tes cartes.</p>`;
+  const worn = save.cos?.deco === id;
   const act = !own ? `<button class="btn gold big block" type="button" data-zdbuy="${id}" ${save.chakra < price ? "disabled" : ""}>Acheter · ${fmtN(price)} ◆</button>
-       <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Elle reste à toi pour toujours et se pose sur autant de cartes que tu veux.</p>`
-    : !has(card.id) ? "" : on ? `<button class="btn big block" type="button" data-zas-ref="" data-slot="deco">Retirer de cette carte</button>`
-    : `<button class="btn gold big block" type="button" data-zas-ref="${id}" data-slot="deco">Mettre sur cette carte</button>`;
+       <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Elle reste à toi pour toujours : autour de ton avatar et sur autant de cartes que tu veux.</p>`
+    : `<div class="zd-acts">${worn ? `<button class="btn big" type="button" data-zdequip="">Retirer de mon avatar</button>` : `<button class="btn gold big" type="button" data-zdequip="${id}">Porter sur mon avatar</button>`}
+      ${!has(card.id) ? "" : on ? `<button class="btn big" type="button" data-zas-ref="" data-slot="deco">Retirer de cette carte</button>` : `<button class="btn gold big" type="button" data-zas-ref="${id}" data-slot="deco">Mettre sur cette carte</button>`}</div>`;
   $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(d.name)}"><div class="sheet-h"><h2>${esc(d.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="zd-big" style="--h1:${C.c1};--h2:${C.c2}">${zDecoCard(d, 190, card)}</div>
+    <div class="sheet-b"><div class="zd-big" style="--h1:${C.c1};--h2:${C.c2}"><div class="zd-pv"><p class="eyebrow">Sur une carte</p>${zDecoCard(d, 170, card)}</div><div class="zd-pv"><p class="eyebrow">Sur ton avatar</p>${zMeAv(d, 120)}</div></div>
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[d.rar].color};color:${RAR[d.rar].color}">${RAR[d.rar].label}</span><span class="pill">${C.kanji} ${esc(C.name || "")}</span><span class="pill">Animée</span><span class="pill">Aucun bonus de jeu</span></div>
       ${pick}${act}</div></div>`;
   $("overlay").hidden = false; $("overlay").dataset.zdk = id; $("overlay").dataset.zdp = ""; $("overlay").dataset.zit = "";
+}
+async function zDecoEquip(id) {
+  try {
+    const r = await zCall("deco/equip", { id }, () => equipDecoS(save, id));
+    if (r?.state) Object.assign(save, r.state);
+    toast(id ? `${DECO_BY_ID[id].name} : portée sur ton avatar.` : "Décoration retirée de ton avatar.");
+    draw(); header(); if (zDecoItem && !$("overlay").hidden) zOpenDeco(zDecoItem);
+  } catch (e) { toast(e.message); }
 }
 async function zDecoBuy(id) {
   try {
     const r = await zCall("deco/buy", { id }, () => buyDecoS(save, id));
     if (r?.state) Object.assign(save, r.state);
-    toast(`${DECO_BY_ID[id].name} : achetée. Pose-la sur une carte.`);
+    toast(`${DECO_BY_ID[id].name} : achetée et portée sur ton avatar. Pose-la aussi sur une carte.`);
     draw(); header(); zOpenDeco(id);
   } catch (e) { toast(e.message); }
 }
@@ -6250,6 +6511,7 @@ document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-zdeco]"); if (a) return zOpenDeco(a.dataset.zdeco);
   const b = t.closest("[data-zdbuy]"); if (b) { b.disabled = true; return zDecoBuy(b.dataset.zdbuy); }
+  const q = t.closest("[data-zdequip]"); if (q) return zDecoEquip(q.dataset.zdequip || null);
   const c = t.closest("[data-zdcoll]"); if (c) document.getElementById("zdcoll-" + c.dataset.zdcoll)?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 function viewBoutique() {

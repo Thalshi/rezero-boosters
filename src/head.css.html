@@ -1681,4 +1681,30 @@ body.ar-on { overflow: hidden; }
   .ar-side { bottom: calc(186px + env(safe-area-inset-bottom)); } .ar-deck { display: none; } .ar-side .btn { height: 36px; font-size: 13px; padding: 0 12px; }
   .ar-wp { display: none; }
 }
+/* ===== Ouvertures en 3D (src/open3d.js) ===== */
+.o3 { position: fixed; inset: 0; z-index: 1; background: #07060f; overflow: hidden; overflow: clip; color: #f0e6d2; }
+.o3-host, .o3-host .o3-c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.o3-vign { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 45%, #000a 100%); }
+.o3-flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 50%, #fff, var(--fc, #fff) 40%, transparent 80%); mix-blend-mode: screen; }
+.o3-hint { position: absolute; top: calc(70px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); margin: 0; font: 600 14px var(--body); color: #a99cc8; background: #0b0916cc; border: 1px solid #e8c77e33; padding: 8px 16px; border-radius: 999px; transition: opacity .4s; pointer-events: none; max-width: calc(100vw - 32px); text-align: center; }
+.o3-title { position: absolute; left: 0; right: 0; top: 16%; text-align: center; pointer-events: none; font: 900 clamp(30px, 8vw, 64px) var(--disp); letter-spacing: .1em; color: #fff; opacity: 0; text-shadow: 0 0 20px var(--rc, #fff), 0 0 50px var(--rc, #fff); }
+.o3-title.go { animation: o3tt 1.9s ease-out both; }
+@keyframes o3tt { 0% { opacity: 0; transform: scale(1.5); letter-spacing: .5em; } 22% { opacity: 1; transform: scale(1); letter-spacing: .1em; } 78% { opacity: 1; } 100% { opacity: 0; transform: scale(.97); } }
+.o3-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+.o3-bar > *, .o3-tools > * { pointer-events: auto; }
+.o3-bar [hidden] { display: none; }
+.o3-tools { display: flex; gap: 8px; }
+.o3-tools .btn { background: #0b0916cc; }
+.o3-sub { position: absolute; left: 16px; bottom: calc(20px + env(safe-area-inset-bottom)); margin: 0; font: 600 12px var(--body); color: #a99cc8; pointer-events: none; }
+.o3-fx { position: absolute; inset: 0; z-index: 5; display: none; overflow: hidden; cursor: pointer; }
+.o3-fx.on { display: block; }
+.o3-fx-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--rc) 30%, #0b0716) 0%, #05030a 75%); }
+.o3-fx-c { position: absolute; inset: 0; width: 100%; height: 100%; }
+.o3-fx-name { position: absolute; left: 0; right: 0; bottom: 9%; text-align: center; pointer-events: none; }
+.o3-fx-name b { display: block; font: 900 clamp(34px, 9vw, 72px) var(--disp); letter-spacing: .06em; color: #fff; text-shadow: 3px 0 0 #ff2e88aa, -3px 0 0 #2ee6ffaa, 0 0 30px var(--rc); }
+.o3-fx-name span { font: 700 13px var(--body); letter-spacing: .4em; text-transform: uppercase; color: var(--rc); }
+.o3-fx-name.go { animation: o3name 2.6s ease-out both; }
+@keyframes o3name { 0%, 20% { opacity: 0; transform: translateX(-30px) skewX(-12deg); } 30% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(20px); } }
+#stage .stage-top { position: relative; z-index: 3; }
+@media (max-width: 600px) { .o3-sub { display: none; } }
 </style>

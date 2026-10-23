@@ -14,9 +14,6 @@ try {
   t.section("Cartes de la table");
   const t1 = await A.api("confront/create", { nom: "Deck", public: true });
   t.check("par défaut : chacun son deck", t1.partage === false && t1.vue.phase === "lobby");
-  const t2 = await A.api("confront/create", { nom: "Pot", public: true, partage: true });
-  t.check("à la création : cartes partagées", t2.partage === true);
-  t.check("la liste des salons montre le mode", (await C.api("confront/list")).salons.find((g) => g.gid === t2.gid)?.partage === true);
   await B.api("confront/act", { gid: t1.gid, action: { type: "rejoindre" } });
   t.check("un autre joueur ne peut pas changer le mode", (await B.api("confront/reglage", { gid: t1.gid, partage: true })).status === 403);
   t.check("l'hôte change le mode dans le salon", (await A.api("confront/reglage", { gid: t1.gid, partage: true })).partage === true && (await A.api("confront/reglage", { gid: t1.gid, partage: false })).partage === false);
@@ -26,6 +23,9 @@ try {
   t.check("chacun son deck : venir sans carte quand on en a, refusé", (await A.api("confront/act", { gid: t1.gid, action: { type: "contribuer", cartes: [] } })).status === 400);
   t.check("le mode ne change plus une fois lancé", (await A.api("confront/reglage", { gid: t1.gid, partage: true })).status === 400);
   await A.api("confront/act", { gid: t1.gid, action: { type: "abandon" } });
+  const t2 = await A.api("confront/create", { nom: "Pot", public: true, partage: true });
+  t.check("à la création : cartes partagées", t2.partage === true);
+  t.check("la liste des salons montre le mode", (await C.api("confront/list")).salons.find((g) => g.gid === t2.gid)?.partage === true);
   await B.api("confront/act", { gid: t2.gid, action: { type: "rejoindre" } });
   t.check("l'hôte ne lance pas tant qu'un joueur n'est pas prêt", (await A.api("confront/act", { gid: t2.gid, action: { type: "lancer" } })).status === 400);
   await B.api("confront/pret", { gid: t2.gid, pret: true });

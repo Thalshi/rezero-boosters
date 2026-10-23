@@ -114,7 +114,7 @@ export const DEFAULT_CONFIG = {
   persoLibre: true,
   // Délais en millisecondes (le serveur appelle tick(state, now))
   delais: {
-    contributions: 120000,
+    contributions: 180000,
     choix: 45000,
     tour: 90000,
     reaction: 20000,

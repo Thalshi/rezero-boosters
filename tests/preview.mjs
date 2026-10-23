@@ -46,7 +46,7 @@ try {
     t.check(`${label} · coffre : récapitulatif`, (await page.locator(".summary [data-card]").count()) === 5);
     await page.click('#stage [data-act="stage-close"]');
     // boutique, sanctuaire, atelier
-    await go("boutique"); const c0 = await page.evaluate(() => save.chakra);
+    await go("boutique/cartes"); const c0 = await page.evaluate(() => save.chakra);
     const id = await page.getAttribute(".zs-tile:has(.zs-price:not(.own):not(.only)) >> nth=0", "data-zitem"); await page.click(`[data-zitem="${id}"] >> nth=0`); await page.waitForTimeout(300); await page.dblclick(`#overlay [data-zbuy="${id}"]`); await page.waitForTimeout(1200); await page.click('#overlay [data-act="close"]').catch(() => {});
     t.check(`${label} · Boutique : achat débité une fois`, (await page.evaluate(() => save.chakra)) === c0 - G.COS_PRICE[G.COS_BY_ID[id].rar]);
     await go("sanctuaire"); const c1 = await page.evaluate(() => save.chakra);

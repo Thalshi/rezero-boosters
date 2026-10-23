@@ -49,6 +49,27 @@ try {
     else t.check("4e échange de la semaine : refusé", tp.status === 400 && /semaine/.test(tp.error), tp.error);
   }
 
+  t.section("décorations d'avatar");
+  const sd0 = (await P.api("state")).state.chakra;
+  const db = await P.api("deco/buy", { id: "deco-flammes" });
+  t.check("acheter une décoration : payée et portée", db.state?.cos?.deco === "deco-flammes" && db.state.chakra === sd0 - G.COS_PRICE.r, db.error);
+  t.check("la racheter est refusé", (await P.api("deco/buy", { id: "deco-flammes" })).status === 400);
+  t.check("porter une décoration pas achetée est refusé", (await P.api("deco/equip", { id: "deco-ailes" })).status === 400);
+  t.check("les autres la voient sur le profil", (await Q.api("profile", { uid: P.id })).deco === "deco-flammes");
+  t.check("la retirer", (await P.api("deco/equip", { id: null })).state?.cos?.deco === null);
+  await P.api("deco/equip", { id: "deco-flammes" });
+
+  t.section("salons");
+  const s1 = await P.api("confront/create", { nom: "S1", public: true }), s2 = await P.api("confront/create", { nom: "S2", public: true });
+  const mes = (await P.api("confront/list")).miennes.filter((g) => g.phase === "lobby");
+  t.check("un seul salon ouvert par personne", mes.length === 1 && mes[0].gid === s2.gid, mes.map((g) => g.nom));
+  await Q.api("confront/act", { gid: s2.gid, action: { type: "rejoindre" } });
+  await P.api("confront/act", { gid: s2.gid, action: { type: "quitter" } });
+  const st2 = await Q.api("confront/state", { gid: s2.gid });
+  t.check("le créateur quitte : l'autre joueur devient l'hôte", st2.createur === Q.id && st2.vue?.hote === Q.id, st2.error);
+  await Q.api("confront/act", { gid: s2.gid, action: { type: "quitter" } });
+  t.check("le dernier quitte : le salon se ferme", !(await P.api("confront/list")).salons.some((g) => g.gid === s2.gid));
+
   t.section("prédictions");
   const q1 = await A.coll("POST", "predq", { ep: 2, text: "Qui gagne ?", options: ["Kuradai", "Sasori"], points: 1, reward: 50, status: "open", answer: null, endsAt: Date.now() - 1000, t: Date.now() });
   const q2 = await A.coll("POST", "predq", { ep: 2, text: "Qui perd ?", options: ["Mahed", "Les 4"], points: 1, reward: 50, status: "open", answer: null, endsAt: Date.now() + 3600000, t: Date.now() });

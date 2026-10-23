@@ -858,7 +858,72 @@ const refCos = (s, ref) => {
 function designOfS(s, cardId) {
   const d = cosOf(s).designs[cardId]; if (!d) return null;
   const out = {}; for (const sl of COS_SLOTS) { const c = refCos(s, d[sl.id]); if (c && c.slot === sl.id) out[sl.id] = c.id; }
+  if (d.deco && DECO_BY_ID[d.deco] && decosOf(s)[d.deco]) out.deco = d.deco; // décoration de profil posée sur la carte
   return Object.keys(out).length ? out : null;
+}
+// ===== Décorations d'avatar (Boutique, façon Discord) : animées autour de l'avatar, visibles partout dans l'app =====
+// Créées pour le QG (aucune image reprise de Discord). k : forme animée ; c1, c2 : couleurs ; coll : collection.
+const DECO_COLLS = [
+  { id: "sakura", name: "Sakura du QG", kanji: "花", tag: "Pétales, fleurs et lanternes des ruelles de Shinjuku.", c1: "#ff8fc0", c2: "#3a1430" },
+  { id: "neon", name: "Néon de Shinjuku", kanji: "電", tag: "Anneaux de néon, casques et bugs d'écran.", c1: "#2ee6ff", c2: "#2a0e4a" },
+  { id: "feu", name: "Feu et foudre", kanji: "火", tag: "Pour ceux qui frappent fort.", c1: "#ff6a2e", c2: "#2a0a08" },
+  { id: "nuit", name: "Givre et nuit", kanji: "夜", tag: "Lune, étoiles et neige sur le QG.", c1: "#8fd0ff", c2: "#0c1430" },
+  { id: "arcanes", name: "Arcanes", kanji: "光", tag: "Runes, sceaux et auréoles des invocations.", c1: "#f5c518", c2: "#2a1a4a" },
+  { id: "humeurs", name: "Humeurs", kanji: "笑", tag: "Ton humeur du jour, autour de ta tête.", c1: "#ffd24d", c2: "#3a2a10" },
+  { id: "saisons", name: "Saisons", kanji: "季", tag: "Halloween, Noël et autres fêtes au QG.", c1: "#ff9a2e", c2: "#1a2a14" },
+];
+const DECOS = [
+  { id: "deco-sakura", coll: "sakura", name: "Sakura", k: "sakura", c1: "#ff9ec4", c2: "#ffd6e8", rar: "r" },
+  { id: "deco-sakura-blanc", coll: "sakura", name: "Sakura blanc", k: "sakura", c1: "#ffffff", c2: "#ffd6e8", rar: "e" },
+  { id: "deco-petales", coll: "sakura", name: "Pluie de pétales", k: "petales", c1: "#ff9ec4", c2: "#ff5a9e", rar: "pc" },
+  { id: "deco-lanternes", coll: "sakura", name: "Lanternes du QG", k: "lanternes", c1: "#ff4d2e", c2: "#ffb060", rar: "e" },
+  { id: "deco-lanternes-violet", coll: "sakura", name: "Lanternes de nuit", k: "lanternes", c1: "#8a4dff", c2: "#ff9ec4", rar: "l" },
+  { id: "deco-neon-cyan", coll: "neon", name: "Néon cyan", k: "anneau", c1: "#2ee6ff", c2: "#2a6fff", rar: "c" },
+  { id: "deco-neon-rose", coll: "neon", name: "Néon rose", k: "anneau", c1: "#ff2e88", c2: "#b072ff", rar: "c" },
+  { id: "deco-glitch", coll: "neon", name: "Bug d'écran", k: "glitch", c1: "#2ee6ff", c2: "#ff2e88", rar: "l" },
+  { id: "deco-casque-cyan", coll: "neon", name: "Casque néon", k: "casque", c1: "#2ee6ff", c2: "#1a2a4a", rar: "r" },
+  { id: "deco-casque-rose", coll: "neon", name: "Casque rose", k: "casque", c1: "#ff5aa8", c2: "#3a1430", rar: "r" },
+  { id: "deco-kanji", coll: "neon", name: "Enseignes", k: "kanji", c1: "#ff2e88", c2: "#2ee6ff", rar: "e", txt: "電光夜" },
+  { id: "deco-flammes", coll: "feu", name: "Flammes", k: "flammes", c1: "#ff3a1a", c2: "#ffd24d", rar: "r" },
+  { id: "deco-flammes-bleues", coll: "feu", name: "Flammes bleues", k: "flammes", c1: "#2a6fff", c2: "#8fe3ff", rar: "e" },
+  { id: "deco-eclairs", coll: "feu", name: "Foudre", k: "eclairs", c1: "#ffe14d", c2: "#fff8c0", rar: "e" },
+  { id: "deco-eclairs-violets", coll: "feu", name: "Foudre du néant", k: "eclairs", c1: "#b072ff", c2: "#ffffff", rar: "l" },
+  { id: "deco-cornes", coll: "feu", name: "Cornes d'ombre", k: "cornes", c1: "#2a1a3a", c2: "#ff3a4d", rar: "r" },
+  { id: "deco-flocons", coll: "nuit", name: "Neige", k: "flocons", c1: "#ffffff", c2: "#8fd0ff", rar: "pc" },
+  { id: "deco-lune", coll: "nuit", name: "Croissant de lune", k: "lune", c1: "#fff3c4", c2: "#8fd0ff", rar: "r" },
+  { id: "deco-etoiles", coll: "nuit", name: "Ciel étoilé", k: "etoiles", c1: "#fff3c4", c2: "#8fd0ff", rar: "pc" },
+  { id: "deco-aurore", coll: "nuit", name: "Aurore", k: "anneau", c1: "#3affb0", c2: "#2a6fff", rar: "pc" },
+  { id: "deco-bulles", coll: "nuit", name: "Bulles", k: "bulles", c1: "#8fe3ff", c2: "#ffffff", rar: "c" },
+  { id: "deco-runes-or", coll: "arcanes", name: "Runes d'or", k: "runes", c1: "#f5c518", c2: "#fff3b0", rar: "r" },
+  { id: "deco-runes-violet", coll: "arcanes", name: "Runes du néant", k: "runes", c1: "#b072ff", c2: "#ff9ec4", rar: "e" },
+  { id: "deco-sceau", coll: "arcanes", name: "Sceau hexagonal", k: "sceau", c1: "#2ee6ff", c2: "#f5c518", rar: "e" },
+  { id: "deco-orbite", coll: "arcanes", name: "Orbes", k: "orbite", c1: "#f5c518", c2: "#ff2e88", rar: "r" },
+  { id: "deco-aureole", coll: "arcanes", name: "Auréole", k: "aureole", c1: "#fff3b0", c2: "#f5c518", rar: "l" },
+  { id: "deco-ailes", coll: "arcanes", name: "Ailes de lumière", k: "ailes", c1: "#fff8e0", c2: "#f5c518", rar: "m" },
+  { id: "deco-couronne", coll: "arcanes", name: "Couronne", k: "couronne", c1: "#f5c518", c2: "#ff2e4d", rar: "l" },
+  { id: "deco-chat", coll: "humeurs", name: "Oreilles de chat", k: "chat", c1: "#f0e6d2", c2: "#ff9ec4", rar: "pc" },
+  { id: "deco-chat-noir", coll: "humeurs", name: "Chat noir", k: "chat", c1: "#2a2230", c2: "#b072ff", rar: "pc" },
+  { id: "deco-coeurs", coll: "humeurs", name: "Amoureux", k: "coeurs", c1: "#ff3a6a", c2: "#ff9ec4", rar: "c" },
+  { id: "deco-sueur", coll: "humeurs", name: "Gêné", k: "sueur", c1: "#8fd0ff", c2: "#ffffff", rar: "c" },
+  { id: "deco-colere", coll: "humeurs", name: "Énervé", k: "colere", c1: "#ff3a3a", c2: "#ffb0b0", rar: "c" },
+  { id: "deco-citrouille", coll: "saisons", name: "Citrouille", k: "citrouille", c1: "#ff8a1a", c2: "#ffe14d", rar: "r" },
+  { id: "deco-bonnet", coll: "saisons", name: "Bonnet de fête", k: "bonnet", c1: "#e8243a", c2: "#ffffff", rar: "r" },
+  { id: "deco-confettis", coll: "saisons", name: "Confettis", k: "confettis", c1: "#ff2e88", c2: "#2ee6ff", rar: "pc" },
+];
+const DECO_BY_ID = Object.fromEntries(DECOS.map((d) => [d.id, d]));
+const decosOf = (s) => { const c = cosOf(s); if (!c.decos || typeof c.decos !== "object") c.decos = {}; return c.decos; };
+function buyDecoS(s, id) {
+  const d = DECO_BY_ID[id]; if (!d) return { error: "Cette décoration n'existe pas." };
+  const own = decosOf(s); if (own[id]) return { error: "Tu as déjà cette décoration." };
+  const price = COS_PRICE[d.rar];
+  if (s.chakra < price) return { error: `Il te faut ${price} ◆ (tu en as ${s.chakra}).` };
+  s.chakra -= price; own[id] = Date.now(); cosOf(s).deco = id; trackS(s, "shop", 1);
+  return { bought: id, price };
+}
+// id null : retirer la décoration
+function equipDecoS(s, id) {
+  if (id && !decosOf(s)[id]) return { error: "Achète d'abord cette décoration." };
+  cosOf(s).deco = id || null; return {};
 }
 function buyCosmeticS(s, id) {
   const c = COS_BY_ID[id], cos = cosOf(s);
@@ -897,6 +962,7 @@ function saveDesignS(s, cardId, design) {
     const c = refCos(s, ref); if (!c || c.slot !== sl.id) return { error: `Objet invalide pour l'emplacement ${sl.label}.` };
     clean[sl.id] = ref;
   }
+  if (design?.deco) { if (!DECO_BY_ID[design.deco] || !decosOf(s)[design.deco]) return { error: "Tu n'as pas cette décoration." }; clean.deco = design.deco; }
   for (const [cid, d] of Object.entries(cos.designs)) if (cid !== cardId) for (const k of Object.keys(d)) if (d[k].startsWith("i:") && Object.values(clean).includes(d[k])) delete d[k];
   if (Object.keys(clean).length) cos.designs[cardId] = clean; else delete cos.designs[cardId];
   return { design: clean };
@@ -1097,4 +1163,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

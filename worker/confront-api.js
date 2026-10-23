@@ -46,6 +46,25 @@ function runBots(g, now) {
   return events;
 }
 // fin de partie (ou partie abandonnée) : on lève les verrous des cartes apportées
+const LOBBY_IDLE = 30 * 60e3;        // un salon sans activité depuis 30 min disparaît de la liste
+// après un départ du salon : fermé s'il n'y reste aucun joueur, sinon le rôle d'hôte passe au joueur suivant
+function afterLeave(g) {
+  if (!g.state.players.some((p) => !isBot(p.id))) { g.ferme = true; return; }
+  if (!g.state.players.some((p) => p.id === g.createur)) { const next = g.state.players.find((p) => !isBot(p.id)); g.state.hote = next.id; g.createur = next.id; }
+}
+async function leaveLobbies(env, h, user) {
+  const rows = (await env.DB.prepare("SELECT id, data FROM docs WHERE coll = 'confront' AND updated > ?").bind(Date.now() - STALE).all()).results;
+  for (const row of rows) {
+    const g0 = JSON.parse(row.data);
+    if (g0.ferme || g0.state.phase !== "lobby" || !g0.state.players.some((p) => p.id === user.id)) continue;
+    await edit(env, h, g0.id, (g, now) => {
+      if (g.state.phase !== "lobby" || !g.state.players.some((p) => p.id === user.id)) return {};
+      const out = act(g.state, user.id, { type: "quitter" }, now); if (!out.error) g.state = out.state;
+      if (g.prets) delete g.prets[user.id];
+      afterLeave(g); return {};
+    }).catch(() => null);
+  }
+}
 async function release(env, h, g) {
   if (g.released) return;
   g.released = true;
@@ -160,7 +179,8 @@ export async function confrontRoute(env, user, path, body, h) {
     const rows = (await env.DB.prepare("SELECT data FROM docs WHERE coll = 'confront' AND updated > ? ORDER BY updated DESC LIMIT 60").bind(since).all()).results.map((r) => JSON.parse(r.data));
     const pub = (g) => ({ gid: g.id, nom: g.nom, phase: g.state.phase, joueurs: g.state.players.length, createur: g.createur, partage: !g.state.config.persoLibre, invite: g.invite || null });
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
-    rows.splice(0, rows.length, ...rows.filter((g) => !g.ferme));
+    // un salon où personne ne s'est rien passé depuis 30 min n'est plus proposé
+    rows.splice(0, rows.length, ...rows.filter((g) => !g.ferme && !(g.state.phase === "lobby" && Date.now() - (g.t || 0) > LOBBY_IDLE)));
     return json({ salons: rows.filter((g) => g.public && g.state.phase === "lobby").map(pub), enCours: rows.filter((g) => g.public && g.state.phase !== "lobby" && g.state.phase !== "fin").map(pub),
       miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub),
       defis: rows.filter((g) => g.invite === user.id && g.state.phase === "lobby" && !g.state.players.some((p) => p.id === user.id)).map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], deck: s?.cfDeck || [], verrou: s?.confront || null });
@@ -175,6 +195,8 @@ export async function confrontRoute(env, user, path, body, h) {
     // « cartes partagées » : on tire ses persos dans les cartes de toute la table ; sinon chacun joue son deck
     const partage = !invite && !!body.partage;
     const nom = invite ? `Duel : ${user.name} contre ${String((await names(env, [invite]))[invite]?.name || "?").slice(0, 16)}` : String(body.nom || `Table de ${user.name}`);
+    // un seul salon à la fois : on quitte ses autres salons (fermés s'il n'y reste personne, sinon confiés au joueur suivant)
+    await leaveLobbies(env, h, user);
     const g = { id: gid, nom: nom.slice(0, 40), public: invite ? false : !!body.public, createur: user.id, t: now, ...(invite ? { invite, duel: invite } : {}),
       state: createGame({ players: [{ id: user.id }], seed: gid + ":" + now + ":" + Math.random(), lobby: true, now, config: { persoLibre: !partage } }) };
     if (!(await save(env, gid, g))) return fail(503, "Réessaie.");
@@ -261,7 +283,13 @@ export async function confrontRoute(env, user, path, body, h) {
     if (action.type === "contribuer") {
       // la contribution vient de la vraie collection : une carte possédée par branche, branche donnée par le serveur
       const ids = [...new Set((Array.isArray(action.cartes) ? action.cartes : []).map(String))].slice(0, BRANCH_IDS.length);
-      if (ids.length && s.confront && s.confront.gid !== gid && Date.now() - s.confront.t < STALE) return fail(400, "Tu as déjà des cartes engagées dans une autre partie.");
+      if (ids.length && s.confront && s.confront.gid !== gid) {
+        // verrou d'une autre table : levé si cette table est finie, introuvable, abandonnée, ou si on n'y joue plus (quitté, éliminé)
+        const og = (await load(env, s.confront.gid))?.g, me = og?.state.players.find((p) => p.id === user.id);
+        const live = og && og.state.phase !== "fin" && !og.released && Date.now() - (og.t || 0) < STALE && me && me.vivant !== false && Date.now() - s.confront.t < STALE;
+        if (live) return fail(400, `Tes cartes jouent déjà à la table « ${og.nom || og.id} », encore en cours. Termine-la ou quitte-la d'abord.`);
+        await h.mutate(env, user.id, (s2) => { if (s2.confront?.gid === s.confront.gid) delete s2.confront; return {}; });
+      }
       const mine = Object.fromEntries(myCards(s, await branchChoices(env)).map((c) => [c.cardId, c.branch]));
       if (ids.some((id) => !mine[id])) return fail(400, "Tu ne peux apporter que des cartes de ta collection.");
       // « chacun son deck » : on joue ses propres cartes (les persos prêtés, seulement si on n'en a aucune)
@@ -281,7 +309,9 @@ export async function confrontRoute(env, user, path, body, h) {
       if ((action.type === "rejoindre" || action.type === "quitter") && g.prets) delete g.prets[user.id];
       const out = act(g.state, user.id, action, now);
       if (out.error) return { error: out.error.message, code: out.error.code };
-      g.state = out.state; return {};
+      g.state = out.state;
+      if (action.type === "quitter") afterLeave(g);
+      return {};
     });
     if (r.error) return fail(r.status || 400, r.error, r.code);
     if (action.type === "contribuer" && action.cartes.length) await h.mutate(env, user.id, (s2) => { s2.confront = { gid, cards: action.cartes.map((c) => c.cardId), t: Date.now() }; return {}; });

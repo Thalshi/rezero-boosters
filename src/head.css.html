@@ -2132,4 +2132,84 @@ html.w3d-on body::after { display: none; }
 .ar-fin.hit .fin-ban { animation: fin-ban .5s cubic-bezier(.2,1.4,.3,1) .12s forwards; }
 .ar-fin.out .fin-ban { opacity: 0; transition: opacity .35s; animation: none; }
 @keyframes fin-ban { from { opacity: 0; scale: 2.2; filter: blur(6px); } to { opacity: 1; scale: 1; filter: none; } }
+/* ===== Décorations d'avatar ===== */
+.avd { position: relative; display: inline-flex; flex: none; line-height: 0; }
+.avd > svg.dk { position: absolute; left: -22.5%; top: -22.5%; width: 145%; height: 145%; pointer-events: none; overflow: visible; z-index: 2; }
+svg.dk .sp { transform-box: view-box; transform-origin: 0 0; animation: dk-spin var(--sd, 8s) linear infinite; }
+svg.dk .sp.s4 { --sd: 4s; } svg.dk .sp.s8 { --sd: 8s; } svg.dk .sp.s14 { --sd: 14s; } svg.dk .sp.s16 { --sd: 16s; } svg.dk .sp.s20 { --sd: 20s; } svg.dk .sp.s24 { --sd: 24s; } svg.dk .sp.s32 { --sd: 32s; } svg.dk .sp.s40 { --sd: 40s; }
+svg.dk .sp.rev { animation-direction: reverse; }
+svg.dk .pulse { animation: dk-pulse 2.4s ease-in-out infinite; }
+svg.dk .tw { transform-box: fill-box; transform-origin: center; animation: dk-tw 2.2s ease-in-out infinite; }
+svg.dk .fall { animation: dk-fall var(--d, 6s) linear infinite; }
+svg.dk .rise { animation: dk-rise var(--d, 6s) ease-in infinite; }
+svg.dk .flick { transform-box: fill-box; transform-origin: 50% 100%; animation: dk-flick .5s ease-in-out infinite alternate; }
+svg.dk .flick2 { animation: dk-pulse .9s steps(3) infinite; }
+svg.dk .flash { animation: dk-flash 2.2s linear infinite; }
+svg.dk .swing { transform-box: view-box; transform-origin: 0 -58px; animation: dk-swing 3s ease-in-out infinite alternate; }
+svg.dk .float { animation: dk-float 3s ease-in-out infinite; }
+svg.dk .jit1 { animation: dk-jit1 1.6s steps(1) infinite; } svg.dk .jit2 { animation: dk-jit2 1.6s steps(1) infinite; }
+svg.dk .blink { animation: dk-blink 1.2s steps(2) infinite; }
+svg.dk .flap { transform-box: view-box; transform-origin: 0 0; animation: dk-flap 2.6s ease-in-out infinite; } svg.dk .flap.r { animation-name: dk-flapr; }
+svg.dk .twitch { transform-box: fill-box; transform-origin: 50% 100%; animation: dk-twitch 4s ease-in-out infinite; }
+svg.dk .drip { animation: dk-drip 2.4s ease-in infinite; }
+svg.dk .throb { animation: dk-throb 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+svg.dk .bounce { animation: dk-float 1.4s ease-in-out infinite; }
+svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk-spin 1.2s linear infinite; }
+@keyframes dk-spin { to { transform: rotate(360deg); } }
+@keyframes dk-pulse { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
+@keyframes dk-tw { 0%, 100% { transform: scale(.55); opacity: .5; } 50% { transform: scale(1.15); opacity: 1; } }
+@keyframes dk-fall { 0% { transform: translate(var(--x), -64px) rotate(0); opacity: 0; } 10% { opacity: 1; } 50% { transform: translate(calc(var(--x) + 6px), 0) rotate(160deg); } 90% { opacity: 1; } 100% { transform: translate(var(--x), 64px) rotate(320deg); opacity: 0; } }
+@keyframes dk-rise { 0% { transform: translate(var(--x), 50px) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(calc(var(--x) - 8px), -60px) scale(1.1); opacity: 0; } }
+@keyframes dk-flick { from { transform: scaleY(.82) scaleX(1.05); } to { transform: scaleY(1.12) scaleX(.94); } }
+@keyframes dk-flash { 0%, 62%, 100% { opacity: 0; } 64%, 70% { opacity: 1; } 67% { opacity: .2; } }
+@keyframes dk-swing { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes dk-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes dk-jit1 { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-2px, 1px); } 40% { transform: translate(1px, -1px); } 70% { transform: translate(-1px, 0); } }
+@keyframes dk-jit2 { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(2px, -1px); } 50% { transform: translate(-1px, 2px); } 80% { transform: translate(1px, 0); } }
+@keyframes dk-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes dk-flap { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
+@keyframes dk-flapr { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-8deg); } }
+@keyframes dk-twitch { 0%, 86%, 100% { transform: rotate(0); } 90% { transform: rotate(14deg); } 94% { transform: rotate(-6deg); } }
+@keyframes dk-drip { 0% { transform: translateY(-3px); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(8px); opacity: 0; } }
+@keyframes dk-throb { 0%, 100% { transform: scale(.85); } 50% { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) { svg.dk * { animation: none !important; } }
+/* Boutique : décorations d'avatar */
+.zd-av { width: var(--s); height: var(--s); }
+.zd-av > img, .zd-av > .zd-ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: linear-gradient(160deg, #3a2a5a, #15102a); box-shadow: 0 0 0 3px #0b0916; }
+.zd-ini { font: 800 calc(var(--s) * .42) Cinzel, Georgia, serif; color: #f0d38c; line-height: 1; }
+.zd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
+.zd-tile { position: relative; display: flex; flex-direction: column; align-items: stretch; padding: 0; border-radius: 14px; overflow: hidden; border: 1px solid #ffffff14; cursor: pointer; color: var(--fg); text-align: left;
+  background: linear-gradient(180deg, #1a1430, #0e0a1e); box-shadow: inset 0 1px 0 #ffffff1a, 0 5px 0 #05040b, 0 14px 28px #000a; transition: transform .2s, box-shadow .2s; }
+.zd-tile:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 #ffffff26, 0 8px 0 #05040b, 0 22px 36px #000c, 0 0 26px color-mix(in srgb, var(--h1) 35%, transparent); }
+.zd-tile.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f88, 0 5px 0 #05040b; }
+.zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
+.zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
+.zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
+.zd-k { font: 800 22px Cinzel, Georgia, serif; color: var(--h1); }
+.zd-mine { display: flex; align-items: center; gap: 16px; padding: 14px 18px; margin: 14px 0; border-radius: 14px; background: linear-gradient(90deg, #1f1838, #120d22); border: 1px solid #ffffff14; box-shadow: 0 4px 0 #05040b; }
+.zd-mine > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .zd-mine small { color: var(--mut, #9a90ad); }
+.zd-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 20px; padding: 28px; margin-bottom: 10px; border-radius: 18px;
+  background: radial-gradient(ellipse at 75% 50%, color-mix(in srgb, var(--h1) 40%, transparent), transparent 60%), linear-gradient(120deg, var(--h2), #0b0916); box-shadow: inset 0 1px 0 #ffffff22, 0 6px 0 #05040b, 0 24px 48px #000b; }
+.zd-hero-t h2 { margin: 4px 0 8px; font-size: 32px; } .zd-hero-t p { color: #e8dcef; }
+.zd-hero-avs { display: flex; align-items: center; justify-content: center; gap: 26px; position: relative; z-index: 1; }
+.zd-hero-av.h1 { transform: translateY(-6px); } .zd-hero-av.h0, .zd-hero-av.h2 { opacity: .9; }
+.zd-hero-k { position: absolute; right: -10px; bottom: -40px; font: 800 200px Cinzel, serif; color: var(--h1); opacity: .08; pointer-events: none; }
+@media (max-width: 760px) { .zd-hero { grid-template-columns: 1fr; padding: 20px; } .zd-hero-avs { gap: 14px; } .zd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.zd-prev { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 22px; padding: 26px; border-radius: 16px; margin-bottom: 14px;
+  background: radial-gradient(circle at 25% 50%, color-mix(in srgb, var(--h1) 40%, transparent), transparent 55%), linear-gradient(140deg, var(--h2), #0b0916); }
+.zd-prev-big { padding: 18px; } .zd-prev-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.zd-prof, .zd-chat { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: #0b0916cc; border: 1px solid #ffffff14; }
+.zd-prof b, .zd-chat b { display: block; } .zd-prof small { color: var(--mut, #9a90ad); } .zd-chat p { margin: 2px 0 0; font-size: 14px; }
+@media (max-width: 600px) { .zd-prev { grid-template-columns: 1fr; justify-items: center; } }
+.av-btn > svg.dk, .pf-av > svg.dk { position: absolute; left: -22.5%; top: -22.5%; width: 145%; height: 145%; pointer-events: none; overflow: visible; z-index: 2; }
+.pf-av { position: relative; } .av-btn { overflow: visible; }
+/* décoration de profil posée sur une carte : centrée sur l'illustration, elle déborde comme autour d'un avatar */
+.kcw { position: relative; }
+.kcw > .kc-dk { position: absolute; left: -25%; top: -17.3%; width: 150%; height: 134.6%; pointer-events: none; z-index: 6; }
+svg.dk .flow > * { animation: dk-flow 7s linear infinite; } svg.dk .flow.rev > * { animation-direction: reverse; }
+@keyframes dk-flow { to { stroke-dashoffset: -188; } }
+.kcw > .kc-dk > svg.dk { width: 100%; height: 100%; overflow: visible; display: block; }
+.cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
+.cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }
+.cf-dl.big.low { color: #fff; background: #ff2e88; border-color: #ff2e88; animation: dk-pulse 1s ease-in-out infinite; }
 </style>

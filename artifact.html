@@ -2132,6 +2132,86 @@ html.w3d-on body::after { display: none; }
 .ar-fin.hit .fin-ban { animation: fin-ban .5s cubic-bezier(.2,1.4,.3,1) .12s forwards; }
 .ar-fin.out .fin-ban { opacity: 0; transition: opacity .35s; animation: none; }
 @keyframes fin-ban { from { opacity: 0; scale: 2.2; filter: blur(6px); } to { opacity: 1; scale: 1; filter: none; } }
+/* ===== Décorations d'avatar ===== */
+.avd { position: relative; display: inline-flex; flex: none; line-height: 0; }
+.avd > svg.dk { position: absolute; left: -22.5%; top: -22.5%; width: 145%; height: 145%; pointer-events: none; overflow: visible; z-index: 2; }
+svg.dk .sp { transform-box: view-box; transform-origin: 0 0; animation: dk-spin var(--sd, 8s) linear infinite; }
+svg.dk .sp.s4 { --sd: 4s; } svg.dk .sp.s8 { --sd: 8s; } svg.dk .sp.s14 { --sd: 14s; } svg.dk .sp.s16 { --sd: 16s; } svg.dk .sp.s20 { --sd: 20s; } svg.dk .sp.s24 { --sd: 24s; } svg.dk .sp.s32 { --sd: 32s; } svg.dk .sp.s40 { --sd: 40s; }
+svg.dk .sp.rev { animation-direction: reverse; }
+svg.dk .pulse { animation: dk-pulse 2.4s ease-in-out infinite; }
+svg.dk .tw { transform-box: fill-box; transform-origin: center; animation: dk-tw 2.2s ease-in-out infinite; }
+svg.dk .fall { animation: dk-fall var(--d, 6s) linear infinite; }
+svg.dk .rise { animation: dk-rise var(--d, 6s) ease-in infinite; }
+svg.dk .flick { transform-box: fill-box; transform-origin: 50% 100%; animation: dk-flick .5s ease-in-out infinite alternate; }
+svg.dk .flick2 { animation: dk-pulse .9s steps(3) infinite; }
+svg.dk .flash { animation: dk-flash 2.2s linear infinite; }
+svg.dk .swing { transform-box: view-box; transform-origin: 0 -58px; animation: dk-swing 3s ease-in-out infinite alternate; }
+svg.dk .float { animation: dk-float 3s ease-in-out infinite; }
+svg.dk .jit1 { animation: dk-jit1 1.6s steps(1) infinite; } svg.dk .jit2 { animation: dk-jit2 1.6s steps(1) infinite; }
+svg.dk .blink { animation: dk-blink 1.2s steps(2) infinite; }
+svg.dk .flap { transform-box: view-box; transform-origin: 0 0; animation: dk-flap 2.6s ease-in-out infinite; } svg.dk .flap.r { animation-name: dk-flapr; }
+svg.dk .twitch { transform-box: fill-box; transform-origin: 50% 100%; animation: dk-twitch 4s ease-in-out infinite; }
+svg.dk .drip { animation: dk-drip 2.4s ease-in infinite; }
+svg.dk .throb { animation: dk-throb 1s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+svg.dk .bounce { animation: dk-float 1.4s ease-in-out infinite; }
+svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk-spin 1.2s linear infinite; }
+@keyframes dk-spin { to { transform: rotate(360deg); } }
+@keyframes dk-pulse { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
+@keyframes dk-tw { 0%, 100% { transform: scale(.55); opacity: .5; } 50% { transform: scale(1.15); opacity: 1; } }
+@keyframes dk-fall { 0% { transform: translate(var(--x), -64px) rotate(0); opacity: 0; } 10% { opacity: 1; } 50% { transform: translate(calc(var(--x) + 6px), 0) rotate(160deg); } 90% { opacity: 1; } 100% { transform: translate(var(--x), 64px) rotate(320deg); opacity: 0; } }
+@keyframes dk-rise { 0% { transform: translate(var(--x), 50px) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(calc(var(--x) - 8px), -60px) scale(1.1); opacity: 0; } }
+@keyframes dk-flick { from { transform: scaleY(.82) scaleX(1.05); } to { transform: scaleY(1.12) scaleX(.94); } }
+@keyframes dk-flash { 0%, 62%, 100% { opacity: 0; } 64%, 70% { opacity: 1; } 67% { opacity: .2; } }
+@keyframes dk-swing { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes dk-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes dk-jit1 { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-2px, 1px); } 40% { transform: translate(1px, -1px); } 70% { transform: translate(-1px, 0); } }
+@keyframes dk-jit2 { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(2px, -1px); } 50% { transform: translate(-1px, 2px); } 80% { transform: translate(1px, 0); } }
+@keyframes dk-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes dk-flap { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(8deg); } }
+@keyframes dk-flapr { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-8deg); } }
+@keyframes dk-twitch { 0%, 86%, 100% { transform: rotate(0); } 90% { transform: rotate(14deg); } 94% { transform: rotate(-6deg); } }
+@keyframes dk-drip { 0% { transform: translateY(-3px); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(8px); opacity: 0; } }
+@keyframes dk-throb { 0%, 100% { transform: scale(.85); } 50% { transform: scale(1.12); } }
+@media (prefers-reduced-motion: reduce) { svg.dk * { animation: none !important; } }
+/* Boutique : décorations d'avatar */
+.zd-av { width: var(--s); height: var(--s); }
+.zd-av > img, .zd-av > .zd-ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: linear-gradient(160deg, #3a2a5a, #15102a); box-shadow: 0 0 0 3px #0b0916; }
+.zd-ini { font: 800 calc(var(--s) * .42) Cinzel, Georgia, serif; color: #f0d38c; line-height: 1; }
+.zd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
+.zd-tile { position: relative; display: flex; flex-direction: column; align-items: stretch; padding: 0; border-radius: 14px; overflow: hidden; border: 1px solid #ffffff14; cursor: pointer; color: var(--fg); text-align: left;
+  background: linear-gradient(180deg, #1a1430, #0e0a1e); box-shadow: inset 0 1px 0 #ffffff1a, 0 5px 0 #05040b, 0 14px 28px #000a; transition: transform .2s, box-shadow .2s; }
+.zd-tile:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 #ffffff26, 0 8px 0 #05040b, 0 22px 36px #000c, 0 0 26px color-mix(in srgb, var(--h1) 35%, transparent); }
+.zd-tile.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f88, 0 5px 0 #05040b; }
+.zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
+.zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
+.zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
+.zd-k { font: 800 22px Cinzel, Georgia, serif; color: var(--h1); }
+.zd-mine { display: flex; align-items: center; gap: 16px; padding: 14px 18px; margin: 14px 0; border-radius: 14px; background: linear-gradient(90deg, #1f1838, #120d22); border: 1px solid #ffffff14; box-shadow: 0 4px 0 #05040b; }
+.zd-mine > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .zd-mine small { color: var(--mut, #9a90ad); }
+.zd-hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 20px; padding: 28px; margin-bottom: 10px; border-radius: 18px;
+  background: radial-gradient(ellipse at 75% 50%, color-mix(in srgb, var(--h1) 40%, transparent), transparent 60%), linear-gradient(120deg, var(--h2), #0b0916); box-shadow: inset 0 1px 0 #ffffff22, 0 6px 0 #05040b, 0 24px 48px #000b; }
+.zd-hero-t h2 { margin: 4px 0 8px; font-size: 32px; } .zd-hero-t p { color: #e8dcef; }
+.zd-hero-avs { display: flex; align-items: center; justify-content: center; gap: 26px; position: relative; z-index: 1; }
+.zd-hero-av.h1 { transform: translateY(-6px); } .zd-hero-av.h0, .zd-hero-av.h2 { opacity: .9; }
+.zd-hero-k { position: absolute; right: -10px; bottom: -40px; font: 800 200px Cinzel, serif; color: var(--h1); opacity: .08; pointer-events: none; }
+@media (max-width: 760px) { .zd-hero { grid-template-columns: 1fr; padding: 20px; } .zd-hero-avs { gap: 14px; } .zd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.zd-prev { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 22px; padding: 26px; border-radius: 16px; margin-bottom: 14px;
+  background: radial-gradient(circle at 25% 50%, color-mix(in srgb, var(--h1) 40%, transparent), transparent 55%), linear-gradient(140deg, var(--h2), #0b0916); }
+.zd-prev-big { padding: 18px; } .zd-prev-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.zd-prof, .zd-chat { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: #0b0916cc; border: 1px solid #ffffff14; }
+.zd-prof b, .zd-chat b { display: block; } .zd-prof small { color: var(--mut, #9a90ad); } .zd-chat p { margin: 2px 0 0; font-size: 14px; }
+@media (max-width: 600px) { .zd-prev { grid-template-columns: 1fr; justify-items: center; } }
+.av-btn > svg.dk, .pf-av > svg.dk { position: absolute; left: -22.5%; top: -22.5%; width: 145%; height: 145%; pointer-events: none; overflow: visible; z-index: 2; }
+.pf-av { position: relative; } .av-btn { overflow: visible; }
+/* décoration de profil posée sur une carte : centrée sur l'illustration, elle déborde comme autour d'un avatar */
+.kcw { position: relative; }
+.kcw > .kc-dk { position: absolute; left: -25%; top: -17.3%; width: 150%; height: 134.6%; pointer-events: none; z-index: 6; }
+svg.dk .flow > * { animation: dk-flow 7s linear infinite; } svg.dk .flow.rev > * { animation-direction: reverse; }
+@keyframes dk-flow { to { stroke-dashoffset: -188; } }
+.kcw > .kc-dk > svg.dk { width: 100%; height: 100%; overflow: visible; display: block; }
+.cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
+.cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }
+.cf-dl.big.low { color: #fff; background: #ff2e88; border-color: #ff2e88; animation: dk-pulse 1s ease-in-out infinite; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -3022,7 +3102,72 @@ const refCos = (s, ref) => {
 function designOfS(s, cardId) {
   const d = cosOf(s).designs[cardId]; if (!d) return null;
   const out = {}; for (const sl of COS_SLOTS) { const c = refCos(s, d[sl.id]); if (c && c.slot === sl.id) out[sl.id] = c.id; }
+  if (d.deco && DECO_BY_ID[d.deco] && decosOf(s)[d.deco]) out.deco = d.deco; // décoration de profil posée sur la carte
   return Object.keys(out).length ? out : null;
+}
+// ===== Décorations d'avatar (Boutique, façon Discord) : animées autour de l'avatar, visibles partout dans l'app =====
+// Créées pour le QG (aucune image reprise de Discord). k : forme animée ; c1, c2 : couleurs ; coll : collection.
+const DECO_COLLS = [
+  { id: "sakura", name: "Sakura du QG", kanji: "花", tag: "Pétales, fleurs et lanternes des ruelles de Shinjuku.", c1: "#ff8fc0", c2: "#3a1430" },
+  { id: "neon", name: "Néon de Shinjuku", kanji: "電", tag: "Anneaux de néon, casques et bugs d'écran.", c1: "#2ee6ff", c2: "#2a0e4a" },
+  { id: "feu", name: "Feu et foudre", kanji: "火", tag: "Pour ceux qui frappent fort.", c1: "#ff6a2e", c2: "#2a0a08" },
+  { id: "nuit", name: "Givre et nuit", kanji: "夜", tag: "Lune, étoiles et neige sur le QG.", c1: "#8fd0ff", c2: "#0c1430" },
+  { id: "arcanes", name: "Arcanes", kanji: "光", tag: "Runes, sceaux et auréoles des invocations.", c1: "#f5c518", c2: "#2a1a4a" },
+  { id: "humeurs", name: "Humeurs", kanji: "笑", tag: "Ton humeur du jour, autour de ta tête.", c1: "#ffd24d", c2: "#3a2a10" },
+  { id: "saisons", name: "Saisons", kanji: "季", tag: "Halloween, Noël et autres fêtes au QG.", c1: "#ff9a2e", c2: "#1a2a14" },
+];
+const DECOS = [
+  { id: "deco-sakura", coll: "sakura", name: "Sakura", k: "sakura", c1: "#ff9ec4", c2: "#ffd6e8", rar: "r" },
+  { id: "deco-sakura-blanc", coll: "sakura", name: "Sakura blanc", k: "sakura", c1: "#ffffff", c2: "#ffd6e8", rar: "e" },
+  { id: "deco-petales", coll: "sakura", name: "Pluie de pétales", k: "petales", c1: "#ff9ec4", c2: "#ff5a9e", rar: "pc" },
+  { id: "deco-lanternes", coll: "sakura", name: "Lanternes du QG", k: "lanternes", c1: "#ff4d2e", c2: "#ffb060", rar: "e" },
+  { id: "deco-lanternes-violet", coll: "sakura", name: "Lanternes de nuit", k: "lanternes", c1: "#8a4dff", c2: "#ff9ec4", rar: "l" },
+  { id: "deco-neon-cyan", coll: "neon", name: "Néon cyan", k: "anneau", c1: "#2ee6ff", c2: "#2a6fff", rar: "c" },
+  { id: "deco-neon-rose", coll: "neon", name: "Néon rose", k: "anneau", c1: "#ff2e88", c2: "#b072ff", rar: "c" },
+  { id: "deco-glitch", coll: "neon", name: "Bug d'écran", k: "glitch", c1: "#2ee6ff", c2: "#ff2e88", rar: "l" },
+  { id: "deco-casque-cyan", coll: "neon", name: "Casque néon", k: "casque", c1: "#2ee6ff", c2: "#1a2a4a", rar: "r" },
+  { id: "deco-casque-rose", coll: "neon", name: "Casque rose", k: "casque", c1: "#ff5aa8", c2: "#3a1430", rar: "r" },
+  { id: "deco-kanji", coll: "neon", name: "Enseignes", k: "kanji", c1: "#ff2e88", c2: "#2ee6ff", rar: "e", txt: "電光夜" },
+  { id: "deco-flammes", coll: "feu", name: "Flammes", k: "flammes", c1: "#ff3a1a", c2: "#ffd24d", rar: "r" },
+  { id: "deco-flammes-bleues", coll: "feu", name: "Flammes bleues", k: "flammes", c1: "#2a6fff", c2: "#8fe3ff", rar: "e" },
+  { id: "deco-eclairs", coll: "feu", name: "Foudre", k: "eclairs", c1: "#ffe14d", c2: "#fff8c0", rar: "e" },
+  { id: "deco-eclairs-violets", coll: "feu", name: "Foudre du néant", k: "eclairs", c1: "#b072ff", c2: "#ffffff", rar: "l" },
+  { id: "deco-cornes", coll: "feu", name: "Cornes d'ombre", k: "cornes", c1: "#2a1a3a", c2: "#ff3a4d", rar: "r" },
+  { id: "deco-flocons", coll: "nuit", name: "Neige", k: "flocons", c1: "#ffffff", c2: "#8fd0ff", rar: "pc" },
+  { id: "deco-lune", coll: "nuit", name: "Croissant de lune", k: "lune", c1: "#fff3c4", c2: "#8fd0ff", rar: "r" },
+  { id: "deco-etoiles", coll: "nuit", name: "Ciel étoilé", k: "etoiles", c1: "#fff3c4", c2: "#8fd0ff", rar: "pc" },
+  { id: "deco-aurore", coll: "nuit", name: "Aurore", k: "anneau", c1: "#3affb0", c2: "#2a6fff", rar: "pc" },
+  { id: "deco-bulles", coll: "nuit", name: "Bulles", k: "bulles", c1: "#8fe3ff", c2: "#ffffff", rar: "c" },
+  { id: "deco-runes-or", coll: "arcanes", name: "Runes d'or", k: "runes", c1: "#f5c518", c2: "#fff3b0", rar: "r" },
+  { id: "deco-runes-violet", coll: "arcanes", name: "Runes du néant", k: "runes", c1: "#b072ff", c2: "#ff9ec4", rar: "e" },
+  { id: "deco-sceau", coll: "arcanes", name: "Sceau hexagonal", k: "sceau", c1: "#2ee6ff", c2: "#f5c518", rar: "e" },
+  { id: "deco-orbite", coll: "arcanes", name: "Orbes", k: "orbite", c1: "#f5c518", c2: "#ff2e88", rar: "r" },
+  { id: "deco-aureole", coll: "arcanes", name: "Auréole", k: "aureole", c1: "#fff3b0", c2: "#f5c518", rar: "l" },
+  { id: "deco-ailes", coll: "arcanes", name: "Ailes de lumière", k: "ailes", c1: "#fff8e0", c2: "#f5c518", rar: "m" },
+  { id: "deco-couronne", coll: "arcanes", name: "Couronne", k: "couronne", c1: "#f5c518", c2: "#ff2e4d", rar: "l" },
+  { id: "deco-chat", coll: "humeurs", name: "Oreilles de chat", k: "chat", c1: "#f0e6d2", c2: "#ff9ec4", rar: "pc" },
+  { id: "deco-chat-noir", coll: "humeurs", name: "Chat noir", k: "chat", c1: "#2a2230", c2: "#b072ff", rar: "pc" },
+  { id: "deco-coeurs", coll: "humeurs", name: "Amoureux", k: "coeurs", c1: "#ff3a6a", c2: "#ff9ec4", rar: "c" },
+  { id: "deco-sueur", coll: "humeurs", name: "Gêné", k: "sueur", c1: "#8fd0ff", c2: "#ffffff", rar: "c" },
+  { id: "deco-colere", coll: "humeurs", name: "Énervé", k: "colere", c1: "#ff3a3a", c2: "#ffb0b0", rar: "c" },
+  { id: "deco-citrouille", coll: "saisons", name: "Citrouille", k: "citrouille", c1: "#ff8a1a", c2: "#ffe14d", rar: "r" },
+  { id: "deco-bonnet", coll: "saisons", name: "Bonnet de fête", k: "bonnet", c1: "#e8243a", c2: "#ffffff", rar: "r" },
+  { id: "deco-confettis", coll: "saisons", name: "Confettis", k: "confettis", c1: "#ff2e88", c2: "#2ee6ff", rar: "pc" },
+];
+const DECO_BY_ID = Object.fromEntries(DECOS.map((d) => [d.id, d]));
+const decosOf = (s) => { const c = cosOf(s); if (!c.decos || typeof c.decos !== "object") c.decos = {}; return c.decos; };
+function buyDecoS(s, id) {
+  const d = DECO_BY_ID[id]; if (!d) return { error: "Cette décoration n'existe pas." };
+  const own = decosOf(s); if (own[id]) return { error: "Tu as déjà cette décoration." };
+  const price = COS_PRICE[d.rar];
+  if (s.chakra < price) return { error: `Il te faut ${price} ◆ (tu en as ${s.chakra}).` };
+  s.chakra -= price; own[id] = Date.now(); cosOf(s).deco = id; trackS(s, "shop", 1);
+  return { bought: id, price };
+}
+// id null : retirer la décoration
+function equipDecoS(s, id) {
+  if (id && !decosOf(s)[id]) return { error: "Achète d'abord cette décoration." };
+  cosOf(s).deco = id || null; return {};
 }
 function buyCosmeticS(s, id) {
   const c = COS_BY_ID[id], cos = cosOf(s);
@@ -3061,6 +3206,7 @@ function saveDesignS(s, cardId, design) {
     const c = refCos(s, ref); if (!c || c.slot !== sl.id) return { error: `Objet invalide pour l'emplacement ${sl.label}.` };
     clean[sl.id] = ref;
   }
+  if (design?.deco) { if (!DECO_BY_ID[design.deco] || !decosOf(s)[design.deco]) return { error: "Tu n'as pas cette décoration." }; clean.deco = design.deco; }
   for (const [cid, d] of Object.entries(cos.designs)) if (cid !== cardId) for (const k of Object.keys(d)) if (d[k].startsWith("i:") && Object.values(clean).includes(d[k])) delete d[k];
   if (Object.keys(clean).length) cos.designs[cardId] = clean; else delete cos.designs[cardId];
   return { design: clean };
@@ -4262,13 +4408,14 @@ function cosDeco(design, present) {
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
   const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? ico("logo") : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
   // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
-  return { za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+  const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco];
+  return { deco: dk ? `<span class="kc-dk" aria-hidden="true">${decoSVG(dk, "rect")}</span>` : "", za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
 }
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
   const dz = soon || locked ? null : cosDeco(o.design, o.present);
-  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}${dz?.za ? `--za:${dz.za};` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
+  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}${dz?.za ? `--za:${dz.za};` : ""}">${dz ? dz.orn + dz.deco : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
     style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
@@ -4296,7 +4443,7 @@ const nm = (uid) => `<b data-uid="${uid}">…</b>`;
 const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
 const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${ico(TITLE_ICON[t.cat])}</i>${esc(t.name)}</span>` : "");
 const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
-const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${av(uid)}${nm(uid)}</button>`;
+const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${avd(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
 const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légende"] : unique >= 90 ? [ico("rang4"), "Maître"] : unique >= 50 ? [ico("rang3"), "Expert"] : unique >= 20 ? [ico("rang2"), "Confirmé"] : [ico("rang1"), "Débutant"];
 
@@ -4359,7 +4506,14 @@ function toggleMenu(force) {
   header();
 }
 const closeMenu = () => { if (menuOpen) toggleMenu(false); };
+// décoration autour de l'avatar de l'en-tête (remplacée seulement quand elle change, pour ne pas relancer l'animation)
+function syncAvDeco() {
+  const b = $("avBtn"); if (!b) return; const id = save.cos?.deco || "";
+  if (b.dataset.deco === id) return; b.dataset.deco = id;
+  b.querySelector("svg.dk")?.remove(); if (id && DECO_BY_ID[id]) b.insertAdjacentHTML("beforeend", decoSVG(DECO_BY_ID[id]));
+}
 function header() {
+  syncAvDeco();
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = fmtN(save.chakra);
@@ -4494,7 +4648,7 @@ function lrowHTML(l) {
 }
 function podiumHTML(list, val, unit) {
   const [a, b, c] = list;
-  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${av(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span>${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : ""}<span class="sc">${unit(p)}</span>
+  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${avd(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span>${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : ""}<span class="sc">${unit(p)}</span>
     <span class="ped"><span class="no">${i}</span><b>${fmtN(val(p))}</b><small>${unit.short || ""}</small></span></button>` : "<span></span>";
   return `<div class="podium">${pod(b, 2)}${pod(a, 1)}${pod(c, 3)}</div>`;
 }
@@ -4874,7 +5028,7 @@ function viewPred() {
   const qHTML = (q) => {
     const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0, res = q.status === "resolved", open = predOpen(q);
     const who = res ? (predVoters.data?.[q.id] || []) : [];
-    const whoHTML = (i) => { const l = who.filter(([, a]) => a === i).map(([u]) => u); return l.length ? `<span class="pq-who">${l.slice(0, 10).map((u) => `<span class="pq-v">${av(u)}${nm(u)}</span>`).join("")}${l.length > 10 ? `<span class="pq-more">+${l.length - 10}</span>` : ""}</span>` : ""; };
+    const whoHTML = (i) => { const l = who.filter(([, a]) => a === i).map(([u]) => u); return l.length ? `<span class="pq-who">${l.slice(0, 10).map((u) => `<span class="pq-v">${avd(u)}${nm(u)}</span>`).join("")}${l.length > 10 ? `<span class="pq-more">+${l.length - 10}</span>` : ""}</span>` : ""; };
     return `<article class="pq ${q.status}">
       <div class="pq-h"><span class="pill gold">+${predRewardOf(q)} ◆ si bonne réponse</span><span class="pill">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pill ${open ? "ok" : ""}">${res ? "Résultat" : !open ? "Votes fermés" : q.endsAt ? `Votes ouverts · ${predLeft(q.endsAt)}` : "Votes ouverts"}</span></div>
       <h3>${esc(q.text)}</h3>
@@ -4899,7 +5053,7 @@ function viewPred() {
     ${qs.length ? eps.map((ep) => `<section class="sec"><div class="sec-h"><h2>Épisode ${ep}</h2><span class="mono mut" style="font-size:13px">${qs.filter((q) => q.ep === ep).length} question${qs.filter((q) => q.ep === ep).length > 1 ? "s" : ""}</span></div>${qs.filter((q) => q.ep === ep).map(qHTML).join("")}</section>`).join("")
       : `<div class="card">${empty("Pas encore de prédiction. Billy les publie après chaque épisode.")}</div>`}
     <section class="sec"><h2>Meilleurs prophètes</h2>
-      ${bl.length ? `${podiumHTML(bl, (p) => p.pts, unit)}<div class="rank-list">${bl.slice(3, 30).map((p, i) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}"><span class="no">${i + 4}</span>${av(p.uid)}<span class="nm" data-uid="${p.uid}">…</span><span class="v">${p.pts}<small>points</small></span></button>`).join("")}</div>` : `<p class="note">Le classement apparaît dès que Billy valide une première bonne réponse.</p>`}</section>
+      ${bl.length ? `${podiumHTML(bl, (p) => p.pts, unit)}<div class="rank-list">${bl.slice(3, 30).map((p, i) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}"><span class="no">${i + 4}</span>${avd(p.uid)}<span class="nm" data-uid="${p.uid}">…</span><span class="v">${p.pts}<small>points</small></span></button>`).join("")}</div>` : `<p class="note">Le classement apparaît dès que Billy valide une première bonne réponse.</p>`}</section>
     ${IS_ADMIN ? `<form class="card sec" id="pqForm"><p class="eyebrow">Admin · nouvelle question</p>
       <label class="field" for="pqText">Question<input id="pqText" type="text" maxlength="160" placeholder="Qui va retrouver Byakko en premier ?"></label>
       <label class="field" for="pqOptions">Réponses possibles (une par ligne, 6 max)<textarea id="pqOptions" rows="4" placeholder="Kuradai&#10;Stalk&#10;Personne"></textarea></label>
@@ -4933,7 +5087,7 @@ function viewClassement() {
     <p class="lead">${desc}</p>
     <div class="search">${icon.search}<input class="in" id="rankQ" type="search" placeholder="Chercher un joueur pour se comparer…" value="${esc(rankQ)}"></div>
     ${list.length ? `${q ? "" : podiumHTML(list, score, unit)}
-      <div class="rank-list" id="rankList">${list.map((p, i) => ({ p, i })).slice(q ? 0 : 3, 60).map(({ p, i }) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}" data-rk="${p.uid}"><span class="no">${i + 1}</span>${av(p.uid)}<span class="nm"><span data-uid="${p.uid}">…</span> ${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : `<span class="tit">${titleOf(p.unique || 0)[0]}</span>`}</span><span class="v">${fmtN(score(p))}<small>${unitTxt}</small></span></button>`).join("")}</div>`
+      <div class="rank-list" id="rankList">${list.map((p, i) => ({ p, i })).slice(q ? 0 : 3, 60).map(({ p, i }) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}" data-rk="${p.uid}"><span class="no">${i + 1}</span>${avd(p.uid)}<span class="nm"><span data-uid="${p.uid}">…</span> ${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : `<span class="tit">${titleOf(p.unique || 0)[0]}</span>`}</span><span class="v">${fmtN(score(p))}<small>${unitTxt}</small></span></button>`).join("")}</div>`
       : empty(sharedNote() ? "Le classement est visible quand tu joues avec le QG." : "Le classement apparaît dès que des joueurs ouvrent des boosters.")}
   </div>`;
 }
@@ -5022,7 +5176,7 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
+      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${decoSVG(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)))}</span>
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
@@ -5348,7 +5502,7 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avi = `<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">`;
+  const avd0 = decoOfUid(m.uid), avi = `${avd0 ? `<span class="avd">` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${decoSVG(avd0)}</span>` : ""}`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
@@ -5398,6 +5552,93 @@ function subscribeExtra() {
   if (!DB || subscribeExtra.done) return; subscribeExtra.done = true;
   DB.collection("avis").orderBy("t", "desc").limit(100).onSnapshot((s) => { shared.avis = s.docs.map((d) => d.data()).filter((r) => r && r.stars >= 1 && r.stars <= 5); sharedChanged(); }, () => {});
 }
+
+// ===== Décorations d'avatar : dessins SVG animés autour de l'avatar (catalogue DECOS dans game.js) =====
+// Repère : l'avatar est un disque de rayon 40 au centre d'une vue de -58 à 58 ; la décoration déborde tout autour.
+let decoN = 0;
+const DK_FLOWER = (x, y, r, c1, c2, rot = 0) => `<g transform="translate(${x} ${y}) rotate(${rot})">${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="${-r * .55}" rx="${r * .42}" ry="${r * .6}" fill="${c1}" stroke="${c2}" stroke-width=".6" transform="rotate(${a})"/>`).join("")}<circle r="${r * .28}" fill="#ffd24d"/></g>`;
+const DK_STAR = (x, y, r, c, i) => `<path class="tw" style="animation-delay:${-i * .37}s" d="M${x} ${y - r}Q${x} ${y} ${x + r} ${y}Q${x} ${y} ${x} ${y + r}Q${x} ${y} ${x - r} ${y}Q${x} ${y} ${x} ${y - r}Z" fill="${c}"/>`;
+const DK_SNOW = (r, c) => `<g stroke="${c}" stroke-width="1.1" stroke-linecap="round">${[0, 60, 120].map((a) => `<path d="M0 ${-r}V${r}" transform="rotate(${a})"/>`).join("")}</g>`;
+const DK_HEART = (c) => `<path d="M0 3C-6 -2 -6 -7 -3 -8C-1.5 -8.6 0 -7.5 0 -6C0 -7.5 1.5 -8.6 3 -8C6 -7 6 -2 0 3Z" fill="${c}"/>`;
+// éléments qui tombent ou montent : --x position, --d durée, --dl décalage (négatif = déjà en route)
+const dkFall = (items, cls = "fall") => items.map(([x, d, dl, inner, s = 1]) => `<g class="${cls}" style="--x:${x}px;--d:${d}s;animation-delay:${dl}s"><g transform="scale(${s})">${inner}</g></g>`).join("");
+// shape « round » : autour d'un avatar rond (rayon 40) ; « rect » : autour d'une carte (rectangle 72 × 104)
+function decoSVG(d, shape = "round") {
+  if (!d) return "";
+  const u = "dk" + ++decoN, c1 = d.c1, c2 = d.c2 || d.c1, G = `url(#${u}g)`, R = shape === "rect";
+  const HW = R ? 36 : 40, HH = R ? 52 : 40, TOP = HH - 40, SIDE = HW - 40, f1 = (n) => +n.toFixed(1);
+  // le contour à « off » unités du bord, et un point du contour (t : degrés depuis le haut, sens horaire)
+  const ring = (off, attrs) => R ? `<rect x="${-(HW + off)}" y="${-(HH + off)}" width="${2 * (HW + off)}" height="${2 * (HH + off)}" rx="${f1(7 + off * .4)}" ${attrs}/>` : `<circle r="${40 + off}" ${attrs}/>`;
+  const at = (t, off) => { const a = (t - 90) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); if (!R) return [f1(c * (40 + off)), f1(s * (40 + off))]; const w = HW + off, h = HH + off, k = Math.min(Math.abs(c) > 1e-6 ? w / Math.abs(c) : 1e9, Math.abs(s) > 1e-6 ? h / Math.abs(s) : 1e9); return [f1(c * k), f1(s * k)]; };
+  const place = (t, off) => { const [x, y] = at(t, off); return `translate(${x} ${y}) rotate(${t})`; };
+  const spin = (cls) => (R ? "flow" : "sp " + cls), sc = (x, y) => [f1(x * HW / 40), f1(y * HH / 40)];
+  const grad = `<linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient><filter id="${u}f" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2"/></filter>`;
+  const glow = (inner) => `<g filter="url(#${u}f)" opacity=".85">${inner}</g>${inner}`;
+  let b = "";
+  switch (d.k) {
+    case "anneau": b = `${ring(4, `fill="none" stroke="${G}" stroke-width="7" opacity=".35" filter="url(#${u}f)" class="pulse"`)}
+      <g class="${spin("s8")}">${ring(4, `fill="none" stroke="${G}" stroke-width="3.6" stroke-linecap="round" stroke-dasharray="58 14 8 14"`)}</g>
+      <g class="${spin("s14 rev")}">${ring(10, `fill="none" stroke="${c1}" stroke-opacity=".6" stroke-width="1.4" stroke-dasharray="3 9"`)}</g>`; break;
+    case "glitch": b = `<g class="jit1">${ring(4, `fill="none" stroke="${c1}" stroke-width="3"`)}</g><g class="jit2">${ring(4, `fill="none" stroke="${c2}" stroke-width="3"`)}</g>
+      ${[250, 80, 200, 20].map((t, i) => { const [x, y] = at(t, 10); return `<rect class="blink" style="animation-delay:${-i * .4}s" x="${x - 6}" y="${y}" width="${10 + i * 3}" height="3" fill="${i % 2 ? c1 : c2}"/>`; }).join("")}`; break;
+    case "casque": { const cx = HW + 5, band = R ? `M${-cx} 0V${-HH + 6}Q${-cx} ${-HH - 4} ${-HW + 8} ${-HH - 4}H${HW - 8}Q${cx} ${-HH - 4} ${cx} ${-HH + 6}V0` : "M-43 -4A44 44 0 0 1 43 -4";
+      b = `<path d="${band}" fill="none" stroke="${c2}" stroke-width="7" stroke-linecap="round"/><path d="${band}" fill="none" stroke="${c1}" stroke-width="1.6" class="pulse"/>
+      ${[-1, 1].map((sx) => `<rect x="${sx * cx - 7}" y="-12" width="14" height="26" rx="5" fill="${c2}" stroke="${c1}" stroke-width="1.6"/><rect class="blink" x="${sx * cx - 3}" y="-4" width="6" height="10" rx="2" fill="${c1}"/>`).join("")}
+      <path d="M${-cx} 12C${-cx} ${HH - 6} ${-cx + 12} ${HH + 4} -18 ${HH + 6}" fill="none" stroke="${c2}" stroke-width="3" stroke-linecap="round"/><circle cx="-16" cy="${HH + 6}" r="4" fill="${c1}" class="pulse"/>`; break; }
+    case "kanji": b = `<g class="${R ? "" : "sp s16"}">${[...(d.txt || "光")].map((k, i, a) => { const [x, y] = at(i / a.length * 360 + 30, 10); return `<g transform="translate(${x} ${y})"><rect x="-8" y="-8" width="16" height="16" rx="4" fill="#0b0916" stroke="${i % 2 ? c2 : c1}" stroke-width="1.6"/><text y="4.5" text-anchor="middle" font-size="11" font-weight="700" fill="${i % 2 ? c2 : c1}">${k}</text></g>`; }).join("")}</g>
+      ${ring(4, `fill="none" stroke="${c1}" stroke-opacity=".4" stroke-width="1.2"`)}`; break;
+    case "sakura": b = `${[290, 312, 334, 356, 378].map((t, i) => { const [x, y] = at(t, 4), [lx, ly] = at(t + 6, 8); return `<ellipse cx="${lx}" cy="${ly}" rx="5" ry="2.2" fill="#5ad17a" transform="rotate(${t + 40} ${lx} ${ly})"/>${DK_FLOWER(x, y, i % 2 ? 7 : 9.5, c1, c2, t)}`; }).join("")}
+      ${dkFall([[30, 5, -1, `<ellipse rx="3" ry="1.8" fill="${c1}"/>`], [46, 6.5, -3.5, `<ellipse rx="2.6" ry="1.6" fill="${c1}"/>`], [-10, 7, -5.5, `<ellipse rx="2.4" ry="1.5" fill="${c2}"/>`]])}`; break;
+    case "petales": b = dkFall([[-44, 5, 0, ""], [-26, 6.2, -2.4, ""], [-6, 5.4, -4.1, ""], [14, 6.8, -1.3, ""], [34, 5.8, -3.3, ""], [50, 6.4, -5.2, ""], [-52, 7, -4.6, ""], [24, 7.4, -.6, ""]].map((x, i) => [x[0], x[1], x[2], `<ellipse rx="5" ry="3" fill="${i % 3 ? c1 : c2}" stroke="#ffffff55" stroke-width=".5"/>`, 1])); break;
+    case "lanternes": b = [-1, 1].map((sx, i) => `<g class="swing" style="animation-delay:${-i * 1.1}s"><path d="M${sx * HW} ${-HH - 18}V${-HH - 4}" stroke="#2a1a10" stroke-width="1.2"/>
+      <g transform="translate(${sx * HW} ${-HH + 6})"><rect x="-4.5" y="-11" width="9" height="3" rx="1" fill="${c2}"/><ellipse rx="8" ry="10" fill="${c1}"/><ellipse rx="8" ry="10" fill="url(#${u}l)"/><path d="M-4 -9.4C-6 -3 -6 3 -4 9.4M4 -9.4C6 -3 6 3 4 9.4M0 -10V10" stroke="#00000055" fill="none" stroke-width=".8"/><rect x="-4.5" y="8" width="9" height="3" rx="1" fill="${c2}"/><path d="M0 11V17" stroke="${c2}" stroke-width="1.2"/><circle class="pulse" r="12" fill="${c2}" opacity=".18"/></g></g>`).join("")
+      + `<radialGradient id="${u}l"><stop offset="0" stop-color="#fff7c0" stop-opacity=".8"/><stop offset="1" stop-color="#fff7c0" stop-opacity="0"/></radialGradient>`; break;
+    case "flammes": { const n = R ? 20 : 14; b = `<linearGradient id="${u}h" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
+      ${Array.from({ length: n }, (_, i) => { const t = i / n * 360, s = (i % 2 ? .75 : 1.1) * (R ? .6 : 1); return `<g transform="${place(t, 1)}"><path class="flick" style="animation-delay:${-i * .17}s" d="M0 2C-6 -4 -4 -12 0 -${18 * s}C4 -12 6 -4 0 2Z" fill="url(#${u}h)"/></g>`; }).join("")}
+      ${ring(2, `fill="none" stroke="${c1}" stroke-width="3" opacity=".6" filter="url(#${u}f)"`)}`; break; }
+    case "eclairs": b = [35, 145, 215, 320].map((t, i) => `<g transform="${place(t, 7)} rotate(${-t + 15})"><path class="flash" style="animation-delay:${-i * .55}s" d="M2 -12L-5 1H0L-3 12L6 -2H1L4 -12Z" fill="${c1}" stroke="${c2}" stroke-width=".8"/></g>`).join("")
+      + ring(4, `fill="none" stroke="${c1}" stroke-width="2" stroke-dasharray="2 6" class="pulse"`); break;
+    case "cornes": b = `<g transform="translate(0 ${-TOP})">${[-1, 1].map((sx) => glow(`<path d="M${sx * 18} -36C${sx * 26} -50 ${sx * 40} -56 ${sx * 50} -54C${sx * 40} -50 ${sx * 32} -42 ${sx * 30} -30Z" fill="${c1}" stroke="${c2}" stroke-width="1.6"/>`)).join("")}</g>`; break;
+    case "flocons": b = dkFall([[-44, 6, 0], [-22, 7.4, -2.5], [0, 6.6, -4.4], [20, 7.8, -1.2], [40, 6.2, -3.4], [52, 8, -5.6], [-34, 8.6, -6.8]].map(([x, dd, dl], i) => [x, dd, dl, DK_SNOW(i % 2 ? 4 : 5.5, i % 3 ? c1 : c2)])); break;
+    case "lune": { const [mx, my] = R ? [HW - 4, -HH + 2] : [34, -36]; b = `<mask id="${u}m"><rect x="-80" y="-80" width="160" height="160" fill="#fff"/><circle cx="${mx + 8}" cy="${my - 6}" r="14" fill="#000"/></mask><g class="float">${glow(`<circle cx="${mx}" cy="${my}" r="17" fill="${c1}" mask="url(#${u}m)"/>`)}</g>
+      ${[[-40, -34, 4.5], [-52, 6, 3.4], [48, 22, 4], [-16, -53, 3.2]].map(([x, y, r], i) => { const [X, Y] = sc(x, y); return DK_STAR(X, Y, r, c2, i); }).join("")}`; break; }
+    case "etoiles": b = `<g class="${R ? "" : "sp s40"}">${[[0, -52, 6], [40, -34, 4.4], [52, 6, 4], [36, 40, 5], [-6, 53, 4], [-42, 34, 4.4], [-53, -4, 5.6], [-36, -40, 4]].map(([x, y, r], i) => { const [X, Y] = sc(x, y); return DK_STAR(X, Y, r, i % 2 ? c2 : c1, i); }).join("")}</g>`; break;
+    case "bulles": b = dkFall([[-36, 6, 0], [-14, 7.2, -2.2], [10, 6.4, -4.1], [30, 7.6, -1.4], [46, 6.8, -3.2]].map(([x, dd, dl], i) => [x, dd, dl, `<circle r="${4.5 + i % 3 * 1.5}" fill="${c1}" fill-opacity=".15" stroke="${c1}" stroke-width=".9"/><circle cx="-1" cy="-1.2" r="1" fill="${c2}"/>`]), "rise"); break;
+    case "runes": b = `${ring(3, `fill="none" stroke="${c1}" stroke-width="1.2" opacity=".7"`)}${ring(12, `fill="none" stroke="${c1}" stroke-width="1.2" opacity=".7"`)}
+      <g class="${R ? "" : "sp s20"}">${Array.from({ length: R ? 22 : 16 }, (_, i, a) => `<g transform="${place(i * 360 / a.length, 7.5)}"><path d="${["M-2 -2.5L2 2.5M2 -2.5L-2 0", "M0 -3V3M-2 -1H2", "M-2 2.5L0 -2.5L2 2.5", "M-2 -2.5H2L-2 2.5H2"][i % 4]}" stroke="${i % 3 ? c1 : c2}" stroke-width="1.2" fill="none" stroke-linecap="round"/></g>`).join("")}</g>
+      ${ring(7.5, `fill="none" stroke="${c1}" stroke-width="7" opacity=".14" filter="url(#${u}f)" class="pulse"`)}`; break;
+    case "sceau": { const hex = (r) => Array.from({ length: 6 }, (_, i) => { const a = (i * 60 - 90) * Math.PI / 180; return `${f1(Math.cos(a) * r)} ${f1(Math.sin(a) * r)}`; }).join(" L");
+      const dots = R ? [0, 90, 180, 270, 45, 135, 225, 315].map((t) => at(t, 13)) : Array.from({ length: 6 }, (_, i) => { const a = (i * 60 - 90) * Math.PI / 180; return [f1(Math.cos(a) * 53), f1(Math.sin(a) * 53)]; });
+      b = `<g class="${R ? "" : "sp s24"}">${glow(R ? ring(13, `fill="none" stroke="${c1}" stroke-width="1.8"`) : `<path d="M${hex(53)}Z" fill="none" stroke="${c1}" stroke-width="1.8"/>`)}${dots.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.4" fill="${c2}"/>`).join("")}</g>
+        <g class="${spin("s32 rev")}">${R ? ring(7, `fill="none" stroke="${c2}" stroke-width="1" stroke-dasharray="4 4"`) : `<path d="M${hex(47)}Z" fill="none" stroke="${c2}" stroke-width="1" stroke-dasharray="4 4"/>`}</g>`; break; }
+    case "orbite": b = R ? `<g class="flow">${ring(8, `fill="none" stroke="${G}" stroke-width="1.6" stroke-dasharray="40 30" stroke-linecap="round"`)}</g>${[20, 140, 260].map((t, i) => { const [x, y] = at(t, 8); return glow(`<circle class="pulse" cx="${x}" cy="${y}" r="${i ? 3.4 : 4.6}" fill="${i % 2 ? c2 : c1}"/>`); }).join("")}`
+      : `<g class="sp s4"><circle r="48" fill="none" stroke="${G}" stroke-width="1.6" stroke-dasharray="40 260" stroke-linecap="round"/>${[0, 120, 240].map((a, i) => `<g transform="rotate(${a})">${glow(`<circle cy="-48" r="${i ? 3.4 : 4.6}" fill="${i % 2 ? c2 : c1}"/>`)}</g>`).join("")}</g>`; break;
+    case "aureole": b = `<g class="float">${glow(`<ellipse cy="${-HH - 12}" rx="24" ry="6.5" fill="none" stroke="${c1}" stroke-width="3.2"/>`)}<ellipse cy="${-HH - 12}" rx="24" ry="6.5" fill="none" stroke="${c2}" stroke-width="1"/></g>`; break;
+    case "ailes": b = [-1, 1].map((sx) => `<g transform="translate(${sx * SIDE} ${R ? -10 : 0})"><g class="flap ${sx < 0 ? "l" : "r"}">${glow(`<path d="M${sx * 36} -8C${sx * 50} -40 ${sx * 66} -44 ${sx * 70} -40C${sx * 62} -34 ${sx * 66} -26 ${sx * 70} -20C${sx * 60} -18 ${sx * 64} -8 ${sx * 66} 0C${sx * 56} 0 ${sx * 56} 8 ${sx * 56} 14C${sx * 46} 10 ${sx * 40} 6 ${sx * 38} 10Z" fill="${c1}" stroke="${c2}" stroke-width="1.2"/>`)}</g></g>`).join(""); break;
+    case "couronne": b = `<g transform="${R ? `translate(-8 ${-HH - 8}) rotate(-14)` : "rotate(-14) translate(0 -50)"}"><g class="float">${glow(`<path d="M-17 8L-20 -10L-9 -1L0 -15L9 -1L20 -10L17 8Z" fill="${G}" stroke="#7a4a10" stroke-width="1"/>`)}
+      ${[-9, 0, 9].map((x, i) => `<circle class="tw" style="animation-delay:${-i * .5}s" cx="${x}" cy="3.5" r="2.2" fill="${c2}"/>`).join("")}</g></g>`; break;
+    case "chat": b = `<g transform="translate(0 ${-TOP})">${[-1, 1].map((sx) => `<g class="${sx > 0 ? "twitch" : ""}"><path d="M${sx * 14} -38L${sx * 30} -60L${sx * 38} -28Z" fill="${c1}" stroke="#0b0916" stroke-width="1.4" stroke-linejoin="round"/><path d="M${sx * 20} -36L${sx * 29} -51L${sx * 33} -32Z" fill="${c2}"/></g>`).join("")}</g>`; break;
+    case "coeurs": b = dkFall([[28, 3.6, 0], [42, 4.2, -1.4], [16, 4.8, -2.6], [50, 3.9, -3.2]].map(([x, dd, dl], i) => [x, dd, dl, DK_HEART(i % 2 ? c2 : c1), i % 2 ? .8 : 1.1]), "rise"); break;
+    case "sueur": b = [[34, -40, 1.2, 0], [44, -26, .9, -.8]].map(([x, y, s2, dl]) => { const [X, Y] = sc(x, y); return `<g class="drip" style="animation-delay:${dl}s"><path transform="translate(${X} ${Y}) scale(${s2})" d="M0 -7C3 -2 5 1 5 3.5A5 5 0 0 1 -5 3.5C-5 1 -3 -2 0 -7Z" fill="${c1}" stroke="${c2}" stroke-width=".8"/></g>`; }).join(""); break;
+    case "colere": { const [X, Y] = sc(34, -38); b = `<g transform="translate(${X} ${Y})"><g class="throb">${[0, 90, 180, 270].map((a) => `<path transform="rotate(${a})" d="M2.5 -10Q2.5 -2.5 10 -2.5" fill="none" stroke="${c1}" stroke-width="3.2" stroke-linecap="round"/>`).join("")}</g></g>
+      ${ring(4, `fill="none" stroke="${c1}" stroke-width="2" opacity=".35" class="pulse"`)}`; break; }
+    case "citrouille": { const [X, Y] = sc(38, 38); b = `<g transform="translate(${X} ${Y})"><g class="float"><path d="M0 -13C1 -18 4 -19 6 -19" stroke="#3a7a2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      ${[-8, 0, 8].map((x) => `<ellipse cx="${x}" cy="0" rx="${x ? 8 : 9}" ry="12" fill="${c1}" stroke="#7a3a08" stroke-width=".8"/>`).join("")}
+      <g class="flick2" fill="${c2}"><path d="M-7 -4L-3 -4L-5 -8Z"/><path d="M3 -4L7 -4L5 -8Z"/><path d="M-8 3Q0 9 8 3L5 5L2 3L0 6L-2 3L-5 5Z"/></g></g></g>`; break; }
+    case "bonnet": b = `<g transform="${R ? `translate(${-HW + 12} ${-HH - 2}) rotate(-22)` : "rotate(-22) translate(-4 -50)"}"><path d="M-22 6C-16 -14 2 -24 22 -16C14 -10 10 -2 18 6Z" fill="${c1}"/><rect x="-24" y="2" width="44" height="8" rx="4" fill="${c2}"/><g class="bounce"><circle cx="24" cy="-16" r="5" fill="${c2}"/></g></g>`; break;
+    case "confettis": b = dkFall(Array.from({ length: 12 }, (_, i) => [-50 + i * 9, 3.6 + (i % 4) * .6, -i * .45, `<rect class="spin2" x="-2" y="-1" width="4" height="2.2" fill="${[c1, c2, "#ffd24d"][i % 3]}"/>`])); break;
+    default: b = ring(4, `fill="none" stroke="${c1}" stroke-width="3"`);
+  }
+  const vb = R ? `${-(HW + 18)} ${-(HH + 18)} ${2 * HW + 36} ${2 * HH + 36}` : "-58 -58 116 116";
+  return `<svg class="dk dk-${d.k} ${R ? "rect" : ""}" viewBox="${vb}" ${R ? 'preserveAspectRatio="none"' : ""} aria-hidden="true"><defs>${grad}</defs>${b}</svg>`;
+}
+// décoration portée par un joueur (la sienne vient de sa sauvegarde, celle des autres de leur profil public)
+function decoOfUid(uid) {
+  const id = uid === ME || uid === "moi" ? save.cos?.deco : (shared.players || []).find((p) => p.uid === uid)?.deco;
+  return id ? DECO_BY_ID[id] : null;
+}
+// un avatar avec sa décoration (même rendu que av(), entouré)
+const avd = (uid, cls = "", d = undefined) => { const dd = d === undefined ? decoOfUid(uid) : d; return dd ? `<span class="avd">${av(uid, cls)}${decoSVG(dd)}</span>` : av(uid, cls); };
 
 // ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
 // Le serveur décide de tout (achat, tirage, design) ; le navigateur ne fait qu'afficher et animer le résultat.
@@ -5471,8 +5712,72 @@ function zShopTile(c) {
     <span class="zs-meta"><b>${esc(c.name)}</b><small>${COS_SLOT_LABEL[c.slot]} · <i style="color:${RAR[c.rar].color}">${RAR[c.rar].label}</i></small>
       <span class="zs-price ${owned ? "own" : ""} ${c.only ? "only" : ""}">${owned ? "✓ " : ""}${tagTxt}</span></span></button>`;
 }
+// ===== Boutique : décorations d'avatar (onglet par défaut) et objets pour les cartes =====
+let zBoutTab = "deco", zDecoItem = null;
+const zbTabs = () => utabs("zBout", [["deco", "Décorations d'avatar"], ["cartes", "Pour tes cartes"]], zBoutTab);
+const zDecoColl = () => DECO_COLLS[Math.floor(Date.now() / 86400e3) % DECO_COLLS.length];
+// ton avatar (photo Discord, sinon ton initiale) entouré d'une décoration
+function zMeAv(d, size = 84) {
+  const name = ACCT?.name || "Toi", img = ACCT?.avatar ? `<img src="${esc(ACCT.avatar)}" alt="">` : `<span class="zd-ini">${esc(name[0].toUpperCase())}</span>`;
+  return `<span class="avd zd-av" style="--s:${size}px">${img}${d ? decoSVG(d) : ""}</span>`;
+}
+function zDecoTile(d) {
+  const own = !!decosOf(save)[d.id], on = save.cos?.deco === d.id, C = DECO_COLLS.find((c) => c.id === d.coll) || {};
+  return `<button type="button" class="zd-tile r-${d.rar} ${on ? "on" : ""}" data-zdeco="${d.id}" style="--h1:${C.c1};--h2:${C.c2};--rc:${RAR[d.rar].color}" aria-label="${esc(d.name)}, ${RAR[d.rar].label}">
+    <span class="zd-stage">${zMeAv(d, 74)}</span>
+    <span class="zd-meta"><b>${esc(d.name)}</b><small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>
+      <span class="zs-price ${own ? "own" : ""}">${on ? "✓ Portée" : own ? "Possédée" : `${fmtN(COS_PRICE[d.rar])} ◆`}</span></span></button>`;
+}
+function viewDecos() {
+  const F = zDecoColl(), fd = DECOS.filter((d) => d.coll === F.id), cur = save.cos?.deco ? DECO_BY_ID[save.cos.deco] : null, n = Object.keys(decosOf(save)).length;
+  const hero = `<section class="zd-hero" style="--h1:${F.c1};--h2:${F.c2}">
+      <div class="zd-hero-t"><p class="eyebrow">Collection à la une</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
+        <button class="btn gold" type="button" data-zdcoll="${F.id}">Voir la collection</button></div>
+      <div class="zd-hero-avs">${fd.slice(0, 3).map((d, i) => `<span class="zd-hero-av h${i}">${zMeAv(d, i === 1 ? 120 : 88)}</span>`).join("")}</div>
+      <span class="zd-hero-k" aria-hidden="true">${F.kanji}</span></section>`;
+  const mine = `<div class="zd-mine">${zMeAv(cur, 56)}<div><b>${cur ? esc(cur.name) : "Aucune décoration"}</b><small>${cur ? "Ta décoration actuelle, visible au comptoir, au classement et sur ton profil." : "Choisis-en une : elle s'affiche partout autour de ton avatar."} ${n ? `· ${n} possédée${n > 1 ? "s" : ""}` : ""}</small></div>${cur ? `<button class="btn sm" type="button" data-zdequip="">Retirer</button>` : ""}</div>`;
+  const rows = DECO_COLLS.map((C) => `<section class="sec zs-row" id="zdcoll-${C.id}"><div class="zs-row-h" style="--h1:${C.c1}"><span class="zs-k zd-k">${C.kanji}</span><div><h2>${esc(C.name)}</h2><p class="note">${esc(C.tag)}</p></div></div>
+      <div class="zd-grid">${DECOS.filter((d) => d.coll === C.id).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zDecoTile).join("")}</div></section>`).join("");
+  return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des décorations animées autour de ton avatar, et des objets pour tes cartes. Aucun bonus de jeu : juste du style.")}
+    ${zbTabs()}<div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span></div>
+    ${mine}${hero}${rows}</div>`;
+}
+// fiche d'une décoration : grand aperçu, ton profil et un message au comptoir avec elle
+function zOpenDeco(id) {
+  const d = DECO_BY_ID[id]; if (!d) return; zDecoItem = id;
+  const own = !!decosOf(save)[id], on = save.cos?.deco === id, price = COS_PRICE[d.rar], C = DECO_COLLS.find((c) => c.id === d.coll) || {}, name = ACCT?.name || "Toi";
+  const act = on ? `<button class="btn big block" type="button" data-zdequip="">Retirer cette décoration</button>`
+    : own ? `<button class="btn gold big block" type="button" data-zdequip="${id}">Porter cette décoration</button>`
+    : `<button class="btn gold big block" type="button" data-zdbuy="${id}" ${save.chakra < price ? "disabled" : ""}>Acheter et porter · ${fmtN(price)} ◆</button>
+       <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Elle reste à toi pour toujours.</p>`;
+  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(d.name)}"><div class="sheet-h"><h2>${esc(d.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><div class="zd-prev" style="--h1:${C.c1};--h2:${C.c2}">
+        <div class="zd-prev-big">${zMeAv(d, 150)}</div>
+        <div class="zd-prev-side"><div class="zd-prof">${zMeAv(d, 54)}<div><b>${esc(name)}</b><small>${TITLE_BY_ID[save.titleShown] ? esc(TITLE_BY_ID[save.titleShown].name) : "Membre du QG"}</small></div></div>
+          <div class="zd-chat">${zMeAv(d, 34)}<div><b>${esc(name)}</b><p>Regardez ma nouvelle déco !</p></div></div></div></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[d.rar].color};color:${RAR[d.rar].color}">${RAR[d.rar].label}</span><span class="pill">${C.kanji} ${esc(C.name || "")}</span><span class="pill">Animée</span></div>
+      ${act}</div></div>`;
+  $("overlay").hidden = false;
+}
+async function zDecoDo(kind, id) {
+  try {
+    const r = await zCall("deco/" + kind, { id }, () => (kind === "buy" ? buyDecoS(save, id) : equipDecoS(save, id)));
+    if (r?.state) Object.assign(save, r.state);
+    toast(kind === "buy" ? `${DECO_BY_ID[id].name} : achetée et portée.` : id ? `${DECO_BY_ID[id].name} : portée.` : "Décoration retirée.");
+    $("overlay").hidden = true; draw(); header();
+  } catch (e) { toast(e.message); }
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const a = t.closest("[data-zdeco]"); if (a) return zOpenDeco(a.dataset.zdeco);
+  const b = t.closest("[data-zdbuy]"); if (b) { b.disabled = true; return zDecoDo("buy", b.dataset.zdbuy); }
+  const q = t.closest("[data-zdequip]"); if (q) return zDecoDo("equip", q.dataset.zdequip || null);
+  const c = t.closest("[data-zdcoll]"); if (c) document.getElementById("zdcoll-" + c.dataset.zdcoll)?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 function viewBoutique() {
   if (!featureOn(CONFIG, "boutique")) return closedHTML("Boutique Arcanique");
+  if (param === "cartes" || param === "deco") { zBoutTab = param; param = null; }
+  if (zBoutTab === "deco") return viewDecos();
   const F = zFeatured(), fItems = F.items.map((id) => COS_BY_ID[id]).filter(Boolean);
   const hero = `<section class="zs-hero" style="--h1:${F.c1};--h2:${F.c2}">
       <div class="zs-hero-t"><p class="eyebrow">Collection à la une</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
@@ -5487,6 +5792,7 @@ function viewBoutique() {
       `<section class="sec zs-row"><div class="zs-row-h" style="--h1:#ff4d2e"><span class="zs-k">${ico("sanctuaire")}</span><div><h2>Exclusifs du Sanctuaire</h2><p class="note">Ils ne s'achètent pas : on les obtient seulement en invoquant au Sanctuaire.</p></div></div>
         <div class="zs-grid">${COSMETICS.filter((c) => c.only).map(zShopTile).join("")}</div></section>`].join("");
   return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
+    ${zbTabs()}
     <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span><button class="btn sm" type="button" data-nav="atelier">Ouvrir l'Atelier</button></div>
     ${hero}${filters}${rows}</div>`;
 }
@@ -5524,7 +5830,7 @@ function viewAtelier() {
   const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length, true]], zAtelierTab);
   if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
-  const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, refCos(save, r)?.id]).filter(([, v]) => v));
+  const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, k === "deco" ? (DECO_BY_ID[r] ? r : null) : refCos(save, r)?.id]).filter(([, v]) => v));
   if (zAtelierTab === "inv") return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}${tabs}${zInventory()}</div>`;
   const dirty = JSON.stringify(zDraft) !== JSON.stringify(cos.designs[zDraftCard] || {});
   return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique", "Choisis une carte, essaie les cosmétiques de ton inventaire, puis enregistre son design. Il s'affiche partout : collection, profil, carte vedette.")}${tabs}
@@ -5537,7 +5843,11 @@ function viewAtelier() {
         </div>
         <label class="zpick">Carte à personnaliser <select id="zCard">${mine.map((x) => `<option value="${x.id}" ${x.id === zDraftCard ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)} (${RAR[x.rar].label})</option>`).join("")}</select></label>
       </div>
-      <div class="zat-slots">${COS_SLOTS.map((sl) => { const opts = zOptions(sl.id); return `<div class="zslot"><p class="eyebrow mut">${sl.label}</p>
+      <div class="zat-slots">${(() => { const own = DECOS.filter((d) => decosOf(save)[d.id]); return `<div class="zslot"><p class="eyebrow mut">Décoration (celles de ton profil)</p>
+        <div class="zopts"><button type="button" class="zopt ${zDraft.deco ? "" : "on"}" data-zset="deco" data-ref="">Aucune</button>
+        ${own.map((d) => `<button type="button" class="zopt ${zDraft.deco === d.id ? "on" : ""}" data-zset="deco" data-ref="${d.id}" style="--c:${RAR[d.rar].color}"><i></i>${esc(d.name)}<small>Décoration</small></button>`).join("")}
+        ${own.length ? "" : `<span class="note">Aucune pour l'instant : <a href="#/boutique">Boutique</a>, onglet Décorations d'avatar.</span>`}</div></div>`; })()}
+      ${COS_SLOTS.map((sl) => { const opts = zOptions(sl.id); return `<div class="zslot"><p class="eyebrow mut">${sl.label}</p>
         <div class="zopts"><button type="button" class="zopt ${zDraft[sl.id] ? "" : "on"}" data-zset="${sl.id}" data-ref="">Aucun</button>
         ${opts.map((o) => `<button type="button" class="zopt ${zDraft[sl.id] === o.ref ? "on" : ""}" data-zset="${sl.id}" data-ref="${o.ref}" style="--c:${RAR[o.c.rar].color}"><i></i>${esc(o.c.name)}<small>${o.note}</small></button>`).join("")}
         ${opts.length ? "" : `<span class="note">Rien pour l'instant : <a href="#/boutique">Boutique</a> ou <a href="#/sanctuaire">Sanctuaire</a>.</span>`}</div></div>`; }).join("")}
@@ -5591,7 +5901,7 @@ async function zSummon(n) {
 VIEWS.boutique = viewBoutique; VIEWS.atelier = viewAtelier; VIEWS.sanctuaire = viewSanctuaire;
 function afterViews() {
 }
-const Z_SEG = { ...ZS_SEG, zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
+const Z_SEG = { ...ZS_SEG, zBout: (v) => { zBoutTab = v; }, zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
 document.addEventListener("click", (e) => {
   const t = e.target;
   const b = t.closest("[data-zbuy]"); if (b) { b.disabled = true; return zBuy(b.dataset.zbuy); }
@@ -5863,7 +6173,7 @@ async function cfLoadList() { if (CF.listLoading) return; CF.listLoading = true;
 async function cfLoadTable(gid) {
   clearTimeout(CF.timer);
   await cfCat();
-  try { const t = await srv("confront/state", { gid }); if (JSON.stringify(t) !== JSON.stringify(CF.table)) { CF.table = t; if (view === "confront" && param === gid && !document.activeElement?.closest?.(".cf-keep")) draw(); } }
+  try { const t = await srv("confront/state", { gid }); if (JSON.stringify(t) !== JSON.stringify(CF.table)) { const moved = t?.vue?.phase !== CF.table?.vue?.phase; CF.table = t; if (view === "confront" && param === gid && (moved || !document.activeElement?.closest?.(".cf-keep"))) { if (moved) document.activeElement?.blur?.(); draw(); } } }
   catch (e) {
     // une erreur passagère (réseau, serveur occupé) ne doit pas arrêter le suivi de la partie : on garde l'écran et on réessaie
     CF.fails = (CF.fails || 0) + 1;
@@ -6038,11 +6348,11 @@ function cfParts(T) {
   } else if (v.phase === "contributions") {
     const me = v.joueurs.find((p) => p.id === v.moi);
     if (!CF.list) cfLoadList();
-    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
+    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes${v.deadline && !me?.soumis ? ` <span class="cf-dl big" data-cfdl="${v.deadline}"></span>` : ""}</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
       ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
-    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Il te manquait des cartes : des persos prêtés complètent le tirage." : "2 persos tirés au hasard parmi ton deck : choisis celui que tu joues."} Ton choix reste secret jusqu'au début.</p>
+    body = `<section class="sec"><h2>Choisis ton personnage${v.deadline && !v.monChoix ? ` <span class="cf-dl big" data-cfdl="${v.deadline}"></span>` : ""}</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Il te manquait des cartes : des persos prêtés complètent le tirage." : "2 persos tirés au hasard parmi ton deck : choisis celui que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
   }
@@ -6192,7 +6502,7 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });
 // compte à rebours du délai de réponse
-setInterval(() => { document.querySelectorAll("[data-cfdl]").forEach((el) => { const s = Math.max(0, Math.round((+el.dataset.cfdl - Date.now()) / 1000)); el.textContent = `· ${s} s`; }); }, 1000);
+setInterval(() => { document.querySelectorAll("[data-cfdl]").forEach((el) => { const s = Math.max(0, Math.round((+el.dataset.cfdl - Date.now()) / 1000)); el.textContent = el.classList.contains("big") ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : `· ${s} s`; el.classList.toggle("low", s <= 20); }); }, 1000);
 
 // ===== Confrontation : livret de règles illustré (#/confront/regles) et fiches des rôles =====
 // Textes originaux, écrits pour Re Zéro à partir de docs/confrontation/REGLES.md (règles appliquées par le moteur).

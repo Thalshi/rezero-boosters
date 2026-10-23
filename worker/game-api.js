@@ -53,7 +53,7 @@ const featuredOf = (s) => (s.featured && G.hasCard(s, s.featured) ? { featured: 
 async function publishStats(env, uid, s) {
   const st = G.statsS(s);
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'players', ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
-    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), title: s.titleShown || null, t: Date.now() }), Date.now()).run();
+    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), title: s.titleShown || null, deco: s.cos?.deco && G.DECO_BY_ID[s.cos.deco] ? s.cos.deco : null, t: Date.now() }), Date.now()).run();
   await bumpRev(env, "players");
 }
 async function getConfig(env) {
@@ -356,6 +356,14 @@ export async function gameRoute(req, env, user, path) {
       if (r.error) return fail(400, r.error);
       return json(r);
     }
+    if (path === "/api/game/deco/buy" || path === "/api/game/deco/equip") {
+      if (!G.featureOn(cfg, "boutique")) return fail(403, "La Boutique Arcanique n'est pas encore ouverte.");
+      const buy = path.endsWith("buy"), id = body.id ? String(body.id) : null;
+      const r = await mutate(env, user.id, (s) => { const o = buy ? G.buyDecoS(s, id) : G.equipDecoS(s, id); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      await publishStats(env, user.id, r.state);
+      return json(r);
+    }
     if (path === "/api/game/summon") {
       if (!G.featureOn(cfg, "sanctuaire")) return fail(403, "Le Sanctuaire des Invocations n'est pas encore ouvert.");
       // le tirage est fait ici, avant toute animation : le navigateur ne fait que montrer le résultat
@@ -553,7 +561,7 @@ export async function gameRoute(req, env, user, path) {
       // designs visibles des cartes exposées (vitrine et carte vedette) ; rien d'autre de l'inventaire n'est public
       const shown = [...new Set([...(s.showcase || []), ...(s.featured ? [s.featured] : [])])];
       const designs = Object.fromEntries(shown.map((id) => [id, G.designOfS(s, id)]).filter(([, d]) => d));
-      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs, titles: s.titles || [], titleShown: s.titleShown || null });
+      return json({ uid: body.uid, stats: G.statsS(s), owned, showcase: s.showcase || [], wish: s.wish || [], featured: s.featured && G.hasCard(s, s.featured) ? s.featured : null, designs, titles: s.titles || [], titleShown: s.titleShown || null, deco: s.cos?.deco && G.DECO_BY_ID[s.cos.deco] ? s.cos.deco : null });
     }
     if (path === "/api/game/title") {
       const r = await mutate(env, user.id, (s) => { const o = G.showTitleS(s, body.id ? String(body.id) : null); return o.error ? { abort: true, error: o.error } : o; });

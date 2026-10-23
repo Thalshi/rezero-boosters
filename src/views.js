@@ -56,13 +56,14 @@ function cosDeco(design, present) {
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
   const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? ico("logo") : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
   // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
-  return { za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+  const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco];
+  return { deco: dk ? `<span class="kc-dk" aria-hidden="true">${decoSVG(dk, "rect")}</span>` : "", za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
 }
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
   const soon = !!o.soon, locked = soon || !!o.locked, [pw, au] = statsOf(c), p = PEOPLE[c.who];
   const dz = soon || locked ? null : cosDeco(o.design, o.present);
-  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}${dz?.za ? `--za:${dz.za};` : ""}">${dz ? dz.orn : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
+  return `<div class="kcw ${dz ? dz.wrap : ""}" ${o.click ? `data-card="${c.id}" tabindex="0" role="button"` : ""} style="${o.w ? `--w:${o.w}px;` : ""}${dz?.za ? `--za:${dz.za};` : ""}">${dz ? dz.orn + dz.deco : ""}<div class="kc r-${c.rar} ${dz ? dz.kc : ""} ${o.gold ? "gold" : ""} ${locked ? "locked" : ""} ${soon ? "soon" : ""} ${c.skin ? `skin sk-${c.skin}` : ""}"
     style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
@@ -90,7 +91,7 @@ const nm = (uid) => `<b data-uid="${uid}">…</b>`;
 const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
 const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${ico(TITLE_ICON[t.cat])}</i>${esc(t.name)}</span>` : "");
 const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
-const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${av(uid)}${nm(uid)}</button>`;
+const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${avd(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
 const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légende"] : unique >= 90 ? [ico("rang4"), "Maître"] : unique >= 50 ? [ico("rang3"), "Expert"] : unique >= 20 ? [ico("rang2"), "Confirmé"] : [ico("rang1"), "Débutant"];
 
@@ -153,7 +154,14 @@ function toggleMenu(force) {
   header();
 }
 const closeMenu = () => { if (menuOpen) toggleMenu(false); };
+// décoration autour de l'avatar de l'en-tête (remplacée seulement quand elle change, pour ne pas relancer l'animation)
+function syncAvDeco() {
+  const b = $("avBtn"); if (!b) return; const id = save.cos?.deco || "";
+  if (b.dataset.deco === id) return; b.dataset.deco = id;
+  b.querySelector("svg.dk")?.remove(); if (id && DECO_BY_ID[id]) b.insertAdjacentHTML("beforeend", decoSVG(DECO_BY_ID[id]));
+}
 function header() {
+  syncAvDeco();
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = fmtN(save.chakra);
@@ -288,7 +296,7 @@ function lrowHTML(l) {
 }
 function podiumHTML(list, val, unit) {
   const [a, b, c] = list;
-  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${av(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span>${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : ""}<span class="sc">${unit(p)}</span>
+  const pod = (p, i) => p ? `<button class="pod p${i}" type="button" data-nav="profil" data-p="${p.uid}"><span class="rav">${avd(p.uid)}<span class="ttl">${titleOf(p.unique || 0)[0]}</span></span><span class="nm" data-uid="${p.uid}">…</span>${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : ""}<span class="sc">${unit(p)}</span>
     <span class="ped"><span class="no">${i}</span><b>${fmtN(val(p))}</b><small>${unit.short || ""}</small></span></button>` : "<span></span>";
   return `<div class="podium">${pod(b, 2)}${pod(a, 1)}${pod(c, 3)}</div>`;
 }

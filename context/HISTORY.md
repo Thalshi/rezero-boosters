@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-23 — Seulement la 3D, Gestion à onglets, économie dure décidée
+- Ouvertures : plus de bouton « Version légère » ; un ancien réglage qui coupait la 3D est ignoré (Reichi ne pouvait plus revenir en arrière). L'ancienne ouverture reste seulement en secours (pas de WebGL, mouvements réduits).
+- Gestion : Admin, Créateur, Branches, Galerie, Labo, Compte de test et Dev regroupés dans une seule rubrique à onglets (sur `dev/re-zero-complet`, pas en ligne).
+- Économie validée par Reichi (sur `dev/economie`, pas en ligne) : Légendaire garantie (40 boosters, 50 invocations), Mythique jamais garantie, réglage D (booster gratuit toutes les 3 h, booster et invocation 150 ◆, probabilités dures), missions refaites (2 quotidiennes, 5 hebdo plus dures, série surtout en boosters), Confrontation illimitée mais récompensée 3 parties par jour.
+
 ## 2026-10-23 — Ouvertures en 3D en production, retours Confrontation, économie
 - En production (accord de Reichi) : coffre 3D (×10, 2 boosters) qui se brise après le tour de clé, avec les 30 scénarios rejoués en 3D ; pochette 3D (×5, un booster) à déchirer au doigt ; cartes qui prennent vie (Légendaire, Mythique, Dorée). « Version légère » et ancienne ouverture en secours. Correctif aussi déployé : les cartes de la collection apparaissent dans le choix de Confrontation.
 - Prêt sur `dev/confront-retours`, pas en ligne : choix des cartes façon draft et deck enregistré, Duel sans Lien vital ni Festin, 2 équipements au plus (le suivant remplace le plus ancien), cartes volées ou détruites montrées en grand, pioche et éléments expliqués.

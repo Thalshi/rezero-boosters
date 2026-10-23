@@ -2190,11 +2190,13 @@ function regenS(s, now = Date.now()) {
 
 function ensureDailyS(s, now = Date.now()) {
   const today = dayKey(now);
-  if (!s.daily || s.daily.day !== today) {
+  // missions refaites : un tirage d'avant (3 missions, ou une mission retirée) est refait, la progression du jour est gardée
+  const stale = s.daily && s.daily.day === today && (s.daily.ids.length !== DAILY_N || s.daily.ids.some((id) => !MISSIONS.some((m) => m.id === id)));
+  if (!s.daily || s.daily.day !== today || stale) {
     let h = 0; for (const ch of today) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...MISSIONS], picks = [];
     while (picks.length < DAILY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.daily = { day: today, ids: picks, prog: {}, claimed: {} };
+    s.daily = { day: today, ids: picks, prog: stale ? s.daily.prog : {}, claimed: {}, ...(stale && s.daily.bonus ? { bonus: true } : {}) };
   }
   return s.daily;
 }
@@ -2271,11 +2273,12 @@ function weekKey(now = Date.now()) {
 }
 function ensureWeeklyS(s, now = Date.now()) {
   const wk = weekKey(now);
-  if (!s.weekly || s.weekly.week !== wk) {
+  const staleW = s.weekly && s.weekly.week === wk && (s.weekly.ids.length !== WEEKLY_N || s.weekly.ids.some((id) => !WEEKLY.some((m) => m.id === id)));
+  if (!s.weekly || s.weekly.week !== wk || staleW) {
     let h = 7; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...WEEKLY], picks = [];
     while (picks.length < WEEKLY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.weekly = { week: wk, ids: picks, prog: {}, claimed: {}, bonus: false };
+    s.weekly = { week: wk, ids: picks, prog: staleW ? s.weekly.prog : {}, claimed: {}, bonus: staleW ? !!s.weekly.bonus : false };
   }
   return s.weekly;
 }

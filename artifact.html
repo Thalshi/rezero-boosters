@@ -5195,7 +5195,7 @@ const cfName = (id) => (id === ME ? "Toi" : CF.table?.noms?.[id]?.name || "Joueu
 const ROLE_LABEL = { gardien: "Gardien", sentinelle: "Sentinelle", briseur: "Briseur", errant: "Errant" };
 const PHASE_LABEL = { lobby: "Salon", contributions: "Chacun choisit ses cartes", choix: "Choix des personnages", partie: "Partie en cours", fin: "Partie terminée" };
 async function cfCat() { if (!CF.cat) try { CF.cat = await srv("confront/catalogue"); } catch (e) { CF.cat = { branches: {}, branchIds: [], cartes: {}, signes: [] }; } }
-async function cfLoadList() { await cfCat(); try { CF.list = await srv("confront/list"); } catch (e) { CF.list = { error: e.message }; } if (view === "confront" && !param) draw(); }
+async function cfLoadList() { if (CF.listLoading) return; CF.listLoading = true; await cfCat(); try { CF.list = await srv("confront/list"); } catch (e) { CF.list = { error: e.message }; } CF.listLoading = false; if (view === "confront" && (!param || CF.table?.vue?.phase === "contributions")) draw(); }
 async function cfLoadTable(gid) {
   clearTimeout(CF.timer);
   await cfCat();
@@ -5322,7 +5322,7 @@ function cfTableHTML() {
     const me = v.joueurs.find((p) => p.id === v.moi), mine = CF.list?.cartes || [];
     if (!CF.list) cfLoadList();
     body = `<section class="sec"><h2>Choisis tes cartes</h2><p class="note">Chaque carte de ta collection a une branche (son style de jeu). Prends jusqu'à une carte par branche : à l'étape suivante, <b>tu choisis ton perso parmi elles</b>. Si tu n'en prends aucune, on te prête 2 persos. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
-      ${me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">Aucune</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
+      ${me && !me.soumis && !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : me && !me.soumis && CF.list?.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">${opts.length ? "Aucune" : "Aucune carte de ce style"}</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
         <button class="btn gold" type="button" data-act="cf-contrib">Valider mes cartes</button>` : `<p class="note">Cartes enregistrées. En attente des autres…</p>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
@@ -5446,6 +5446,7 @@ document.addEventListener("click", (e) => {
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
+  if (act === "cf-reload") { CF.list = null; cfLoadList(); return draw(); }
   if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });

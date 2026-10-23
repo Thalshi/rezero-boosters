@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-10-23 — Troisième mise en production : arène 3D et icônes néon
+- En production (accord de Reichi) : icônes néon Arcane à la place des kanji dans tout le site, arène 3D branchée sur la vraie Confrontation (main en glisser-déposer, réactions, chrono, historique, fiches, récap des rôles), salon de table (8 émotes, messages), « Vue classique » en un clic et en secours sans WebGL.
+- Corrigé en route : toucher un champion hors cible annule la visée, une carte injouable n'est plus défaussée sans le vouloir, victoire par rôle comptée seulement s'il y a un rôle.
+- Bots : toujours des cartes de prêt (emblèmes) ; un joueur qui apporte ses cartes voit son perso sur son champion.
+- Tests : arène 30/30, campagne 106/106, autres suites vertes. Point de restauration D1 dans docs/MISE_EN_PRODUCTION.md.
+
 ## 2026-10-22 — Icônes néon partout, arène 3D en cours d'intégration
 - Kanji remplacés par des icônes néon Arcane dans tout le site (`src/icons.js` : logo, rôles, éléments, familles de cartes, menus, factions, rangs, coffre). Commité sur `dev/re-zero-complet`, pas encore en production.
 - Reichi a remarqué que la nouvelle arène 3D n'était pas dans le jeu déployé (c'était un prototype) : intégration en cours dans la vraie Confrontation (salon émotes et chat côté serveur, arène branchée sur le vrai moteur, vue classique en secours).

@@ -154,14 +154,7 @@ function toggleMenu(force) {
   header();
 }
 const closeMenu = () => { if (menuOpen) toggleMenu(false); };
-// décoration autour de l'avatar de l'en-tête (remplacée seulement quand elle change, pour ne pas relancer l'animation)
-function syncAvDeco() {
-  const b = $("avBtn"); if (!b) return; const id = save.cos?.deco || "";
-  if (b.dataset.deco === id) return; b.dataset.deco = id;
-  b.querySelector("svg.dk")?.remove(); if (id && DECO_BY_ID[id]) b.insertAdjacentHTML("beforeend", decoSVG(DECO_BY_ID[id]));
-}
 function header() {
-  syncAvDeco();
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = fmtN(save.chakra);

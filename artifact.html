@@ -2173,7 +2173,7 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 @keyframes dk-drip { 0% { transform: translateY(-3px); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(8px); opacity: 0; } }
 @keyframes dk-throb { 0%, 100% { transform: scale(.85); } 50% { transform: scale(1.12); } }
 @media (prefers-reduced-motion: reduce) { svg.dk * { animation: none !important; } }
-/* Boutique : décorations d'avatar */
+/* Boutique : décorations de cartes */
 .zd-av { width: var(--s); height: var(--s); }
 .zd-av > img, .zd-av > .zd-ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: linear-gradient(160deg, #3a2a5a, #15102a); box-shadow: 0 0 0 3px #0b0916; }
 .zd-ini { font: 800 calc(var(--s) * .42) Cinzel, Georgia, serif; color: #f0d38c; line-height: 1; }
@@ -2183,6 +2183,8 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 .zd-tile:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 #ffffff26, 0 8px 0 #05040b, 0 22px 36px #000c, 0 0 26px color-mix(in srgb, var(--h1) 35%, transparent); }
 .zd-tile.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f88, 0 5px 0 #05040b; }
 .zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
+.zd-cstage { height: 200px; padding: 14px 0; overflow: hidden; } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
+.zd-hero-cards { gap: 34px; padding: 18px 0; }
 .zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
 .zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
 .zd-k { font: 800 22px Cinzel, Georgia, serif; color: var(--h1); }
@@ -4574,14 +4576,7 @@ function toggleMenu(force) {
   header();
 }
 const closeMenu = () => { if (menuOpen) toggleMenu(false); };
-// décoration autour de l'avatar de l'en-tête (remplacée seulement quand elle change, pour ne pas relancer l'animation)
-function syncAvDeco() {
-  const b = $("avBtn"); if (!b) return; const id = save.cos?.deco || "";
-  if (b.dataset.deco === id) return; b.dataset.deco = id;
-  b.querySelector("svg.dk")?.remove(); if (id && DECO_BY_ID[id]) b.insertAdjacentHTML("beforeend", decoSVG(DECO_BY_ID[id]));
-}
 function header() {
-  syncAvDeco();
   $("wFree").textContent = `${save.free}/${FREE_MAX}`;
   $("wGauge").style.width = Math.min(100, save.free / FREE_MAX * 100) + "%";
   $("wChakra").textContent = fmtN(save.chakra);
@@ -5247,7 +5242,7 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${decoSVG(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)))}</span>
+      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
@@ -5704,10 +5699,8 @@ function decoSVG(d, shape = "round") {
   return `<svg class="dk dk-${d.k} ${R ? "rect" : ""}" viewBox="${vb}" ${R ? 'preserveAspectRatio="none"' : ""} aria-hidden="true"><defs>${grad}</defs>${b}</svg>`;
 }
 // décoration portée par un joueur (la sienne vient de sa sauvegarde, celle des autres de leur profil public)
-function decoOfUid(uid) {
-  const id = uid === ME || uid === "moi" ? save.cos?.deco : (shared.players || []).find((p) => p.uid === uid)?.deco;
-  return id ? DECO_BY_ID[id] : null;
-}
+// les décorations se posent sur les cartes, plus autour des avatars
+function decoOfUid() { return null; }
 // un avatar avec sa décoration (même rendu que av(), entouré)
 const avd = (uid, cls = "", d = undefined) => { const dd = d === undefined ? decoOfUid(uid) : d; return dd ? `<span class="avd">${av(uid, cls)}${decoSVG(dd)}</span>` : av(uid, cls); };
 
@@ -5783,66 +5776,66 @@ function zShopTile(c) {
     <span class="zs-meta"><b>${esc(c.name)}</b><small>${COS_SLOT_LABEL[c.slot]} · <i style="color:${RAR[c.rar].color}">${RAR[c.rar].label}</i></small>
       <span class="zs-price ${owned ? "own" : ""} ${c.only ? "only" : ""}">${owned ? "✓ " : ""}${tagTxt}</span></span></button>`;
 }
-// ===== Boutique : décorations d'avatar (onglet par défaut) et objets pour les cartes =====
+// ===== Boutique : décorations de cartes (onglet par défaut) et objets pour les cartes =====
 let zBoutTab = "deco", zDecoItem = null;
-const zbTabs = () => utabs("zBout", [["deco", "Décorations d'avatar"], ["cartes", "Pour tes cartes"]], zBoutTab);
+const zbTabs = () => utabs("zBout", [["deco", "Décorations de cartes"], ["cartes", "Objets pour tes cartes"]], zBoutTab);
 const zDecoColl = () => DECO_COLLS[Math.floor(Date.now() / 86400e3) % DECO_COLLS.length];
-// ton avatar (photo Discord, sinon ton initiale) entouré d'une décoration
-function zMeAv(d, size = 84) {
-  const name = ACCT?.name || "Toi", img = ACCT?.avatar ? `<img src="${esc(ACCT.avatar)}" alt="">` : `<span class="zd-ini">${esc(name[0].toUpperCase())}</span>`;
-  return `<span class="avd zd-av" style="--s:${size}px">${img}${d ? decoSVG(d) : ""}</span>`;
+// une de tes cartes (avec son design actuel) entourée d'une décoration
+function zDecoCard(d, w, card) {
+  const c = card || zSample(), cur = has(c.id) ? designOfS(save, c.id) || {} : {};
+  return cardHTML(c, { design: { ...cur, deco: d ? d.id : null }, present: true, w });
 }
+const zDecoUses = (id) => Object.values(cosOf(save).designs || {}).filter((x) => x?.deco === id).length;
 function zDecoTile(d) {
-  const own = !!decosOf(save)[d.id], on = save.cos?.deco === d.id, C = DECO_COLLS.find((c) => c.id === d.coll) || {};
-  return `<button type="button" class="zd-tile r-${d.rar} ${on ? "on" : ""}" data-zdeco="${d.id}" style="--h1:${C.c1};--h2:${C.c2};--rc:${RAR[d.rar].color}" aria-label="${esc(d.name)}, ${RAR[d.rar].label}">
-    <span class="zd-stage">${zMeAv(d, 74)}</span>
+  const own = !!decosOf(save)[d.id], n = own ? zDecoUses(d.id) : 0, C = DECO_COLLS.find((c) => c.id === d.coll) || {};
+  return `<button type="button" class="zd-tile r-${d.rar} ${n ? "on" : ""}" data-zdeco="${d.id}" style="--h1:${C.c1};--h2:${C.c2};--rc:${RAR[d.rar].color}" aria-label="${esc(d.name)}, ${RAR[d.rar].label}">
+    <span class="zd-stage zd-cstage">${zDecoCard(d, 96)}</span>
     <span class="zd-meta"><b>${esc(d.name)}</b><small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>
-      <span class="zs-price ${own ? "own" : ""}">${on ? "✓ Portée" : own ? "Possédée" : `${fmtN(COS_PRICE[d.rar])} ◆`}</span></span></button>`;
+      <span class="zs-price ${own ? "own" : ""}">${n ? `✓ Sur ${n} carte${n > 1 ? "s" : ""}` : own ? "Possédée" : `${fmtN(COS_PRICE[d.rar])} ◆`}</span></span></button>`;
 }
 function viewDecos() {
-  const F = zDecoColl(), fd = DECOS.filter((d) => d.coll === F.id), cur = save.cos?.deco ? DECO_BY_ID[save.cos.deco] : null, n = Object.keys(decosOf(save)).length;
+  const F = zDecoColl(), fd = DECOS.filter((d) => d.coll === F.id), n = Object.keys(decosOf(save)).length;
   const hero = `<section class="zd-hero" style="--h1:${F.c1};--h2:${F.c2}">
       <div class="zd-hero-t"><p class="eyebrow">Collection à la une</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
         <button class="btn gold" type="button" data-zdcoll="${F.id}">Voir la collection</button></div>
-      <div class="zd-hero-avs">${fd.slice(0, 3).map((d, i) => `<span class="zd-hero-av h${i}">${zMeAv(d, i === 1 ? 120 : 88)}</span>`).join("")}</div>
+      <div class="zd-hero-avs zd-hero-cards">${fd.slice(0, 3).map((d, i) => `<span class="zd-hero-av h${i}">${zDecoCard(d, i === 1 ? 150 : 112)}</span>`).join("")}</div>
       <span class="zd-hero-k" aria-hidden="true">${F.kanji}</span></section>`;
-  const mine = `<div class="zd-mine">${zMeAv(cur, 56)}<div><b>${cur ? esc(cur.name) : "Aucune décoration"}</b><small>${cur ? "Ta décoration actuelle, visible au comptoir, au classement et sur ton profil." : "Choisis-en une : elle s'affiche partout autour de ton avatar."} ${n ? `· ${n} possédée${n > 1 ? "s" : ""}` : ""}</small></div>${cur ? `<button class="btn sm" type="button" data-zdequip="">Retirer</button>` : ""}</div>`;
+  const mine = `<div class="zd-mine"><div><b>Une décoration habille tes cartes</b><small>Achète-la une fois, pose-la sur autant de cartes que tu veux : elle se voit dans ta collection, sur ta carte vedette (profil) et au Défilé.${n ? ` · ${n} possédée${n > 1 ? "s" : ""}` : ""}</small></div></div>`;
   const rows = DECO_COLLS.map((C) => `<section class="sec zs-row" id="zdcoll-${C.id}"><div class="zs-row-h" style="--h1:${C.c1}"><span class="zs-k zd-k">${C.kanji}</span><div><h2>${esc(C.name)}</h2><p class="note">${esc(C.tag)}</p></div></div>
       <div class="zd-grid">${DECOS.filter((d) => d.coll === C.id).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zDecoTile).join("")}</div></section>`).join("");
-  return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des décorations animées autour de ton avatar, et des objets pour tes cartes. Aucun bonus de jeu : juste du style.")}
+  return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des décorations animées autour de tes cartes, et des objets pour les personnaliser. Aucun bonus de jeu : juste du style.")}
     ${zbTabs()}<div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span></div>
     ${mine}${hero}${rows}</div>`;
 }
-// fiche d'une décoration : grand aperçu, ton profil et un message au comptoir avec elle
+// fiche d'une décoration : aperçu sur la carte de ton choix, achat, puis pose sur cette carte
 function zOpenDeco(id) {
   const d = DECO_BY_ID[id]; if (!d) return; zDecoItem = id;
-  const own = !!decosOf(save)[id], on = save.cos?.deco === id, price = COS_PRICE[d.rar], C = DECO_COLLS.find((c) => c.id === d.coll) || {}, name = ACCT?.name || "Toi";
-  const act = on ? `<button class="btn big block" type="button" data-zdequip="">Retirer cette décoration</button>`
-    : own ? `<button class="btn gold big block" type="button" data-zdequip="${id}">Porter cette décoration</button>`
-    : `<button class="btn gold big block" type="button" data-zdbuy="${id}" ${save.chakra < price ? "disabled" : ""}>Acheter et porter · ${fmtN(price)} ◆</button>
-       <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Elle reste à toi pour toujours.</p>`;
+  if (!zPrevCard || !has(zPrevCard)) zPrevCard = zSample()?.id;
+  const card = byId[zPrevCard] || zSample(), mineC = [...CARDS, ...SKINS].filter((x) => has(x.id));
+  const own = !!decosOf(save)[id], on = has(card.id) && designOfS(save, card.id)?.deco === id, price = COS_PRICE[d.rar], C = DECO_COLLS.find((c) => c.id === d.coll) || {};
+  const pick = mineC.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mineC.map((x) => `<option value="${x.id}" ${x.id === card.id ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : `<p class="note">Ouvre un booster pour la voir sur une de tes cartes.</p>`;
+  const act = !own ? `<button class="btn gold big block" type="button" data-zdbuy="${id}" ${save.chakra < price ? "disabled" : ""}>Acheter · ${fmtN(price)} ◆</button>
+       <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Elle reste à toi pour toujours et se pose sur autant de cartes que tu veux.</p>`
+    : !has(card.id) ? "" : on ? `<button class="btn big block" type="button" data-zas-ref="" data-slot="deco">Retirer de cette carte</button>`
+    : `<button class="btn gold big block" type="button" data-zas-ref="${id}" data-slot="deco">Mettre sur cette carte</button>`;
   $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(d.name)}"><div class="sheet-h"><h2>${esc(d.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="zd-prev" style="--h1:${C.c1};--h2:${C.c2}">
-        <div class="zd-prev-big">${zMeAv(d, 150)}</div>
-        <div class="zd-prev-side"><div class="zd-prof">${zMeAv(d, 54)}<div><b>${esc(name)}</b><small>${TITLE_BY_ID[save.titleShown] ? esc(TITLE_BY_ID[save.titleShown].name) : "Membre du QG"}</small></div></div>
-          <div class="zd-chat">${zMeAv(d, 34)}<div><b>${esc(name)}</b><p>Regardez ma nouvelle déco !</p></div></div></div></div>
-      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[d.rar].color};color:${RAR[d.rar].color}">${RAR[d.rar].label}</span><span class="pill">${C.kanji} ${esc(C.name || "")}</span><span class="pill">Animée</span></div>
-      ${act}</div></div>`;
-  $("overlay").hidden = false;
+    <div class="sheet-b"><div class="zs-prev" style="--h1:${C.c1};--h2:${C.c2}"><div class="zs-prev-card">${zDecoCard(d, 200, card)}</div></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[d.rar].color};color:${RAR[d.rar].color}">${RAR[d.rar].label}</span><span class="pill">${C.kanji} ${esc(C.name || "")}</span><span class="pill">Animée</span><span class="pill">Aucun bonus de jeu</span></div>
+      ${pick}${act}</div></div>`;
+  $("overlay").hidden = false; $("overlay").dataset.zdk = id; $("overlay").dataset.zdp = ""; $("overlay").dataset.zit = "";
 }
-async function zDecoDo(kind, id) {
+async function zDecoBuy(id) {
   try {
-    const r = await zCall("deco/" + kind, { id }, () => (kind === "buy" ? buyDecoS(save, id) : equipDecoS(save, id)));
+    const r = await zCall("deco/buy", { id }, () => buyDecoS(save, id));
     if (r?.state) Object.assign(save, r.state);
-    toast(kind === "buy" ? `${DECO_BY_ID[id].name} : achetée et portée.` : id ? `${DECO_BY_ID[id].name} : portée.` : "Décoration retirée.");
-    $("overlay").hidden = true; draw(); header();
+    toast(`${DECO_BY_ID[id].name} : achetée. Pose-la sur une carte.`);
+    draw(); header(); zOpenDeco(id);
   } catch (e) { toast(e.message); }
 }
 document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-zdeco]"); if (a) return zOpenDeco(a.dataset.zdeco);
-  const b = t.closest("[data-zdbuy]"); if (b) { b.disabled = true; return zDecoDo("buy", b.dataset.zdbuy); }
-  const q = t.closest("[data-zdequip]"); if (q) return zDecoDo("equip", q.dataset.zdequip || null);
+  const b = t.closest("[data-zdbuy]"); if (b) { b.disabled = true; return zDecoBuy(b.dataset.zdbuy); }
   const c = t.closest("[data-zdcoll]"); if (c) document.getElementById("zdcoll-" + c.dataset.zdcoll)?.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 function viewBoutique() {
@@ -5885,7 +5878,7 @@ function zOpenItem(id) {
         <div class="zs-prev-card">${cardHTML(card, { design, present: true, gold: has(card.id) && !own(card.id).n && own(card.id).gold > 0 })}</div></div>
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${col ? `<span class="pill">${ico(COLL_ICON[col.id] || "logo")} ${esc(col.name)}</span>` : ""}<span class="pill">Aucun bonus de jeu</span></div>
       ${pick}${act}</div></div>`;
-  $("overlay").hidden = false; $("overlay").dataset.zdrop = ""; $("overlay").dataset.zitem = id;
+  $("overlay").hidden = false; $("overlay").dataset.zdp = ""; $("overlay").dataset.zit = id; $("overlay").dataset.zdk = "";
 }
 const ZS_SEG = { zShopF: (v) => { zShopFilter = v; } };
 
@@ -5917,7 +5910,7 @@ function viewAtelier() {
         </div>
         <label class="zpick">Carte à personnaliser <select id="zCard">${mine.map((x) => `<option value="${x.id}" ${x.id === zDraftCard ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)} (${RAR[x.rar].label})</option>`).join("")}</select></label>
       </div>
-      <div class="zat-slots">${(() => { const own = DECOS.filter((d) => decosOf(save)[d.id]); return `<div class="zslot"><p class="eyebrow mut">Décoration (celles de ton profil)</p>
+      <div class="zat-slots">${(() => { const own = DECOS.filter((d) => decosOf(save)[d.id]); return `<div class="zslot"><p class="eyebrow mut">Décoration</p>
         <div class="zopts"><button type="button" class="zopt ${zDraft.deco ? "" : "on"}" data-zset="deco" data-ref="">Aucune</button>
         ${own.map((d) => `<button type="button" class="zopt ${zDraft.deco === d.id ? "on" : ""}" data-zset="deco" data-ref="${d.id}" style="--c:${RAR[d.rar].color}"><i></i>${esc(d.name)}<small>Décoration</small></button>`).join("")}
         ${own.length ? "" : `<span class="note">Aucune pour l'instant : <a href="#/boutique">Boutique</a>, onglet Décorations d'avatar.</span>`}</div></div>`; })()}
@@ -5996,14 +5989,14 @@ function zDropOpen(id) {
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${c.only ? `<span class="pill">Exclusif du Sanctuaire</span>` : ""}</div>
       ${mine.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mine.map((x) => `<option value="${x.id}" ${x.id === zPrevCard ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : `<p class="note">Ouvre un booster pour le voir sur une de tes cartes.</p>`}
       ${ref && card ? `<button class="btn gold big block" type="button" data-zas-ref="${ref}" data-slot="${c.slot}">Mettre sur cette carte</button>` : `<p class="note">${ref ? "" : "Pas encore à toi : il sort des invocations."}</p>`}</div></div>`;
-  $("overlay").hidden = false; $("overlay").dataset.zdrop = id; $("overlay").dataset.zitem = "";
+  $("overlay").hidden = false; $("overlay").dataset.zdp = id; $("overlay").dataset.zit = ""; $("overlay").dataset.zdk = "";
 }
 document.addEventListener("click", (e) => {
   const d = e.target.closest("[data-zdrop]"); if (d) return zDropOpen(d.dataset.zdrop);
-  const b = e.target.closest("[data-zas-ref]"); if (b) { const card = zPrevCard, slot = b.dataset.slot, design = { ...(cosOf(save).designs[card] || {}), [slot]: b.dataset.zasRef };
-    zCall("design", { card, design }, () => saveDesignS(save, card, design)).then(() => { toast(`Posé sur ${nameOf(byId[card])}.`); $("overlay").hidden = true; draw(); }).catch((err) => toast(err.message)); }
+  const b = e.target.closest("[data-zas-ref]"); if (b) { const card = zPrevCard, slot = b.dataset.slot, design = { ...(cosOf(save).designs[card] || {}), [slot]: b.dataset.zasRef || null };
+    zCall("design", { card, design }, () => saveDesignS(save, card, design)).then(() => { toast(b.dataset.zasRef ? `Posé sur ${nameOf(byId[card])}.` : `Retiré de ${nameOf(byId[card])}.`); $("overlay").hidden = true; draw(); }).catch((err) => toast(err.message)); }
 });
-document.addEventListener("change", (e) => { if (e.target.id === "zPrevCard") { zPrevCard = e.target.value; const o = $("overlay").dataset; if (o.zitem) zOpenItem(o.zitem); else zDropOpen(o.zdrop); } });
+document.addEventListener("change", (e) => { if (e.target.id === "zPrevCard") { zPrevCard = e.target.value; const o = $("overlay").dataset; if (o.zdk) zOpenDeco(o.zdk); else if (o.zit) zOpenItem(o.zit); else zDropOpen(o.zdp); } });
 // tout ce qu'une invocation peut donner, rareté par rareté, avec la chance de chaque objet et ce que tu as déjà
 let zDropR = "";
 function zDrops() {

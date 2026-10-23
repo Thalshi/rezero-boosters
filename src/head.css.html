@@ -2173,7 +2173,7 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 @keyframes dk-drip { 0% { transform: translateY(-3px); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(8px); opacity: 0; } }
 @keyframes dk-throb { 0%, 100% { transform: scale(.85); } 50% { transform: scale(1.12); } }
 @media (prefers-reduced-motion: reduce) { svg.dk * { animation: none !important; } }
-/* Boutique : décorations d'avatar */
+/* Boutique : décorations de cartes */
 .zd-av { width: var(--s); height: var(--s); }
 .zd-av > img, .zd-av > .zd-ini { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: linear-gradient(160deg, #3a2a5a, #15102a); box-shadow: 0 0 0 3px #0b0916; }
 .zd-ini { font: 800 calc(var(--s) * .42) Cinzel, Georgia, serif; color: #f0d38c; line-height: 1; }
@@ -2183,6 +2183,8 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 .zd-tile:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 #ffffff26, 0 8px 0 #05040b, 0 22px 36px #000c, 0 0 26px color-mix(in srgb, var(--h1) 35%, transparent); }
 .zd-tile.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f88, 0 5px 0 #05040b; }
 .zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
+.zd-cstage { height: 200px; padding: 14px 0; overflow: hidden; } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
+.zd-hero-cards { gap: 34px; padding: 18px 0; }
 .zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
 .zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
 .zd-k { font: 800 22px Cinzel, Georgia, serif; color: var(--h1); }

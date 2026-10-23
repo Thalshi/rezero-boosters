@@ -133,3 +133,5 @@ try { if (typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table) document.documen
 })();
 // changement de page : le contenu arrive en profondeur (la classe ne reste que le temps de l'animation)
 addEventListener("hashchange", () => { const v = document.getElementById("view"); if (!v) return; v.classList.remove("v-enter"); void v.offsetWidth; v.classList.add("v-enter"); clearTimeout(v._vt); v._vt = setTimeout(() => v.classList.remove("v-enter"), 800); });
+// le monde 3D du QG derrière l'app (une fois la page affichée, sans retarder le démarrage)
+(window.requestIdleCallback || ((f) => setTimeout(f, 600)))(() => World3D.start());

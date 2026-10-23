@@ -511,6 +511,7 @@ function drawOpening() {
   const o = opening, el = $("stage");
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
   const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">${ico("labo")} Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
+  if (Open3D.draw(el, o, top)) return;
   if ((Coffre.isChest(o.pk) || o.scenario) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
@@ -567,7 +568,7 @@ async function tearPack() {
   }
   opening.phase = "cards"; drawOpening();
 }
-function closeStage() { Coffre.stop(); Reveal.stop(); opening = null; setTimeout(flushTitles, 0); loadStyles(); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
+function closeStage() { Coffre.stop(); Reveal.stop(); Open3D.stop(); opening = null; setTimeout(flushTitles, 0); loadStyles(); $("stage").hidden = true; $("stage").innerHTML = ""; $("stage").dataset.cf = ""; draw(); }
 function unlocked(x) {
   const c = byId[x.id];
   $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Objet déverrouillé"><div class="sheet-h"><h2>Objet déverrouillé !</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>

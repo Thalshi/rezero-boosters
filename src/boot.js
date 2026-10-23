@@ -47,10 +47,10 @@ document.addEventListener("click", (e) => {
   if (act === "pool") return openPool(ab.dataset.p);
   const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
   if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
-  if (act === "skip") { Coffre.stop(); Reveal.stop(); opening.phase = "done"; return drawOpening(); }
+  if (act === "skip") { Coffre.stop(); Reveal.stop(); Open3D.stop(); opening.phase = "done"; return drawOpening(); }
   if (act === "cf-next") return Coffre.next();
   if (act === "cf-sound") return Coffre.toggleSound();
-  if (act === "stage-back") { Reveal.stop(); if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
+  if (act === "stage-back") { Reveal.stop(); Open3D.stop(); if (opening.phase === "done") return closeStage(); opening.phase = "done"; return drawOpening(); }
   if (act === "stage-close") return closeStage();
   if (act === "to-col") { closeStage(); return nav("collection"); }
   if (act === "to-atelier") { closeStage(); return nav("atelier"); }

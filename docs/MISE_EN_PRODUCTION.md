@@ -4,6 +4,7 @@ Rien de ce document n'est exécuté sans ton accord explicite (Reichi). Branche 
 En production depuis le 22/10/2026 : tout (`dev/re-zero-complet` fusionnée dans `main`, nouveautés ouvertes). Point de restauration D1 pris juste avant : `0000000e-000000f9-0000510c-c116b22844c0cc2ed9ae514596faa219`.
 Deuxième mise en production le 22/10/2026 au soir (nouveau coffre et clé, dévoilement carte par carte, titres, perso choisi parmi ses cartes en Confrontation, style de Confrontation sur les cartes). Point de restauration D1 pris juste avant : `00000010-00000000-0000510c-cf3b138cc44089a8cf19c7038b779a7e`.
 Troisième mise en production le 23/10/2026 (icônes néon à la place des kanji, arène 3D de Confrontation, salon de table). Point de restauration D1 pris juste avant : `00000014-00000000-0000510d-24f913897d874991282b91dd155a1973`.
+Quatrième mise en production le 23/10/2026 (ouvertures en 3D : coffre et ses 30 scénarios, pochette à déchirer). Point de restauration D1 pris juste avant : `00000018-00000000-0000510d-ba3016c075d37598741ee3e74dd3fe13`.
 
 ## 1. Ce qui partirait en production
 

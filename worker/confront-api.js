@@ -8,7 +8,7 @@ import { botAction } from "./confront/bots.mjs";
 import { brancheProposeeCarte } from "./confront/branches-proposees.mjs";
 import { BRANCHES, BRANCH_IDS } from "./confront/branches.mjs";
 import { CARD_DEFS, SIGNES } from "./confront/cards.mjs";
-import { modeFor } from "./confront/config.mjs";
+import { modeFor, DEFAULT_CONFIG } from "./confront/config.mjs";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, error, code) => json({ error, code }, status);
@@ -56,6 +56,10 @@ async function release(env, h, g) {
     const rc = res?.recompenses?.[p.id];
     if (rc?.eligible) {
       G.trackS(s, "cfPlay", 1, now);
+      // essence : seulement les CF_REWARD.max premières parties valables du jour
+      const day = G.dayKey(now);
+      if (s.cfDay?.day !== day) s.cfDay = { day, n: 0 };
+      if (s.cfDay.n < G.CF_REWARD.max) { s.cfDay.n++; s.chakra += G.CF_REWARD.partie + (rc.gagnant ? G.CF_REWARD.victoire : 0); }
       if (rc.gagnant) {
         G.trackS(s, "cfWin", 1, now); if (p.role) G.trackS(s, "cfWin_" + p.role, 1, now);
         if (p.vivant && p.pv === 1) G.trackS(s, "cfWin1pv", 1, now);
@@ -93,7 +97,7 @@ const names = async (env, ids) => {
 const SALON_MAX = 40, SALON_LEN = 120, SALON_GAP = 2000, SALON_EMOTES = ["salut", "haha", "respect", "defi", "grr", "quoi", "ouin", "pardon"];
 async function viewOf(env, g, uid) {
   const me = g.state.players.some((p) => p.id === uid) ? uid : null;
-  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me), salon: (g.salon || []).slice(-SALON_MAX) };
+  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, partage: !g.state.config.persoLibre, invite: g.invite || null, duel: g.duel || null, refuse: !!g.refuse, ferme: !!g.ferme, prets: g.prets || {}, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me), salon: (g.salon || []).slice(-SALON_MAX) };
 }
 // cartes de collection apportables : celles du joueur, avec leur branche (rien d'autre du catalogue n'est envoyé)
 // proposition : branche donnée à la création (carte, puis perso créé depuis l'app), sinon la table proposée
@@ -114,12 +118,26 @@ export async function confrontRoute(env, user, path, body, h) {
   if (!path.startsWith("/api/game/confront/")) return null;
   if (!G.featureOn(h.cfg, "confrontation") && !user.admin) return fail(403, "Re Zéro : Confrontation n'est pas encore ouvert.");
   const a = path.slice("/api/game/confront/".length);
-  if (a === "catalogue") return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES });
+  // règles des présages (quel élément réussit quoi) et des tables, pour les expliquer dans la pioche
+  if (a === "catalogue") { const C = DEFAULT_CONFIG; return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES, regles: { presage: C.presage, defensePetite: C.petiteTable.defense, reprise: C.precision.repriseSiParee, equipMax: C.equipMax, retraits: C.retraitsParMode } }); }
   // le style (branche) de chacune de MES cartes, pour l'afficher dans la collection et sur les fiches ;
   // jamais celles des cartes qu'on n'a pas (pas de spoil)
   if (a === "mes-styles") {
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
     return json({ cartes: s ? Object.fromEntries(myCards(s, await branchChoices(env)).map((c) => [c.cardId, c.branch])) : {} });
+  }
+  // deck enregistré : une carte par style, reprise en un toucher à la partie suivante (seulement mes cartes)
+  if (a === "deck") {
+    const ids = Array.isArray(body.cartes) ? [...new Set(body.cartes.map(String))].slice(0, BRANCH_IDS.length) : null;
+    if (!ids) return fail(400, "Deck invalide.");
+    const choix = await branchChoices(env);
+    const r = await h.mutate(env, user.id, (s) => {
+      const mine = Object.fromEntries(myCards(s, choix).map((c) => [c.cardId, c.branch]));
+      if (ids.some((id) => !mine[id])) return { abort: true, error: "Une de ces cartes n'est pas dans ta collection." };
+      if (new Set(ids.map((id) => mine[id])).size !== ids.length) return { abort: true, error: "Une seule carte par style." };
+      s.cfDeck = ids; return {};
+    });
+    return r.error ? fail(400, r.error) : json({ deck: ids });
   }
   // admin : la branche de chaque carte (proposition et choix de Billy), et la modifier
   if (a === "branches" || a === "branches/set") {
@@ -140,17 +158,27 @@ export async function confrontRoute(env, user, path, body, h) {
   if (a === "list") {
     const since = Date.now() - STALE;
     const rows = (await env.DB.prepare("SELECT data FROM docs WHERE coll = 'confront' AND updated > ? ORDER BY updated DESC LIMIT 60").bind(since).all()).results.map((r) => JSON.parse(r.data));
-    const pub = (g) => ({ gid: g.id, nom: g.nom, phase: g.state.phase, joueurs: g.state.players.length, createur: g.createur });
+    const pub = (g) => ({ gid: g.id, nom: g.nom, phase: g.state.phase, joueurs: g.state.players.length, createur: g.createur, partage: !g.state.config.persoLibre, invite: g.invite || null });
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
+    rows.splice(0, rows.length, ...rows.filter((g) => !g.ferme));
     return json({ salons: rows.filter((g) => g.public && g.state.phase === "lobby").map(pub), enCours: rows.filter((g) => g.public && g.state.phase !== "lobby" && g.state.phase !== "fin").map(pub),
-      miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], verrou: s?.confront || null });
+      miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub),
+      defis: rows.filter((g) => g.invite === user.id && g.state.phase === "lobby" && !g.state.players.some((p) => p.id === user.id)).map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], deck: s?.cfDeck || [], verrou: s?.confront || null });
   }
   if (a === "create") {
     if (!user.member && !user.admin) return fail(403, "Réservé aux membres du QG de Shinjuku.");
     const gid = newGid(), now = Date.now();
-    const g = { id: gid, nom: String(body.nom || `Table de ${user.name}`).slice(0, 40), public: !!body.public, createur: user.id, t: now,
-      state: createGame({ players: [{ id: user.id }], seed: gid + ":" + now + ":" + Math.random(), lobby: true, now }) };
+    // défi en duel depuis un profil : table privée, la personne défiée reçoit une notification
+    const invite = body.invite ? String(body.invite) : null;
+    if (invite && (invite === user.id || isBot(invite))) return fail(400, "Défi impossible.");
+    if (invite && !(await h.loadRow(env, invite))) return fail(404, "Joueur introuvable.");
+    // « cartes partagées » : on tire ses persos dans les cartes de toute la table ; sinon chacun joue son deck
+    const partage = !invite && !!body.partage;
+    const nom = invite ? `Duel : ${user.name} contre ${String((await names(env, [invite]))[invite]?.name || "?").slice(0, 16)}` : String(body.nom || `Table de ${user.name}`);
+    const g = { id: gid, nom: nom.slice(0, 40), public: invite ? false : !!body.public, createur: user.id, t: now, ...(invite ? { invite, duel: invite } : {}),
+      state: createGame({ players: [{ id: user.id }], seed: gid + ":" + now + ":" + Math.random(), lobby: true, now, config: { persoLibre: !partage } }) };
     if (!(await save(env, gid, g))) return fail(503, "Réessaie.");
+    if (invite) await h.notify(env, invite, "confront", `${user.name} te défie en duel à Confrontation !`, { go: "confront/" + gid }).catch(() => null);
     return json(await viewOf(env, g, user.id));
   }
   const gid = String(body.gid || "").toUpperCase();
@@ -168,6 +196,48 @@ export async function confrontRoute(env, user, path, body, h) {
       g.state = out.state; return {};
     });
     return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
+  }
+  // réglage du salon par l'hôte : cartes partagées ou chacun son deck (tout le monde le voit avant de lancer)
+  if (a === "reglage") {
+    const r = await edit(env, h, gid, (g) => {
+      if (g.state.hote !== user.id) return { error: "Seul l'hôte règle la table.", status: 403 };
+      if (g.state.phase !== "lobby") return { error: "La partie est lancée.", status: 400 };
+      if (g.duel) return { error: "Un duel se joue chacun avec son deck.", status: 400 };
+      // le mode change : chacun doit redire qu'il est prêt
+      if (g.state.config.persoLibre !== !body.partage) g.prets = {};
+      g.state.config.persoLibre = !body.partage; return {};
+    });
+    return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
+  }
+  // « prêt » : l'hôte ne lance que quand tous les autres joueurs le sont (les bots le sont d'office)
+  if (a === "pret") {
+    const r = await edit(env, h, gid, (g) => {
+      if (g.state.phase !== "lobby") return { error: "La partie est lancée.", status: 400 };
+      if (!g.state.players.some((p) => p.id === user.id)) return { error: "Assieds-toi d'abord à la table.", status: 400 };
+      g.prets ||= {}; if (body.pret === false) delete g.prets[user.id]; else g.prets[user.id] = true; return {};
+    });
+    return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
+  }
+  // fermer le salon (créateur ou hôte, avant le lancement) : plus personne ne peut s'y asseoir, les joueurs sont prévenus
+  if (a === "fermer") {
+    const r = await edit(env, h, gid, (g) => {
+      if (g.createur !== user.id && g.state.hote !== user.id && !user.admin) return { error: "Seul l'hôte ferme le salon.", status: 403 };
+      if (g.state.phase !== "lobby") return { error: "La partie est lancée : chacun peut la quitter.", status: 400 };
+      g.ferme = true; return {};
+    });
+    if (r.error) return fail(r.status || 400, r.error);
+    for (const p of r.g.state.players) if (p.id !== user.id && !isBot(p.id)) await h.notify(env, p.id, "confront", `${user.name} a fermé le salon « ${r.g.nom} ».`, { go: "confront" }).catch(() => null);
+    return json({ ok: true });
+  }
+  // défi refusé : la table est fermée et le joueur qui a défié est prévenu
+  if (a === "refuser") {
+    const r = await edit(env, h, gid, (g) => {
+      if (g.invite !== user.id || g.state.phase !== "lobby") return { error: "Pas de défi à refuser.", status: 400 };
+      g.invite = null; g.refuse = true; return {};
+    });
+    if (r.error) return fail(r.status || 400, r.error);
+    await h.notify(env, r.g.createur, "confront", `${user.name} a refusé ton duel.`, { go: "confront" }).catch(() => null);
+    return json({ ok: true });
   }
   // salon de la table : messages courts et émotes, visibles de tous ; seuls les joueurs de la table écrivent
   if (a === "salon") {
@@ -190,13 +260,25 @@ export async function confrontRoute(env, user, path, body, h) {
     if (action.type === "rejoindre" && !user.member && !user.admin) return fail(403, "Réservé aux membres du QG de Shinjuku.");
     if (action.type === "contribuer") {
       // la contribution vient de la vraie collection : une carte possédée par branche, branche donnée par le serveur
-      if (s.confront && s.confront.gid !== gid && Date.now() - s.confront.t < STALE) return fail(400, "Tu as déjà des cartes engagées dans une autre partie.");
       const ids = [...new Set((Array.isArray(action.cartes) ? action.cartes : []).map(String))].slice(0, BRANCH_IDS.length);
+      if (ids.length && s.confront && s.confront.gid !== gid && Date.now() - s.confront.t < STALE) return fail(400, "Tu as déjà des cartes engagées dans une autre partie.");
       const mine = Object.fromEntries(myCards(s, await branchChoices(env)).map((c) => [c.cardId, c.branch]));
       if (ids.some((id) => !mine[id])) return fail(400, "Tu ne peux apporter que des cartes de ta collection.");
+      // « chacun son deck » : on joue ses propres cartes (les persos prêtés, seulement si on n'en a aucune)
+      const cur = await load(env, gid);
+      if (cur?.g.state.config.persoLibre && !ids.length && Object.keys(mine).length) return fail(400, "Table « chacun son deck » : choisis au moins une de tes cartes.");
       action.cartes = ids.map((id) => ({ instanceId: user.id + ":" + id, cardId: id, branch: mine[id], cosmetique: G.designOfS(s, id) || undefined }));
     }
     const r = await edit(env, h, gid, (g, now) => {
+      // table de duel : seule la personne défiée peut s'asseoir
+      if (action.type === "rejoindre" && g.duel && g.duel !== user.id) return { error: "Cette table est un duel privé.", status: 403 };
+      if (action.type === "rejoindre" && g.refuse) return { error: "Ce défi a été refusé.", status: 400 };
+      if (g.ferme) return { error: "Ce salon a été fermé par l'hôte.", status: 400 };
+      if (action.type === "lancer" && g.state.hote === user.id) {
+        const attente = g.state.players.filter((p) => p.id !== user.id && !isBot(p.id) && !g.prets?.[p.id]);
+        if (attente.length) return { error: `Tout le monde n'est pas prêt (${attente.length} en attente).`, status: 400, code: "PAS_PRETS" };
+      }
+      if ((action.type === "rejoindre" || action.type === "quitter") && g.prets) delete g.prets[user.id];
       const out = act(g.state, user.id, action, now);
       if (out.error) return { error: out.error.message, code: out.error.code };
       g.state = out.state; return {};

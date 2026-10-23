@@ -6,6 +6,7 @@ Deuxième mise en production le 22/10/2026 au soir (nouveau coffre et clé, dév
 Troisième mise en production le 23/10/2026 (icônes néon à la place des kanji, arène 3D de Confrontation, salon de table). Point de restauration D1 pris juste avant : `00000014-00000000-0000510d-24f913897d874991282b91dd155a1973`.
 Quatrième mise en production le 23/10/2026 (ouvertures en 3D : coffre et ses 30 scénarios, pochette à déchirer). Point de restauration D1 pris juste avant : `00000018-00000000-0000510d-ba3016c075d37598741ee3e74dd3fe13`.
 Cinquième mise en production le 23/10/2026 (compte de test : repartir de zéro et récupérer son vrai compte, dev et admin). Point de restauration D1 pris juste avant : `0000001a-0000006d-0000510d-d29459841fcac8379a9158015322f1e9`.
+Sixième mise en production le 23/10/2026 (économie dure, missions refaites, salons de Confrontation : prêt, fermer, duel, partage, chacun son deck ; arène seule, quitter la partie à tout moment ; seulement la 3D aux ouvertures ; Gestion à onglets ; notifications, aperçu du Défilé). Point de restauration D1 pris juste avant : `0000001e-00000000-0000510d-2cbb3754473085ba417682a3a684ef34`.
 
 ## 1. Ce qui partirait en production
 

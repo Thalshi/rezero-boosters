@@ -72,13 +72,13 @@ function viewLabo() {
     <div class="lab-warn">Bac à sable : rien de ce qui se passe ici n'est réel.</div>
     <section class="sec"><h2>Partie de test</h2>
       ${s ? `<div class="card stat4"><div><b>${fmtN(s.chakra)}</b><span>Essence de test</span></div><div><b>${s.free}</b><span>Boosters gratuits</span></div><div><b>${statsS(s).unique}</b><span>Cartes</span></div><div><b>${cos.inst.length + Object.keys(cos.own).length}</b><span>Cosmétiques</span></div></div>
-        <p class="note">Pity Mythique : ${s.sinceMythic}/${MYTHIC_PITY} · pity dorée : ${s.sinceGold} · pity d'invocation : ${cos.sinceM}/${SUMMON_PITY_M}</p>` : `<p class="note">Chargement…</p>`}
+        <p class="note">Pity Légendaire : ${s.sinceLegend || 0}/${LEGEND_PITY} · pity dorée : ${s.sinceGold} · pity Légendaire d'invocation : ${cos.sinceL || 0}/${SUMMON_PITY_L}</p>` : `<p class="note">Chargement…</p>`}
       <div class="lab-form" id="labForm">
         <label>Essence <input type="number" min="0" name="chakra" value="${s?.chakra ?? LAB_START.chakra}"></label>
         <label>Gratuits <input type="number" min="0" name="free" value="${s?.free ?? LAB_START.free}"></label>
-        <label>Pity Mythique <input type="number" min="0" name="sinceMythic" value="${s?.sinceMythic ?? 0}"></label>
+        <label>Pity Légendaire <input type="number" min="0" name="sinceLegend" value="${s?.sinceLegend ?? 0}"></label>
         <label>Pity dorée <input type="number" min="0" name="sinceGold" value="${s?.sinceGold ?? 0}"></label>
-        <label>Pity invocation <input type="number" min="0" name="sinceM" value="${cos?.sinceM ?? 0}"></label>
+        <label>Pity invocation <input type="number" min="0" name="sinceL" value="${cos?.sinceL ?? 0}"></label>
       </div>
       <div class="row"><button class="btn sm" type="button" data-act="lab-set">Appliquer les valeurs</button><button class="btn sm" type="button" data-act="lab-reset">Repartir de zéro</button><button class="btn sm" type="button" data-act="lab-full">Repartir avec toutes les cartes</button></div></section>
     <section class="sec"><h2>Tester une ouverture</h2>

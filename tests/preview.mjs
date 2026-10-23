@@ -60,7 +60,7 @@ try {
     await page.click('[data-zset][data-ref^="i:"] >> nth=0'); await page.click("[data-zsave]"); await page.waitForTimeout(800);
     t.check(`${label} · Atelier : design enregistré`, await page.evaluate((c) => !!cosOf(save).designs[c], card));
     // Défilé : Reichi ouvre, deux joueurs s'inscrivent et votent
-    await go("defile"); await page.fill("#defTitle", "Défilé de test"); await page.click('[data-act="def-new"]'); await page.waitForTimeout(1200);
+    await go("defile"); await page.fill("#defTitle", "Défilé de test"); await page.click('[data-act="def-prev"]'); await page.click('[data-act="def-new"]'); await page.waitForTimeout(1200);
     await page.click('[data-act="def-enter"]'); await page.waitForTimeout(1000);
     await who("300000000000000003"); await go("defile"); await page.waitForTimeout(1200); await page.click('[data-act="def-enter"]'); await page.waitForTimeout(1000);
     await who("666024039776518157"); await go("defile"); await page.waitForTimeout(1200); await page.click('[data-act="def-votes"]'); await page.waitForTimeout(1000);
@@ -85,7 +85,7 @@ try {
     await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800); await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800);
     await page.click(`[data-cfa='{"type":"lancer"}']`); await page.waitForTimeout(1500);
-    await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1500);
+    await page.click('.cf-pick >> nth=0').catch(() => {}); await page.waitForTimeout(300); await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1500);
     await page.click(".cf-prop .btn >> nth=0"); await page.waitForTimeout(1500);
     let phase = "", n = 0; const t0 = Date.now();
     while (Date.now() - t0 < 180000) {

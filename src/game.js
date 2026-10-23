@@ -159,40 +159,45 @@ const PACKS = [
   { id: "coffre",  name: "Coffre hextech", sub: "Skins des membres du QG",            kanji: "匠", color: "#b04ce0", fac: ["irl"], skins: true },
 ];
 const RAR = {
-  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 1 },
-  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 2 },
-  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 5 },
-  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 15 },
-  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 40 },
-  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 100 },
+  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 0 },
+  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 1 },
+  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 1 },
+  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 4 },
+  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 10 },
+  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 25 },
 };
 const RANKS = ["c", "pc", "r", "e", "l", "m"];
-const SLOT = { c: 52, pc: 27, r: 14, e: 5, l: 1.6, m: 0.4 };   // cartes 1 à 4
-const LAST = { r: 80, e: 15, l: 4, m: 1 };                        // 5e carte : Rare ou mieux
+const SLOT = { c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 };   // cartes 1 à 4
+const LAST = { r: 86, e: 11, l: 2.5, m: 0.5 };                      // 5e carte : Rare ou mieux
 // une constante par ligne : build.py exporte chaque nom vers le serveur
 const PACK = 5;
 const FREE_MAX = 3;                    // réserve de boosters gratuits
-const REGEN = 2 * 3600e3;              // un booster gratuit de plus toutes les 2 h
-const PRICE = 100;                     // prix d'un booster en boutique (◆)
+const REGEN = 3 * 3600e3;              // un booster gratuit de plus toutes les 3 h
+const PRICE = 150;                     // prix d'un booster en boutique (◆)
 const GOLD_EVERY = 10;
-const MYTHIC_PITY = 120;
-const GOLD_CHANCE = 0.02;
+const MYTHIC_PITY = 0;                 // Mythique garantie au bout de N boosters (0 = jamais : décidé par Reichi, seule la Légendaire est garantie)
+const LEGEND_PITY = 40;                // une Légendaire ou mieux garantie au plus tard au 40e booster (provisoire)
+const GOLD_CHANCE = 0.01;
+const NEW_BIAS = 0.4;                  // anti-frustration : 40 % des cartes tirées viennent de celles qui te manquent (dans la rareté tirée)
 const THEME_MIN = 5;                   // persos débloqués avant qu'un booster thématique s'ouvre (provisoire)
 const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
-const DAILY_LAST = { e: 85, l: 12, m: 3 }; // 5e carte du pack du jour : Épique ou mieux
-const STREAK = [{ boosters: 1 }, { chakra: 50 }, { boosters: 1 }, { chakra: 100 }, { boosters: 2 }, { chakra: 150 }, { boosters: 3, chakra: 300 }];
+const DAILY_LAST = { e: 90, l: 8.5, m: 1.5 }; // 5e carte du pack du jour : Épique ou mieux
+const STREAK = [{ boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 2, chakra: 100 }];
+const DAILY_N = 2;                     // missions du jour tirées chaque jour
+const WEEKLY_N = 5;                    // missions de la semaine tirées chaque semaine
 const MISSIONS = [
-  { id: "open3",  label: "Ouvre 3 boosters",                     key: "open",    goal: 3, reward: { chakra: 40 } },
-  { id: "epic1",  label: "Obtiens une carte Épique ou mieux",     key: "epic",    goal: 1, reward: { chakra: 60 } },
-  { id: "new2",   label: "Obtiens 2 nouvelles cartes",            key: "new",     goal: 2, reward: { boosters: 1 } },
-  { id: "recyc",  label: "Recycle tes doublons",                  key: "recycle", goal: 1, reward: { chakra: 30 } },
-  { id: "sell1",  label: "Mets une carte en vente au marché",     key: "sell",    goal: 1, reward: { chakra: 40 } },
-  { id: "open6",  label: "Ouvre 6 boosters",                      key: "open",    goal: 6, reward: { boosters: 1 } },
-  { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 50 } },
-  { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { boosters: 1 } },
-  { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 20 } },
-  { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 30 } },
-  { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 20 } },
+  { id: "open3",  label: "Ouvre 3 boosters",                     key: "open",    goal: 3, reward: { chakra: 15 } },
+  { id: "epic1",  label: "Obtiens une carte Épique ou mieux",     key: "epic",    goal: 1, reward: { chakra: 20 } },
+  { id: "new2",   label: "Obtiens 2 nouvelles cartes",            key: "new",     goal: 2, reward: { chakra: 15 } },
+  { id: "recyc",  label: "Recycle tes doublons",                  key: "recycle", goal: 1, reward: { chakra: 10 } },
+  { id: "sell1",  label: "Mets une carte en vente au marché",     key: "sell",    goal: 1, reward: { chakra: 15 } },
+  { id: "open6",  label: "Ouvre 6 boosters",                      key: "open",    goal: 6, reward: { chakra: 20 } },
+  { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 15 } },
+  { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { chakra: 15 } },
+  { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 10 } },
+  { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 15 } },
+  { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 10 } },
+  { id: "cf1",    label: "Joue une partie de Confrontation",        key: "cfPlay",  goal: 1, reward: { chakra: 15 } },
 ];
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
@@ -231,7 +236,7 @@ const dayKey = (ts = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone:
 const prevDay = (ts = Date.now()) => dayKey(ts - 86400e3);
 
 function freshSave(now = Date.now()) {
-  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, history: [], updated: 0, pack: "saison1",
+  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, sinceLegend: 0, history: [], updated: 0, pack: "saison1",
     streak: { last: "", n: 0 }, daily: null, paid: [], sales: 0, predPaid: [], trades: 0, crafted: 0 };
 }
 function normalizeSave(s, now = Date.now()) {
@@ -256,11 +261,13 @@ function regenS(s, now = Date.now()) {
 
 function ensureDailyS(s, now = Date.now()) {
   const today = dayKey(now);
-  if (!s.daily || s.daily.day !== today) {
+  // missions refaites : un tirage d'avant (3 missions, ou une mission retirée) est refait, la progression du jour est gardée
+  const stale = s.daily && s.daily.day === today && (s.daily.ids.length !== DAILY_N || s.daily.ids.some((id) => !MISSIONS.some((m) => m.id === id)));
+  if (!s.daily || s.daily.day !== today || stale) {
     let h = 0; for (const ch of today) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...MISSIONS], picks = [];
-    while (picks.length < 3) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.daily = { day: today, ids: picks, prog: {}, claimed: {} };
+    while (picks.length < DAILY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
+    s.daily = { day: today, ids: picks, prog: stale ? s.daily.prog : {}, claimed: {}, ...(stale && s.daily.bonus ? { bonus: true } : {}) };
   }
   return s.daily;
 }
@@ -272,18 +279,22 @@ function trackS(s, key, n = 1, now = Date.now()) {
 
 // ===== Semaine, premiers pas, succès, pack du jour (repris de Kyara) =====
 const WEEKLY = [
-  { id: "w-open20", label: "Ouvre 20 boosters",                key: "open",   goal: 20, reward: { chakra: 150 } },
-  { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend", goal: 1,  reward: { chakra: 150 } },
-  { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",   goal: 3,  reward: { chakra: 150 } },
-  { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",  goal: 2,  reward: { chakra: 200 } },
-  { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",  goal: 2,  reward: { chakra: 150 } },
-  { id: "w-epic5",  label: "Obtiens 5 Épiques ou mieux",       key: "epic",   goal: 5,  reward: { chakra: 200 } },
-  { id: "w-pred3",  label: "Vote pour 3 prédictions",          key: "predict", goal: 3, reward: { chakra: 150 } },
-  { id: "w-predok", label: "Réussis une prédiction",           key: "predwin", goal: 1, reward: { chakra: 200 } },
-  { id: "w-chat10", label: "Écris 10 messages dans le chat",   key: "chat",   goal: 10, reward: { chakra: 100 } },
+  { id: "w-open25", label: "Ouvre 25 boosters",                key: "open",    goal: 25, reward: { chakra: 100 } },
+  { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend",  goal: 1,  reward: { chakra: 100 } },
+  { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",    goal: 3,  reward: { chakra: 100 } },
+  { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",   goal: 2,  reward: { chakra: 100 } },
+  { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",   goal: 2,  reward: { chakra: 80 } },
+  { id: "w-epic8",  label: "Obtiens 8 Épiques ou mieux",       key: "epic",    goal: 8,  reward: { chakra: 100 } },
+  { id: "w-pred5",  label: "Vote pour 5 prédictions",          key: "predict", goal: 5,  reward: { chakra: 80 } },
+  { id: "w-predok", label: "Réussis 2 prédictions",            key: "predwin", goal: 2,  reward: { chakra: 120 } },
+  { id: "w-cfwin3", label: "Gagne 3 parties de Confrontation", key: "cfWin",   goal: 3,  reward: { chakra: 120 } },
+  { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
 ];
-const DAILY_BONUS = { boosters: 1 };     // les 3 missions du jour réclamées
-const WEEKLY_BONUS = { boosters: 3 };    // les 3 missions de la semaine réclamées
+const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
+const WEEKLY_BONUS = { boosters: 3 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
+const WEEKLY_BONUS_N = 3;
+// Confrontation : jouable à l'infini, mais l'essence ne vient que des premières parties valables du jour
+const CF_REWARD = { partie: 10, victoire: 10, max: 3 };
 const FIRST_STEPS = [
   { id: "f-open",   label: "Ouvre ton premier booster",    test: (s) => s.opened >= 1,                           reward: { chakra: 20 } },
   { id: "f-coffre", label: "Ouvre un coffre hextech",      test: (s) => (s.counts?.coffre || 0) >= 1,            reward: { chakra: 30 } },
@@ -333,11 +344,12 @@ function weekKey(now = Date.now()) {
 }
 function ensureWeeklyS(s, now = Date.now()) {
   const wk = weekKey(now);
-  if (!s.weekly || s.weekly.week !== wk) {
+  const staleW = s.weekly && s.weekly.week === wk && (s.weekly.ids.length !== WEEKLY_N || s.weekly.ids.some((id) => !WEEKLY.some((m) => m.id === id)));
+  if (!s.weekly || s.weekly.week !== wk || staleW) {
     let h = 7; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...WEEKLY], picks = [];
-    while (picks.length < 3) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.weekly = { week: wk, ids: picks, prog: {}, claimed: {}, bonus: false };
+    while (picks.length < WEEKLY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
+    s.weekly = { week: wk, ids: picks, prog: staleW ? s.weekly.prog : {}, claimed: {}, bonus: staleW ? !!s.weekly.bonus : false };
   }
   return s.weekly;
 }
@@ -363,7 +375,7 @@ function claimAnyS(s, kind, id, now = Date.now()) {
   }
   if (kind === "weekly-bonus") {
     const w = ensureWeeklyS(s, now);
-    if (w.bonus || weeklyS(s, now).some((m) => !m.claimed)) return null;
+    if (w.bonus || weeklyS(s, now).filter((m) => m.claimed).length < WEEKLY_BONUS_N) return null;
     w.bonus = true; giveRewardS(s, WEEKLY_BONUS); return { reward: WEEKLY_BONUS };
   }
   if (kind === "first") {
@@ -402,7 +414,7 @@ function claimableCountS(s, now = Date.now()) {
   n += achievementsS(s).filter((a) => a.prog >= a.goal && !a.claimed).length;
   const d = ensureDailyS(s, now), w = ensureWeeklyS(s, now);
   if (!d.bonus && missionsTodayS(s, now).every((m) => m.claimed)) n++;
-  if (!w.bonus && weeklyS(s, now).every((m) => m.claimed)) n++;
+  if (!w.bonus && weeklyS(s, now).filter((m) => m.claimed).length >= WEEKLY_BONUS_N) n++;
   if (!(s.first || {}).bonus && firstStepsS(s).every((f) => f.claimed)) n++;
   return n;
 }
@@ -496,10 +508,12 @@ function rollWith(table, rng) {
 }
 // La rareté est tirée d'abord. Le perso vient du thème ; si le thème n'a pas cette rareté, du Mix (même rareté) ;
 // si le Mix non plus, de la rareté inférieure la plus proche. Jamais d'une rareté plus haute.
-function pickWith(rar, pool, rng, mix = pool) {
+function pickWith(rar, pool, rng, mix = pool, missing = null) {
   for (let j = RANKS.indexOf(rar); j >= 0; j--) {
     for (const list of [pool, mix]) {
-      const l = list.filter((c) => c.rar === RANKS[j]);
+      let l = list.filter((c) => c.rar === RANKS[j]);
+      // une partie des tirages va d'office vers une carte qui manque encore (la rareté, elle, ne change pas)
+      if (l.length && missing && NEW_BIAS && rng() < NEW_BIAS) { const m = l.filter(missing); if (m.length) l = m; }
       if (l.length) return l[Math.floor(rng() * l.length)];
     }
   }
@@ -530,11 +544,17 @@ function openPackS(s, pk, pool, rng, now = Date.now(), mix = pool) {
   for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : pk.last || LAST, k), rng));
   // le pity ne compte que les boosters qui peuvent donner une Mythique (sinon il forcerait une carte impossible)
   const canMythic = pool.some((c) => c.rar === "m") || mix.some((c) => c.rar === "m");
+  // la Légendaire garantie ne compte que les boosters qui peuvent en donner une (Légendaire ou Mythique)
+  const canLegend = canMythic || pool.some((c) => c.rar === "l") || mix.some((c) => c.rar === "l");
   if (canMythic) s.sinceMythic++;
+  if (canLegend) s.sinceLegend = (s.sinceLegend || 0) + 1;
   s.sinceGold++;
-  if (canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
-  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix), gold: rng() < GOLD_CHANCE }));
+  if (MYTHIC_PITY && canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
+  if (LEGEND_PITY && canLegend && s.sinceLegend >= LEGEND_PITY && !rars.some((r) => r === "l" || r === "m")) rars[PACK - 1] = "l";
+  const missing = (c) => !hasCard(s, c.id);
+  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix, missing), gold: rng() < GOLD_CHANCE }));
   if (cards.some((x) => x.c.rar === "m")) s.sinceMythic = 0;
+  if (cards.some((x) => x.c.rar === "l" || x.c.rar === "m")) s.sinceLegend = 0;
   cards.sort((a, b) => RANKS.indexOf(a.c.rar) - RANKS.indexOf(b.c.rar));
   if (s.sinceGold >= GOLD_EVERY) cards[PACK - 1].gold = true;
   if (cards.some((x) => x.gold)) s.sinceGold = 0;
@@ -768,8 +788,9 @@ function applyCreations(data) {
 const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
 const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
 const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
-const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
-const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
+const SUMMON_RATES = { c: 42, pc: 30, r: 18, e: 7.5, l: 2.1, m: 0.4 };
+const SUMMON_PITY_M = 0;              // Mythique garantie au bout de N invocations (0 = jamais)
+const SUMMON_PITY_L = 50;             // une Légendaire ou mieux garantie au plus tard à la 50e invocation (provisoire)
 const SUMMON_5_FLOOR = "r";           // ×5 et ×10 : au moins une Rare ou mieux
 const SUMMON_10_FLOOR = "e";          // ×10 : au moins une Épique ou mieux
 const SUMMON_COUNTS = [1, 5, 10];     // ×1 : une carte ; ×5 : une pochette ; ×10 : le coffre
@@ -780,6 +801,7 @@ function cosOf(s) {
   if (!Array.isArray(c.inst)) c.inst = [];
   if (!c.designs || typeof c.designs !== "object") c.designs = {};
   if (typeof c.sinceM !== "number") c.sinceM = 0;
+  if (typeof c.sinceL !== "number") c.sinceL = 0;
   return c;
 }
 // références d'un design : « a:<id> » pour un cosmétique de compte, « i:<instance> » pour une instance
@@ -813,7 +835,7 @@ function summonS(s, n, rng, now = Date.now()) {
   if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
-  for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
+  for (let k = 0; k < n; k++) { cos.sinceM++; cos.sinceL++; let r = rollWith(SUMMON_RATES, rng); if (SUMMON_PITY_M && cos.sinceM >= SUMMON_PITY_M) r = "m"; if (SUMMON_PITY_L && cos.sinceL >= SUMMON_PITY_L && r !== "m") r = "l"; if (r === "m") cos.sinceM = 0; if (r === "l" || r === "m") cos.sinceL = 0; rars.push(r); }
   // ×5 : au moins une Rare ou mieux
   if (n >= 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
   if (n === 10 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_10_FLOOR))) rars[n - 2] = SUMMON_10_FLOOR;

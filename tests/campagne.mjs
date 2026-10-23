@@ -280,7 +280,7 @@ try {
 
   await etape("5. Défilé des Légendes à plusieurs (admin, 3 joueurs, mobile)", async () => {
   await A.go("defile"); await A.page.waitForTimeout(1200);
-  if (await A.page.locator("#defTitle").count()) { await A.page.fill("#defTitle", "Défilé de la campagne"); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1200); }
+  if (await A.page.locator("#defTitle").count()) { await A.page.fill("#defTitle", "Défilé de la campagne"); await A.page.click('[data-act="def-prev"]'); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1200); }
   for (const J of [P, Q]) { await J.page.reload(); await J.page.waitForTimeout(2000); await J.go("defile"); await J.page.waitForTimeout(1500); await J.page.click('[data-act="def-enter"]'); await J.page.waitForTimeout(1200); }
   R = await joueur(IDS.p3, "Joueur réduit", { vp: "mobile", reduced: true });
   await R.go("defile"); await R.page.waitForTimeout(1500); await R.page.click('[data-act="def-enter"]'); await R.page.waitForTimeout(1200);
@@ -304,7 +304,7 @@ try {
   await R.go("boosters"); await R.page.reload(); await R.page.waitForTimeout(2500);
   t.check("accueil : le gagnant est affiché", (await R.page.locator(".def-hall .kcw").count()) === 1);
   // nouvelle édition et retrait avec motif dans la page
-  await A.page.fill("#defTitle", "Deuxième"); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1000);
+  await A.page.fill("#defTitle", "Deuxième"); await A.page.click('[data-act="def-prev"]'); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1000);
   await R.go("defile"); await R.page.waitForTimeout(1200); await R.page.click('[data-act="def-enter"]'); await R.page.waitForTimeout(1000);
   await A.page.reload(); await A.page.waitForTimeout(2000); await A.go("defile"); await A.page.waitForTimeout(1200);
   await A.page.click(`[data-defrm="${R.id}"]`); await A.page.waitForTimeout(300);
@@ -315,13 +315,14 @@ try {
   // =====================================================================================
 
   await etape("6. Confrontation : 2 humains + 1 bot par l'interface, jusqu'à la fin", async () => {
-  const cr = await P.api.api("confront/create", { nom: "Campagne", public: true });
+  const cr = await P.api.api("confront/create", { nom: "Campagne", public: true, partage: true });
   const gid = cr.gid;
   await Q.api.api("confront/act", { gid, action: { type: "rejoindre" } });
   // vue classique ici (boutons data-cfa) : l'arène 3D a son propre test, et deux arènes en WebGL logiciel ralentissent trop la machine de test
   for (const J of [P, Q]) await J.page.evaluate(() => localStorage.setItem("cf-vue", "classique"));
   for (const J of [P, Q]) { await J.go("confront/" + gid); await J.page.waitForTimeout(1500); }
   await P.page.click('[data-act="cf-bot"]'); await P.page.waitForTimeout(1200);
+  await Q.page.click('[data-cfready="1"]'); await Q.page.waitForTimeout(1200); await P.go("confront/" + gid); await P.page.waitForTimeout(1500);
   await P.page.click(`[data-cfa='{"type":"lancer"}']`); await P.page.waitForTimeout(2200);
   for (const J of [P, Q]) { await J.page.waitForTimeout(1200); await J.page.click('[data-act="cf-contrib"]').catch(() => {}); await J.page.waitForTimeout(1500); }
   for (const J of [P, Q]) { await J.page.waitForSelector(".cf-prop .btn", { timeout: 8000 }).catch(() => {}); await J.page.click(".cf-prop .btn >> nth=0").catch(() => {}); await J.page.waitForTimeout(1200); }
@@ -356,8 +357,8 @@ try {
   for (const e of extra) await e.api("state");
   for (const n of [2, 3, 4, 5, 6, 7]) {
     const humans = [P.api, Q.api, R.api, ...extra].slice(0, Math.max(1, Math.ceil(n / 2)));
-    const c = await humans[0].api("confront/create", { nom: "T" + n });
-    for (const h of humans.slice(1)) await h.api("confront/act", { gid: c.gid, action: { type: "rejoindre" } });
+    const c = await humans[0].api("confront/create", { nom: "T" + n, partage: true });
+    for (const h of humans.slice(1)) { await h.api("confront/act", { gid: c.gid, action: { type: "rejoindre" } }); await h.api("confront/pret", { gid: c.gid, pret: true }); }
     for (let b = humans.length; b < n; b++) await humans[0].api("confront/bot", { gid: c.gid });
     await humans[0].api("confront/act", { gid: c.gid, action: { type: "lancer" } });
     let ph = "", steps = 0;

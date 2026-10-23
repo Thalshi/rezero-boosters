@@ -36,10 +36,10 @@ try {
 
   t.section("Isolation : le labo ne touche jamais la vraie partie");
   const real0 = (await A.api("state")).state, docs0 = srv.rows("SELECT COUNT(*) AS n FROM docs WHERE coll IN ('feed','players','market')")[0].n;
-  const reset = await A.api("lab/reset", { chakra: 777, free: 5, sinceMythic: G.MYTHIC_PITY - 1 });
-  t.check("partie de test : valeurs imposées", reset.lab.chakra === 777 && reset.lab.free === 5 && reset.lab.sinceMythic === G.MYTHIC_PITY - 1);
+  const reset = await A.api("lab/reset", { chakra: 777, free: 5, sinceLegend: G.LEGEND_PITY - 1 });
+  t.check("partie de test : valeurs imposées", reset.lab.chakra === 777 && reset.lab.free === 5 && reset.lab.sinceLegend === G.LEGEND_PITY - 1);
   const pity = await A.api("lab/open", { pack: "mix", all: true });
-  t.check(`pity à ${G.MYTHIC_PITY - 1} : la Mythique tombe au booster suivant du labo`, pity.cards.some((x) => G.CARD_BY_ID[x.id].rar === "m"), pity.cards.map((x) => G.CARD_BY_ID[x.id].rar));
+  t.check(`pity à ${G.LEGEND_PITY - 1} : la Légendaire (ou mieux) tombe au booster suivant du labo`, pity.cards.some((x) => ["l", "m"].includes(G.CARD_BY_ID[x.id].rar)), pity.cards.map((x) => G.CARD_BY_ID[x.id].rar));
   const picks = [["m", 0], ["m", 1], ["c", 0], ["c", 1], ["c", 2]].map(([r, i]) => ({ id: G.SKINS.filter((c) => c.rar === r)[i].id, gold: false }));
   const forced = await A.api("lab/open", { pack: "coffre", cards: picks, scenario: "tr-jumeaux" });
   t.check("ouverture imposée : les 5 cartes choisies et le scénario", forced.status === 200 && forced.cards.map((x) => x.id).join() === picks.map((x) => x.id).join() && forced.scenario === "tr-jumeaux" && forced.compatible === true);

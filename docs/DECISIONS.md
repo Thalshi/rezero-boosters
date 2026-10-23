@@ -6,7 +6,7 @@ Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lance
 ## Économie des boosters
 | # | Décision | Options | Provisoire | Où |
 |---|---|---|---|---|
-| E1 🔴 | Rythme de l'économie | Accessible 30 j / Équilibré 45 j / Collectionneur 60 j pour finir le Mix (joueur régulier) | réserve 3, +1 / 2 h, 100 ◆, recyclage 1/2/5/15/40/100 (≈ 29 j) | `FREE_MAX`, `REGEN`, `PRICE`, `RAR[].chakra` |
+| E1 ✅ | Rythme de l'économie | décidé par Reichi le 23/10 : économie dure, sans frustration | réserve 3, +1 / 3 h, booster et invocation 150 ◆, recyclage 0/1/1/4/10/25, probabilités dures, Légendaire garantie (40 boosters, 50 invocations), Mythique jamais garantie, anti-doublons 40 % ; missions : 2 du jour, 5 de la semaine (bonus dès 3), série surtout en boosters ; Mix ≈ 89 j pour un régulier | `FREE_MAX`, `REGEN`, `PRICE`, `RAR[].chakra`, `SLOT`, `LAST`, `NEW_BIAS`, `LEGEND_PITY`, `MISSIONS`, `WEEKLY` |
 | E2 🟠 | Seuil d'ouverture d'un booster thématique | 5, 8 ou 10 persos (+ C/PC/R présents) | 5 | `THEME_MIN` |
 | E3 🟠 | Saison 1 (édition limitée) | garder ×2 L/M ou non ; durée | gratuit seulement, non achetable | `PACKS` |
 | E4 🟢 | Noms définitifs des nouveaux persos | Billy | « ??? », Ogre 1…4, Soldat 1–2, Castor 1–2… | `PEOPLE` |
@@ -41,8 +41,8 @@ Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lance
 | # | Décision | Options | Provisoire | Où |
 |---|---|---|---|---|
 | F1 🟠 | PV et limite de main | | 6 / 5 / 4 PV (+1 chef) ; main = PV | `worker/confront/config.mjs` |
-| F2 🟠 | Récompenses de partie et anti-farm | rien / essence plafonnée | à proposer après les simulations | |
-| F3 🟢 | Affichage de la partie | arène 3D / plateau classique | arène 3D par défaut (Three.js depuis le CDN jsdelivr), « Vue classique » en un clic et en secours sans WebGL | `src/arena.js` |
+| F2 ✅ | Récompenses de partie et anti-farm | décidé le 23/10 : jeu illimité, gains limités | 10 ◆ par partie valable + 10 si victoire, 3 premières parties du jour | `CF_REWARD` |
+| F3 ✅ | Affichage de la partie | décidé le 23/10 : seulement l'arène 3D | plus de « Vue classique » ; le plateau classique reste en secours sans WebGL. Salon et choix des cartes en 3D : maquettes à valider (https://claude.ai/artifact/16p1nCHePT95TFvBcpojSU) | `src/arena.js` |
 | F4 🟢 | Salon de la table | | 8 émotes, messages de 120 caractères, 1 message toutes les 2 s, 40 derniers gardés, seuls les joueurs de la table écrivent | `worker/confront-api.js` |
 
 ## Titres

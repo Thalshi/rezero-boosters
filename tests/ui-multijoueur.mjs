@@ -23,7 +23,7 @@ try {
   const menu = async (p) => { await p.click(p.viewportSize().width > 900 ? "#avBtn" : "#menuBtn"); await sleep(300); const items = await p.$$eval("#menu .mgrid button", (bs) => bs.map((b) => b.dataset.nav)); await p.click(p.viewportSize().width > 900 ? "#avBtn" : "#menuBtn"); return items; };
   const mB = await menu(B), mR = await menu(R), mT = await menu(T);
   t.check("Billy : Admin sans Dev", mB.includes("admin") && !mB.includes("dev"));
-  t.check("Reichi : Admin et Dev", mR.includes("admin") && mR.includes("dev"));
+  t.check("Reichi : une seule entrée Gestion (Admin et Dev sont des onglets)", mR.includes("admin") && !mR.includes("dev"));
   t.check("joueur : ni Admin ni Dev", !mT.includes("admin") && !mT.includes("dev"));
 
   t.section("Boosters");

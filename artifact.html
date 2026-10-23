@@ -1707,6 +1707,78 @@ body.ar-on { overflow: hidden; }
 @keyframes o3name { 0%, 20% { opacity: 0; transform: translateX(-30px) skewX(-12deg); } 30% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(20px); } }
 #stage .stage-top { position: relative; z-index: 3; }
 @media (max-width: 600px) { .o3-sub { display: none; } }
+/* compteur discret dans un onglet (nombre d'objets, pas une alerte) */
+.utabs .tcount { margin-left: 6px; font: 600 12px var(--mono, monospace); color: var(--mut); }
+
+/* Défilé : bandeau d'aperçu (admin) */
+.def-prev-bar { margin: 0 0 18px; padding: 12px 16px; border: 1px dashed var(--gold); border-radius: 12px; background: #f5c5180f; color: var(--fg2); }
+.def-prev-bar b { color: var(--gold); margin-right: 8px; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; }
+
+/* Gestion : barre d'onglets commune aux pages admin et dev */
+.gest { padding-top: 24px; } .gest .eyebrow { margin-bottom: 6px; }
+.gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
+.gest-tabs .ic { width: 16px; height: 16px; }
+.gest + .wrap.page { padding-top: 24px; }
+/* ===== Confrontation : cartes de la table (chacun son deck / partagées), partage du salon ===== */
+.cf-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; }
+.cf-mode { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line3); background: var(--bg2); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }
+.cf-mode b { font: 700 14px var(--body); } .cf-mode small { font: 500 12px/1.4 var(--body); color: var(--mut); }
+.cf-mode.on, .cf-mode:has(input:checked) { border-color: var(--gold); box-shadow: 0 0 14px #f5c51833; }
+.cf-mode input { position: absolute; opacity: 0; pointer-events: none; }
+label.cf-mode { position: relative; }
+.cf-share .row { flex-wrap: wrap; gap: 8px; margin: 12px 0; } .cf-share input { width: 100%; }
+.cf-defis .cf-row { border-color: var(--gold); }
+.cf-lobby .pill.cf-ready { border-color: #3fbf7f88; color: #7fe0ad; }
+
+/* ===== Confrontation : choix des cartes façon draft ===== */
+.cf-deckbar { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 800px) { .cf-deckbar { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.cf-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 12px; border: 1px dashed var(--line3); background: var(--bg2); color: var(--fg); cursor: pointer; min-width: 0; font: inherit; }
+.cf-slot.on { border-style: solid; border-color: var(--gold); box-shadow: 0 0 14px #f5c51833; }
+.cf-slot.cur { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.cf-slot .cf-emb.big { width: 46px; height: 46px; opacity: .5; }
+.cf-slot-art { width: 46px; height: 62px; border-radius: 6px; overflow: hidden; position: relative; display: block; }
+.cf-slot-art .cf-th { position: absolute; inset: 0; display: block; }
+.cf-slot-art .cf-th > div { position: absolute; inset: 0; }
+.cf-slot b { font: 700 11px var(--body); } .cf-slot small { font: 500 10px var(--body); color: var(--mut); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-slot i { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 11px; color: var(--mut); }
+.cf-deck-tools { gap: 8px; }
+.cf-tabs .chip .cf-emb { width: 18px; height: 18px; }
+.cf-tab-pow { display: flex; gap: 6px; align-items: center; }
+.cf-pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.cf-pick { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 0; background: none; border: 0; color: var(--fg); cursor: pointer; text-align: center; font: inherit; transition: transform .15s; }
+.cf-pick:hover { transform: translateY(-3px); }
+.cf-pick .kcw { --w: 100%; }
+.cf-pick.on .kc { box-shadow: 0 0 0 3px var(--gold), 0 0 24px #f5c51877; }
+.cf-pick-b { font: 600 12px var(--body); color: var(--fg2); display: flex; gap: 4px; justify-content: center; align-items: center; } .cf-pick-b .cf-emb { width: 16px; height: 16px; }
+.cf-pick-ok { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 4; background: var(--gold); color: #1a1405; font: 800 11px var(--body); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.cf-draft-go { position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); display: flex; justify-content: center; padding: 10px 0; background: linear-gradient(transparent, var(--bg) 40%); z-index: 5; }
+@media (min-width: 900px) { .cf-draft-go { bottom: 12px; } }
+/* arène : pioche et éléments, carte mise en avant, choix d'une carte adverse */
+.ar-deck { cursor: pointer; padding: 0; font: inherit; }
+.ar-deck em { position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 50%; background: var(--ac); color: #04161a; font: 800 11px/18px var(--body); font-style: normal; text-align: center; }
+.ar-elems { position: absolute; inset: -14px; pointer-events: none; }
+.ar-elems i { position: absolute; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: #0b0916; border: 1px solid var(--ec); color: var(--ec); }
+.ar-elems i .ic { width: 12px; height: 12px; }
+.ar-elems i:nth-child(1) { left: 0; top: 0; } .ar-elems i:nth-child(2) { right: 0; top: 0; } .ar-elems i:nth-child(3) { left: 0; bottom: 0; } .ar-elems i:nth-child(4) { right: 0; bottom: 0; }
+.ar-elgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+.ar-elgrid span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--ec) 50%, transparent); color: var(--ec); }
+.ar-elgrid .ic { width: 26px; height: 26px; } .ar-elgrid b { font: 700 12px var(--body); } .ar-elgrid small { font: 500 10px var(--body); color: var(--am); }
+.ar-pres { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 6px; } .ar-pres svg { width: 26px; height: 26px; flex: none; color: var(--ag); }
+.ar-spot { position: absolute; inset: 0; z-index: 12; display: grid; place-items: center; background: #000a; animation: ar-rin .25s ease-out; cursor: pointer; }
+.ar-spot.out { opacity: 0; transition: opacity .3s; }
+.ar-spot-in { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 280px; text-align: center; }
+.ar-spot-in .cff { width: 200px; font-size: 15px; animation: ar-emo .5s cubic-bezier(.2,1.4,.4,1); }
+.ar-spot-in p { margin: 0; font: 700 16px var(--disp); } .ar-spot-in small { font: 500 12px/1.4 var(--body); color: var(--am); }
+.ar-cardpick { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.ar-cp { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 12px; border: 1px solid var(--aline); background: #120d22; color: var(--af); cursor: pointer; font: inherit; }
+.ar-cp:hover { border-color: var(--ag); box-shadow: 0 0 16px #e8c77e44; }
+.ar-cp .cff { width: 100%; }
+.ar-cp small { font: 500 11px var(--body); color: var(--am); }
+.ar-cp-back { position: relative; width: 100%; aspect-ratio: 5 / 7; border-radius: 10px; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #3a2464, #0b0916); border: 2px solid var(--ag); color: var(--ag); }
+.ar-cp-back .ic { width: 40%; height: auto; } .ar-cp-back b { position: absolute; bottom: 6px; font: 700 12px var(--body); }
+@media (max-width: 600px) { .ar-side { flex-direction: row; align-items: center; } .ar-deck { display: grid !important; width: 40px; height: 58px; } .ar-elems { inset: -10px; } .ar-elems i { width: 16px; height: 16px; } }
+.ar-omen .ar-need { color: #fff; font-size: 9px; letter-spacing: 0; margin-top: 1px; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -1899,40 +1971,45 @@ const PACKS = [
   { id: "coffre",  name: "Coffre hextech", sub: "Skins des membres du QG",            kanji: "匠", color: "#b04ce0", fac: ["irl"], skins: true },
 ];
 const RAR = {
-  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 1 },
-  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 2 },
-  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 5 },
-  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 15 },
-  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 40 },
-  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 100 },
+  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 0 },
+  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 1 },
+  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 1 },
+  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 4 },
+  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 10 },
+  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 25 },
 };
 const RANKS = ["c", "pc", "r", "e", "l", "m"];
-const SLOT = { c: 52, pc: 27, r: 14, e: 5, l: 1.6, m: 0.4 };   // cartes 1 à 4
-const LAST = { r: 80, e: 15, l: 4, m: 1 };                        // 5e carte : Rare ou mieux
+const SLOT = { c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 };   // cartes 1 à 4
+const LAST = { r: 86, e: 11, l: 2.5, m: 0.5 };                      // 5e carte : Rare ou mieux
 // une constante par ligne : build.py exporte chaque nom vers le serveur
 const PACK = 5;
 const FREE_MAX = 3;                    // réserve de boosters gratuits
-const REGEN = 2 * 3600e3;              // un booster gratuit de plus toutes les 2 h
-const PRICE = 100;                     // prix d'un booster en boutique (◆)
+const REGEN = 3 * 3600e3;              // un booster gratuit de plus toutes les 3 h
+const PRICE = 150;                     // prix d'un booster en boutique (◆)
 const GOLD_EVERY = 10;
-const MYTHIC_PITY = 120;
-const GOLD_CHANCE = 0.02;
+const MYTHIC_PITY = 0;                 // Mythique garantie au bout de N boosters (0 = jamais : décidé par Reichi, seule la Légendaire est garantie)
+const LEGEND_PITY = 40;                // une Légendaire ou mieux garantie au plus tard au 40e booster (provisoire)
+const GOLD_CHANCE = 0.01;
+const NEW_BIAS = 0.4;                  // anti-frustration : 40 % des cartes tirées viennent de celles qui te manquent (dans la rareté tirée)
 const THEME_MIN = 5;                   // persos débloqués avant qu'un booster thématique s'ouvre (provisoire)
 const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
-const DAILY_LAST = { e: 85, l: 12, m: 3 }; // 5e carte du pack du jour : Épique ou mieux
-const STREAK = [{ boosters: 1 }, { chakra: 50 }, { boosters: 1 }, { chakra: 100 }, { boosters: 2 }, { chakra: 150 }, { boosters: 3, chakra: 300 }];
+const DAILY_LAST = { e: 90, l: 8.5, m: 1.5 }; // 5e carte du pack du jour : Épique ou mieux
+const STREAK = [{ boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 2, chakra: 100 }];
+const DAILY_N = 2;                     // missions du jour tirées chaque jour
+const WEEKLY_N = 5;                    // missions de la semaine tirées chaque semaine
 const MISSIONS = [
-  { id: "open3",  label: "Ouvre 3 boosters",                     key: "open",    goal: 3, reward: { chakra: 40 } },
-  { id: "epic1",  label: "Obtiens une carte Épique ou mieux",     key: "epic",    goal: 1, reward: { chakra: 60 } },
-  { id: "new2",   label: "Obtiens 2 nouvelles cartes",            key: "new",     goal: 2, reward: { boosters: 1 } },
-  { id: "recyc",  label: "Recycle tes doublons",                  key: "recycle", goal: 1, reward: { chakra: 30 } },
-  { id: "sell1",  label: "Mets une carte en vente au marché",     key: "sell",    goal: 1, reward: { chakra: 40 } },
-  { id: "open6",  label: "Ouvre 6 boosters",                      key: "open",    goal: 6, reward: { boosters: 1 } },
-  { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 50 } },
-  { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { boosters: 1 } },
-  { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 20 } },
-  { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 30 } },
-  { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 20 } },
+  { id: "open3",  label: "Ouvre 3 boosters",                     key: "open",    goal: 3, reward: { chakra: 15 } },
+  { id: "epic1",  label: "Obtiens une carte Épique ou mieux",     key: "epic",    goal: 1, reward: { chakra: 20 } },
+  { id: "new2",   label: "Obtiens 2 nouvelles cartes",            key: "new",     goal: 2, reward: { chakra: 15 } },
+  { id: "recyc",  label: "Recycle tes doublons",                  key: "recycle", goal: 1, reward: { chakra: 10 } },
+  { id: "sell1",  label: "Mets une carte en vente au marché",     key: "sell",    goal: 1, reward: { chakra: 15 } },
+  { id: "open6",  label: "Ouvre 6 boosters",                      key: "open",    goal: 6, reward: { chakra: 20 } },
+  { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 15 } },
+  { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { chakra: 15 } },
+  { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 10 } },
+  { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 15 } },
+  { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 10 } },
+  { id: "cf1",    label: "Joue une partie de Confrontation",        key: "cfPlay",  goal: 1, reward: { chakra: 15 } },
 ];
 const LIMITED_END = new Date("2026-12-31T23:59:59");
 // ===== Épisodes : persos vus dans l'épisode 1 (repérés sur les images). Billy peut tout changer dans l'onglet Admin.
@@ -1971,7 +2048,7 @@ const dayKey = (ts = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone:
 const prevDay = (ts = Date.now()) => dayKey(ts - 86400e3);
 
 function freshSave(now = Date.now()) {
-  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, history: [], updated: 0, pack: "saison1",
+  return { created: now, free: FREE_MAX, freeTs: now, chakra: 120, owned: {}, opened: 0, sinceGold: 0, sinceMythic: 0, sinceLegend: 0, history: [], updated: 0, pack: "saison1",
     streak: { last: "", n: 0 }, daily: null, paid: [], sales: 0, predPaid: [], trades: 0, crafted: 0 };
 }
 function normalizeSave(s, now = Date.now()) {
@@ -1996,11 +2073,13 @@ function regenS(s, now = Date.now()) {
 
 function ensureDailyS(s, now = Date.now()) {
   const today = dayKey(now);
-  if (!s.daily || s.daily.day !== today) {
+  // missions refaites : un tirage d'avant (3 missions, ou une mission retirée) est refait, la progression du jour est gardée
+  const stale = s.daily && s.daily.day === today && (s.daily.ids.length !== DAILY_N || s.daily.ids.some((id) => !MISSIONS.some((m) => m.id === id)));
+  if (!s.daily || s.daily.day !== today || stale) {
     let h = 0; for (const ch of today) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...MISSIONS], picks = [];
-    while (picks.length < 3) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.daily = { day: today, ids: picks, prog: {}, claimed: {} };
+    while (picks.length < DAILY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
+    s.daily = { day: today, ids: picks, prog: stale ? s.daily.prog : {}, claimed: {}, ...(stale && s.daily.bonus ? { bonus: true } : {}) };
   }
   return s.daily;
 }
@@ -2012,18 +2091,22 @@ function trackS(s, key, n = 1, now = Date.now()) {
 
 // ===== Semaine, premiers pas, succès, pack du jour (repris de Kyara) =====
 const WEEKLY = [
-  { id: "w-open20", label: "Ouvre 20 boosters",                key: "open",   goal: 20, reward: { chakra: 150 } },
-  { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend", goal: 1,  reward: { chakra: 150 } },
-  { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",   goal: 3,  reward: { chakra: 150 } },
-  { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",  goal: 2,  reward: { chakra: 200 } },
-  { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",  goal: 2,  reward: { chakra: 150 } },
-  { id: "w-epic5",  label: "Obtiens 5 Épiques ou mieux",       key: "epic",   goal: 5,  reward: { chakra: 200 } },
-  { id: "w-pred3",  label: "Vote pour 3 prédictions",          key: "predict", goal: 3, reward: { chakra: 150 } },
-  { id: "w-predok", label: "Réussis une prédiction",           key: "predwin", goal: 1, reward: { chakra: 200 } },
-  { id: "w-chat10", label: "Écris 10 messages dans le chat",   key: "chat",   goal: 10, reward: { chakra: 100 } },
+  { id: "w-open25", label: "Ouvre 25 boosters",                key: "open",    goal: 25, reward: { chakra: 100 } },
+  { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend",  goal: 1,  reward: { chakra: 100 } },
+  { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",    goal: 3,  reward: { chakra: 100 } },
+  { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",   goal: 2,  reward: { chakra: 100 } },
+  { id: "w-craft2", label: "Combine 2 skins",                  key: "craft",   goal: 2,  reward: { chakra: 80 } },
+  { id: "w-epic8",  label: "Obtiens 8 Épiques ou mieux",       key: "epic",    goal: 8,  reward: { chakra: 100 } },
+  { id: "w-pred5",  label: "Vote pour 5 prédictions",          key: "predict", goal: 5,  reward: { chakra: 80 } },
+  { id: "w-predok", label: "Réussis 2 prédictions",            key: "predwin", goal: 2,  reward: { chakra: 120 } },
+  { id: "w-cfwin3", label: "Gagne 3 parties de Confrontation", key: "cfWin",   goal: 3,  reward: { chakra: 120 } },
+  { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
 ];
-const DAILY_BONUS = { boosters: 1 };     // les 3 missions du jour réclamées
-const WEEKLY_BONUS = { boosters: 3 };    // les 3 missions de la semaine réclamées
+const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
+const WEEKLY_BONUS = { boosters: 3 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
+const WEEKLY_BONUS_N = 3;
+// Confrontation : jouable à l'infini, mais l'essence ne vient que des premières parties valables du jour
+const CF_REWARD = { partie: 10, victoire: 10, max: 3 };
 const FIRST_STEPS = [
   { id: "f-open",   label: "Ouvre ton premier booster",    test: (s) => s.opened >= 1,                           reward: { chakra: 20 } },
   { id: "f-coffre", label: "Ouvre un coffre hextech",      test: (s) => (s.counts?.coffre || 0) >= 1,            reward: { chakra: 30 } },
@@ -2073,11 +2156,12 @@ function weekKey(now = Date.now()) {
 }
 function ensureWeeklyS(s, now = Date.now()) {
   const wk = weekKey(now);
-  if (!s.weekly || s.weekly.week !== wk) {
+  const staleW = s.weekly && s.weekly.week === wk && (s.weekly.ids.length !== WEEKLY_N || s.weekly.ids.some((id) => !WEEKLY.some((m) => m.id === id)));
+  if (!s.weekly || s.weekly.week !== wk || staleW) {
     let h = 7; for (const ch of wk) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...WEEKLY], picks = [];
-    while (picks.length < 3) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.weekly = { week: wk, ids: picks, prog: {}, claimed: {}, bonus: false };
+    while (picks.length < WEEKLY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
+    s.weekly = { week: wk, ids: picks, prog: staleW ? s.weekly.prog : {}, claimed: {}, bonus: staleW ? !!s.weekly.bonus : false };
   }
   return s.weekly;
 }
@@ -2103,7 +2187,7 @@ function claimAnyS(s, kind, id, now = Date.now()) {
   }
   if (kind === "weekly-bonus") {
     const w = ensureWeeklyS(s, now);
-    if (w.bonus || weeklyS(s, now).some((m) => !m.claimed)) return null;
+    if (w.bonus || weeklyS(s, now).filter((m) => m.claimed).length < WEEKLY_BONUS_N) return null;
     w.bonus = true; giveRewardS(s, WEEKLY_BONUS); return { reward: WEEKLY_BONUS };
   }
   if (kind === "first") {
@@ -2142,7 +2226,7 @@ function claimableCountS(s, now = Date.now()) {
   n += achievementsS(s).filter((a) => a.prog >= a.goal && !a.claimed).length;
   const d = ensureDailyS(s, now), w = ensureWeeklyS(s, now);
   if (!d.bonus && missionsTodayS(s, now).every((m) => m.claimed)) n++;
-  if (!w.bonus && weeklyS(s, now).every((m) => m.claimed)) n++;
+  if (!w.bonus && weeklyS(s, now).filter((m) => m.claimed).length >= WEEKLY_BONUS_N) n++;
   if (!(s.first || {}).bonus && firstStepsS(s).every((f) => f.claimed)) n++;
   return n;
 }
@@ -2236,10 +2320,12 @@ function rollWith(table, rng) {
 }
 // La rareté est tirée d'abord. Le perso vient du thème ; si le thème n'a pas cette rareté, du Mix (même rareté) ;
 // si le Mix non plus, de la rareté inférieure la plus proche. Jamais d'une rareté plus haute.
-function pickWith(rar, pool, rng, mix = pool) {
+function pickWith(rar, pool, rng, mix = pool, missing = null) {
   for (let j = RANKS.indexOf(rar); j >= 0; j--) {
     for (const list of [pool, mix]) {
-      const l = list.filter((c) => c.rar === RANKS[j]);
+      let l = list.filter((c) => c.rar === RANKS[j]);
+      // une partie des tirages va d'office vers une carte qui manque encore (la rareté, elle, ne change pas)
+      if (l.length && missing && NEW_BIAS && rng() < NEW_BIAS) { const m = l.filter(missing); if (m.length) l = m; }
       if (l.length) return l[Math.floor(rng() * l.length)];
     }
   }
@@ -2270,11 +2356,17 @@ function openPackS(s, pk, pool, rng, now = Date.now(), mix = pool) {
   for (let i = 0; i < PACK; i++) rars.push(divine ? (i === PACK - 1 ? "m" : rollWith({ e: 70, l: 25, m: 5 }, rng)) : rollWith(boosted(i < PACK - 1 ? SLOT : pk.last || LAST, k), rng));
   // le pity ne compte que les boosters qui peuvent donner une Mythique (sinon il forcerait une carte impossible)
   const canMythic = pool.some((c) => c.rar === "m") || mix.some((c) => c.rar === "m");
+  // la Légendaire garantie ne compte que les boosters qui peuvent en donner une (Légendaire ou Mythique)
+  const canLegend = canMythic || pool.some((c) => c.rar === "l") || mix.some((c) => c.rar === "l");
   if (canMythic) s.sinceMythic++;
+  if (canLegend) s.sinceLegend = (s.sinceLegend || 0) + 1;
   s.sinceGold++;
-  if (canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
-  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix), gold: rng() < GOLD_CHANCE }));
+  if (MYTHIC_PITY && canMythic && s.sinceMythic >= MYTHIC_PITY && !rars.includes("m")) rars[PACK - 1] = "m";
+  if (LEGEND_PITY && canLegend && s.sinceLegend >= LEGEND_PITY && !rars.some((r) => r === "l" || r === "m")) rars[PACK - 1] = "l";
+  const missing = (c) => !hasCard(s, c.id);
+  const cards = rars.map((r) => ({ c: pickWith(r, pool, rng, mix, missing), gold: rng() < GOLD_CHANCE }));
   if (cards.some((x) => x.c.rar === "m")) s.sinceMythic = 0;
+  if (cards.some((x) => x.c.rar === "l" || x.c.rar === "m")) s.sinceLegend = 0;
   cards.sort((a, b) => RANKS.indexOf(a.c.rar) - RANKS.indexOf(b.c.rar));
   if (s.sinceGold >= GOLD_EVERY) cards[PACK - 1].gold = true;
   if (cards.some((x) => x.gold)) s.sinceGold = 0;
@@ -2508,8 +2600,9 @@ function applyCreations(data) {
 const COS_PRICE = { c: 60, pc: 120, r: 250, e: 500, l: 1000, m: 2000 };
 const SUMMON_COST = 150;              // une invocation ; ×5 coûte 5 fois ce prix moins la remise
 const SUMMON_DISCOUNT_5 = 0.1;        // ×5 : 10 % moins cher
-const SUMMON_RATES = { c: 38, pc: 28, r: 20, e: 9.5, l: 3.7, m: 0.8 };
-const SUMMON_PITY_M = 80;             // une Mythique garantie au plus tard à la 80e invocation
+const SUMMON_RATES = { c: 42, pc: 30, r: 18, e: 7.5, l: 2.1, m: 0.4 };
+const SUMMON_PITY_M = 0;              // Mythique garantie au bout de N invocations (0 = jamais)
+const SUMMON_PITY_L = 50;             // une Légendaire ou mieux garantie au plus tard à la 50e invocation (provisoire)
 const SUMMON_5_FLOOR = "r";           // ×5 et ×10 : au moins une Rare ou mieux
 const SUMMON_10_FLOOR = "e";          // ×10 : au moins une Épique ou mieux
 const SUMMON_COUNTS = [1, 5, 10];     // ×1 : une carte ; ×5 : une pochette ; ×10 : le coffre
@@ -2520,6 +2613,7 @@ function cosOf(s) {
   if (!Array.isArray(c.inst)) c.inst = [];
   if (!c.designs || typeof c.designs !== "object") c.designs = {};
   if (typeof c.sinceM !== "number") c.sinceM = 0;
+  if (typeof c.sinceL !== "number") c.sinceL = 0;
   return c;
 }
 // références d'un design : « a:<id> » pour un cosmétique de compte, « i:<instance> » pour une instance
@@ -2553,7 +2647,7 @@ function summonS(s, n, rng, now = Date.now()) {
   if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
-  for (let k = 0; k < n; k++) { cos.sinceM++; let r = rollWith(SUMMON_RATES, rng); if (cos.sinceM >= SUMMON_PITY_M) r = "m"; if (r === "m") cos.sinceM = 0; rars.push(r); }
+  for (let k = 0; k < n; k++) { cos.sinceM++; cos.sinceL++; let r = rollWith(SUMMON_RATES, rng); if (SUMMON_PITY_M && cos.sinceM >= SUMMON_PITY_M) r = "m"; if (SUMMON_PITY_L && cos.sinceL >= SUMMON_PITY_L && r !== "m") r = "l"; if (r === "m") cos.sinceM = 0; if (r === "l" || r === "m") cos.sinceL = 0; rars.push(r); }
   // ×5 : au moins une Rare ou mieux
   if (n >= 5 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_5_FLOOR))) rars[n - 1] = SUMMON_5_FLOOR;
   if (n === 10 && !rars.some((r) => RANKS.indexOf(r) >= RANKS.indexOf(SUMMON_10_FLOOR))) rars[n - 2] = SUMMON_10_FLOOR;
@@ -3545,6 +3639,15 @@ let MYNAME = "";
 const NICON = { sold: "◆", trade: "⇄", mention: "@", episode: "★", pred: "?", announce: "!" };
 const canChat = () => (SRV ? true : !!(DB && ME && canShare));
 
+// notifs touchées : on les retire de la cloche (sur cet appareil)
+function notifOff() { try { const o = JSON.parse(lsGet("rzlol-notif-off") || "{}"); return { todo: o.todo || {}, ids: o.ids || [] }; } catch (e) { return { todo: {}, ids: [] }; } }
+function dismissNotif(el) {
+  const o = notifOff();
+  if (el.dataset.ntodo) o.todo[el.dataset.ntodo] = Date.now();
+  if (el.dataset.nid) o.ids = [...o.ids, +el.dataset.nid].slice(-300);
+  lsSet("rzlol-notif-off", JSON.stringify(o)); badges();
+}
+const shownNotifs = () => { const ids = new Set(notifOff().ids); return notif.items.filter((n) => !ids.has(n.id)); };
 function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
 function badges() {
@@ -3666,7 +3769,7 @@ document.addEventListener("click", (e) => {
   if (t.closest("#bellBtn")) return toggleNotifs();
   if (notif.open && !t.closest("#notifPanel")) toggleNotifs(false);
   if (t.closest("#chatFab")) return openChat(true);
-  const ng = t.closest("[data-ngo]"); if (ng) return goTo(ng.dataset.ngo);
+  const ng = t.closest("[data-ngo]"); if (ng) { dismissNotif(ng); if (!ng.dataset.ngo) return drawNotifs(); return goTo(ng.dataset.ngo); }
   const del = t.closest("[data-chatdel]"); if (del) return deleteChat(del.dataset.chatdel);
   const mn = t.closest("[data-mention]"); if (mn && $("chatIn")) { const i = $("chatIn"); i.value = (i.value ? i.value.replace(/\s*$/, " ") : "") + "@" + mn.dataset.mention + " "; return i.focus(); }
   const act = t.closest("[data-act]")?.dataset.act;
@@ -3770,7 +3873,7 @@ const icon = {
 const dia = '<span class="dia f"></span>';
 const head = (eb, title, lead = "") => `<div class="head"><p class="eyebrow">${eb}</p><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}</div>`;
 const seg = (name, items, cur, cls = "") => `<div class="seg ${cls}" role="tablist">${items.map(([k, l, dot]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${dot ? '<i class="dot"></i>' : ""}</button>`).join("")}</div>`;
-const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
+const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n, plain]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? plain ? `<span class="tcount">${n}</span>` : `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
 const rarChips = (name, cur) => `<div class="chips">${[["", "Toutes"], ...RANKS.map((k) => [k, RAR[k].label])].map(([k, l]) => `<button class="chip" type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${k ? `<i class="d" style="background:${RAR[k].color}"></i>` : ""}${l}</button>`).join("")}</div>`;
 const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`;
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
@@ -3787,7 +3890,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
   ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
-  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"], ["createur", "createur", "Créateur"], ["branches", "branches", "Branches"], ["galerie", "galerie", "Galerie"], ["labo", "labo", "Labo"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : []),
+  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -3799,7 +3902,7 @@ function drawNav() {
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>${ico("pred")} Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
-      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
+      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
 }
 let ACCT = null;
 async function loadAccount() {
@@ -3827,7 +3930,7 @@ function drawMenu() {
       <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
     ${guest && window.DISCORD_LOGIN ? `<div class="disc-box">Lie ton compte Discord pour ne pas perdre ta collection et jouer avec le QG.<a class="btn-disc" href="/auth/login">${icon.discord}Se connecter avec Discord</a></div>` : ""}
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
-    <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié M</small><b>${save.sinceMythic}/${MYTHIC_PITY}</b></div></div>
+    <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié L</small><b>${save.sinceLegend || 0}/${LEGEND_PITY}</b></div></div>
   </div>
   <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${ico(k)}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
   <div class="m-foot">${SRV || ME ? `<button type="button" data-nav="profil" data-p="${ME}">Mon profil public</button>` : `<button type="button" data-nav="profil" data-p="moi">Mon profil</button>`}
@@ -3860,16 +3963,18 @@ function todos() {
   if (save.free >= FREE_MAX) out.push({ text: "Tes boosters gratuits sont pleins : ouvre-les pour qu'ils se rechargent.", go: "boosters" });
   const p = SRV ? pendingTrades().length : 0; if (p) out.push({ text: `${p} échange${p > 1 ? "s" : ""} attend${p > 1 ? "ent" : ""} ta réponse.`, go: "trades" });
   const q = openPredCount(); if (q) out.push({ text: `${q} prédiction${q > 1 ? "s" : ""} attend${q > 1 ? "ent" : ""} ton vote.`, go: "pred" });
-  return out;
+  // une fois touchée, la notif disparaît (elle revient si le texte change, ou 12 h plus tard)
+  const off = notifOff().todo, now = Date.now();
+  return out.filter((x) => !(off[x.text] > now - 12 * 3600e3));
 }
 function drawNotifs() {
   const box = $("notifPanel"); if (!box) return;
   const td = todos();
   const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
   box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
-    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
+    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}" data-ntodo="${esc(x.text)}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
     <div class="np-sec">Récent</div>
-    ${SRV ? (notif.items.length ? notif.items.map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
       : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
       : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
     ${"Notification" in window ? `<button class="btn sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
@@ -3911,7 +4016,7 @@ function qsHTML() {
     <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
     <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">${ico("feu")}</span><b>J${st.n}/7</b><span>connexion à la suite</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
     <div style="--c:var(--gold)"><span class="k">${ico("piece")}</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le booster doré</span></div>
-    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
+    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div>
   </div>`;
 }
 function packsForTab() {
@@ -3950,11 +4055,11 @@ function boosterZone() {
       <div class="pkd" style="--pc:${pk.color}">
         <div class="pkd-h"><span class="e">${ico(packIcon(pk))}</span><div><h3>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name}</h3><p>${pk.sub}</p></div></div>
         <div class="mini4"><div><b>${PACK}</b><span>cartes par booster</span></div><div><b style="color:var(--r-${pk.daily ? "e" : "r"})">${pk.daily ? "Épique" : "Rare"}</b><span>ou mieux, garantie</span></div>
-          <div><b style="color:var(--acc)">${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
+          <div><b style="color:var(--r-l)">${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
         <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
-        ${fill.length ? `<p class="note">Pas encore de ${fill.map((r) => RAR[r].label).join(", ")} dans ce booster : ces raretés viennent du Mix, avec les mêmes chances.</p>` : ""}
+        ${fill.length ? `<p class="note">Pas encore de carte ${fill.map((r) => RAR[r].label).join(" ni ")} dans ce booster : ${fill.length > 1 ? "ces raretés viennent" : "cette rareté vient"} du Mix, avec les mêmes chances.</p>` : ""}
         ${btn}
       </div>
     </div>
@@ -4309,9 +4414,9 @@ function viewMissions() {
     ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
       ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
-      ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Les 3 réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
+      ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus("Les 3 réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}</div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
       <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>
@@ -4477,13 +4582,12 @@ function viewProfil() {
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
     ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
-    ${isMe && SRV && (IS_DEV || IS_ADMIN) ? testZone() : ""}
     ${titlesSection(p, isMe)}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
       ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
@@ -4506,7 +4610,7 @@ function viewRaretes() {
     <section class="sec prose"><h2>Et aussi</h2>
       <p><b style="color:var(--gold)">Dorée.</b> Tous les ${GOLD_EVERY} boosters, ta meilleure carte sort dorée (et ${pct(GOLD_CHANCE)} de chance à chaque carte). Une dorée vaut trois fois plus au recyclage.</p>
       <p><b style="color:var(--r-e)">Skins du QG.</b> Les membres du serveur ont chacun six skins, comme dans LoL : ${SKIN_LINES.map((l) => `${l.name} (${RAR[l.rar].label})`).join(", ")}. Ils sortent du Coffre hextech ou en combinant ${CRAFT_COST} doublons.</p>
-      <p><b style="color:var(--acc)">Mythique garantie.</b> Si tu n'as pas eu de Mythique depuis ${MYTHIC_PITY} boosters, la suivante est garantie.</p>
+      <p><b style="color:var(--r-l)">Légendaire garantie.</b> Si tu n'as pas eu de Légendaire ni de Mythique depuis ${LEGEND_PITY} boosters, le suivant t'en donne une. La Mythique, elle, n'est jamais garantie.</p>
       <p><b style="color:var(--wish)">Booster divin.</b> Environ 1 booster sur ${Math.round(1 / DIVINE_CHANCE)} est divin : que des Légendaires et des Mythiques.</p>
       <p><b>POW et AURA.</b> Les deux chiffres en bas de chaque carte montrent la puissance du perso. Plus la carte est rare, plus ils sont hauts.</p></section>
   </div>`;
@@ -4664,7 +4768,7 @@ function drawOpening() {
       <div class="floor"></div>
       <p class="hint">${o.pk.cos ? `<b>${o.pk.name}</b> · ${o.cards.length} objets` : o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
       <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : o.pk.cos ? "Tire la pochette vers le haut (ou touche-la)" : "Tire le booster vers le haut (ou touche-le)"}</p>
-      <p class="sub">${o.pk.cos ? `Mythique garantie dans ${Math.max(0, SUMMON_PITY_M - cosOf(save).sinceM)} invocations au plus` : `Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus`}</p></section>`;
+      <p class="sub">${o.pk.cos ? `Légendaire garantie dans ${Math.max(0, SUMMON_PITY_L - cosOf(save).sinceL)} invocations au plus` : `Légendaire garantie dans ${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))} boosters au plus`}</p></section>`;
     const p = $("pack"); if (!chest) bindPull(p);
     return;
   }
@@ -4902,7 +5006,7 @@ function viewAtelier() {
   if (param && has(param) && zDraftCard !== param) { zDraftCard = param; zDraft = null; }
   if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
   const cos = cosOf(save);
-  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length]], zAtelierTab);
+  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length, true]], zAtelierTab);
   if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
   const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, refCos(save, r)?.id]).filter(([, v]) => v));
@@ -4945,7 +5049,7 @@ function viewSanctuaire() {
   const cos = cosOf(save);
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
   return `<div class="wrap page">${head("Sanctuaire des Invocations", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
-    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Mythique garantie dans <b>${Math.max(0, SUMMON_PITY_M - cos.sinceM)}</b> invocations</span></div>
+    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Légendaire garantie dans <b>${Math.max(0, SUMMON_PITY_L - cos.sinceL)}</b> invocations</span></div>
     <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${save.chakra < summonCost(n) || zBusy ? "disabled" : ""}>
       <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${ico(k)}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${ico(k)}</b></span>` : `<span class="zo-card"><b>${ico(k)}</b></span>`}</span>
       <span class="zo-n">×${n}</span><b class="zo-t">${t}</b><span class="zo-s">${sub}</span>
@@ -5063,13 +5167,13 @@ function viewLabo() {
     <div class="lab-warn">Bac à sable : rien de ce qui se passe ici n'est réel.</div>
     <section class="sec"><h2>Partie de test</h2>
       ${s ? `<div class="card stat4"><div><b>${fmtN(s.chakra)}</b><span>Essence de test</span></div><div><b>${s.free}</b><span>Boosters gratuits</span></div><div><b>${statsS(s).unique}</b><span>Cartes</span></div><div><b>${cos.inst.length + Object.keys(cos.own).length}</b><span>Cosmétiques</span></div></div>
-        <p class="note">Pity Mythique : ${s.sinceMythic}/${MYTHIC_PITY} · pity dorée : ${s.sinceGold} · pity d'invocation : ${cos.sinceM}/${SUMMON_PITY_M}</p>` : `<p class="note">Chargement…</p>`}
+        <p class="note">Pity Légendaire : ${s.sinceLegend || 0}/${LEGEND_PITY} · pity dorée : ${s.sinceGold} · pity Légendaire d'invocation : ${cos.sinceL || 0}/${SUMMON_PITY_L}</p>` : `<p class="note">Chargement…</p>`}
       <div class="lab-form" id="labForm">
         <label>Essence <input type="number" min="0" name="chakra" value="${s?.chakra ?? LAB_START.chakra}"></label>
         <label>Gratuits <input type="number" min="0" name="free" value="${s?.free ?? LAB_START.free}"></label>
-        <label>Pity Mythique <input type="number" min="0" name="sinceMythic" value="${s?.sinceMythic ?? 0}"></label>
+        <label>Pity Légendaire <input type="number" min="0" name="sinceLegend" value="${s?.sinceLegend ?? 0}"></label>
         <label>Pity dorée <input type="number" min="0" name="sinceGold" value="${s?.sinceGold ?? 0}"></label>
-        <label>Pity invocation <input type="number" min="0" name="sinceM" value="${cos?.sinceM ?? 0}"></label>
+        <label>Pity invocation <input type="number" min="0" name="sinceL" value="${cos?.sinceL ?? 0}"></label>
       </div>
       <div class="row"><button class="btn sm" type="button" data-act="lab-set">Appliquer les valeurs</button><button class="btn sm" type="button" data-act="lab-reset">Repartir de zéro</button><button class="btn sm" type="button" data-act="lab-full">Repartir avec toutes les cartes</button></div></section>
     <section class="sec"><h2>Tester une ouverture</h2>
@@ -5173,7 +5277,10 @@ function viewDefile() {
   // l'état du Défilé change pendant qu'on joue (Billy ouvre, les votes s'ouvrent) : on le recharge en arrivant, puis toutes les 20 s
   defLoad();
   clearTimeout(DEF.timer); DEF.timer = setTimeout(() => { if (view === "defile" && !document.activeElement?.closest?.(".cf-keep")) defLoad(true); }, 20000);
-  const d = DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
+  // aperçu (admin) : la page telle que les joueurs la verront une fois les inscriptions ouvertes, sans rien envoyer
+  const prev = IS_ADMIN && DEF.preview != null && (!DEF.current || DEF.current.phase === "clos") ? { title: DEF.preview || "Défilé des Légendes", phase: "inscriptions", entries: [] } : null;
+  if (!prev) DEF.preview = null;
+  const d = prev || DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
   const PH = { inscriptions: "Inscriptions ouvertes", votes: "Votes ouverts", clos: "Terminé" };
   const mineCards = [...CARDS, ...SKINS].filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
   if (!DEF.pick || !has(DEF.pick)) DEF.pick = save.featured && has(save.featured) ? save.featured : mineCards[0]?.id || null;
@@ -5199,14 +5306,16 @@ function viewDefile() {
         ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>${DEF.rm === e.uid ? `<div class="def-rm cf-keep"><input type="text" id="defRmWhy" maxlength="200" class="gal-note" placeholder="Motif envoyé au joueur"><button class="btn sm acc" type="button" data-defrmgo="${e.uid}">Retirer l'inscription</button></div>` : ""}` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
   }
   const admin = IS_ADMIN ? `<section class="sec def-admin"><p class="eyebrow">Admin</p><h2>Gérer le Défilé</h2>
-    <div class="row">${!d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px"><button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions</button>` : ""}
+    ${prev ? `<p class="note">Notification envoyée à tout le QG : « Le ${esc(prev.title)} est ouvert : inscris ta plus belle carte ! »</p>` : ""}
+    <div class="row">${prev ? `<button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions pour de vrai</button><button class="btn sm" type="button" data-act="def-prev-off">Modifier</button>`
+      : !d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px" value="${esc(DEF.draft || "")}"><button class="btn gold sm" type="button" data-act="def-prev">Voir l'aperçu</button>` : ""}
     ${phase === "inscriptions" ? `<button class="btn gold sm" type="button" data-act="def-votes">Fermer les inscriptions et ouvrir les votes</button>` : ""}
     ${phase === "votes" ? `<button class="btn gold sm" type="button" data-act="def-close">Clore et récompenser</button>` : ""}</div>
     <p class="note">Récompenses provisoires (à valider) : ${DEFILE_REWARDS.map((v, i) => `${i + 1}${i ? "e" : "er"} ${v} ◆`).join(", ")}, plus ${DEFILE_PARTICIPATION} ◆ pour chaque participant ; titres « ${DEFILE_TITLES.join(" », « ")} » (et « Habitué du Défilé » après 5 participations). La fréquence (semaine ou mois) est à décider : c'est toi qui ouvres et fermes.</p></section>` : "";
   const arch = DEF.archives.length ? `<section class="sec"><h2>Archives</h2><div class="def-arch">${DEF.archives.map((a) => `<div class="def-arch-i"><div class="def-arch-c">${a.podium[0] ? defCard(a.podium[0]) : ""}</div><div><b>${esc(a.title)}</b><p class="note">${new Date(a.t).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · ${a.n} carte${a.n > 1 ? "s" : ""} · ${a.voters} votant${a.voters > 1 ? "s" : ""}</p><p class="note">${a.podium.map((p, i) => `${i + 1}. ${esc(p.name)} (${p.votes})`).join(" · ")}</p></div></div>`).join("")}</div></section>` : "";
   return `<div class="wrap page">${head("Défilé des Légendes", d ? esc(d.title) : "Défilé des Légendes", "Montre ta plus belle carte personnalisée. Le QG vote, la gagnante s'affiche à l'accueil pendant une semaine.")}
     ${d ? `<div class="z-bar"><span>Étape : <b>${PH[phase]}</b></span><span>${((n) => `${n} inscrit${n > 1 ? "s" : ""}`)(d.entries.filter((e) => !e.removed).length)}</span></div>` : ""}
-    ${body}${admin}${arch}</div>`;
+    ${prev ? `<div class="def-prev-bar"><b>Aperçu</b> Voici ce que les joueurs verront. Rien n'est envoyé tant que tu n'as pas ouvert les inscriptions.</div><div inert>${body}</div>` : body}${admin}${prev ? "" : arch}</div>`;
 }
 VIEWS.defile = viewDefile;
 // à chaque arrivée sur la page, on recharge l'état du Défilé (il a pu s'ouvrir ou passer aux votes entre-temps)
@@ -5219,7 +5328,9 @@ document.addEventListener("click", (e) => {
   const a = t.closest("[data-act]")?.dataset.act; if (!a || !a.startsWith("def-")) return;
   if (a === "def-enter") return defAct("defile/enter", { card: DEF.pick }, "Ta carte défile !");
   if (a === "def-withdraw") return defAct("defile/withdraw", {}, "Inscription retirée.");
-  if (a === "def-new") return defAct("defile/admin", { action: "new", title: $("defTitle")?.value || "" }, "Défilé ouvert.");
+  if (a === "def-prev") { DEF.draft = ($("defTitle")?.value || "").trim(); DEF.preview = DEF.draft; scrollTo(0, 0); return draw(); }
+  if (a === "def-prev-off") { DEF.preview = null; return draw(); }
+  if (a === "def-new") { const title = DEF.preview ?? ($("defTitle")?.value || ""); DEF.preview = null; DEF.draft = ""; return defAct("defile/admin", { action: "new", title }, "Défilé ouvert."); }
   if (a === "def-votes") return defAct("defile/admin", { action: "votes" }, "Votes ouverts.");
   if (a === "def-close" && sure(t.closest("[data-act]"), "Confirmer : clore et récompenser")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
 });
@@ -5320,6 +5431,27 @@ function cfFace(c, extra = "") {
 const cfChip = (c) => { if (!c) return ""; const d = cfCardDef(c), [col] = cfFam(d); return `<span class="cfc" style="--fc:${col}" title="${esc(d.nom)} : ${esc(CF_SHORT[c.def] || d.texte || "")}">${CF_ICON[c.def] || ico(CF_FAMILY_ICON[d.cat] || "logo")}<span>${esc(d.nom)}</span></span>`; };
 const cfBranch = (b) => CF.cat?.branches?.[b] || { nom: b, kanji: "?" };
 
+// cartes de la table : choisies par l'hôte, visibles avant de rejoindre
+const CF_MODES = [["deck", "Chacun son deck", "Tu joues un perso parmi tes propres cartes."], ["partage", "Cartes partagées", "Les cartes de tous vont au pot : tu peux tirer celles des autres (elles restent à leur propriétaire)."]];
+// partager un salon : la feuille de partage du téléphone, sinon le lien copié ; et le chat du QG en un toucher
+async function cfShare(gid, nom) {
+  const url = `${location.origin}/#/confront/${gid}`, text = `Viens jouer à Confrontation : ${nom || "ma table"} (code ${gid})`;
+  $("overlay").innerHTML = `<div class="sheet cf-share" role="dialog" aria-label="Partager le salon" style="max-width:420px"><h2>Partager le salon</h2>
+    <p class="note">Code <b class="mono">${gid}</b></p><input type="text" readonly value="${esc(url)}" class="gal-note" onclick="this.select()">
+    <div class="row"><button class="btn gold" type="button" data-cfsh="chat">Envoyer dans le chat du QG</button><button class="btn" type="button" data-cfsh="copy">Copier le lien</button>${navigator.share ? `<button class="btn" type="button" data-cfsh="os">Autre appli…</button>` : ""}</div>
+    <button class="btn sm" type="button" data-act="close">Fermer</button></div>`;
+  $("overlay").hidden = false; CF.share = { url, text };
+}
+async function cfShareDo(k) {
+  const { url, text } = CF.share || {}; if (!url) return;
+  try {
+    if (k === "chat") { await srv("chat/send", { text: `${text} ${url}` }); toast("Envoyé dans le chat du QG."); }
+    if (k === "copy") { await navigator.clipboard.writeText(url); toast("Lien copié."); }
+    if (k === "os") await navigator.share({ title: "Confrontation", text, url });
+    $("overlay").hidden = true;
+  } catch (err) { if (err?.name !== "AbortError") toast(err.message || "Partage impossible."); }
+}
+
 function viewConfront() {
   if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
   if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re Zéro : Confrontation");
@@ -5327,13 +5459,16 @@ function viewConfront() {
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
-  const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
+  const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · ${g.partage ? "cartes partagées" : "chacun son deck"} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
   return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
-    <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label><button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
+    <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>
+      <div class="cf-modes" role="radiogroup" aria-label="Cartes de la table">${CF_MODES.map(([k, l, d]) => `<label class="cf-mode"><input type="radio" name="cfMode" value="${k}" ${k === "deck" ? "checked" : ""}><b>${l}</b><small>${d}</small></label>`).join("")}</div>
+      <button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
       <div class="lab-form cf-keep"><label>Rejoindre avec un code <input type="text" id="cfCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"></label><button class="btn" type="button" data-act="cf-code">Ouvrir</button></div></section>
     ${!L ? `<p class="note">Chargement…</p>` : L.error ? `<p class="note">${esc(L.error)}</p>` : `
+    ${L.defis?.length ? `<section class="sec cf-defis"><h2>Défis reçus</h2>${L.defis.map((g) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">Duel · chacun son deck</span><div class="row"><button class="btn sm gold" type="button" data-cfaccept="${g.gid}">Accepter</button><button class="btn sm" type="button" data-cfrefuse="${g.gid}">Refuser</button></div></div>`).join("")}</section>` : ""}
     ${L.miennes.length ? `<section class="sec"><h2>Mes parties</h2>${L.miennes.map((g) => row(g, "Reprendre")).join("")}</section>` : ""}
     <section class="sec"><h2>Salons ouverts</h2>${L.salons.length ? L.salons.map((g) => row(g, "Voir")).join("") : `<p class="note">Aucun salon public pour l'instant. Crée le tien !</p>`}</section>
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
@@ -5345,23 +5480,31 @@ function viewConfront() {
 function cfTableHTML() {
   const T = CF.table;
   if (!T) return `<div class="wrap page"><p class="note">Chargement de la table…</p></div>`;
+  if (T.ferme && T.vue?.phase === "lobby") return `<div class="wrap page">${empty("Ce salon a été fermé par l'hôte.")}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
   if (T.error) return `<div class="wrap page">${empty(esc(T.error))}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
   const v = T.vue, acts = v.actions || [], has1 = (t) => acts.find((a) => a.type === t);
   const top = `<div class="cf-top"><div><p class="eyebrow">Confrontation · ${esc(PHASE_LABEL[v.phase])}${v.mode ? ` · ${{ duel: "Duel", trio: "Trio", classique: "Classique" }[v.mode]}` : ""}</p><h1 class="cf-h">${esc(T.nom)}</h1>
     <p class="note">Code <b class="mono">${T.gid}</b>${T.spectateur ? " · tu regardes en spectateur" : ""}</p></div>
-    <div class="row"><button class="btn sm" type="button" data-nav="confront">Salons</button>${has1("abandon") && v.phase !== "lobby" ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Abandonner</button>` : ""}</div></div>`;
+    <div class="row"><button class="btn sm" type="button" data-nav="confront">Salons</button>${v.phase !== "fin" ? `<button class="btn sm" type="button" data-act="cf-share">Partager le salon</button>` : ""}
+      ${v.phase === "lobby" && !T.spectateur && (v.hote === ME || T.createur === ME) && !T.ferme ? `<button class="btn sm" type="button" data-act="cf-close">Fermer le salon</button>` : ""}
+      ${has1("quitter") ? `<button class="btn sm acc" type="button" data-cfa='{"type":"quitter"}'>Quitter le salon</button>` : has1("abandon") && (v.phase === "contributions" || v.phase === "choix") ? `<button class="btn sm acc" type="button" data-act="cf-leave">Quitter la table</button>` : v.phase === "partie" && v.joueurs.find((j) => j.id === v.moi)?.vivant ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Quitter la partie</button>` : v.phase !== "lobby" ? `<button class="btn sm" type="button" data-nav="confront">Quitter</button>` : ""}</div></div>`;
   let body = "";
   if (v.phase === "lobby") {
-    body = `<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : ""}</span>`).join("")}</div>
+    const attente = v.joueurs.filter((p) => p.id !== v.hote && !/^bot:/.test(p.id) && !T.prets?.[p.id]).length;
+    const host = v.hote === ME, M = CF_MODES.find((m) => m[0] === (T.partage ? "partage" : "deck"));
+    const modeBox = `<section class="sec cf-modebox"><h2>Cartes de la table</h2>${T.duel ? `<p class="note"><b>Duel</b> : chacun joue son deck.${T.refuse ? " <b>Ton défi a été refusé.</b>" : v.joueurs.length < 2 ? " En attente de la réponse…" : ""}</p>`
+      : host ? `<div class="cf-modes">${CF_MODES.map(([k, l, d]) => `<button type="button" class="cf-mode ${k === M[0] ? "on" : ""}" data-cfmode="${k}" aria-pressed="${k === M[0]}"><b>${l}</b><small>${d}</small></button>`).join("")}</div><p class="note">Tout le monde voit ce choix : rejoindre la table, c'est l'accepter.</p>`
+      : `<div class="cf-modes"><div class="cf-mode on"><b>${M[1]}</b><small>${M[2]}</small></div></div><p class="note">Choisi par l'hôte. Rejoindre la table, c'est l'accepter.</p>`}</section>`;
+    body = `${modeBox}<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.id === v.hote || /^bot:/.test(p.id) || T.prets?.[p.id] ? "cf-ready" : ""}">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : /^bot:/.test(p.id) || T.prets?.[p.id] ? " · prêt" : " · pas prêt"}</span>`).join("")}</div>
       <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : `Mode Classique, avec des rôles secrets : ${ROLE_SPLIT[v.joueurs.length].map((x, i) => x ? `${x} ${ROLES[ROLE_ORDER[i]].nom}${x > 1 ? "s" : ""}` : "").filter(Boolean).join(", ")} (${ROLE_BONUS[v.joueurs.length]}).`} <a href="#/confront/regles">Comment jouer</a></p>
-      <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
-      ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}${has1("quitter") ? `<button class="btn" type="button" data-cfa='{"type":"quitter"}'>Quitter</button>` : ""}</div></section>`;
+      <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? (attente ? `<button class="btn gold" type="button" disabled>En attente : ${attente} pas prêt${attente > 1 ? "s" : ""}</button>` : `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>`) : ""}
+      ${!T.spectateur && v.hote !== ME ? `<button class="btn ${T.prets?.[ME] ? "" : "gold"}" type="button" data-cfready="${T.prets?.[ME] ? "0" : "1"}">${T.prets?.[ME] ? "Pas prêt finalement" : "Je suis prêt"}</button>` : ""}
+      ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {
-    const me = v.joueurs.find((p) => p.id === v.moi), mine = CF.list?.cartes || [];
+    const me = v.joueurs.find((p) => p.id === v.moi);
     if (!CF.list) cfLoadList();
-    body = `<section class="sec"><h2>Choisis tes cartes</h2><p class="note">Chaque carte de ta collection a une branche (son style de jeu). Prends jusqu'à une carte par branche : à l'étape suivante, <b>tu choisis ton perso parmi elles</b>. Si tu n'en prends aucune, on te prête 2 persos. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
-      ${me && !me.soumis && !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : me && !me.soumis && CF.list?.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">${opts.length ? "Aucune" : "Aucune carte de ce style"}</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
-        <button class="btn gold" type="button" data-act="cf-contrib">Valider mes cartes</button>` : `<p class="note">Cartes enregistrées. En attente des autres…</p>`}
+    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
+      ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
@@ -5372,6 +5515,19 @@ function cfTableHTML() {
   else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
   if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
   return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+}
+// ===== Choix des cartes façon draft : le deck (une carte par style) en haut, ta collection en vraies cartes =====
+function cfDraft() {
+  const mine = CF.list.cartes || [], ids = CF.cat?.branchIds || [], tab = CF.draftTab || "tous";
+  const picked = ids.filter((b) => CF.contrib[b]), deck = (CF.list.deck || []).filter((id) => mine.some((c) => c.cardId === id));
+  const pool = mine.filter((c) => tab === "tous" || c.branch === tab).sort((a, b) => RAR[byId[b.cardId].rar].rank - RAR[byId[a.cardId].rar].rank || nameOf(byId[a.cardId]).localeCompare(nameOf(byId[b.cardId])));
+  const slot = (b) => { const id = CF.contrib[b], c = id && byId[id]; return `<button type="button" class="cf-slot ${c ? "on" : ""} ${tab === b ? "cur" : ""}" data-cftab="${b}" title="${esc(cfBranch(b).nom)}">${c ? `<span class="cf-slot-art">${thumb(c, "cf-th")}</span>` : cfEmb(b, "big")}<b>${esc(cfBranch(b).nom)}</b><small>${c ? esc(nameOf(c)) : "vide"}</small>${c ? `<i data-cfdrop="${b}" aria-label="Retirer">✕</i>` : ""}</button>`; };
+  return `<div class="cf-deckbar" aria-label="Ton deck">${ids.map(slot).join("")}</div>
+    <div class="row cf-deck-tools">${deck.length ? `<button class="btn sm gold" type="button" data-act="cf-deck-use">Prendre mon deck (${deck.length})</button>` : ""}<button class="btn sm" type="button" data-act="cf-deck-save" ${picked.length ? "" : "disabled"}>Enregistrer comme deck</button>${picked.length ? `<button class="btn sm" type="button" data-act="cf-deck-clear">Tout retirer</button>` : ""}</div>
+    <div class="chips cf-tabs"><button class="chip" type="button" data-cftab="tous" aria-pressed="${tab === "tous"}">Toutes · ${mine.length}</button>${ids.map((b) => { const n = mine.filter((c) => c.branch === b).length; return `<button class="chip" type="button" data-cftab="${b}" aria-pressed="${tab === b}" ${n ? "" : "disabled"}>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} · ${n}</button>`; }).join("")}</div>
+    ${tab !== "tous" ? `<p class="note cf-tab-pow">${cfEmb(tab, "sm")} <b>${esc(cfBranch(tab).nom)}</b> : ${esc(cfBranch(tab).pouvoir)}</p>` : ""}
+    ${pool.length ? `<div class="cf-pool">${pool.map((x) => { const c = byId[x.cardId], on = CF.contrib[x.branch] === x.cardId; return `<button type="button" class="cf-pick ${on ? "on" : ""}" data-cfpick="${x.cardId}" data-b="${x.branch}" aria-pressed="${on}">${cardHTML(c, { design: myDesign(c.id) })}<span class="cf-pick-b">${cfEmb(x.branch, "sm")} ${esc(cfBranch(x.branch).nom)}</span>${on ? `<span class="cf-pick-ok">Dans ton deck</span>` : ""}</button>`; }).join("")}</div>` : `<p class="note">Aucune carte de ce style dans ta collection.</p>`}
+    <div class="cf-draft-go">${!picked.length && !CF.table?.partage && mine.length ? `<button class="btn gold big" type="button" disabled>Choisis au moins une de tes cartes</button>` : `<button class="btn gold big" type="button" data-act="cf-contrib">${picked.length ? `Valider mes cartes (${picked.length}/${ids.length})` : "Jouer avec 2 persos prêtés"}</button>`}</div>`;
 }
 function cfPerso(c, big) {
   if (!c) return "";
@@ -5439,7 +5595,7 @@ function cfHand(v, me, pr, acts) {
     ${fin?.aDefausser ? `<p class="note">Tu as trop de cartes : touche ${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} à défausser, puis « Finir le tour ».</p>` : ""}</section>`;
 }
 const EVT = {
-  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}.`,
+  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
@@ -5455,7 +5611,7 @@ const EVT = {
   etal: (e) => `${cfName(e.pid)} ouvre l'Étal du marché.`, etal_pris: (e) => `${cfName(e.pid)} prend une carte de l'Étal.`, etal_fin: () => "L'Étal est vidé.", arme_remplacee: (e) => `${cfName(e.pid)} change d'arme.`,
   choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
-const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr" };
+const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr", reprise: "Œil sûr" };
 const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
@@ -5478,14 +5634,28 @@ document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));
   const c = t.closest("[data-cfc]"); if (c) return cfSelect(c.dataset.cfc);
+  const dr = t.closest("[data-cfdrop]"); if (dr) { delete CF.contrib[dr.dataset.cfdrop]; return draw(); }
+  const rd = t.closest("[data-cfready]"); if (rd) return srv("confront/pret", { gid: CF.gid, pret: rd.dataset.cfready === "1" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
+  const sh = t.closest("[data-cfsh]"); if (sh) return cfShareDo(sh.dataset.cfsh);
+  const md = t.closest("[data-cfmode]"); if (md) return srv("confront/reglage", { gid: CF.gid, partage: md.dataset.cfmode === "partage" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
+  const ac = t.closest("[data-cfaccept]"); if (ac) return srv("confront/act", { gid: ac.dataset.cfaccept, action: { type: "rejoindre" } }).then(() => { CF.list = null; nav("confront", ac.dataset.cfaccept); }).catch((err) => toast(err.message));
+  const rf = t.closest("[data-cfrefuse]"); if (rf) return srv("confront/refuser", { gid: rf.dataset.cfrefuse }).then(() => { CF.list = null; toast("Défi refusé."); cfLoadList(); draw(); }).catch((err) => toast(err.message));
+  const df = t.closest("[data-cfdefi]"); if (df) return srv("confront/create", { invite: df.dataset.cfdefi }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; toast("Défi envoyé : la table t'attend."); nav("confront", r.gid); }).catch((err) => toast(err.message));
+  const pk = t.closest("[data-cfpick]"); if (pk) { const b = pk.dataset.b; CF.contrib[b] = CF.contrib[b] === pk.dataset.cfpick ? null : pk.dataset.cfpick; return draw(); }
+  const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
-  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
+  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked, partage: document.querySelector('[name="cfMode"]:checked')?.value === "partage" }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
+  if (act === "cf-deck-use") { CF.contrib = {}; for (const id of CF.list?.deck || []) { const c = (CF.list.cartes || []).find((x) => x.cardId === id); if (c) CF.contrib[c.branch] = id; } return draw(); }
+  if (act === "cf-deck-clear") { CF.contrib = {}; return draw(); }
+  if (act === "cf-deck-save") return srv("confront/deck", { cartes: Object.values(CF.contrib).filter(Boolean) }).then((r) => { if (CF.list) CF.list.deck = r.deck; toast("Deck enregistré : tu pourras le reprendre en un toucher."); draw(); }).catch((err) => toast(err.message));
   if (act === "cf-reload") { CF.list = null; cfLoadList(); return draw(); }
-  if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
+  if (act === "cf-share") return cfShare(CF.gid, CF.table?.nom);
+  if (act === "cf-close" && sure(t.closest("[data-act]"), "Fermer pour tout le monde")) return srv("confront/fermer", { gid: CF.gid }).then(() => { CF.list = null; toast("Salon fermé."); nav("confront"); }).catch((err) => toast(err.message));
+  if (act === "cf-leave" && sure(t.closest("[data-act]"), "Quitter : la partie est annulée")) return cfAct({ type: "abandon" }).then(() => nav("confront"));
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });
@@ -6246,7 +6416,9 @@ const Arena = (() => {
   let R = null; // le moteur 3D, créé une fois
   let st = null; // la table affichée : { gid, champs, lastSeq, lastSalon, queue, … }
   const $a = (id) => document.getElementById("ar-" + id);
-  const wanted = () => { try { return localStorage.getItem(LS) !== "classique"; } catch (e) { return true; } };
+  // seulement l'arène, comme les boosters : la vue classique ne sert plus que de secours (pas de WebGL) ;
+  // les navigateurs pilotés par les tests la gardent, sauf si un test demande l'arène
+  const wanted = () => { let v = null; try { v = localStorage.getItem(LS); } catch (e) {} return !navigator.webdriver || v === "arene"; };
   const setWanted = (on) => { try { localStorage.setItem(LS, on ? "arene" : "classique"); } catch (e) {} };
   const webgl = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } };
   const usable = () => !failed && wanted() && webgl();
@@ -6273,7 +6445,7 @@ const Arena = (() => {
     if ($a("root")) return;
     const d = document.createElement("div"); d.id = "ar-root"; d.className = "ar"; d.hidden = true;
     d.innerHTML = `<canvas id="ar-c"></canvas><div class="ar-vign"></div><div id="ar-tags"></div><div id="ar-pops"></div><div class="ar-flash" id="ar-flash"></div>
-      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm" type="button" id="ar-classic">Vue classique</button><button class="btn sm acc" type="button" id="ar-quit" hidden>Abandonner</button></div>
+      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm acc" type="button" id="ar-quit">Quitter la partie</button></div>
       <div class="ar-hint" id="ar-hint"></div>
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
@@ -6288,15 +6460,22 @@ const Arena = (() => {
           <label class="ar-mute"><input type="checkbox" id="ar-mute"> Couper les émotes et messages des autres</label></div></div>
       <button class="btn ar-emob" id="ar-emoBtn" type="button" aria-label="Émotes">${ico("haha")}<span>Émotes</span></button>
       <div class="ar-emow" id="ar-emoW">${EMOTES.map(([k, t]) => `<button type="button" data-emo="${k}">${ico(k)}${t}</button>`).join("")}</div>
-      <div class="ar-side"><div class="ar-deck" id="ar-deck" title="Pioche">${ico("logo")}<b id="ar-deckN"></b></div><button class="btn gold" type="button" id="ar-end" disabled>Fin du tour</button></div>
+      <div class="ar-side"><button class="ar-deck" id="ar-deck" type="button" title="La pioche et les éléments" aria-label="La pioche et les éléments"><span class="ar-elems">${["feu", "eau", "vent", "terre"].map((k) => `<i style="--ec:${SIGNE_COL[k]}">${ico(k)}</i>`).join("")}</span>${ico("logo")}<b id="ar-deckN"></b><em>?</em></button><button class="btn gold" type="button" id="ar-end" disabled>Fin du tour</button></div>
       <div class="ar-react" id="ar-react"><p id="ar-reactTxt"></p><div class="ar-bar"><i id="ar-reactBar"></i></div><div class="ar-cards" id="ar-reactCards"></div><div class="ar-row" id="ar-reactBtns"></div></div>
       <div class="ar-modal" id="ar-modal"><div class="ar-sheet" id="ar-sheet"></div></div>
       <div class="ar-endo" id="ar-endo"><div><h1 id="ar-endTxt"></h1><p id="ar-endSub"></p><div class="ar-row"><button class="btn" type="button" id="ar-endSee">Revoir la table</button><button class="btn gold" type="button" id="ar-endBack">Retour aux salons</button></div></div></div>
       <div class="ar-load" id="ar-load">Entrée dans l'arène…</div>`;
     document.body.appendChild(d);
     $a("back").onclick = () => nav("confront");
-    $a("classic").onclick = () => { setWanted(false); hide(); draw(); };
-    $a("quit").onclick = (e) => { if (sure(e.currentTarget, "Confirmer l'abandon")) cfAct({ type: "abandon" }); };
+    // quitter la partie : en vie, c'est un abandon (confirmé) ; éliminé, spectateur ou partie finie, on sort simplement
+    $a("quit").onclick = async (e) => {
+      const v = CF.table?.vue, live = v?.phase === "partie" && !!v.joueurs?.find((j) => j.id === v.moi)?.vivant;
+      if (!live) return nav("confront");
+      if (!sure(e.currentTarget, "Quitter = abandonner, confirmer")) return;
+      // directement au serveur : une action de jeu encore en cours ne doit jamais bloquer la sortie
+      const gid = CF.gid; nav("confront");
+      try { await srv("confront/act", { gid, action: { type: "abandon" } }); } catch (err) { toast(err.message); }
+    };
     $a("tabLog").onclick = () => panel("log"); $a("tabChat").onclick = () => panel("chat"); $a("logArr").onclick = () => panel();
     $a("tblBtn").onclick = () => { const t = $a("tbl"); t.classList.toggle("open"); $a("tblArr").textContent = t.classList.contains("open") ? "▴" : "▾"; };
     $a("emoBtn").onclick = () => $a("emoW").classList.toggle("on");
@@ -6304,7 +6483,7 @@ const Arena = (() => {
     $a("qp").onclick = (e) => { const b = e.target.closest("button"); if (b) salon("msg", b.textContent); };
     $a("chatForm").onsubmit = (e) => { e.preventDefault(); const v = $a("chatIn").value.trim(); if (!v) return; $a("chatIn").value = ""; salon("msg", v); };
     $a("mute").onchange = (e) => { if (st) st.muted = e.target.checked; };
-    $a("end").onclick = onEnd;
+    $a("end").onclick = onEnd; $a("deck").onclick = showDeckInfo;
     $a("chip").onclick = () => showRole();
     $a("modal").onclick = (e) => { if (e.target.id === "ar-modal") closeModal(); };
     $a("endSee").onclick = () => $a("endo").classList.remove("on");
@@ -6594,7 +6773,10 @@ const Arena = (() => {
     if (!p) return;
     const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e", [x, y] = screenOf(worldOf(p, 2.4));
     const d = document.createElement("div"); d.className = "ar-omen"; d.style.cssText = `left:${x}px;top:${y}px;--oc:${c}`;
-    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small><b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
+    const R = CF.cat?.regles || {}, P = R.presage || {}, petite = (CF.table?.vue?.joueurs.length || 4) <= 3;
+    const need = { voile: P.voile, defense: petite && R.defensePetite ? R.defensePetite : P.defense, entrave: P.entrave, reprise: R.reprise }[e.quoi];
+    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `explose sur Terre 1 à ${P.orbe.rangMax}` : need ? `il faut ${need.map((k) => nm2[k]).join(" ou ")}` : "";
+    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small>${needTxt ? `<small class="ar-need">${needTxt}</small>` : ""}<b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
     $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
@@ -6712,6 +6894,35 @@ const Arena = (() => {
     $a("sheet").innerHTML = `<div class="ar-rolec">${roleCard(v.monRole, { mine: true })}</div><div class="ar-row"><button class="btn gold" type="button" id="ar-roleOk">C'est compris</button></div>`;
     $a("roleOk").onclick = closeModal; $a("modal").classList.add("on");
   }
+  const SIGNE_NOM = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" };
+  const els = (l) => (l || []).map((k) => `<b style="color:${SIGNE_COL[k]}">${ico(k)} ${SIGNE_NOM[k]}</b>`).join(" ou ");
+  // la pioche expliquée : les 4 éléments, et ce que chaque présage demande
+  function showDeckInfo() {
+    const v = CF.table?.vue, R = CF.cat?.regles || {}, P = R.presage || {}, petite = v && v.joueurs.length <= 3;
+    const rows = [
+      ["voile", "Voile de brume", `esquive l'attaque sur ${els(P.voile)}`],
+      ["defense", "Garde (style Défense)", `esquive l'attaque sur ${els(petite && R.defensePetite ? R.defensePetite : P.defense)}${!petite && R.defensePetite ? ` (à 2 ou 3 joueurs : ${els(R.defensePetite)})` : ""}`],
+      ["sceau", "Sceau d'entrave", `le joueur entravé se libère sur ${els(P.entrave)}, sinon il passe son tour`],
+      ["orbe", "Orbe instable", P.orbe ? `explose sur ${els([P.orbe.signe])} de rang 1 à ${P.orbe.rangMax} (${P.orbe.degats} PV), sinon passe au voisin` : ""],
+      ["precision", "Œil sûr (style Précision)", R.reprise?.length ? `une Frappe parée revient en main sur ${els(R.reprise)}` : ""],
+      ["chance", "Style Chance", "retourne 2 cartes à chaque présage et garde la meilleure"],
+    ].filter((r) => r[2]);
+    $a("sheet").style.setProperty("--bc", "var(--ag)");
+    $a("sheet").innerHTML = `<div class="ar-sh"><h2 class="ar-h2">La pioche et les éléments</h2><button class="btn sm ar-x" type="button" aria-label="Fermer">✕</button></div>
+      <p class="ar-sd">Chaque carte porte un <b>élément</b> et un <b>rang de 1 à 10</b> (en haut à gauche de la carte). Il y a autant de chaque élément : un quart de la pioche chacun.</p>
+      <div class="ar-elgrid">${["feu", "eau", "vent", "terre"].map((k) => `<span style="--ec:${SIGNE_COL[k]}">${ico(k)}<b>${SIGNE_NOM[k]}</b><small>1 carte sur 4</small></span>`).join("")}</div>
+      <div class="ar-ss"><b>Le présage</b><p class="ar-sd">Certaines cartes et certains styles font un <b>présage</b> : on retourne la carte du dessus de la pioche et <b>son élément décide</b>. Le présage apparaît au-dessus du joueur, avec « réussi » ou « raté ».</p></div>
+      <div class="ar-ss"><b>Qui a besoin de quel élément</b>${rows.map(([k, n, t]) => `<div class="ar-sd ar-pres">${CF_ICON[k] || ico(k === "defense" || k === "precision" || k === "chance" ? "logo" : k)}<span><b>${n}</b> : ${t}.</span></div>`).join("")}</div>
+      ${v ? `<div class="ar-ss"><b>En ce moment</b><p class="ar-sd">Pioche : <b>${v.pioche}</b> cartes · défausse : <b>${v.nbDefausse}</b> (remélangée dans la pioche quand elle est vide).${R.equipMax ? ` Équipements : <b>${R.equipMax}</b> au plus devant soi (l'arme à part), le suivant remplace le plus ancien.` : ""}</p></div>` : ""}`;
+    $a("sheet").querySelector(".ar-x").onclick = closeModal; $a("modal").classList.add("on");
+  }
+  // une carte prise ou détruite s'affiche en grand, avec son image et sa règle
+  function spotlight(c, caption) {
+    if (!c?.def) return Promise.resolve();
+    const d = document.createElement("div"); d.className = "ar-spot"; d.innerHTML = `<div class="ar-spot-in">${cfFace(c, "ar-spot-card")}<p>${caption}</p><small>${esc(defOf(c).texte || "")}</small></div>`;
+    $a("root").appendChild(d); d.onclick = () => d.remove();
+    return wait(1900).then(() => { d.classList.add("out"); return wait(300); }).then(() => d.remove());
+  }
   const closeModal = () => $a("modal").classList.remove("on");
 
   // ---------- la main ----------
@@ -6773,7 +6984,10 @@ const Arena = (() => {
     // Larcin, Dissipation : une carte de sa main ou une carte posée devant lui
     const j = p.j || {}, posed = [j.arme, ...(j.equip || [])].filter(Boolean);
     $a("sheet").style.setProperty("--bc", "var(--gold)");
-    $a("sheet").innerHTML = `<h2 class="ar-h2">Quelle carte de ${esc(nm(p.id))} ?</h2><div class="ar-choices">${acts.map((a, i) => `<button class="btn ${a.choix === "main" ? "gold" : ""}" type="button" data-i="${i}">${a.choix === "main" ? "Une carte au hasard dans sa main" : esc(defOf(posed.find((c) => c.uid === a.choix)).nom || "Carte posée")}</button>`).join("")}</div><button class="btn sm" type="button" id="ar-choixX">Annuler</button>`;
+    const verb = defOf(CF.table.vue.main.find((c) => c.uid === acts[0].carte)).nom || "";
+    $a("sheet").innerHTML = `<h2 class="ar-h2">${esc(verb)} · quelle carte de ${esc(nm(p.id))} ?</h2><div class="ar-choices ar-cardpick">${acts.map((a, i) => a.choix === "main"
+      ? `<button class="ar-cp" type="button" data-i="${i}"><span class="ar-cp-back">${ico("logo")}<b>${(p.j?.nbMain ?? 0)}</b></span><b>Une carte au hasard</b><small>dans sa main (tu ne la vois pas avant)</small></button>`
+      : `<button class="ar-cp" type="button" data-i="${i}">${cfFace(posed.find((c) => c.uid === a.choix))}<small>posée devant lui</small></button>`).join("")}</div><button class="btn sm" type="button" id="ar-choixX">Annuler</button>`;
     $a("sheet").querySelectorAll("[data-i]").forEach((b) => { b.onclick = () => { closeModal(); act(acts[+b.dataset.i]); }; });
     $a("choixX").onclick = closeModal; $a("modal").classList.add("on");
   }
@@ -6845,7 +7059,7 @@ const Arena = (() => {
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }
-    $a("quit").hidden = !(v.actions || []).some((a) => a.type === "abandon") || v.phase !== "partie";
+    if (!$a("quit").dataset.sure) $a("quit").textContent = v.phase === "partie" && v.joueurs?.find((j) => j.id === v.moi)?.vivant ? "Quitter la partie" : "Quitter";
     const me = v.joueurs.find((j) => j.id === v.moi), pr = v.attente;
     $a("chatForm").hidden = $a("qp").hidden = $a("emoBtn").hidden = !me;
     if (!me) hint("Tu regardes la partie en spectateur.");
@@ -6904,11 +7118,11 @@ const Arena = (() => {
         else if (d === "defi") await beam(p, to, "#ff9b3d", .9);
         else if (d === "sceau") { await beam(p, to, "#ff4d5e", .6); if (to) setSeal(to, true, true); }
         else if (d === "orbe") { if (p) setOrb(p, true); emit(60, worldOf(p, 2.4), "#ff7a1a", { speed: 2, life: .8, grav: 0 }); await wait(400); }
-        else if (d === "larcin") await flyCard(e.prise || null, to, p);
-        else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); }
+        else if (d === "larcin") { await flyCard(e.prise || null, to, p); if (e.prise) await spotlight(e.prise, `${esc(nm(e.pid))} prend la carte posée devant ${esc(nm(e.cible))}`); }
+        else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); if (e.defaussee) await spotlight(e.defaussee, `${esc(nm(e.pid))} détruit ${e.source === "main" ? "une carte de la main" : "la carte posée devant"} de ${esc(nm(e.cible))}`); }
         else if (d === "inspiration" || d === "revelation" || d === "etal") { emit(60, worldOf(p, 1.6), "#4dd6ff", { speed: 2, life: .9, grav: -.5 }); await wait(450); }
         else if (defOf(c).cat === "arme") { if (p) setWeapon(p, d, true); await wait(500); }
-        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); await wait(400); }
+        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); if (e.remplace) pop(p, `${defOf(e.remplace).nom} défaussé (${CF.cat?.regles?.equipMax || 2} au plus)`, "#a99cc8", true); await wait(400); }
         break;
       }
       case "degats": if (p) { hitFx(p, e.cause === "onde" ? "#f5a524" : "#ff4d5e"); pop(p, "-" + e.n, "#ff4d5e"); p.pv = e.pv; renderTags(); } await wait(420); break;
@@ -6923,7 +7137,8 @@ const Arena = (() => {
       case "sauvetage": case "survie": if (p) { healFx(p); pop(p, "Sauvé !", "#3fdc8f", true); p.pv = e.pv ?? p.pv; renderTags(); } await wait(600); break;
       case "entrave": if (p) pop(p, "Entravé : passe son tour", "#ff4d5e", true); await wait(600); break;
       case "entrave_brisee": if (p) { setSeal(p, false); pop(p, "Libéré !", "#3fdc8f", true); } await wait(500); break;
-      case "vol": case "vol_public": await flyCard(e.carte || null, champ(e.cible), p); break;
+      case "vol": { await flyCard(e.carte || null, champ(e.cible), p); const v = CF.table.vue; if (e.carte) await spotlight(e.carte, e.pid === v.moi ? `Tu prends cette carte à ${esc(nm(e.cible))}` : `${esc(nm(e.pid))} te prend cette carte`); break; }
+      case "vol_public": await flyCard(null, champ(e.cible), p); break;
       case "etal_pris": await flyCard(e.carte, null, p); break;
       case "pioche_publique": if (p) pop(p, `+${e.n} carte${e.n > 1 ? "s" : ""}`, "#4dd6ff", true); break;
       case "defi_perdu": case "effondrement": if (p) hitFx(p, "#ff9b3d"); break;
@@ -7023,7 +7238,7 @@ const Arena = (() => {
     return true;
   }
   addEventListener("hashchange", () => { if (st && !location.hash.startsWith("#/confront/" + st.gid)) hide(); });
-  return { wants, sync, hide, usable, setWanted, offer: () => !failed && !wanted() && webgl(), loading: () => !!loading && !THREE && !failed, get st() { return st; } };
+  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; } };
 })();
 
 // ===== Ouvertures en 3D : le coffre (×10, 2 boosters) et la pochette (×5, un booster) =====
@@ -7038,8 +7253,9 @@ const Open3D = (() => {
   let T = null, M = null, loading = null, failed = false, E = null, cur = null;
   const pref = () => { try { return localStorage.getItem(LS); } catch (e) { return null; } };
   const webgl = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } };
-  // les navigateurs pilotés par les tests gardent l'ancienne ouverture, sauf si un test demande la 3D
-  const usable = () => !failed && !reduced && pref() !== "0" && (!navigator.webdriver || pref() === "1") && webgl();
+  // seulement la 3D : l'ancienne ouverture ne sert plus que de secours (pas de WebGL, mouvements réduits) ;
+  // les navigateurs pilotés par les tests la gardent, sauf si un test demande la 3D
+  const usable = () => !failed && !reduced && (!navigator.webdriver || pref() === "1") && webgl();
   function load() {
     if (loading) return loading;
     const all = Promise.all([import("three"), import("three/addons/environments/RoomEnvironment.js"), import("three/addons/geometries/RoundedBoxGeometry.js"), import("three/addons/postprocessing/EffectComposer.js"), import("three/addons/postprocessing/RenderPass.js"), import("three/addons/postprocessing/UnrealBloomPass.js"), import("three/addons/postprocessing/OutputPass.js")]);
@@ -7426,7 +7642,7 @@ const Open3D = (() => {
       <div class="o3-title" id="o3Title"></div><p class="o3-hint" id="o3Hint"></p>
       <div class="o3-fx" id="o3Fx"><div class="o3-fx-bg"></div><canvas class="o3-fx-c" id="o3FxC"></canvas><div class="o3-fx-name" id="o3FxName"><b></b><span></span></div></div>
       <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button>
-        <div class="o3-tools"><button class="btn sm" type="button" id="o3Light">Version légère</button><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
+        <div class="o3-tools"><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
       <p class="o3-sub">${esc(o.pk.name)}${o.pk.daily || o.pk.cos ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
   }
   const hint = (t) => { const h = $("o3Hint"); if (h) { h.textContent = t; h.style.opacity = t ? 1 : 0; } };
@@ -7434,7 +7650,6 @@ const Open3D = (() => {
     el.innerHTML = stageHTML(o, top); el.dataset.o3 = o.o3id; el.dataset.cf = ""; delete el.dataset.rv;
     $("o3Host").appendChild(E.canvas);
     $("o3All").onclick = flipAll; $("o3Done").onclick = finish;
-    $("o3Light").onclick = () => { try { localStorage.setItem(LS, "0"); } catch (e) {} stop(); drawOpening(); toast("Version légère : l'ouverture en 3D est coupée sur cet appareil."); };
     $("o3Fx").onclick = () => cur?.fxSkip?.();
     if (!E.on) { E.on = true; E.last = performance.now(); requestAnimationFrame(frame); }
     resize(); hint(cur?.phase === "idle" ? cur.hint : cur?.phase === "cards" ? "Touche une carte pour la retourner" : "");
@@ -7930,6 +8145,22 @@ const Open3D = (() => {
   }
   return { draw, stop, get state() { return cur && { kind: cur.kind, phase: cur.phase, cards: cur.cards.length, flipped: cur.cards.filter((c) => c.flipped).length }; }, tear: (p) => tearTo(p), open: () => (cur?.kind === "chest" ? openChest() : autoTear()), flipAll, finish };
 })();
+
+// ===== Gestion : tout ce qui sert à l'admin et au dev, dans une seule rubrique à onglets =====
+// Les pages gardent leur adresse (#/admin, #/createur…) : seul le menu change (une entrée « Gestion ») et chaque page
+// reçoit la barre d'onglets en haut.
+ROUTES.push("tests");
+const GEST_TABS = () => [
+  ["admin", "admin", "Admin", IS_ADMIN], ["createur", "createur", "Créateur", IS_ADMIN || IS_DEV], ["branches", "branches", "Branches", IS_ADMIN],
+  ["galerie", "galerie", "Galerie", IS_ADMIN], ["labo", "labo", "Labo", IS_ADMIN], ["tests", "profil", "Compte de test", SRV && (IS_ADMIN || IS_DEV)], ["dev", "dev", "Dev", IS_DEV],
+].filter((x) => x[3]);
+const isGest = (v) => GEST_TABS().some((x) => x[0] === v);
+const gestHome = () => GEST_TABS()[0]?.[0] || "admin";
+function gestBar(cur) {
+  return `<nav class="wrap gest" aria-label="Gestion"><p class="eyebrow">Gestion · admin et dev</p><div class="utabs gest-tabs">${GEST_TABS().map(([v, k, l]) => `<button type="button" data-nav="${v}" aria-pressed="${v === cur}">${ico(k)} ${l}</button>`).join("")}</div></nav>`;
+}
+VIEWS.tests = () => `<div class="wrap page">${head("Gestion", "Compte de test")}${SRV && (IS_ADMIN || IS_DEV) ? testZone() : empty("Réservé à l'admin et au dev, sur le site du QG.")}</div>`;
+for (const v of ["admin", "createur", "branches", "galerie", "labo", "tests", "dev"]) { const f = VIEWS[v]; if (f) VIEWS[v] = () => (isGest(v) ? gestBar(v) : "") + f(); }
 
 // ===== Événements =====
 let toastT;

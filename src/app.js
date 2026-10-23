@@ -624,6 +624,15 @@ let MYNAME = "";
 const NICON = { sold: "◆", trade: "⇄", mention: "@", episode: "★", pred: "?", announce: "!" };
 const canChat = () => (SRV ? true : !!(DB && ME && canShare));
 
+// notifs touchées : on les retire de la cloche (sur cet appareil)
+function notifOff() { try { const o = JSON.parse(lsGet("rzlol-notif-off") || "{}"); return { todo: o.todo || {}, ids: o.ids || [] }; } catch (e) { return { todo: {}, ids: [] }; } }
+function dismissNotif(el) {
+  const o = notifOff();
+  if (el.dataset.ntodo) o.todo[el.dataset.ntodo] = Date.now();
+  if (el.dataset.nid) o.ids = [...o.ids, +el.dataset.nid].slice(-300);
+  lsSet("rzlol-notif-off", JSON.stringify(o)); badges();
+}
+const shownNotifs = () => { const ids = new Set(notifOff().ids); return notif.items.filter((n) => !ids.has(n.id)); };
 function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
 function badges() {
@@ -745,7 +754,7 @@ document.addEventListener("click", (e) => {
   if (t.closest("#bellBtn")) return toggleNotifs();
   if (notif.open && !t.closest("#notifPanel")) toggleNotifs(false);
   if (t.closest("#chatFab")) return openChat(true);
-  const ng = t.closest("[data-ngo]"); if (ng) return goTo(ng.dataset.ngo);
+  const ng = t.closest("[data-ngo]"); if (ng) { dismissNotif(ng); if (!ng.dataset.ngo) return drawNotifs(); return goTo(ng.dataset.ngo); }
   const del = t.closest("[data-chatdel]"); if (del) return deleteChat(del.dataset.chatdel);
   const mn = t.closest("[data-mention]"); if (mn && $("chatIn")) { const i = $("chatIn"); i.value = (i.value ? i.value.replace(/\s*$/, " ") : "") + "@" + mn.dataset.mention + " "; return i.focus(); }
   const act = t.closest("[data-act]")?.dataset.act;

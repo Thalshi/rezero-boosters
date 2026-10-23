@@ -79,7 +79,7 @@ const icon = {
 const dia = '<span class="dia f"></span>';
 const head = (eb, title, lead = "") => `<div class="head"><p class="eyebrow">${eb}</p><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}</div>`;
 const seg = (name, items, cur, cls = "") => `<div class="seg ${cls}" role="tablist">${items.map(([k, l, dot]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${dot ? '<i class="dot"></i>' : ""}</button>`).join("")}</div>`;
-const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
+const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n, plain]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? plain ? `<span class="tcount">${n}</span>` : `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
 const rarChips = (name, cur) => `<div class="chips">${[["", "Toutes"], ...RANKS.map((k) => [k, RAR[k].label])].map(([k, l]) => `<button class="chip" type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${k ? `<i class="d" style="background:${RAR[k].color}"></i>` : ""}${l}</button>`).join("")}</div>`;
 const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`;
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
@@ -96,7 +96,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
   ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
-  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"], ["createur", "createur", "Créateur"], ["branches", "branches", "Branches"], ["galerie", "galerie", "Galerie"], ["labo", "labo", "Labo"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : []),
+  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -108,7 +108,7 @@ function drawNav() {
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>${ico("pred")} Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
-      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
+      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
 }
 let ACCT = null;
 async function loadAccount() {
@@ -136,7 +136,7 @@ function drawMenu() {
       <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
     ${guest && window.DISCORD_LOGIN ? `<div class="disc-box">Lie ton compte Discord pour ne pas perdre ta collection et jouer avec le QG.<a class="btn-disc" href="/auth/login">${icon.discord}Se connecter avec Discord</a></div>` : ""}
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
-    <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié M</small><b>${save.sinceMythic}/${MYTHIC_PITY}</b></div></div>
+    <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié L</small><b>${save.sinceLegend || 0}/${LEGEND_PITY}</b></div></div>
   </div>
   <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${ico(k)}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
   <div class="m-foot">${SRV || ME ? `<button type="button" data-nav="profil" data-p="${ME}">Mon profil public</button>` : `<button type="button" data-nav="profil" data-p="moi">Mon profil</button>`}
@@ -169,16 +169,18 @@ function todos() {
   if (save.free >= FREE_MAX) out.push({ text: "Tes boosters gratuits sont pleins : ouvre-les pour qu'ils se rechargent.", go: "boosters" });
   const p = SRV ? pendingTrades().length : 0; if (p) out.push({ text: `${p} échange${p > 1 ? "s" : ""} attend${p > 1 ? "ent" : ""} ta réponse.`, go: "trades" });
   const q = openPredCount(); if (q) out.push({ text: `${q} prédiction${q > 1 ? "s" : ""} attend${q > 1 ? "ent" : ""} ton vote.`, go: "pred" });
-  return out;
+  // une fois touchée, la notif disparaît (elle revient si le texte change, ou 12 h plus tard)
+  const off = notifOff().todo, now = Date.now();
+  return out.filter((x) => !(off[x.text] > now - 12 * 3600e3));
 }
 function drawNotifs() {
   const box = $("notifPanel"); if (!box) return;
   const td = todos();
   const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
   box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
-    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
+    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}" data-ntodo="${esc(x.text)}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
     <div class="np-sec">Récent</div>
-    ${SRV ? (notif.items.length ? notif.items.map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
       : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
       : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
     ${"Notification" in window ? `<button class="btn sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
@@ -220,7 +222,7 @@ function qsHTML() {
     <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
     <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">${ico("feu")}</span><b>J${st.n}/7</b><span>connexion à la suite</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
     <div style="--c:var(--gold)"><span class="k">${ico("piece")}</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le booster doré</span></div>
-    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
+    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div>
   </div>`;
 }
 function packsForTab() {
@@ -259,11 +261,11 @@ function boosterZone() {
       <div class="pkd" style="--pc:${pk.color}">
         <div class="pkd-h"><span class="e">${ico(packIcon(pk))}</span><div><h3>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name}</h3><p>${pk.sub}</p></div></div>
         <div class="mini4"><div><b>${PACK}</b><span>cartes par booster</span></div><div><b style="color:var(--r-${pk.daily ? "e" : "r"})">${pk.daily ? "Épique" : "Rare"}</b><span>ou mieux, garantie</span></div>
-          <div><b style="color:var(--acc)">${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
+          <div><b style="color:var(--r-l)">${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
         <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
-        ${fill.length ? `<p class="note">Pas encore de ${fill.map((r) => RAR[r].label).join(", ")} dans ce booster : ces raretés viennent du Mix, avec les mêmes chances.</p>` : ""}
+        ${fill.length ? `<p class="note">Pas encore de carte ${fill.map((r) => RAR[r].label).join(" ni ")} dans ce booster : ${fill.length > 1 ? "ces raretés viennent" : "cette rareté vient"} du Mix, avec les mêmes chances.</p>` : ""}
         ${btn}
       </div>
     </div>

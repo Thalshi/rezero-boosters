@@ -16,8 +16,10 @@ export function allCardPositions(s) {
 /** Chaque carte d'action existe exactement une fois. */
 export function conserved(s) {
   if (s.phase !== "partie" && s.phase !== "fin") return true;
+  // les cartes retirées pour ce mode (Duel : Lien vital, Festin) ne sont jamais en jeu
+  const out = s.config.retraitsParMode?.[s.mode] || [], n = buildDeck().filter((c) => !out.includes(c.def)).length;
   const pos = allCardPositions(s);
-  return pos.length === ALL_UIDS.length && new Set(pos).size === ALL_UIDS.length;
+  return pos.length === n && new Set(pos).size === n;
 }
 
 function detach(s, uid) {

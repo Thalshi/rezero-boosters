@@ -8,7 +8,7 @@ import { botAction } from "./confront/bots.mjs";
 import { brancheProposeeCarte } from "./confront/branches-proposees.mjs";
 import { BRANCHES, BRANCH_IDS } from "./confront/branches.mjs";
 import { CARD_DEFS, SIGNES } from "./confront/cards.mjs";
-import { modeFor } from "./confront/config.mjs";
+import { modeFor, DEFAULT_CONFIG } from "./confront/config.mjs";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, error, code) => json({ error, code }, status);
@@ -114,12 +114,26 @@ export async function confrontRoute(env, user, path, body, h) {
   if (!path.startsWith("/api/game/confront/")) return null;
   if (!G.featureOn(h.cfg, "confrontation") && !user.admin) return fail(403, "Re Zéro : Confrontation n'est pas encore ouvert.");
   const a = path.slice("/api/game/confront/".length);
-  if (a === "catalogue") return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES });
+  // règles des présages (quel élément réussit quoi) et des tables, pour les expliquer dans la pioche
+  if (a === "catalogue") { const C = DEFAULT_CONFIG; return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES, regles: { presage: C.presage, defensePetite: C.petiteTable.defense, reprise: C.precision.repriseSiParee, equipMax: C.equipMax, retraits: C.retraitsParMode } }); }
   // le style (branche) de chacune de MES cartes, pour l'afficher dans la collection et sur les fiches ;
   // jamais celles des cartes qu'on n'a pas (pas de spoil)
   if (a === "mes-styles") {
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
     return json({ cartes: s ? Object.fromEntries(myCards(s, await branchChoices(env)).map((c) => [c.cardId, c.branch])) : {} });
+  }
+  // deck enregistré : une carte par style, reprise en un toucher à la partie suivante (seulement mes cartes)
+  if (a === "deck") {
+    const ids = Array.isArray(body.cartes) ? [...new Set(body.cartes.map(String))].slice(0, BRANCH_IDS.length) : null;
+    if (!ids) return fail(400, "Deck invalide.");
+    const choix = await branchChoices(env);
+    const r = await h.mutate(env, user.id, (s) => {
+      const mine = Object.fromEntries(myCards(s, choix).map((c) => [c.cardId, c.branch]));
+      if (ids.some((id) => !mine[id])) return { abort: true, error: "Une de ces cartes n'est pas dans ta collection." };
+      if (new Set(ids.map((id) => mine[id])).size !== ids.length) return { abort: true, error: "Une seule carte par style." };
+      s.cfDeck = ids; return {};
+    });
+    return r.error ? fail(400, r.error) : json({ deck: ids });
   }
   // admin : la branche de chaque carte (proposition et choix de Billy), et la modifier
   if (a === "branches" || a === "branches/set") {
@@ -143,7 +157,7 @@ export async function confrontRoute(env, user, path, body, h) {
     const pub = (g) => ({ gid: g.id, nom: g.nom, phase: g.state.phase, joueurs: g.state.players.length, createur: g.createur });
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
     return json({ salons: rows.filter((g) => g.public && g.state.phase === "lobby").map(pub), enCours: rows.filter((g) => g.public && g.state.phase !== "lobby" && g.state.phase !== "fin").map(pub),
-      miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], verrou: s?.confront || null });
+      miennes: rows.filter((g) => g.state.players.some((p) => p.id === user.id) && g.state.phase !== "fin").map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], deck: s?.cfDeck || [], verrou: s?.confront || null });
   }
   if (a === "create") {
     if (!user.member && !user.admin) return fail(403, "Réservé aux membres du QG de Shinjuku.");

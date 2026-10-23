@@ -54,6 +54,14 @@ try {
   const stA = (await A.api("state")).state;
   const notMine = G.CARDS.find((c) => !stA.owned[c.id] && brancheProposee(c.who)).id;
   t.check("apporter une carte que je n'ai pas : refusé", (await A.api("confront/act", { gid, action: { type: "contribuer", cartes: [notMine] } })).status === 400);
+  t.section("Deck enregistré");
+  const two = listA.cartes.reduce((m, x) => { (m[x.branch] ||= []).push(x.cardId); return m; }, {}), dbl = Object.values(two).find((l) => l.length >= 2);
+  const deck1 = Object.values(two).map((l) => l[0]).slice(0, 3);
+  t.check("enregistrer un deck de mes cartes", (await A.api("confront/deck", { cartes: deck1 })).deck?.length === deck1.length);
+  t.check("le deck revient avec la liste", JSON.stringify((await A.api("confront/list")).deck) === JSON.stringify(deck1));
+  t.check("deck avec une carte que je n'ai pas : refusé", (await A.api("confront/deck", { cartes: [notMine] })).status === 400);
+  if (dbl) t.check("deck avec deux cartes du même style : refusé", (await A.api("confront/deck", { cartes: dbl.slice(0, 2) })).status === 400);
+  t.check("le deck refusé n'a rien changé", JSON.stringify((await A.api("confront/list")).deck) === JSON.stringify(deck1));
   // une carte par branche, en choisissant si possible un exemplaire unique (pour tester le verrou)
   const byBranch = {}; for (const x of listA.cartes) if (!byBranch[x.branch] || stA.owned[x.cardId].n + stA.owned[x.cardId].gold === 1) byBranch[x.branch] = x.cardId;
   const mine = Object.values(byBranch);
@@ -124,10 +132,16 @@ try {
     await page.fill("#cfNom", "Table " + label); await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(900);
     await page.click('[data-cfa=\'{"type":"lancer"}\']'); await page.waitForTimeout(1500);
-    t.check(`${label} · contributions : une liste par branche`, (await page.locator("[data-cfb]").count()) === 8);
+    t.check(`${label} · draft : un emplacement par style`, (await page.locator(".cf-slot").count()) === 8);
     // les menus se remplissent avec MES cartes, sans attendre qu'autre chose bouge à la table (bug vu en production)
     await page.waitForTimeout(1500);
-    t.check(`${label} · contributions : mes cartes sont proposées`, (await page.locator("[data-cfb] option[value]:not([value=''])").count()) > 0);
+    t.check(`${label} · draft : mes cartes en vraies cartes`, (await page.locator(".cf-pick .kc").count()) > 0);
+    await page.click(".cf-pick >> nth=0"); await page.waitForTimeout(300);
+    t.check(`${label} · draft : toucher une carte la met dans le deck`, (await page.locator(".cf-slot.on").count()) === 1 && (await page.locator(".cf-pick.on").count()) === 1);
+    await page.click('[data-act="cf-deck-save"]'); await page.waitForTimeout(800);
+    await page.click('[data-act="cf-deck-clear"]'); await page.waitForTimeout(200);
+    await page.click('[data-act="cf-deck-use"]'); await page.waitForTimeout(300);
+    t.check(`${label} · deck enregistré puis repris en un toucher`, (await page.locator(".cf-slot.on").count()) === 1);
     await page.screenshot({ path: join(OUT, `confront-contrib-${label}.png`), fullPage: true });
     await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1800);
     await page.click(".cf-prop .btn >> nth=0"); await page.waitForTimeout(2500);

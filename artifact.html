@@ -1712,6 +1712,55 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Confrontation : choix des cartes façon draft ===== */
+.cf-deckbar { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 800px) { .cf-deckbar { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.cf-slot { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; border-radius: 12px; border: 1px dashed var(--line3); background: var(--bg2); color: var(--fg); cursor: pointer; min-width: 0; font: inherit; }
+.cf-slot.on { border-style: solid; border-color: var(--gold); box-shadow: 0 0 14px #f5c51833; }
+.cf-slot.cur { outline: 2px solid var(--cyan); outline-offset: 1px; }
+.cf-slot .cf-emb.big { width: 46px; height: 46px; opacity: .5; }
+.cf-slot-art { width: 46px; height: 62px; border-radius: 6px; overflow: hidden; position: relative; display: block; }
+.cf-slot-art .cf-th { position: absolute; inset: 0; display: block; }
+.cf-slot-art .cf-th > div { position: absolute; inset: 0; }
+.cf-slot b { font: 700 11px var(--body); } .cf-slot small { font: 500 10px var(--body); color: var(--mut); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cf-slot i { position: absolute; top: 2px; right: 4px; font-style: normal; font-size: 11px; color: var(--mut); }
+.cf-deck-tools { gap: 8px; }
+.cf-tabs .chip .cf-emb { width: 18px; height: 18px; }
+.cf-tab-pow { display: flex; gap: 6px; align-items: center; }
+.cf-pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.cf-pick { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 0; background: none; border: 0; color: var(--fg); cursor: pointer; text-align: center; font: inherit; transition: transform .15s; }
+.cf-pick:hover { transform: translateY(-3px); }
+.cf-pick .kcw { --w: 100%; }
+.cf-pick.on .kc { box-shadow: 0 0 0 3px var(--gold), 0 0 24px #f5c51877; }
+.cf-pick-b { font: 600 12px var(--body); color: var(--fg2); display: flex; gap: 4px; justify-content: center; align-items: center; } .cf-pick-b .cf-emb { width: 16px; height: 16px; }
+.cf-pick-ok { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 4; background: var(--gold); color: #1a1405; font: 800 11px var(--body); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.cf-draft-go { position: sticky; bottom: calc(76px + env(safe-area-inset-bottom)); display: flex; justify-content: center; padding: 10px 0; background: linear-gradient(transparent, var(--bg) 40%); z-index: 5; }
+@media (min-width: 900px) { .cf-draft-go { bottom: 12px; } }
+/* arène : pioche et éléments, carte mise en avant, choix d'une carte adverse */
+.ar-deck { cursor: pointer; padding: 0; font: inherit; }
+.ar-deck em { position: absolute; top: -8px; right: -8px; width: 18px; height: 18px; border-radius: 50%; background: var(--ac); color: #04161a; font: 800 11px/18px var(--body); font-style: normal; text-align: center; }
+.ar-elems { position: absolute; inset: -14px; pointer-events: none; }
+.ar-elems i { position: absolute; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: #0b0916; border: 1px solid var(--ec); color: var(--ec); }
+.ar-elems i .ic { width: 12px; height: 12px; }
+.ar-elems i:nth-child(1) { left: 0; top: 0; } .ar-elems i:nth-child(2) { right: 0; top: 0; } .ar-elems i:nth-child(3) { left: 0; bottom: 0; } .ar-elems i:nth-child(4) { right: 0; bottom: 0; }
+.ar-elgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+.ar-elgrid span { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--ec) 50%, transparent); color: var(--ec); }
+.ar-elgrid .ic { width: 26px; height: 26px; } .ar-elgrid b { font: 700 12px var(--body); } .ar-elgrid small { font: 500 10px var(--body); color: var(--am); }
+.ar-pres { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 6px; } .ar-pres svg { width: 26px; height: 26px; flex: none; color: var(--ag); }
+.ar-spot { position: absolute; inset: 0; z-index: 12; display: grid; place-items: center; background: #000a; animation: ar-rin .25s ease-out; cursor: pointer; }
+.ar-spot.out { opacity: 0; transition: opacity .3s; }
+.ar-spot-in { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 280px; text-align: center; }
+.ar-spot-in .cff { width: 200px; font-size: 15px; animation: ar-emo .5s cubic-bezier(.2,1.4,.4,1); }
+.ar-spot-in p { margin: 0; font: 700 16px var(--disp); } .ar-spot-in small { font: 500 12px/1.4 var(--body); color: var(--am); }
+.ar-cardpick { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.ar-cp { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 12px; border: 1px solid var(--aline); background: #120d22; color: var(--af); cursor: pointer; font: inherit; }
+.ar-cp:hover { border-color: var(--ag); box-shadow: 0 0 16px #e8c77e44; }
+.ar-cp .cff { width: 100%; }
+.ar-cp small { font: 500 11px var(--body); color: var(--am); }
+.ar-cp-back { position: relative; width: 100%; aspect-ratio: 5 / 7; border-radius: 10px; display: grid; place-items: center; background: radial-gradient(circle at 50% 45%, #3a2464, #0b0916); border: 2px solid var(--ag); color: var(--ag); }
+.ar-cp-back .ic { width: 40%; height: auto; } .ar-cp-back b { position: absolute; bottom: 6px; font: 700 12px var(--body); }
+@media (max-width: 600px) { .ar-side { flex-direction: row; align-items: center; } .ar-deck { display: grid !important; width: 40px; height: 58px; } .ar-elems { inset: -10px; } .ar-elems i { width: 16px; height: 16px; } }
+.ar-omen .ar-need { color: #fff; font-size: 9px; letter-spacing: 0; margin-top: 1px; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -5361,11 +5410,10 @@ function cfTableHTML() {
       <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
       ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}${has1("quitter") ? `<button class="btn" type="button" data-cfa='{"type":"quitter"}'>Quitter</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {
-    const me = v.joueurs.find((p) => p.id === v.moi), mine = CF.list?.cartes || [];
+    const me = v.joueurs.find((p) => p.id === v.moi);
     if (!CF.list) cfLoadList();
-    body = `<section class="sec"><h2>Choisis tes cartes</h2><p class="note">Chaque carte de ta collection a une branche (son style de jeu). Prends jusqu'à une carte par branche : à l'étape suivante, <b>tu choisis ton perso parmi elles</b>. Si tu n'en prends aucune, on te prête 2 persos. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
-      ${me && !me.soumis && !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : me && !me.soumis && CF.list?.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">${opts.length ? "Aucune" : "Aucune carte de ce style"}</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
-        <button class="btn gold" type="button" data-act="cf-contrib">Valider mes cartes</button>` : `<p class="note">Cartes enregistrées. En attente des autres…</p>`}
+    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
+      ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
@@ -5376,6 +5424,19 @@ function cfTableHTML() {
   else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
   if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
   return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+}
+// ===== Choix des cartes façon draft : le deck (une carte par style) en haut, ta collection en vraies cartes =====
+function cfDraft() {
+  const mine = CF.list.cartes || [], ids = CF.cat?.branchIds || [], tab = CF.draftTab || "tous";
+  const picked = ids.filter((b) => CF.contrib[b]), deck = (CF.list.deck || []).filter((id) => mine.some((c) => c.cardId === id));
+  const pool = mine.filter((c) => tab === "tous" || c.branch === tab).sort((a, b) => RAR[byId[b.cardId].rar].rank - RAR[byId[a.cardId].rar].rank || nameOf(byId[a.cardId]).localeCompare(nameOf(byId[b.cardId])));
+  const slot = (b) => { const id = CF.contrib[b], c = id && byId[id]; return `<button type="button" class="cf-slot ${c ? "on" : ""} ${tab === b ? "cur" : ""}" data-cftab="${b}" title="${esc(cfBranch(b).nom)}">${c ? `<span class="cf-slot-art">${thumb(c, "cf-th")}</span>` : cfEmb(b, "big")}<b>${esc(cfBranch(b).nom)}</b><small>${c ? esc(nameOf(c)) : "vide"}</small>${c ? `<i data-cfdrop="${b}" aria-label="Retirer">✕</i>` : ""}</button>`; };
+  return `<div class="cf-deckbar" aria-label="Ton deck">${ids.map(slot).join("")}</div>
+    <div class="row cf-deck-tools">${deck.length ? `<button class="btn sm gold" type="button" data-act="cf-deck-use">Prendre mon deck (${deck.length})</button>` : ""}<button class="btn sm" type="button" data-act="cf-deck-save" ${picked.length ? "" : "disabled"}>Enregistrer comme deck</button>${picked.length ? `<button class="btn sm" type="button" data-act="cf-deck-clear">Tout retirer</button>` : ""}</div>
+    <div class="chips cf-tabs"><button class="chip" type="button" data-cftab="tous" aria-pressed="${tab === "tous"}">Toutes · ${mine.length}</button>${ids.map((b) => { const n = mine.filter((c) => c.branch === b).length; return `<button class="chip" type="button" data-cftab="${b}" aria-pressed="${tab === b}" ${n ? "" : "disabled"}>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} · ${n}</button>`; }).join("")}</div>
+    ${tab !== "tous" ? `<p class="note cf-tab-pow">${cfEmb(tab, "sm")} <b>${esc(cfBranch(tab).nom)}</b> : ${esc(cfBranch(tab).pouvoir)}</p>` : ""}
+    ${pool.length ? `<div class="cf-pool">${pool.map((x) => { const c = byId[x.cardId], on = CF.contrib[x.branch] === x.cardId; return `<button type="button" class="cf-pick ${on ? "on" : ""}" data-cfpick="${x.cardId}" data-b="${x.branch}" aria-pressed="${on}">${cardHTML(c, { design: myDesign(c.id) })}<span class="cf-pick-b">${cfEmb(x.branch, "sm")} ${esc(cfBranch(x.branch).nom)}</span>${on ? `<span class="cf-pick-ok">Dans ton deck</span>` : ""}</button>`; }).join("")}</div>` : `<p class="note">Aucune carte de ce style dans ta collection.</p>`}
+    <div class="cf-draft-go"><button class="btn gold big" type="button" data-act="cf-contrib">${picked.length ? `Valider mes cartes (${picked.length}/${ids.length})` : "Jouer avec 2 persos prêtés"}</button></div>`;
 }
 function cfPerso(c, big) {
   if (!c) return "";
@@ -5443,7 +5504,7 @@ function cfHand(v, me, pr, acts) {
     ${fin?.aDefausser ? `<p class="note">Tu as trop de cartes : touche ${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} à défausser, puis « Finir le tour ».</p>` : ""}</section>`;
 }
 const EVT = {
-  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}.`,
+  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
@@ -5459,7 +5520,7 @@ const EVT = {
   etal: (e) => `${cfName(e.pid)} ouvre l'Étal du marché.`, etal_pris: (e) => `${cfName(e.pid)} prend une carte de l'Étal.`, etal_fin: () => "L'Étal est vidé.", arme_remplacee: (e) => `${cfName(e.pid)} change d'arme.`,
   choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
-const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr" };
+const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr", reprise: "Œil sûr" };
 const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
@@ -5482,12 +5543,18 @@ document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));
   const c = t.closest("[data-cfc]"); if (c) return cfSelect(c.dataset.cfc);
+  const dr = t.closest("[data-cfdrop]"); if (dr) { delete CF.contrib[dr.dataset.cfdrop]; return draw(); }
+  const pk = t.closest("[data-cfpick]"); if (pk) { const b = pk.dataset.b; CF.contrib[b] = CF.contrib[b] === pk.dataset.cfpick ? null : pk.dataset.cfpick; return draw(); }
+  const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
   if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
+  if (act === "cf-deck-use") { CF.contrib = {}; for (const id of CF.list?.deck || []) { const c = (CF.list.cartes || []).find((x) => x.cardId === id); if (c) CF.contrib[c.branch] = id; } return draw(); }
+  if (act === "cf-deck-clear") { CF.contrib = {}; return draw(); }
+  if (act === "cf-deck-save") return srv("confront/deck", { cartes: Object.values(CF.contrib).filter(Boolean) }).then((r) => { if (CF.list) CF.list.deck = r.deck; toast("Deck enregistré : tu pourras le reprendre en un toucher."); draw(); }).catch((err) => toast(err.message));
   if (act === "cf-reload") { CF.list = null; cfLoadList(); return draw(); }
   if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
@@ -6292,7 +6359,7 @@ const Arena = (() => {
           <label class="ar-mute"><input type="checkbox" id="ar-mute"> Couper les émotes et messages des autres</label></div></div>
       <button class="btn ar-emob" id="ar-emoBtn" type="button" aria-label="Émotes">${ico("haha")}<span>Émotes</span></button>
       <div class="ar-emow" id="ar-emoW">${EMOTES.map(([k, t]) => `<button type="button" data-emo="${k}">${ico(k)}${t}</button>`).join("")}</div>
-      <div class="ar-side"><div class="ar-deck" id="ar-deck" title="Pioche">${ico("logo")}<b id="ar-deckN"></b></div><button class="btn gold" type="button" id="ar-end" disabled>Fin du tour</button></div>
+      <div class="ar-side"><button class="ar-deck" id="ar-deck" type="button" title="La pioche et les éléments" aria-label="La pioche et les éléments"><span class="ar-elems">${["feu", "eau", "vent", "terre"].map((k) => `<i style="--ec:${SIGNE_COL[k]}">${ico(k)}</i>`).join("")}</span>${ico("logo")}<b id="ar-deckN"></b><em>?</em></button><button class="btn gold" type="button" id="ar-end" disabled>Fin du tour</button></div>
       <div class="ar-react" id="ar-react"><p id="ar-reactTxt"></p><div class="ar-bar"><i id="ar-reactBar"></i></div><div class="ar-cards" id="ar-reactCards"></div><div class="ar-row" id="ar-reactBtns"></div></div>
       <div class="ar-modal" id="ar-modal"><div class="ar-sheet" id="ar-sheet"></div></div>
       <div class="ar-endo" id="ar-endo"><div><h1 id="ar-endTxt"></h1><p id="ar-endSub"></p><div class="ar-row"><button class="btn" type="button" id="ar-endSee">Revoir la table</button><button class="btn gold" type="button" id="ar-endBack">Retour aux salons</button></div></div></div>
@@ -6308,7 +6375,7 @@ const Arena = (() => {
     $a("qp").onclick = (e) => { const b = e.target.closest("button"); if (b) salon("msg", b.textContent); };
     $a("chatForm").onsubmit = (e) => { e.preventDefault(); const v = $a("chatIn").value.trim(); if (!v) return; $a("chatIn").value = ""; salon("msg", v); };
     $a("mute").onchange = (e) => { if (st) st.muted = e.target.checked; };
-    $a("end").onclick = onEnd;
+    $a("end").onclick = onEnd; $a("deck").onclick = showDeckInfo;
     $a("chip").onclick = () => showRole();
     $a("modal").onclick = (e) => { if (e.target.id === "ar-modal") closeModal(); };
     $a("endSee").onclick = () => $a("endo").classList.remove("on");
@@ -6598,7 +6665,10 @@ const Arena = (() => {
     if (!p) return;
     const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e", [x, y] = screenOf(worldOf(p, 2.4));
     const d = document.createElement("div"); d.className = "ar-omen"; d.style.cssText = `left:${x}px;top:${y}px;--oc:${c}`;
-    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small><b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
+    const R = CF.cat?.regles || {}, P = R.presage || {}, petite = (CF.table?.vue?.joueurs.length || 4) <= 3;
+    const need = { voile: P.voile, defense: petite && R.defensePetite ? R.defensePetite : P.defense, entrave: P.entrave, reprise: R.reprise }[e.quoi];
+    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `explose sur Terre 1 à ${P.orbe.rangMax}` : need ? `il faut ${need.map((k) => nm2[k]).join(" ou ")}` : "";
+    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small>${needTxt ? `<small class="ar-need">${needTxt}</small>` : ""}<b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
     $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
@@ -6716,6 +6786,35 @@ const Arena = (() => {
     $a("sheet").innerHTML = `<div class="ar-rolec">${roleCard(v.monRole, { mine: true })}</div><div class="ar-row"><button class="btn gold" type="button" id="ar-roleOk">C'est compris</button></div>`;
     $a("roleOk").onclick = closeModal; $a("modal").classList.add("on");
   }
+  const SIGNE_NOM = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" };
+  const els = (l) => (l || []).map((k) => `<b style="color:${SIGNE_COL[k]}">${ico(k)} ${SIGNE_NOM[k]}</b>`).join(" ou ");
+  // la pioche expliquée : les 4 éléments, et ce que chaque présage demande
+  function showDeckInfo() {
+    const v = CF.table?.vue, R = CF.cat?.regles || {}, P = R.presage || {}, petite = v && v.joueurs.length <= 3;
+    const rows = [
+      ["voile", "Voile de brume", `esquive l'attaque sur ${els(P.voile)}`],
+      ["defense", "Garde (style Défense)", `esquive l'attaque sur ${els(petite && R.defensePetite ? R.defensePetite : P.defense)}${!petite && R.defensePetite ? ` (à 2 ou 3 joueurs : ${els(R.defensePetite)})` : ""}`],
+      ["sceau", "Sceau d'entrave", `le joueur entravé se libère sur ${els(P.entrave)}, sinon il passe son tour`],
+      ["orbe", "Orbe instable", P.orbe ? `explose sur ${els([P.orbe.signe])} de rang 1 à ${P.orbe.rangMax} (${P.orbe.degats} PV), sinon passe au voisin` : ""],
+      ["precision", "Œil sûr (style Précision)", R.reprise?.length ? `une Frappe parée revient en main sur ${els(R.reprise)}` : ""],
+      ["chance", "Style Chance", "retourne 2 cartes à chaque présage et garde la meilleure"],
+    ].filter((r) => r[2]);
+    $a("sheet").style.setProperty("--bc", "var(--ag)");
+    $a("sheet").innerHTML = `<div class="ar-sh"><h2 class="ar-h2">La pioche et les éléments</h2><button class="btn sm ar-x" type="button" aria-label="Fermer">✕</button></div>
+      <p class="ar-sd">Chaque carte porte un <b>élément</b> et un <b>rang de 1 à 10</b> (en haut à gauche de la carte). Il y a autant de chaque élément : un quart de la pioche chacun.</p>
+      <div class="ar-elgrid">${["feu", "eau", "vent", "terre"].map((k) => `<span style="--ec:${SIGNE_COL[k]}">${ico(k)}<b>${SIGNE_NOM[k]}</b><small>1 carte sur 4</small></span>`).join("")}</div>
+      <div class="ar-ss"><b>Le présage</b><p class="ar-sd">Certaines cartes et certains styles font un <b>présage</b> : on retourne la carte du dessus de la pioche et <b>son élément décide</b>. Le présage apparaît au-dessus du joueur, avec « réussi » ou « raté ».</p></div>
+      <div class="ar-ss"><b>Qui a besoin de quel élément</b>${rows.map(([k, n, t]) => `<div class="ar-sd ar-pres">${CF_ICON[k] || ico(k === "defense" || k === "precision" || k === "chance" ? "logo" : k)}<span><b>${n}</b> : ${t}.</span></div>`).join("")}</div>
+      ${v ? `<div class="ar-ss"><b>En ce moment</b><p class="ar-sd">Pioche : <b>${v.pioche}</b> cartes · défausse : <b>${v.nbDefausse}</b> (remélangée dans la pioche quand elle est vide).${R.equipMax ? ` Équipements : <b>${R.equipMax}</b> au plus devant soi (l'arme à part), le suivant remplace le plus ancien.` : ""}</p></div>` : ""}`;
+    $a("sheet").querySelector(".ar-x").onclick = closeModal; $a("modal").classList.add("on");
+  }
+  // une carte prise ou détruite s'affiche en grand, avec son image et sa règle
+  function spotlight(c, caption) {
+    if (!c?.def) return Promise.resolve();
+    const d = document.createElement("div"); d.className = "ar-spot"; d.innerHTML = `<div class="ar-spot-in">${cfFace(c, "ar-spot-card")}<p>${caption}</p><small>${esc(defOf(c).texte || "")}</small></div>`;
+    $a("root").appendChild(d); d.onclick = () => d.remove();
+    return wait(1900).then(() => { d.classList.add("out"); return wait(300); }).then(() => d.remove());
+  }
   const closeModal = () => $a("modal").classList.remove("on");
 
   // ---------- la main ----------
@@ -6777,7 +6876,10 @@ const Arena = (() => {
     // Larcin, Dissipation : une carte de sa main ou une carte posée devant lui
     const j = p.j || {}, posed = [j.arme, ...(j.equip || [])].filter(Boolean);
     $a("sheet").style.setProperty("--bc", "var(--gold)");
-    $a("sheet").innerHTML = `<h2 class="ar-h2">Quelle carte de ${esc(nm(p.id))} ?</h2><div class="ar-choices">${acts.map((a, i) => `<button class="btn ${a.choix === "main" ? "gold" : ""}" type="button" data-i="${i}">${a.choix === "main" ? "Une carte au hasard dans sa main" : esc(defOf(posed.find((c) => c.uid === a.choix)).nom || "Carte posée")}</button>`).join("")}</div><button class="btn sm" type="button" id="ar-choixX">Annuler</button>`;
+    const verb = defOf(CF.table.vue.main.find((c) => c.uid === acts[0].carte)).nom || "";
+    $a("sheet").innerHTML = `<h2 class="ar-h2">${esc(verb)} · quelle carte de ${esc(nm(p.id))} ?</h2><div class="ar-choices ar-cardpick">${acts.map((a, i) => a.choix === "main"
+      ? `<button class="ar-cp" type="button" data-i="${i}"><span class="ar-cp-back">${ico("logo")}<b>${(p.j?.nbMain ?? 0)}</b></span><b>Une carte au hasard</b><small>dans sa main (tu ne la vois pas avant)</small></button>`
+      : `<button class="ar-cp" type="button" data-i="${i}">${cfFace(posed.find((c) => c.uid === a.choix))}<small>posée devant lui</small></button>`).join("")}</div><button class="btn sm" type="button" id="ar-choixX">Annuler</button>`;
     $a("sheet").querySelectorAll("[data-i]").forEach((b) => { b.onclick = () => { closeModal(); act(acts[+b.dataset.i]); }; });
     $a("choixX").onclick = closeModal; $a("modal").classList.add("on");
   }
@@ -6908,11 +7010,11 @@ const Arena = (() => {
         else if (d === "defi") await beam(p, to, "#ff9b3d", .9);
         else if (d === "sceau") { await beam(p, to, "#ff4d5e", .6); if (to) setSeal(to, true, true); }
         else if (d === "orbe") { if (p) setOrb(p, true); emit(60, worldOf(p, 2.4), "#ff7a1a", { speed: 2, life: .8, grav: 0 }); await wait(400); }
-        else if (d === "larcin") await flyCard(e.prise || null, to, p);
-        else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); }
+        else if (d === "larcin") { await flyCard(e.prise || null, to, p); if (e.prise) await spotlight(e.prise, `${esc(nm(e.pid))} prend la carte posée devant ${esc(nm(e.cible))}`); }
+        else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); if (e.defaussee) await spotlight(e.defaussee, `${esc(nm(e.pid))} détruit ${e.source === "main" ? "une carte de la main" : "la carte posée devant"} de ${esc(nm(e.cible))}`); }
         else if (d === "inspiration" || d === "revelation" || d === "etal") { emit(60, worldOf(p, 1.6), "#4dd6ff", { speed: 2, life: .9, grav: -.5 }); await wait(450); }
         else if (defOf(c).cat === "arme") { if (p) setWeapon(p, d, true); await wait(500); }
-        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); await wait(400); }
+        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); if (e.remplace) pop(p, `${defOf(e.remplace).nom} défaussé (${CF.cat?.regles?.equipMax || 2} au plus)`, "#a99cc8", true); await wait(400); }
         break;
       }
       case "degats": if (p) { hitFx(p, e.cause === "onde" ? "#f5a524" : "#ff4d5e"); pop(p, "-" + e.n, "#ff4d5e"); p.pv = e.pv; renderTags(); } await wait(420); break;
@@ -6927,7 +7029,8 @@ const Arena = (() => {
       case "sauvetage": case "survie": if (p) { healFx(p); pop(p, "Sauvé !", "#3fdc8f", true); p.pv = e.pv ?? p.pv; renderTags(); } await wait(600); break;
       case "entrave": if (p) pop(p, "Entravé : passe son tour", "#ff4d5e", true); await wait(600); break;
       case "entrave_brisee": if (p) { setSeal(p, false); pop(p, "Libéré !", "#3fdc8f", true); } await wait(500); break;
-      case "vol": case "vol_public": await flyCard(e.carte || null, champ(e.cible), p); break;
+      case "vol": { await flyCard(e.carte || null, champ(e.cible), p); const v = CF.table.vue; if (e.carte) await spotlight(e.carte, e.pid === v.moi ? `Tu prends cette carte à ${esc(nm(e.cible))}` : `${esc(nm(e.pid))} te prend cette carte`); break; }
+      case "vol_public": await flyCard(null, champ(e.cible), p); break;
       case "etal_pris": await flyCard(e.carte, null, p); break;
       case "pioche_publique": if (p) pop(p, `+${e.n} carte${e.n > 1 ? "s" : ""}`, "#4dd6ff", true); break;
       case "defi_perdu": case "effondrement": if (p) hitFx(p, "#ff9b3d"); break;

@@ -57,7 +57,7 @@ const Arena = (() => {
           <label class="ar-mute"><input type="checkbox" id="ar-mute"> Couper les émotes et messages des autres</label></div></div>
       <button class="btn ar-emob" id="ar-emoBtn" type="button" aria-label="Émotes">${ico("haha")}<span>Émotes</span></button>
       <div class="ar-emow" id="ar-emoW">${EMOTES.map(([k, t]) => `<button type="button" data-emo="${k}">${ico(k)}${t}</button>`).join("")}</div>
-      <div class="ar-side"><div class="ar-deck" id="ar-deck" title="Pioche">${ico("logo")}<b id="ar-deckN"></b></div><button class="btn gold" type="button" id="ar-end" disabled>Fin du tour</button></div>
+      <div class="ar-side"><button class="ar-deck" id="ar-deck" type="button" title="La pioche et les éléments" aria-label="La pioche et les éléments"><span class="ar-elems">${["feu", "eau", "vent", "terre"].map((k) => `<i style="--ec:${SIGNE_COL[k]}">${ico(k)}</i>`).join("")}</span>${ico("logo")}<b id="ar-deckN"></b><em>?</em></button><button class="btn gold" type="button" id="ar-end" disabled>Fin du tour</button></div>
       <div class="ar-react" id="ar-react"><p id="ar-reactTxt"></p><div class="ar-bar"><i id="ar-reactBar"></i></div><div class="ar-cards" id="ar-reactCards"></div><div class="ar-row" id="ar-reactBtns"></div></div>
       <div class="ar-modal" id="ar-modal"><div class="ar-sheet" id="ar-sheet"></div></div>
       <div class="ar-endo" id="ar-endo"><div><h1 id="ar-endTxt"></h1><p id="ar-endSub"></p><div class="ar-row"><button class="btn" type="button" id="ar-endSee">Revoir la table</button><button class="btn gold" type="button" id="ar-endBack">Retour aux salons</button></div></div></div>
@@ -73,7 +73,7 @@ const Arena = (() => {
     $a("qp").onclick = (e) => { const b = e.target.closest("button"); if (b) salon("msg", b.textContent); };
     $a("chatForm").onsubmit = (e) => { e.preventDefault(); const v = $a("chatIn").value.trim(); if (!v) return; $a("chatIn").value = ""; salon("msg", v); };
     $a("mute").onchange = (e) => { if (st) st.muted = e.target.checked; };
-    $a("end").onclick = onEnd;
+    $a("end").onclick = onEnd; $a("deck").onclick = showDeckInfo;
     $a("chip").onclick = () => showRole();
     $a("modal").onclick = (e) => { if (e.target.id === "ar-modal") closeModal(); };
     $a("endSee").onclick = () => $a("endo").classList.remove("on");
@@ -363,7 +363,10 @@ const Arena = (() => {
     if (!p) return;
     const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e", [x, y] = screenOf(worldOf(p, 2.4));
     const d = document.createElement("div"); d.className = "ar-omen"; d.style.cssText = `left:${x}px;top:${y}px;--oc:${c}`;
-    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small><b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
+    const R = CF.cat?.regles || {}, P = R.presage || {}, petite = (CF.table?.vue?.joueurs.length || 4) <= 3;
+    const need = { voile: P.voile, defense: petite && R.defensePetite ? R.defensePetite : P.defense, entrave: P.entrave, reprise: R.reprise }[e.quoi];
+    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `explose sur Terre 1 à ${P.orbe.rangMax}` : need ? `il faut ${need.map((k) => nm2[k]).join(" ou ")}` : "";
+    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small>${needTxt ? `<small class="ar-need">${needTxt}</small>` : ""}<b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
     $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
@@ -481,6 +484,35 @@ const Arena = (() => {
     $a("sheet").innerHTML = `<div class="ar-rolec">${roleCard(v.monRole, { mine: true })}</div><div class="ar-row"><button class="btn gold" type="button" id="ar-roleOk">C'est compris</button></div>`;
     $a("roleOk").onclick = closeModal; $a("modal").classList.add("on");
   }
+  const SIGNE_NOM = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" };
+  const els = (l) => (l || []).map((k) => `<b style="color:${SIGNE_COL[k]}">${ico(k)} ${SIGNE_NOM[k]}</b>`).join(" ou ");
+  // la pioche expliquée : les 4 éléments, et ce que chaque présage demande
+  function showDeckInfo() {
+    const v = CF.table?.vue, R = CF.cat?.regles || {}, P = R.presage || {}, petite = v && v.joueurs.length <= 3;
+    const rows = [
+      ["voile", "Voile de brume", `esquive l'attaque sur ${els(P.voile)}`],
+      ["defense", "Garde (style Défense)", `esquive l'attaque sur ${els(petite && R.defensePetite ? R.defensePetite : P.defense)}${!petite && R.defensePetite ? ` (à 2 ou 3 joueurs : ${els(R.defensePetite)})` : ""}`],
+      ["sceau", "Sceau d'entrave", `le joueur entravé se libère sur ${els(P.entrave)}, sinon il passe son tour`],
+      ["orbe", "Orbe instable", P.orbe ? `explose sur ${els([P.orbe.signe])} de rang 1 à ${P.orbe.rangMax} (${P.orbe.degats} PV), sinon passe au voisin` : ""],
+      ["precision", "Œil sûr (style Précision)", R.reprise?.length ? `une Frappe parée revient en main sur ${els(R.reprise)}` : ""],
+      ["chance", "Style Chance", "retourne 2 cartes à chaque présage et garde la meilleure"],
+    ].filter((r) => r[2]);
+    $a("sheet").style.setProperty("--bc", "var(--ag)");
+    $a("sheet").innerHTML = `<div class="ar-sh"><h2 class="ar-h2">La pioche et les éléments</h2><button class="btn sm ar-x" type="button" aria-label="Fermer">✕</button></div>
+      <p class="ar-sd">Chaque carte porte un <b>élément</b> et un <b>rang de 1 à 10</b> (en haut à gauche de la carte). Il y a autant de chaque élément : un quart de la pioche chacun.</p>
+      <div class="ar-elgrid">${["feu", "eau", "vent", "terre"].map((k) => `<span style="--ec:${SIGNE_COL[k]}">${ico(k)}<b>${SIGNE_NOM[k]}</b><small>1 carte sur 4</small></span>`).join("")}</div>
+      <div class="ar-ss"><b>Le présage</b><p class="ar-sd">Certaines cartes et certains styles font un <b>présage</b> : on retourne la carte du dessus de la pioche et <b>son élément décide</b>. Le présage apparaît au-dessus du joueur, avec « réussi » ou « raté ».</p></div>
+      <div class="ar-ss"><b>Qui a besoin de quel élément</b>${rows.map(([k, n, t]) => `<div class="ar-sd ar-pres">${CF_ICON[k] || ico(k === "defense" || k === "precision" || k === "chance" ? "logo" : k)}<span><b>${n}</b> : ${t}.</span></div>`).join("")}</div>
+      ${v ? `<div class="ar-ss"><b>En ce moment</b><p class="ar-sd">Pioche : <b>${v.pioche}</b> cartes · défausse : <b>${v.nbDefausse}</b> (remélangée dans la pioche quand elle est vide).${R.equipMax ? ` Équipements : <b>${R.equipMax}</b> au plus devant soi (l'arme à part), le suivant remplace le plus ancien.` : ""}</p></div>` : ""}`;
+    $a("sheet").querySelector(".ar-x").onclick = closeModal; $a("modal").classList.add("on");
+  }
+  // une carte prise ou détruite s'affiche en grand, avec son image et sa règle
+  function spotlight(c, caption) {
+    if (!c?.def) return Promise.resolve();
+    const d = document.createElement("div"); d.className = "ar-spot"; d.innerHTML = `<div class="ar-spot-in">${cfFace(c, "ar-spot-card")}<p>${caption}</p><small>${esc(defOf(c).texte || "")}</small></div>`;
+    $a("root").appendChild(d); d.onclick = () => d.remove();
+    return wait(1900).then(() => { d.classList.add("out"); return wait(300); }).then(() => d.remove());
+  }
   const closeModal = () => $a("modal").classList.remove("on");
 
   // ---------- la main ----------
@@ -542,7 +574,10 @@ const Arena = (() => {
     // Larcin, Dissipation : une carte de sa main ou une carte posée devant lui
     const j = p.j || {}, posed = [j.arme, ...(j.equip || [])].filter(Boolean);
     $a("sheet").style.setProperty("--bc", "var(--gold)");
-    $a("sheet").innerHTML = `<h2 class="ar-h2">Quelle carte de ${esc(nm(p.id))} ?</h2><div class="ar-choices">${acts.map((a, i) => `<button class="btn ${a.choix === "main" ? "gold" : ""}" type="button" data-i="${i}">${a.choix === "main" ? "Une carte au hasard dans sa main" : esc(defOf(posed.find((c) => c.uid === a.choix)).nom || "Carte posée")}</button>`).join("")}</div><button class="btn sm" type="button" id="ar-choixX">Annuler</button>`;
+    const verb = defOf(CF.table.vue.main.find((c) => c.uid === acts[0].carte)).nom || "";
+    $a("sheet").innerHTML = `<h2 class="ar-h2">${esc(verb)} · quelle carte de ${esc(nm(p.id))} ?</h2><div class="ar-choices ar-cardpick">${acts.map((a, i) => a.choix === "main"
+      ? `<button class="ar-cp" type="button" data-i="${i}"><span class="ar-cp-back">${ico("logo")}<b>${(p.j?.nbMain ?? 0)}</b></span><b>Une carte au hasard</b><small>dans sa main (tu ne la vois pas avant)</small></button>`
+      : `<button class="ar-cp" type="button" data-i="${i}">${cfFace(posed.find((c) => c.uid === a.choix))}<small>posée devant lui</small></button>`).join("")}</div><button class="btn sm" type="button" id="ar-choixX">Annuler</button>`;
     $a("sheet").querySelectorAll("[data-i]").forEach((b) => { b.onclick = () => { closeModal(); act(acts[+b.dataset.i]); }; });
     $a("choixX").onclick = closeModal; $a("modal").classList.add("on");
   }
@@ -673,11 +708,11 @@ const Arena = (() => {
         else if (d === "defi") await beam(p, to, "#ff9b3d", .9);
         else if (d === "sceau") { await beam(p, to, "#ff4d5e", .6); if (to) setSeal(to, true, true); }
         else if (d === "orbe") { if (p) setOrb(p, true); emit(60, worldOf(p, 2.4), "#ff7a1a", { speed: 2, life: .8, grav: 0 }); await wait(400); }
-        else if (d === "larcin") await flyCard(e.prise || null, to, p);
-        else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); }
+        else if (d === "larcin") { await flyCard(e.prise || null, to, p); if (e.prise) await spotlight(e.prise, `${esc(nm(e.pid))} prend la carte posée devant ${esc(nm(e.cible))}`); }
+        else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); if (e.defaussee) await spotlight(e.defaussee, `${esc(nm(e.pid))} détruit ${e.source === "main" ? "une carte de la main" : "la carte posée devant"} de ${esc(nm(e.cible))}`); }
         else if (d === "inspiration" || d === "revelation" || d === "etal") { emit(60, worldOf(p, 1.6), "#4dd6ff", { speed: 2, life: .9, grav: -.5 }); await wait(450); }
         else if (defOf(c).cat === "arme") { if (p) setWeapon(p, d, true); await wait(500); }
-        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); await wait(400); }
+        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); if (e.remplace) pop(p, `${defOf(e.remplace).nom} défaussé (${CF.cat?.regles?.equipMax || 2} au plus)`, "#a99cc8", true); await wait(400); }
         break;
       }
       case "degats": if (p) { hitFx(p, e.cause === "onde" ? "#f5a524" : "#ff4d5e"); pop(p, "-" + e.n, "#ff4d5e"); p.pv = e.pv; renderTags(); } await wait(420); break;
@@ -692,7 +727,8 @@ const Arena = (() => {
       case "sauvetage": case "survie": if (p) { healFx(p); pop(p, "Sauvé !", "#3fdc8f", true); p.pv = e.pv ?? p.pv; renderTags(); } await wait(600); break;
       case "entrave": if (p) pop(p, "Entravé : passe son tour", "#ff4d5e", true); await wait(600); break;
       case "entrave_brisee": if (p) { setSeal(p, false); pop(p, "Libéré !", "#3fdc8f", true); } await wait(500); break;
-      case "vol": case "vol_public": await flyCard(e.carte || null, champ(e.cible), p); break;
+      case "vol": { await flyCard(e.carte || null, champ(e.cible), p); const v = CF.table.vue; if (e.carte) await spotlight(e.carte, e.pid === v.moi ? `Tu prends cette carte à ${esc(nm(e.cible))}` : `${esc(nm(e.pid))} te prend cette carte`); break; }
+      case "vol_public": await flyCard(null, champ(e.cible), p); break;
       case "etal_pris": await flyCard(e.carte, null, p); break;
       case "pioche_publique": if (p) pop(p, `+${e.n} carte${e.n > 1 ? "s" : ""}`, "#4dd6ff", true); break;
       case "defi_perdu": case "effondrement": if (p) hitFx(p, "#ff9b3d"); break;

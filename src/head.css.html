@@ -1982,4 +1982,21 @@ input[type="text"], input[type="search"], input:not([type]), textarea, select, .
 .w3d { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none; display: block; }
 html.w3d-on body::before { background: linear-gradient(180deg, #07060f00 0%, #07060f40 45%, #07060fa0 100%); }
 html.w3d-on body::after { display: none; }
+
+/* Missions : structure de Kyara (deux colonnes, lignes compactes, succès en grille) */
+.mpage { max-width: 1240px; }
+.mgrid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .mgrid2 { grid-template-columns: 1fr; } }
+.mpage .mbox { gap: 10px; padding: 18px; }
+.mpage .mr { grid-template-columns: minmax(0, 1fr) auto auto; gap: 4px 14px; padding: 10px 12px; }
+.mpage .mr .t { grid-column: 1; }
+.mpage .mr .bar { grid-column: 1; }
+.mpage .mr .rw { grid-column: 2; grid-row: 1 / span 2; }
+.mpage .mr .s { grid-column: 3; grid-row: 1 / span 2; }
+.mpage .mr .btn { grid-column: 3; grid-row: 1 / span 2; }
+.ach-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .ach-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 800px) { .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .ach-grid { grid-template-columns: 1fr; } }
+.ach-grid .ach { padding: 12px; gap: 12px; }
 </style>

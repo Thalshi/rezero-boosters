@@ -8,6 +8,7 @@
 ## 2026-10-23 — Ouvertures en 3D en production, retours Confrontation, économie
 - En production (accord de Reichi) : coffre 3D (×10, 2 boosters) qui se brise après le tour de clé, avec les 30 scénarios rejoués en 3D ; pochette 3D (×5, un booster) à déchirer au doigt ; cartes qui prennent vie (Légendaire, Mythique, Dorée). « Version légère » et ancienne ouverture en secours. Correctif aussi déployé : les cartes de la collection apparaissent dans le choix de Confrontation.
 - Prêt sur `dev/confront-retours`, pas en ligne : choix des cartes façon draft et deck enregistré, Duel sans Lien vital ni Festin, 2 équipements au plus (le suivant remplace le plus ancien), cartes volées ou détruites montrées en grand, pioche et éléments expliqués.
+- En production aussi : compte de test pour le dev et l'admin (profil → « Repartir de zéro », puis « Récupérer mon vrai compte » ; sauvegarde jamais écrasée).
 - Économie : simulation globale (`tests/simulation-economie-globale.mjs`). Recyclage et missions font plus de 95 % de l'essence ; un joueur régulier gagne ~15 000 ◆ par mois, les cosmétiques sont trop faciles. Décidé avec Reichi : d'abord réduire les gains, ensuite la Boutique façon Discord et les prix des cosmétiques.
 
 ## 2026-10-23 — Troisième mise en production : arène 3D et icônes néon

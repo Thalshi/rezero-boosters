@@ -4566,6 +4566,16 @@ async function setShownTitle(id) {
   toast(id ? `Titre affiché : ${TITLE_BY_ID[id].name}.` : "Plus aucun titre affiché.");
   if (opening) drawOpening(); else if (!$("overlay").hidden && $("overlay").querySelector(".ttl-sheet")) $("overlay").querySelectorAll("[data-title] em").forEach((e) => { e.textContent = e.parentElement.dataset.title === id ? "Affiché" : "L'afficher"; }); else draw();
 }
+// tests sur un vrai compte (dev et admin) : repartir de zéro, puis revenir à son vrai compte
+let devBackup;
+function testZone() {
+  if (devBackup === undefined) { devBackup = null; srv("dev/backup").then((r) => { devBackup = r.backup || false; draw(); }).catch(() => { devBackup = false; }); }
+  const b = devBackup;
+  return `<section class="sec card test-zone"><p class="eyebrow">Tests · dev et admin seulement</p><h2>Repartir de zéro</h2>
+    <p class="note">Ton compte redevient celui d'un nouveau joueur (aucune carte, essence et boosters de départ), pour tester le jeu comme quelqu'un qui arrive. Ton vrai compte est mis de côté et tu le récupères en un clic. Les cartes que tu as en vente au marché restent en vente.</p>
+    ${b ? `<p class="note"><b>Ton vrai compte est sauvegardé</b> depuis le ${new Date(b.t).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} : ${b.cartes} cartes, ${b.opened} boosters ouverts, ${fmtN(b.chakra)} ◆. Repartir de zéro encore une fois ne l'écrase pas.</p>` : ""}
+    <div class="row"><button class="btn acc" type="button" data-act="dev-reset">Repartir de zéro</button>${b ? `<button class="btn gold" type="button" data-act="dev-restore">Récupérer mon vrai compte</button>` : ""}</div></section>`;
+}
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;
   let p = isMe ? selfProfile() : profCache[uid];
@@ -4590,6 +4600,7 @@ function viewProfil() {
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
     ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
+    ${isMe && SRV && (IS_DEV || IS_ADMIN) ? testZone() : ""}
     ${titlesSection(p, isMe)}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
       ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
@@ -8086,6 +8097,10 @@ document.addEventListener("click", (e) => {
   if (act === "pool") return openPool(ab.dataset.p);
   const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
   if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
+  if (act === "dev-reset" || act === "dev-restore") {
+    const b = t.closest("[data-act]"); if (!sure(b, act === "dev-reset" ? "Confirmer : compte neuf" : "Confirmer la restauration")) return;
+    return srv(act === "dev-reset" ? "dev/reset" : "dev/restore").then(() => { toast(act === "dev-reset" ? "Compte remis à zéro. Ton vrai compte est sauvegardé." : "Ton vrai compte est de retour."); setTimeout(() => location.reload(), 900); }).catch((err) => toast(err.message));
+  }
   if (act === "skip") { Coffre.stop(); Reveal.stop(); Open3D.stop(); opening.phase = "done"; return drawOpening(); }
   if (act === "cf-next") return Coffre.next();
   if (act === "cf-sound") return Coffre.toggleSound();

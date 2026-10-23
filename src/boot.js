@@ -47,6 +47,10 @@ document.addEventListener("click", (e) => {
   if (act === "pool") return openPool(ab.dataset.p);
   const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
   if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
+  if (act === "dev-reset" || act === "dev-restore") {
+    const b = t.closest("[data-act]"); if (!sure(b, act === "dev-reset" ? "Confirmer : compte neuf" : "Confirmer la restauration")) return;
+    return srv(act === "dev-reset" ? "dev/reset" : "dev/restore").then(() => { toast(act === "dev-reset" ? "Compte remis à zéro. Ton vrai compte est sauvegardé." : "Ton vrai compte est de retour."); setTimeout(() => location.reload(), 900); }).catch((err) => toast(err.message));
+  }
   if (act === "skip") { Coffre.stop(); Reveal.stop(); Open3D.stop(); opening.phase = "done"; return drawOpening(); }
   if (act === "cf-next") return Coffre.next();
   if (act === "cf-sound") return Coffre.toggleSound();

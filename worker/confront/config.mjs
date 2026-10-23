@@ -63,7 +63,7 @@ export const DEFAULT_CONFIG = {
   // ne soignent que l'adversaire ou les deux joueurs à égalité
   retraitsParMode: { duel: ["lien", "festin"] },
   // Équipements posés devant soi au plus (l'arme à part ; Sceau et Orbe non comptés) : poser le suivant défausse le plus ancien
-  equipMax: 3,
+  equipMax: 2,
   // Présages (tests). Un présage retourne la carte du dessus : on regarde son signe et son rang.
   presage: {
     voile: ["eau"],          // Voile de brume : esquive si le signe est Eau (1 chance sur 4)

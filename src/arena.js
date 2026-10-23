@@ -712,7 +712,7 @@ const Arena = (() => {
         else if (d === "dissipation") { if (to) hitFx(to, "#8a8590"); await flyCard(e.defaussee || null, to, null); if (e.defaussee) await spotlight(e.defaussee, `${esc(nm(e.pid))} détruit ${e.source === "main" ? "une carte de la main" : "la carte posée devant"} de ${esc(nm(e.cible))}`); }
         else if (d === "inspiration" || d === "revelation" || d === "etal") { emit(60, worldOf(p, 1.6), "#4dd6ff", { speed: 2, life: .9, grav: -.5 }); await wait(450); }
         else if (defOf(c).cat === "arme") { if (p) setWeapon(p, d, true); await wait(500); }
-        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); if (e.remplace) pop(p, `${defOf(e.remplace).nom} défaussé (3 au plus)`, "#a99cc8", true); await wait(400); }
+        else if (defOf(c).type === "equipement") { emit(40, worldOf(p, 1.8), famCol(c), { speed: 2, life: .8, grav: 0 }); if (e.remplace) pop(p, `${defOf(e.remplace).nom} défaussé (${CF.cat?.regles?.equipMax || 2} au plus)`, "#a99cc8", true); await wait(400); }
         break;
       }
       case "degats": if (p) { hitFx(p, e.cause === "onde" ? "#f5a524" : "#ff4d5e"); pop(p, "-" + e.n, "#ff4d5e"); p.pv = e.pv; renderTags(); } await wait(420); break;

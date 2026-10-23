@@ -578,14 +578,14 @@ t.section("Pioche selon la table et limite d'équipement");
   t.check("Trio : Lien vital et Festin restent", defs(d3).includes("lien") || defs(d3).includes("festin"));
   const roles = { p0: "gardien", p1: "briseur", p2: "errant", p3: "briseur" };
   let s = setup(4, { seed: "equip", branches: { p0: "assaut", p1: "assaut", p2: "assaut", p3: "assaut" }, roles, seats: ["p0", "p1", "p2", "p3"] });
-  arrange(s, { p1: { main: ["voile", "cape", "oeil", "kanji"], equip: [] } });
+  arrange(s, { p1: { main: ["voile", "cape", "kanji"], equip: [] } });
   forceTurn(s, "p1");
-  for (const d of ["voile", "cape", "oeil"]) s = ok(s, "p1", { type: "jouer", carte: card(s, "p1", d) });
-  t.check("3 équipements posés", P(s, "p1").equip.length === 3);
+  for (const d of ["voile", "cape"]) s = ok(s, "p1", { type: "jouer", carte: card(s, "p1", d) });
+  t.check("2 équipements posés", P(s, "p1").equip.length === 2);
   const before = P(s, "p1").equip[0];
   s = ok(s, "p1", { type: "jouer", carte: card(s, "p1", "kanji") });
   const ev = s.log.filter((e) => e.type === "joue").at(-1);
-  t.check("le 4e remplace le plus ancien (défaussé, annoncé dans le journal)", P(s, "p1").equip.length === 3 && !P(s, "p1").equip.includes(before) && s.discard.includes(before) && ev.remplace?.def === "voile" && conserved(s));
+  t.check("le 3e remplace le plus ancien (défaussé, annoncé dans le journal)", P(s, "p1").equip.length === 2 && !P(s, "p1").equip.includes(before) && s.discard.includes(before) && ev.remplace?.def === "voile" && conserved(s));
 }
 
 t.section("Premier joueur, collusion à trois, robustesse sur parties complètes");

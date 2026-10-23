@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-23 — Décorations façon Discord, salons, compte à rebours (8e mise en ligne)
+- Boutique : onglet « Décorations d'avatar » (36 décorations animées créées pour le QG, 7 collections ; Reichi a choisi de ne pas reprendre les images de Discord). Visibles autour de l'avatar partout (en-tête, profil, classement, comptoir, prédictions) et posables sur les cartes à l'Atelier, en version rectangle (pour le Défilé).
+- Confrontation : un seul salon ouvert par personne ; le créateur qui quitte passe la main au joueur suivant, ou le salon se ferme ; salons inactifs 30 min retirés de la liste. Compte à rebours visible pour le choix des cartes (3 min) et du perso ; l'écran suit le changement d'étape même en plein choix. Une ancienne table finie ou quittée ne bloque plus les cartes.
+- Invocation, sanctuaire, finish et pioche 3D : voir l'entrée précédente.
+
 ## 2026-10-23 — Retours de Reichi en local (7e mise en ligne)
 - Boosters : ×10 (5 coffres de 10 cartes d'affilée, « Coffre suivant 2/5 »), bouton Retour (y compris « Retour à l'ouverture » depuis une carte ou la collection), ouverture plus fluide (lumières fixes et cartes préparées pendant qu'on regarde le coffre).
 - Collection : recycler et combiner les doublons au choix (plus rien n'est recyclé sans le vouloir) ; « Mes envies » se choisissent une par une (plus d'ajout de toutes les manquantes).

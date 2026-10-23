@@ -10,7 +10,7 @@ async function cfLoadList() { if (CF.listLoading) return; CF.listLoading = true;
 async function cfLoadTable(gid) {
   clearTimeout(CF.timer);
   await cfCat();
-  try { const t = await srv("confront/state", { gid }); if (JSON.stringify(t) !== JSON.stringify(CF.table)) { CF.table = t; if (view === "confront" && param === gid && !document.activeElement?.closest?.(".cf-keep")) draw(); } }
+  try { const t = await srv("confront/state", { gid }); if (JSON.stringify(t) !== JSON.stringify(CF.table)) { const moved = t?.vue?.phase !== CF.table?.vue?.phase; CF.table = t; if (view === "confront" && param === gid && (moved || !document.activeElement?.closest?.(".cf-keep"))) { if (moved) document.activeElement?.blur?.(); draw(); } } }
   catch (e) {
     // une erreur passagère (réseau, serveur occupé) ne doit pas arrêter le suivi de la partie : on garde l'écran et on réessaie
     CF.fails = (CF.fails || 0) + 1;
@@ -185,11 +185,11 @@ function cfParts(T) {
   } else if (v.phase === "contributions") {
     const me = v.joueurs.find((p) => p.id === v.moi);
     if (!CF.list) cfLoadList();
-    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
+    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes${v.deadline && !me?.soumis ? ` <span class="cf-dl big" data-cfdl="${v.deadline}"></span>` : ""}</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
       ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
-    body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Il te manquait des cartes : des persos prêtés complètent le tirage." : "2 persos tirés au hasard parmi ton deck : choisis celui que tu joues."} Ton choix reste secret jusqu'au début.</p>
+    body = `<section class="sec"><h2>Choisis ton personnage${v.deadline && !v.monChoix ? ` <span class="cf-dl big" data-cfdl="${v.deadline}"></span>` : ""}</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Il te manquait des cartes : des persos prêtés complètent le tirage." : "2 persos tirés au hasard parmi ton deck : choisis celui que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
   }
@@ -339,4 +339,4 @@ document.addEventListener("click", (e) => {
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });
 // compte à rebours du délai de réponse
-setInterval(() => { document.querySelectorAll("[data-cfdl]").forEach((el) => { const s = Math.max(0, Math.round((+el.dataset.cfdl - Date.now()) / 1000)); el.textContent = `· ${s} s`; }); }, 1000);
+setInterval(() => { document.querySelectorAll("[data-cfdl]").forEach((el) => { const s = Math.max(0, Math.round((+el.dataset.cfdl - Date.now()) / 1000)); el.textContent = el.classList.contains("big") ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : `· ${s} s`; el.classList.toggle("low", s <= 20); }); }, 1000);

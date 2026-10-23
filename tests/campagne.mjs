@@ -194,7 +194,7 @@ try {
   grant(srv, [P.api], { chakra: 6000, free: 12 });
   for (let i = 0; i < 10; i++) await P.api.api("open", { pack: "mix" });
   await P.page.reload(); await P.page.waitForTimeout(2000);
-  await P.go("boutique");
+  await P.go("boutique/cartes");
   let sb = await P.state();
   firstBuy = await P.page.getAttribute(".zs-tile:has(.zs-price:not(.own):not(.only)) >> nth=0", "data-zitem");
   await P.page.click(`[data-zitem="${firstBuy}"] >> nth=0`); await P.page.waitForTimeout(400);

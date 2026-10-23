@@ -19,7 +19,7 @@ try {
     // une carte et de l'essence pour tester (sauvegarde locale du navigateur de test uniquement)
     await page.evaluate(() => { save.chakra = 5000; save.owned.billy = { n: 1, gold: 0, first: Date.now() }; persist(); });
 
-    await go(page, "boutique");
+    await go(page, "boutique/cartes");
     t.check(`${label} · la Boutique s'affiche`, (await page.locator(".zs-tile").count()) > 30);
     await page.screenshot({ path: join(OUT, `cos-boutique-${label}.png`) });
     t.check(`${label} · Boutique : bannière de la collection à la une et rayons par collection`, (await page.locator(".zs-hero").count()) === 1 && (await page.locator(".zs-row").count()) >= 5);
@@ -42,7 +42,7 @@ try {
     t.check(`${label} · ×5 : la pochette s'affiche`, (await page.locator("#stage #pack .bst").count()) === 1);
     t.check(`${label} · invocation ×5 : 5 instances`, (await page.evaluate(() => save.cos.inst.length)) === before + 5);
     await page.click("#pack"); await sleep(900);
-    await page.click("#revealBtn"); await sleep(500);
+    await page.click("#revealBtn", { force: true }); await sleep(500);
     t.check(`${label} · retourner un objet`, (await page.locator("#stage .reveal-card.on .ocos").count()) === 1);
     await page.screenshot({ path: join(OUT, `cos-pochette-${label}.png`) });
     await page.click('[data-act="skip"]'); await sleep(300);
@@ -55,7 +55,7 @@ try {
     t.check(`${label} · ×10 : le coffre et sa clé`, (await page.locator("#cfChest").count()) === 1 && (await page.locator("#cfKey").count()) === 1);
     await page.click("#cfKey", { force: true });
     t.check(`${label} · ×10 : les 10 objets se dévoilent un par un`, await page.waitForSelector("#revealBtn", { timeout: 20000 }).then(() => true).catch(() => false) && (await page.locator("#stage .pdots i").count()) === 10, errors);
-    await page.click("#revealBtn"); await sleep(400);
+    await page.click("#revealBtn", { force: true }); await sleep(400);
     t.check(`${label} · ×10 : toucher pour retourner l'objet`, (await page.locator("#stage .reveal-card.on .ocos").count()) === 1);
     await page.click('[data-act="skip"]'); await sleep(250);
     t.check(`${label} · ×10 : récapitulatif`, (await page.locator(".summary .ocos").count()) === 10);

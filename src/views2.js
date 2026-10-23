@@ -220,7 +220,7 @@ function viewPred() {
   const qHTML = (q) => {
     const mine = pred.mine[q.id], c = IS_ADMIN ? counts(q) : null, tot = c ? c.reduce((a, b) => a + b, 0) : 0, res = q.status === "resolved", open = predOpen(q);
     const who = res ? (predVoters.data?.[q.id] || []) : [];
-    const whoHTML = (i) => { const l = who.filter(([, a]) => a === i).map(([u]) => u); return l.length ? `<span class="pq-who">${l.slice(0, 10).map((u) => `<span class="pq-v">${av(u)}${nm(u)}</span>`).join("")}${l.length > 10 ? `<span class="pq-more">+${l.length - 10}</span>` : ""}</span>` : ""; };
+    const whoHTML = (i) => { const l = who.filter(([, a]) => a === i).map(([u]) => u); return l.length ? `<span class="pq-who">${l.slice(0, 10).map((u) => `<span class="pq-v">${avd(u)}${nm(u)}</span>`).join("")}${l.length > 10 ? `<span class="pq-more">+${l.length - 10}</span>` : ""}</span>` : ""; };
     return `<article class="pq ${q.status}">
       <div class="pq-h"><span class="pill gold">+${predRewardOf(q)} ◆ si bonne réponse</span><span class="pill">${q.points || 1} pt${(q.points || 1) > 1 ? "s" : ""}</span><span class="pill ${open ? "ok" : ""}">${res ? "Résultat" : !open ? "Votes fermés" : q.endsAt ? `Votes ouverts · ${predLeft(q.endsAt)}` : "Votes ouverts"}</span></div>
       <h3>${esc(q.text)}</h3>
@@ -245,7 +245,7 @@ function viewPred() {
     ${qs.length ? eps.map((ep) => `<section class="sec"><div class="sec-h"><h2>Épisode ${ep}</h2><span class="mono mut" style="font-size:13px">${qs.filter((q) => q.ep === ep).length} question${qs.filter((q) => q.ep === ep).length > 1 ? "s" : ""}</span></div>${qs.filter((q) => q.ep === ep).map(qHTML).join("")}</section>`).join("")
       : `<div class="card">${empty("Pas encore de prédiction. Billy les publie après chaque épisode.")}</div>`}
     <section class="sec"><h2>Meilleurs prophètes</h2>
-      ${bl.length ? `${podiumHTML(bl, (p) => p.pts, unit)}<div class="rank-list">${bl.slice(3, 30).map((p, i) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}"><span class="no">${i + 4}</span>${av(p.uid)}<span class="nm" data-uid="${p.uid}">…</span><span class="v">${p.pts}<small>points</small></span></button>`).join("")}</div>` : `<p class="note">Le classement apparaît dès que Billy valide une première bonne réponse.</p>`}</section>
+      ${bl.length ? `${podiumHTML(bl, (p) => p.pts, unit)}<div class="rank-list">${bl.slice(3, 30).map((p, i) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}"><span class="no">${i + 4}</span>${avd(p.uid)}<span class="nm" data-uid="${p.uid}">…</span><span class="v">${p.pts}<small>points</small></span></button>`).join("")}</div>` : `<p class="note">Le classement apparaît dès que Billy valide une première bonne réponse.</p>`}</section>
     ${IS_ADMIN ? `<form class="card sec" id="pqForm"><p class="eyebrow">Admin · nouvelle question</p>
       <label class="field" for="pqText">Question<input id="pqText" type="text" maxlength="160" placeholder="Qui va retrouver Byakko en premier ?"></label>
       <label class="field" for="pqOptions">Réponses possibles (une par ligne, 6 max)<textarea id="pqOptions" rows="4" placeholder="Kuradai&#10;Stalk&#10;Personne"></textarea></label>
@@ -279,7 +279,7 @@ function viewClassement() {
     <p class="lead">${desc}</p>
     <div class="search">${icon.search}<input class="in" id="rankQ" type="search" placeholder="Chercher un joueur pour se comparer…" value="${esc(rankQ)}"></div>
     ${list.length ? `${q ? "" : podiumHTML(list, score, unit)}
-      <div class="rank-list" id="rankList">${list.map((p, i) => ({ p, i })).slice(q ? 0 : 3, 60).map(({ p, i }) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}" data-rk="${p.uid}"><span class="no">${i + 1}</span>${av(p.uid)}<span class="nm"><span data-uid="${p.uid}">…</span> ${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : `<span class="tit">${titleOf(p.unique || 0)[0]}</span>`}</span><span class="v">${fmtN(score(p))}<small>${unitTxt}</small></span></button>`).join("")}</div>`
+      <div class="rank-list" id="rankList">${list.map((p, i) => ({ p, i })).slice(q ? 0 : 3, 60).map(({ p, i }) => `<button class="rk ${p.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${p.uid}" data-rk="${p.uid}"><span class="no">${i + 1}</span>${avd(p.uid)}<span class="nm"><span data-uid="${p.uid}">…</span> ${TITLE_BY_ID[p.title] ? ttagOf(TITLE_BY_ID[p.title], "sm") : `<span class="tit">${titleOf(p.unique || 0)[0]}</span>`}</span><span class="v">${fmtN(score(p))}<small>${unitTxt}</small></span></button>`).join("")}</div>`
       : empty(sharedNote() ? "Le classement est visible quand tu joues avec le QG." : "Le classement apparaît dès que des joueurs ouvrent des boosters.")}
   </div>`;
 }
@@ -368,7 +368,7 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
+      <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${decoSVG(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)))}</span>
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
@@ -694,7 +694,7 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avi = `<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">`;
+  const avd0 = decoOfUid(m.uid), avi = `${avd0 ? `<span class="avd">` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${decoSVG(avd0)}</span>` : ""}`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());

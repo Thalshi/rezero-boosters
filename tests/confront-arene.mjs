@@ -121,8 +121,9 @@ try {
     // seulement l'arène : plus de bouton pour passer à la vue classique
     t.check("plus de bouton « Vue classique »", (await page.locator("#ar-classic").count()) === 0 && (await page.locator('[data-act="cf-arene"]').count()) === 0);
     t.check("« Quitter la partie » toujours visible en jeu", (await page.locator("#ar-quit").isVisible()) && (await page.locator("#ar-quit").innerText()).includes("Quitter la partie"));
-    await page.click("#ar-quit"); await page.waitForFunction(() => document.getElementById("ar-quit")?.dataset.sure === "1", null, { timeout: 5000 }).catch(() => {});
-    await page.click("#ar-quit"); await page.waitForFunction(() => location.hash === "#/confront", null, { timeout: 10000 }).catch(() => {}); await page.waitForTimeout(800);
+    // deux touchers rapprochés (en rendu logiciel, attendre que le bouton soit « stable » dépasse les 4 s de la confirmation)
+    await page.locator("#ar-quit").dispatchEvent("click"); await page.waitForTimeout(300);
+    await page.locator("#ar-quit").dispatchEvent("click"); await page.waitForFunction(() => location.hash === "#/confront", null, { timeout: 10000 }).catch(() => {}); await page.waitForTimeout(800);
     const quitted = (await A.api("confront/state", { gid })).vue;
     t.check("quitter la partie : abandon confirmé, retour aux salons", (await page.locator("#ar-root").isHidden()) && page.url().endsWith("#/confront") && (quitted.phase === "fin" || quitted.joueurs.find((j) => j.id === A.id)?.vivant === false), quitted.phase);
     t.check("aucune erreur JavaScript", errors.length === 0, errors);

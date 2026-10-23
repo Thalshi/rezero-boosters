@@ -6472,7 +6472,9 @@ const Arena = (() => {
       const v = CF.table?.vue, live = v?.phase === "partie" && !!v.joueurs?.find((j) => j.id === v.moi)?.vivant;
       if (!live) return nav("confront");
       if (!sure(e.currentTarget, "Quitter = abandonner, confirmer")) return;
-      await cfAct({ type: "abandon" }); nav("confront");
+      // directement au serveur : une action de jeu encore en cours ne doit jamais bloquer la sortie
+      const gid = CF.gid; nav("confront");
+      try { await srv("confront/act", { gid, action: { type: "abandon" } }); } catch (err) { toast(err.message); }
     };
     $a("tabLog").onclick = () => panel("log"); $a("tabChat").onclick = () => panel("chat"); $a("logArr").onclick = () => panel();
     $a("tblBtn").onclick = () => { const t = $a("tbl"); t.classList.toggle("open"); $a("tblArr").textContent = t.classList.contains("open") ? "▴" : "▾"; };

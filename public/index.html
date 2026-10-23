@@ -1535,6 +1535,15 @@ body.ar-on { overflow: hidden; }
 .ar-top .btn { background: #0b0916e6; }
 .ar-top .btn.acc { background: linear-gradient(180deg, #ff5aa5, #c4166a); color: #fff; border: 0; }
 .ar-hint { position: absolute; top: calc(12px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 6; font: 600 13px var(--body); background: #0b0916d9; border: 1px solid var(--aline); padding: 8px 16px; border-radius: 999px; max-width: calc(100vw - 32px); text-align: center; pointer-events: none; }
+.ar-insp { position: absolute; right: calc(16px + env(safe-area-inset-right)); top: 50%; transform: translateY(-50%); z-index: 9; width: min(280px, 34vw); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 18px 16px 16px; border-radius: 16px; background: #0b0916e6; border: 1px solid var(--aline); box-shadow: 0 20px 50px #000c; animation: ar-insp-in .25s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes ar-insp-in { from { opacity: 0; transform: translate(20px, -50%); } }
+.ar-insp .ar-hc.ar-insp-card { position: relative; left: auto; bottom: auto; margin: 0; --w: min(210px, 26vw); transform: none !important; cursor: default; box-shadow: 0 16px 40px #000, 0 0 30px var(--cc); }
+.ar-insp .ar-insp-card .ar-t { font-size: 17px; } .ar-insp .ar-insp-card .ar-d { font-size: 13px; }
+.ar-insp-t { margin: 0; font-size: 13px; line-height: 1.45; color: #e8e0f0; text-align: center; }
+.ar-insp-b { display: flex; flex-direction: column; gap: 8px; width: 100%; } .ar-insp-b .btn { width: 100%; }
+.ar-insp-n { margin: 0; font-size: 12px; color: #b8aecb; text-align: center; }
+.ar-insp-x { position: absolute; right: 8px; top: 8px; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ffffff22; background: #ffffff10; color: #fff; cursor: pointer; }
+@media (max-width: 700px) { .ar-insp { top: auto; bottom: calc(46vw + 20px); transform: none; right: 50%; margin-right: min(-140px, -45vw); width: min(280px, 90vw); flex-direction: row; flex-wrap: wrap; justify-content: center; } .ar-insp .ar-hc.ar-insp-card { --w: 96px; } @keyframes ar-insp-in { from { opacity: 0; } } }
 .ar-hint[hidden], .ar-chip[hidden], .ar-top [hidden], .ar [hidden] { display: none; }
 /* étiquettes au-dessus des champions */
 .ar-tag { position: absolute; left: 0; top: 0; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; transition: opacity .3s, filter .3s; white-space: nowrap; z-index: 3; }
@@ -1571,11 +1580,30 @@ body.ar-on { overflow: hidden; }
 .ar-bub.emo b { display: block; color: var(--bc); line-height: 1.1; } .ar-bub.emo b .ic { width: 34px; height: 34px; filter: drop-shadow(0 0 8px var(--bc)); }
 .ar-bub.out { opacity: 0; transition: opacity .4s; }
 @keyframes ar-in { from { opacity: 0; transform: translate(-50%, -80%); } } @keyframes ar-emo { from { opacity: 0; transform: translate(-50%, -60%) scale(.3); } }
+.ar-om { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 8px; animation: ar-om-in .35s cubic-bezier(.2,.9,.3,1.2) both; }
+.ar-om.out { animation: ar-om-out .3s ease-in forwards; }
+@keyframes ar-om-in { from { opacity: 0; transform: translate(-50%, -30%) scale(.7); } }
+@keyframes ar-om-out { to { opacity: 0; transform: translate(-50%, -60%) scale(.9); } }
+.ar-om-h { margin: 0; padding: 6px 14px; border-radius: 999px; background: #0b0916e6; border: 1px solid #ffffff22; font: 600 14px var(--body); color: #e8e0f0; white-space: nowrap; } .ar-om-h b { color: #fff; }
+.ar-om-need { margin: 0; padding: 4px 12px; border-radius: 8px; background: #0b0916cc; font: 700 13px var(--body); color: var(--gold, #e8c77e); }
+.ar-om-card { width: 132px; height: 186px; perspective: 800px; }
+.ar-om-in { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: ar-om-flip .7s .45s cubic-bezier(.3,.7,.2,1.2) both; }
+@keyframes ar-om-flip { from { transform: rotateY(180deg); } to { transform: rotateY(0); } }
+.ar-om-back, .ar-om-face { position: absolute; inset: 0; border-radius: 12px; backface-visibility: hidden; overflow: hidden; }
+.ar-om-back { transform: rotateY(180deg); display: grid; place-items: center; background: repeating-linear-gradient(45deg, #2a1e48 0 8px, #1e1636 8px 16px); border: 2px solid #e8c77e; color: #e8c77e; } .ar-om-back .ic { width: 46px; height: 46px; }
+.ar-om-face { background: #1a1230; border: 3px solid var(--oc); box-shadow: 0 0 40px var(--oc), 0 20px 40px #000c; display: flex; flex-direction: column; }
+.ar-om-art { flex: 1; background-size: cover; background-position: center; display: grid; place-items: center; color: var(--oc); } .ar-om-art .ic { width: 50px; height: 50px; }
+.ar-om-sg { position: absolute; left: 6px; top: 6px; display: flex; align-items: center; gap: 2px; padding: 3px 7px 3px 4px; border-radius: 999px; background: #0b0916e0; color: var(--oc); font: 900 18px var(--body); } .ar-om-sg .ic { width: 22px; height: 22px; } .ar-om-sg i { font-style: normal; color: #fff; }
+.ar-om-nm { padding: 6px 8px 0; font: 700 13px var(--disp); color: #fff; } .ar-om-el { padding: 0 8px 7px; font: 700 12px var(--body); color: var(--oc); }
+.ar-om-v { margin: 0; font: 900 30px var(--disp); text-shadow: 0 2px 0 #000, 0 0 22px currentColor; animation: ar-om-v .4s 1.15s cubic-bezier(.2,.9,.3,1.5) both; }
+.ar-om.ok .ar-om-v { color: var(--aok, #3fdc8f); } .ar-om.no .ar-om-v { color: var(--abad, #ff4d5e); }
+@keyframes ar-om-v { from { opacity: 0; transform: scale(2); } }
 .ar-omen { position: absolute; transform: translate(-50%, -100%); z-index: 7; pointer-events: none; text-align: center; width: 104px; padding: 6px 4px 8px; border-radius: 10px; background: #0b0916f0; border: 2px solid var(--oc); box-shadow: 0 0 24px var(--oc); animation: ar-omen 2s ease-out both; }
 .ar-omen small { display: block; font: 700 8.5px var(--body); letter-spacing: .04em; color: var(--am); } .ar-omen b { display: block; color: var(--oc); } .ar-omen b .ic { width: 40px; height: 40px; filter: drop-shadow(0 0 8px var(--oc)); }
 .ar-omen span { display: block; font: 700 12px var(--body); color: #fff; } .ar-omen em { font: 700 10px var(--body); font-style: normal; } .ar-omen em.ok { color: var(--aok); } .ar-omen em.no { color: var(--abad); }
 @keyframes ar-omen { 0% { opacity: 0; transform: translate(-50%, -80%) rotateY(90deg); } 20% { opacity: 1; transform: translate(-50%, -100%) rotateY(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -130%); } }
 .ar-fly { position: absolute; left: -30px; top: -42px; width: 60px; height: 84px; border-radius: 8px; border: 2px solid var(--cc); background: #241a3e; box-shadow: 0 0 20px var(--cc); z-index: 8; pointer-events: none; display: grid; place-items: center; overflow: hidden; color: var(--cc); }
+.ar-fly .ar-back { position: absolute; inset: 3px; border-radius: 5px; display: grid; place-items: center; background: repeating-linear-gradient(45deg, #2a1e48 0 6px, #1e1636 6px 12px); border: 1px solid #e8c77e88; color: #e8c77e; } .ar-fly .ar-back .ic { width: 26px; height: 26px; }
 .ar-fly span { position: absolute; inset: 0; background-size: cover; background-position: center; }
 /* main du joueur */
 .ar-hand { position: absolute; left: 50%; bottom: 0; width: 0; height: 0; z-index: 8; }
@@ -1590,6 +1618,7 @@ body.ar-on { overflow: hidden; }
 .ar-hc:hover, .ar-hc.ok { box-shadow: 0 16px 34px #000, 0 0 18px var(--cc); }
 .ar-hc:not(.picked):hover { margin-bottom: 40px; }
 .ar-hc.off { filter: saturate(.35) brightness(.7); }
+.ar-hc.chosen { box-shadow: 0 16px 34px #000, 0 0 0 2px var(--cc), 0 0 26px var(--cc); filter: brightness(1.12); }
 .ar-hc.picked { outline: 3px solid var(--abad); outline-offset: 2px; }
 .ar-hc.lifted { opacity: .25; }
 .ar-drag { position: absolute; z-index: 58; pointer-events: none; margin: 0 !important; transition: none !important; left: 0; bottom: auto; }
@@ -2096,9 +2125,13 @@ html.w3d-on body::after { display: none; }
 @keyframes bk-prev { from { transform: rotateY(18deg) translateX(-20px); opacity: .2; filter: brightness(.7); } to { transform: none; opacity: 1; } }
 .bk-run { margin: 0 0 6px; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8a6a3a; }
 .bk-page h2 { font-family: var(--disp, Cinzel), serif; color: #3a1d08; font-size: 30px; margin: 0 0 14px; }
-.bk-page h3:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #5a2c0a; } .bk-page :is(p, li):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #2e2214; line-height: 1.6; } .bk-page b:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #1a0f04; }
+.bk-page h3:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) *) { color: #5a2c0a; } .bk-page :is(p, li):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) *) { color: #2e2214; line-height: 1.6; } .bk-page b:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) *) { color: #1a0f04; }
 .bk-page .rg-n { display: none; }
-.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
+/* cases sombres dans le livre : texte clair, lisible */
+.bk-page :is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) { color: #f3ead8; }
+.bk-page :is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) :is(h3, h4, b, strong) { color: #fff3d0 !important; }
+.bk-page :is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) :is(p, span, li, .note, small) { color: #ddd3e6 !important; }
+.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) *) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
 .bk-page :is(.rg-box, .rg-modes > div, .rg-steps li) :is(span, p) { color: #4a3a24 !important; }
 .bk-page .rg-tbl th, .bk-page .rg-tbl td { color: #2e2214; border-color: #c8a46a66; }
 .bk-page a { color: #8a3a10; }
@@ -2191,7 +2224,9 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 .zd-tile:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 #ffffff26, 0 8px 0 #05040b, 0 22px 36px #000c, 0 0 26px color-mix(in srgb, var(--h1) 35%, transparent); }
 .zd-tile.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f88, 0 5px 0 #05040b; }
 .zd-stage { display: grid; place-items: center; height: 138px; background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--h1) 45%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
-.zd-cstage { height: 200px; padding: 14px 0; overflow: hidden; } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
+.zd-cstage { height: 230px; padding: 24px 0; overflow: hidden; }
+.zd-big { display: grid; place-items: center; padding: 70px 20px 60px; margin-bottom: 14px; border-radius: 16px; overflow: hidden; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--h1) 38%, transparent), transparent 62%), linear-gradient(160deg, var(--h2), #0b0916); }
+.zd-big .kcw { pointer-events: none; } .zd-cstage .kcw, .zd-hero-cards .kcw { pointer-events: none; }
 .zd-hero-cards { gap: 34px; padding: 18px 0; }
 .zd-meta { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px 12px; } .zd-meta b { font: 700 14px Inter, system-ui, sans-serif; } .zd-meta small { font-size: 11px; font-weight: 600; }
 .zd-meta .zs-price { align-self: flex-start; margin-top: 4px; }
@@ -2219,6 +2254,65 @@ svg.dk .spin2 { transform-box: fill-box; transform-origin: center; animation: dk
 svg.dk .flow > * { animation: dk-flow 7s linear infinite; } svg.dk .flow.rev > * { animation-direction: reverse; }
 @keyframes dk-flow { to { stroke-dashoffset: -188; } }
 .kcw > .kc-dk > svg.dk { width: 100%; height: 100%; overflow: visible; display: block; }
+/* Effets de cartes (src/fx.js) : une couche derrière la carte, une devant */
+.kcw:has(> .kc-dk.back) { isolation: isolate; }
+.kcw > .kc-dk.back { z-index: -1; }
+.kcw > .kc-dk.fx { overflow: visible; }
+svg.dk [class^="fx-"], svg.dk [class*=" fx-"] { transform-box: fill-box; transform-origin: center; }
+svg.dk .fx-pulse { animation: dk-pulse 2.4s ease-in-out infinite; }
+svg.dk .fx-bob { animation: dk-float 3s ease-in-out infinite; }
+svg.dk .fx-spin { animation: dk-spin 9s linear infinite; } svg.dk .fx-spin.slow { animation-duration: 18s; }
+svg.dk .fx-tw { animation: fx-tw 1.8s ease-in-out infinite; }
+svg.dk .fx-flick { transform-origin: 100% 50%; animation: fx-flick .45s ease-in-out infinite alternate; }
+svg.dk .fx-flame { transform-origin: 50% 100%; animation: fx-flame .8s ease-in-out infinite alternate; }
+svg.dk .fx-whisk { transform-origin: 100% 50%; animation: fx-whisk 1.4s ease-in-out infinite alternate; } svg.dk .fx-whisk.b { animation-delay: -.7s; }
+svg.dk .fx-eye { animation: fx-blinkeye 4s steps(1) infinite; }
+svg.dk .fx-rise { transform-box: view-box; transform-origin: 0 0; animation: fx-rise var(--d, 3s) linear infinite; }
+svg.dk .fx-fall { transform-box: view-box; transform-origin: 0 0; animation: fx-fall var(--d, 6s) linear infinite; }
+svg.dk .fx-rain { transform-box: view-box; transform-origin: 0 0; animation: fx-rain var(--d, .8s) linear infinite; }
+svg.dk .fx-spark { transform-box: view-box; transform-origin: 0 0; animation: fx-spark var(--d, 1.2s) ease-out infinite; }
+svg.dk .fx-flip { animation: fx-flip 1.6s ease-in-out infinite; }
+svg.dk .fx-sway { transform-origin: 0 0; animation: fx-sway 4s ease-in-out infinite alternate; }
+svg.dk .fx-gleam { transform-box: view-box; animation: fx-gleam 3.2s ease-in-out infinite; }
+svg.dk .fx-slash path { stroke-dasharray: 100; stroke-dashoffset: 100; animation: fx-slash 2.8s cubic-bezier(.2,.8,.2,1) infinite; animation-delay: inherit; }
+svg.dk .fx-slash { animation: fx-slashfade 2.8s linear infinite; }
+svg.dk .fx-hum { animation: fx-hum 3s linear infinite; }
+svg.dk .fx-neonflick { animation: fx-neon 4.2s steps(1) infinite; } svg.dk .fx-neonflick.b { animation-duration: 5.3s; animation-delay: -2s; }
+svg.dk .fx-strike { opacity: 0; animation: fx-strike 3.6s linear infinite; }
+svg.dk .fx-storm { animation: fx-storm 3.6s linear infinite; }
+svg.dk .fx-arc { opacity: 0; animation: fx-arc .36s steps(1) infinite; } svg.dk .fx-arc.a1 { animation-delay: -.12s; } svg.dk .fx-arc.a2 { animation-delay: -.24s; }
+svg.dk .fx-wing { transform-box: view-box; transform-origin: 0 0; animation: fx-wing 1.8s ease-in-out infinite; }
+svg.dk .fx-tail { transform-box: view-box; transform-origin: 0 0; animation: fx-tail 2.4s ease-in-out infinite alternate; }
+svg.dk .fx-coin { animation: fx-coin 3.6s linear infinite; }
+svg.dk .fx-blink { animation: fx-blink 2.2s ease-in-out infinite; }
+svg.dk .fx-wander { transform-box: view-box; transform-origin: 0 0; animation: fx-w0 9s ease-in-out infinite; } svg.dk .fx-wander.w1 { animation-name: fx-w1; animation-duration: 11s; } svg.dk .fx-wander.w2 { animation-name: fx-w2; animation-duration: 8s; }
+@keyframes fx-tw { 0%, 100% { opacity: .35; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes fx-flick { from { transform: scaleX(.8) scaleY(.9); } to { transform: scaleX(1.15) scaleY(1.1); } }
+@keyframes fx-flame { 0% { transform: scale(.85, .8) skewX(-4deg); opacity: .85; } 100% { transform: scale(1.08, 1.18) skewX(5deg); opacity: 1; } }
+@keyframes fx-whisk { from { transform: rotate(-8deg); } to { transform: rotate(10deg); } }
+@keyframes fx-blinkeye { 0%, 94% { opacity: 1; } 95%, 98% { opacity: 0; } }
+@keyframes fx-rise { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: 1; } 80% { opacity: .8; } 100% { transform: translate(var(--dx, 0), -120px); opacity: 0; } }
+@keyframes fx-fall { 0% { transform: translate(0, 0); opacity: 0; } 10% { opacity: 1; } 90% { opacity: .9; } 100% { transform: translate(var(--dx, 0), 130px); opacity: 0; } }
+@keyframes fx-rain { from { transform: translate(0, 0); } to { transform: translate(-28px, 150px); } }
+@keyframes fx-spark { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx, 0), -16px) scale(.2); opacity: 0; } }
+@keyframes fx-flip { 0%, 100% { transform: rotate(0) scaleX(1); } 50% { transform: rotate(160deg) scaleX(-.3); } }
+@keyframes fx-sway { from { transform: rotate(-2deg); } to { transform: rotate(3deg); } }
+@keyframes fx-gleam { 0%, 55% { transform: translateX(-20px); } 100% { transform: translateX(150px); } }
+@keyframes fx-slash { 0% { stroke-dashoffset: 100; } 18%, 100% { stroke-dashoffset: 0; } }
+@keyframes fx-slashfade { 0% { opacity: 1; } 22% { opacity: 1; } 40%, 100% { opacity: 0; } }
+@keyframes fx-hum { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 48% { opacity: .55; } 49% { opacity: 1; } 51% { opacity: .7; } 52% { opacity: 1; } }
+@keyframes fx-neon { 0%, 60% { opacity: 1; } 61% { opacity: .15; } 63% { opacity: 1; } 65% { opacity: .2; } 67%, 88% { opacity: 1; } 89% { opacity: .3; } 90%, 100% { opacity: 1; } }
+@keyframes fx-strike { 0%, 9% { opacity: 0; } 10% { opacity: 1; } 12% { opacity: .2; } 13% { opacity: 1; } 18%, 100% { opacity: 0; } }
+@keyframes fx-storm { 0%, 100% { opacity: .25; } 10%, 13% { opacity: .75; } 30% { opacity: .3; } }
+@keyframes fx-arc { 0% { opacity: .9; } 33%, 100% { opacity: 0; } }
+@keyframes fx-wing { 0%, 100% { transform: rotate(6deg) scaleX(1); } 50% { transform: rotate(-12deg) scaleX(.86); } }
+@keyframes fx-tail { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+@keyframes fx-coin { from { transform: scaleX(1); } 25% { transform: scaleX(.05); } 50% { transform: scaleX(-1); } 75% { transform: scaleX(.05); } to { transform: scaleX(1); } }
+@keyframes fx-blink { 0%, 100% { opacity: .15; } 50% { opacity: 1; } }
+@keyframes fx-w0 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(14px, -10px); } 66% { transform: translate(-8px, -18px); } }
+@keyframes fx-w1 { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(-12px, 8px); } 66% { transform: translate(10px, 14px); } }
+@keyframes fx-w2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(16px, 10px); } }
+@media (prefers-reduced-motion: reduce) { svg.dk [class*="fx-"] { animation: none !important; } }
 .cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
 .cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }
 .cf-dl.big.low { color: #fff; background: #ff2e88; border-color: #ff2e88; animation: dk-pulse 1s ease-in-out infinite; }
@@ -3276,6 +3370,7 @@ function designOfS(s, cardId) {
 // ===== Décorations d'avatar (Boutique, façon Discord) : animées autour de l'avatar, visibles partout dans l'app =====
 // Créées pour le QG (aucune image reprise de Discord). k : forme animée ; c1, c2 : couleurs ; coll : collection.
 const DECO_COLLS = [
+  { id: "legendes", name: "Légendes du QG", kanji: "龍", tag: "Dragons, katanas, flammes et néons : les décorations les plus folles.", c1: "#ffb020", c2: "#2a0e08" },
   { id: "sakura", name: "Sakura du QG", kanji: "花", tag: "Pétales, fleurs et lanternes des ruelles de Shinjuku.", c1: "#ff8fc0", c2: "#3a1430" },
   { id: "neon", name: "Néon de Shinjuku", kanji: "電", tag: "Anneaux de néon, casques et bugs d'écran.", c1: "#2ee6ff", c2: "#2a0e4a" },
   { id: "feu", name: "Feu et foudre", kanji: "火", tag: "Pour ceux qui frappent fort.", c1: "#ff6a2e", c2: "#2a0a08" },
@@ -3285,6 +3380,16 @@ const DECO_COLLS = [
   { id: "saisons", name: "Saisons", kanji: "季", tag: "Halloween, Noël et autres fêtes au QG.", c1: "#ff9a2e", c2: "#1a2a14" },
 ];
 const DECOS = [
+  { id: "deco-dragon-or", coll: "legendes", name: "Dragon d'or", k: "dragon", c1: "#ffd24d", c2: "#b8401a", rar: "m" },
+  { id: "deco-dragon-azur", coll: "legendes", name: "Dragon d'azur", k: "dragon2", c1: "#6ae0ff", c2: "#1a3a9e", rar: "l" },
+  { id: "deco-phenix", coll: "legendes", name: "Phénix", k: "phenix", c1: "#ff8a2e", c2: "#c81a1a", rar: "m" },
+  { id: "deco-katanas", coll: "legendes", name: "Lames jumelles", k: "katanas", c1: "#ff2e4d", c2: "#2a1a2a", rar: "l" },
+  { id: "deco-inferno", coll: "legendes", name: "Aura enflammée", k: "inferno", c1: "#ff7a1a", c2: "#c8140a", rar: "l" },
+  { id: "deco-inferno-bleu", coll: "legendes", name: "Flammes spectrales", k: "inferno", c1: "#5ad8ff", c2: "#2a3aff", rar: "e" },
+  { id: "deco-foudre", coll: "legendes", name: "Tempête de foudre", k: "foudre", c1: "#bfe6ff", c2: "#8a4dff", rar: "l" },
+  { id: "deco-tempete", coll: "legendes", name: "Tempête de sakura", k: "tempete", c1: "#ffb3d1", c2: "#e0508a", rar: "l" },
+  { id: "deco-neon-kabuki", coll: "legendes", name: "Néon de Kabukichō", k: "neon", c1: "#ff3df0", c2: "#3de8ff", rar: "e" },
+  { id: "deco-neon-cyber", coll: "legendes", name: "Néon cyber", k: "neon2", c1: "#3dff9e", c2: "#ffd24d", rar: "e" },
   { id: "deco-sakura", coll: "sakura", name: "Sakura", k: "sakura", c1: "#ff9ec4", c2: "#ffd6e8", rar: "r" },
   { id: "deco-sakura-blanc", coll: "sakura", name: "Sakura blanc", k: "sakura", c1: "#ffffff", c2: "#ffd6e8", rar: "e" },
   { id: "deco-petales", coll: "sakura", name: "Pluie de pétales", k: "petales", c1: "#ff9ec4", c2: "#ff5a9e", rar: "pc" },
@@ -4593,10 +4698,11 @@ function cosDeco(design, present) {
   else if (fo) style.push(`background:${base}`);
   if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
-  const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? ico("logo") : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
+  // décoration, ornement et particules : calques SVG derrière et devant la carte (src/fx.js)
+  const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco], L = dk ? decoLayers(dk) : { back: "", front: "" };
+  const O = o ? fxBuild("o-" + o.k, o.c1, o.c1) || { back: "", front: "" } : { back: "", front: "" }, P = pa ? fxBuild("p-" + pa.k, pa.c1, pa.c1) || { back: "", front: "" } : { back: "", front: "" };
   // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
-  const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco];
-  return { deco: dk ? `<span class="kc-dk" aria-hidden="true">${decoSVG(dk, "rect")}</span>` : "", za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+  return { deco: L.back + O.back + L.front + O.front + P.front, za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: "", orn: "" };
 }
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
@@ -5821,6 +5927,197 @@ function decoOfUid() { return null; }
 // un avatar avec sa décoration (même rendu que av(), entouré)
 const avd = (uid, cls = "", d = undefined) => { const dd = d === undefined ? decoOfUid(uid) : d; return dd ? `<span class="avd">${av(uid, cls)}${decoSVG(dd)}</span>` : av(uid, cls); };
 
+// ===== Effets de cartes : décorations spectaculaires, ornements et particules =====
+// Repère commun avec decoSVG(d, "rect") : la carte va de (-36, -52) à (36, 52), la vue déborde de 18 tout autour.
+// Chaque effet a deux couches : « back » derrière la carte, « front » devant. Ce qui tourne autour de la carte
+// (dragons, pétales) est dessiné dans les deux : la couche de devant ne garde que la moitié basse de l'orbite,
+// si bien qu'il passe derrière la carte en haut et devant en bas.
+let fxN = 0;
+const FX_HW = 36, FX_HH = 52, f1x = (n) => +n.toFixed(1);
+// petit générateur pseudo-aléatoire stable (les mêmes éclairs à chaque affichage)
+const fxRand = (seed) => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+// orbite elliptique autour de la carte, parcourue dans le sens horaire (bas = devant)
+const fxOrbit = (rx, ry) => `M${rx} 0A${rx} ${ry} 0 1 1 ${-rx} 0A${rx} ${ry} 0 1 1 ${rx} 0`;
+const fxGlow = (u, sd = 2.4) => `<filter id="${u}b" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="${sd}"/></filter>`;
+// particules : --x départ, --dx dérive, --d durée, délai négatif = déjà en route
+const fxP = (cls, x, y, d, dl, inner, dx = 0, s = 1) => `<g transform="translate(${f1x(x)} ${f1x(y)})"><g class="${cls}" style="--d:${f1x(d)}s;--dx:${f1x(dx)}px;animation-delay:${f1x(dl)}s"><g transform="scale(${s})">${inner}</g></g></g>`;
+const FX_PETAL = (c1, c2) => `<path d="M0 -4.6C3 -3 3.4 1.6 0 4.2C-3.4 1.6 -3 -3 0 -4.6Z" fill="${c1}" stroke="${c2}" stroke-width=".4"/><path d="M0 -3V3" stroke="${c2}" stroke-width=".35" opacity=".6"/>`;
+const FX_FLAKE = (c) => `<g stroke="${c}" stroke-width=".7" stroke-linecap="round" fill="none">${[0, 60, 120].map((a) => `<g transform="rotate(${a})"><path d="M0 -4.4V4.4"/><path d="M-1.3 -3.2L0 -2.1L1.3 -3.2M-1.3 3.2L0 2.1L1.3 3.2"/></g>`).join("")}</g>`;
+const FX_SPARK = (c, r = 3) => `<path d="M0 ${-r}Q0 0 ${r * .35} 0Q0 0 0 ${r}Q0 0 ${-r * .35} 0Q0 0 0 ${-r}Z" fill="${c}"/><path d="M${-r} 0Q0 0 0 ${r * .3}Q0 0 ${r} 0Q0 0 0 ${-r * .3}Q0 0 ${-r} 0Z" fill="${c}" opacity=".8"/>`;
+
+// --- un dragon serpent : la tête et ~30 anneaux suivent la même orbite, chacun un peu en retard ---
+function fxDragon(u, c1, c2, rx, ry, T, belly = "#fff3c4") {
+  const N = 52, path = fxOrbit(rx, ry), dt = .03 * T / 7, mot = (i) => `<animateMotion dur="${T}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-(N + 4 - i) * dt)}s" path="${path}"/>`;
+  let body = "";
+  for (let i = N; i >= 1; i--) {
+    const r = 6 * (1 - i / N * .75), leg = i === 8 || i === 26;
+    body += `<g>${mot(i)}${leg ? `<path d="M0 ${r}L-2 ${r + 5}L-4 ${r + 6}M-2 ${r + 5}L-1 ${r + 7}M0 ${-r}L-2 ${-r - 5}L-4 ${-r - 6}" stroke="${c2}" stroke-width="1.3" fill="none" stroke-linecap="round"/>` : ""}
+      ${i % 4 === 0 ? `<path d="M${f1x(r * .6)} ${f1x(-r * .7)}L${f1x(-r * .7)} ${f1x(-r * 1.9)}L${f1x(-r * .5)} ${f1x(-r * .6)}Z" fill="${c2}"/>` : ""}
+      <ellipse rx="${f1x(r * 1.25)}" ry="${f1x(r)}" fill="url(#${u}d)"/><ellipse cy="${f1x(r * .55)}" rx="${f1x(r * 1.2)}" ry="${f1x(r * .38)}" fill="${belly}" opacity=".8"/></g>`;
+  }
+  // bout de queue en flamme
+  body = `<g>${mot(N + 1)}<path class="fx-flick" d="M2 0C-4 -6 -10 -5 -15 -9C-11 -3 -12 2 -16 6C-10 4 -4 5 2 0Z" fill="${c1}" opacity=".9"/></g>` + body;
+  const head = `<g>${mot(0)}<g transform="translate(3 0) scale(1.25)">
+      <path class="fx-whisk" d="M7 2C2 8 -8 9 -16 15" stroke="${c1}" stroke-width=".8" fill="none" stroke-linecap="round"/><path class="fx-whisk b" d="M7 -2C2 -8 -8 -9 -16 -15" stroke="${c1}" stroke-width=".8" fill="none" stroke-linecap="round"/>
+      <path d="M-4 -4C-9 -9 -14 -10 -18 -9C-14 -7 -11 -5 -8 -3Z" fill="${belly}" stroke="${c2}" stroke-width=".5"/><path d="M-4 4C-9 9 -14 10 -18 9C-14 7 -11 5 -8 3Z" fill="${belly}" stroke="${c2}" stroke-width=".5"/>
+      <path d="M-6 -5C-3 -7 4 -6 9 -3.2L13 -1.4L9 -.2L13 1.6L8 3.4C4 6 -3 7 -6 5Z" fill="url(#${u}d)" stroke="${c2}" stroke-width=".6"/>
+      <path d="M8 2.4L4.6 3.2M10 .6L6 1.2" stroke="${belly}" stroke-width=".6"/><path d="M-5 -5.4L-9 -8L-7 -4.2M-5 5.4L-9 8L-7 4.2" fill="${c2}"/>
+      <ellipse cx="3.4" cy="-2.6" rx="1.6" ry="1.1" fill="#fff"/><ellipse class="fx-eye" cx="3.8" cy="-2.6" rx=".8" ry="1" fill="${c2 === "#0b0916" ? c1 : "#ff2e2e"}"/>
+      <circle cx="11.6" cy="-1.6" r=".5" fill="#0008"/></g></g>`;
+  // la perle que le dragon poursuit
+  const pearl = `<g>${mot(-9)}<circle r="5" fill="${c1}" opacity=".35" filter="url(#${u}b)"/><circle r="2.6" fill="url(#${u}p)"/></g>`;
+  return `${pearl}${body}${head}`;
+}
+const fxDragonDefs = (u, c1, c2) => `<linearGradient id="${u}d" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="${c2}"/><stop offset=".45" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>
+  <radialGradient id="${u}p" cx=".35" cy=".35"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient>`;
+// la couche de devant ne montre que la moitié basse de l'orbite (inclinée comme elle)
+const fxFrontMask = (u, tilt) => `<mask id="${u}m" maskUnits="userSpaceOnUse" x="-200" y="-200" width="400" height="400"><rect x="-200" y="2" width="400" height="300" fill="#fff" transform="rotate(${tilt})"/></mask>`;
+
+// --- un katana couché sur l'axe x : poignée de 0 à 36, lame jusqu'à L ---
+function fxKatana(u, L, wrap, steel) {
+  const b0 = 40, wraps = Array.from({ length: 8 }, (_, i) => `<path d="M${3 + i * 4.2} -2.6L${5.1 + i * 4.2} 0L${3 + i * 4.2} 2.6M${5.1 + i * 4.2} -2.6L${3 + i * 4.2} 0L${5.1 + i * 4.2} 2.6" stroke="#f3e6c8" stroke-width=".7" fill="none"/>`).join("");
+  return `<rect x="0" y="-2.7" width="36" height="5.4" rx="2" fill="${wrap}"/>${wraps}<rect x="-1.6" y="-2.4" width="2.4" height="4.8" rx="1" fill="#c9a23a"/>
+    <ellipse cx="37.4" cy="0" rx="1.8" ry="6.2" fill="#2a2018" stroke="#c9a23a" stroke-width=".7"/><rect x="38.8" y="-2.4" width="2.6" height="4.6" fill="#d8b04a"/>
+    <path d="M${b0} -2.3Q${L * .62} -3 ${L} -10.5Q${L - 1} -6.4 ${L - 5} -5Q${L * .6} 2.4 ${b0} 2.3Z" fill="url(#${u}s)" stroke="${steel}" stroke-width=".3"/>
+    <path d="M${b0 + 3} .9Q${L * .4} 1.8 ${L * .55} .6T${L * .8} -2.6T${L - 7} -6" stroke="#ffffffa0" stroke-width=".6" fill="none"/>
+    <g clip-path="url(#${u}k)"><rect class="fx-gleam" x="${b0}" y="-14" width="10" height="20" fill="url(#${u}g)"/></g>
+    <clipPath id="${u}k"><path d="M${b0} -2.3Q${L * .62} -3 ${L} -10.5Q${L - 1} -6.4 ${L - 5} -5Q${L * .6} 2.4 ${b0} 2.3Z"/></clipPath>`;
+}
+
+// --- les effets : back / front en SVG (contenu), defs partagées ---
+function fxBuild(k, c1, c2) {
+  const u = "fx" + ++fxN, HW = FX_HW, HH = FX_HH, R = fxRand(k.length * 977 + c1.length * 31 + (c1.charCodeAt(1) || 7));
+  let defs = fxGlow(u), back = "", front = "";
+  switch (k) {
+    // ===== Dragons qui volent autour de la carte =====
+    case "dragon": case "dragon2": {
+      const tilt = -14, rx = HW + 17, ry = HH + 10, T = k === "dragon2" ? 6.2 : 7;
+      defs += fxDragonDefs(u, c1, c2) + fxFrontMask(u, tilt);
+      const orbit = `<g transform="rotate(${tilt})">${fxDragon(u, c1, c2, rx, ry, T)}</g>`;
+      const clouds = [[-HW - 6, HH - 4, 1], [HW + 4, -HH + 8, -1]].map(([x, y, sx], i) => `<g transform="translate(${x} ${y}) scale(${sx} 1)"><g class="fx-bob" style="animation-delay:${-i * 1.3}s"><path d="M-12 2C-14 -3 -8 -6 -5 -3C-4 -8 4 -8 5 -3C8 -6 14 -3 12 2Z" fill="${c1}" opacity=".22"/><path d="M-9 1C-8 -2 -5 -3 -3 -1M2 -2C4 -4 7 -3 8 0" stroke="${c1}" stroke-width=".8" fill="none" opacity=".8"/></g></g>`).join("");
+      back = `<rect x="${-HW - 6}" y="${-HH - 6}" width="${2 * HW + 12}" height="${2 * HH + 12}" rx="10" fill="${c1}" opacity=".18" filter="url(#${u}b)" class="fx-pulse"/>${orbit}`;
+      front = `<g mask="url(#${u}m)">${orbit}</g>${clouds}`;
+      break;
+    }
+    // ===== Katanas croisés derrière la carte, reflets sur les lames et coups de lame =====
+    case "katanas": {
+      defs += `<linearGradient id="${u}s" x1="0" y1="-1" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#aab3c2"/><stop offset="1" stop-color="#5a6272"/></linearGradient>
+        <linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".95"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`;
+      back = [1, -1].map((sx) => `<g transform="scale(${sx} 1) translate(-62 84) rotate(-57)">${fxKatana(u + (sx > 0 ? "a" : "c"), 172, c2, "#fff")}</g>`).join("")
+        .replace(/url\(#(fx\d+)[ac]s\)/g, "url(#$1s)").replace(/url\(#(fx\d+)[ac]g\)/g, "url(#$1g)");
+      const slash = (d, i) => `<g class="fx-slash" style="animation-delay:${-i * 1.4}s"><path d="${d}" stroke="${c1}" stroke-width="6" fill="none" opacity=".5" filter="url(#${u}b)" pathLength="100"/><path d="${d}" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" pathLength="100"/></g>`;
+      front = slash(`M${-HW - 14} ${-HH + 10}Q0 -6 ${HW + 14} ${HH - 22}`, 0) + slash(`M${HW + 14} ${-HH + 26}Q4 4 ${-HW - 14} ${HH - 8}`, 1)
+        + Array.from({ length: 7 }, (_, i) => fxP("fx-fall", -HW + R() * 2 * HW, -HH - 14, 4.5 + R() * 3, -R() * 7, FX_PETAL("#ffb3cf", "#ff6fa3"), (R() - .5) * 30, .9)).join("");
+      break;
+    }
+    // ===== Aura enflammée : vraies flammes ondulantes autour de la carte =====
+    case "inferno": {
+      defs += `<filter id="${u}t" x="-40%" y="-40%" width="180%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".05 .11" numOctaves="2" seed="4" result="n"><animate attributeName="baseFrequency" dur="1.6s" values=".05 .11;.058 .13;.05 .11" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter>
+        <linearGradient id="${u}f" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c2}"/><stop offset=".55" stop-color="${c1}"/><stop offset="1" stop-color="${c1}" stop-opacity="0"/></linearGradient>
+        <linearGradient id="${u}y" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff6c8"/><stop offset="1" stop-color="${c2}" stop-opacity="0"/></linearGradient>`;
+      // langues de feu qui montent toujours vers le haut, plus hautes sur les côtés et au sommet
+      const tongue = (x, y, h, w, fill, i, cls = "fx-flame") => `<path class="${cls}" style="animation-delay:${f1x(-i * .13)}s;animation-duration:${f1x(.7 + (i % 5) * .12)}s" d="M${f1x(x - w)} ${y}C${f1x(x - w)} ${f1x(y - h * .4)} ${f1x(x - w * .2)} ${f1x(y - h * .6)} ${f1x(x + w * .15)} ${f1x(y - h)}C${f1x(x + w * .3)} ${f1x(y - h * .55)} ${f1x(x + w)} ${f1x(y - h * .35)} ${f1x(x + w)} ${y}Z" fill="${fill}"/>`;
+      const ring = (fill, sc, cls) => { let s = "", i = 0;
+        for (let y = HH; y >= -HH; y -= 9) for (const sx of [-1, 1]) s += tongue(sx * (HW + 1), y, (14 + R() * 10) * sc, 6 * sc, fill, i++, cls);
+        for (let x = -HW; x <= HW; x += 8) s += tongue(x, -HH + 2, (20 + R() * 14) * sc, 6 * sc, fill, i++, cls);
+        return s; };
+      back = `<rect x="${-HW - 4}" y="${-HH - 8}" width="${2 * HW + 8}" height="${2 * HH + 12}" rx="10" fill="${c1}" opacity=".45" filter="url(#${u}b)" class="fx-pulse"/>
+        <g filter="url(#${u}t)">${ring(`url(#${u}f)`, 1.15)}${ring(`url(#${u}y)`, .65)}</g>`;
+      let bot = ""; for (let x = -HW + 2; x <= HW - 2; x += 7) bot += tongue(x, HH + 3, 7 + R() * 7, 4.5, `url(#${u}f)`, x + 40);
+      front = `<g filter="url(#${u}t)" opacity=".9">${bot}</g>`
+        + Array.from({ length: 14 }, (_, i) => fxP("fx-rise", -HW - 8 + R() * (2 * HW + 16), HH, 2.2 + R() * 2.2, -R() * 4, `<circle r="${f1x(.6 + R() * .9)}" fill="${i % 3 ? c1 : "#fff3b0"}"/><circle r="2.2" fill="${c1}" opacity=".3"/>`, (R() - .5) * 26)).join("");
+      break;
+    }
+    // ===== Néon de Shinjuku : tubes qui grésillent, enseigne en kanji, pluie =====
+    case "neon": case "neon2": {
+      const tube = (off, c, w, extra = "") => `<rect x="${-HW - off}" y="${-HH - off}" width="${2 * (HW + off)}" height="${2 * (HH + off)}" rx="${7 + off * .5}" fill="none" stroke="${c}" stroke-width="${w}" ${extra}/>`;
+      const lit = (inner, cls = "") => `<g class="${cls}"><g filter="url(#${u}b)" opacity=".9">${inner}</g>${inner}</g>`;
+      const sx = HW + 13, sign = (txt, x, y, c, cls) => `<g transform="translate(${x} ${y})"><rect x="-6.5" y="-15" width="13" height="30" rx="2.5" fill="#07060fcc" stroke="#ffffff22" stroke-width=".6"/>${lit(`<rect x="-5" y="-13.5" width="10" height="27" rx="2" fill="none" stroke="${c}" stroke-width=".7"/>${[...txt].map((ch, i) => `<text y="${-4 + i * 11}" text-anchor="middle" font-size="9" font-weight="800" fill="none" stroke="${c}" stroke-width=".7">${ch}</text>`).join("")}`, cls)}<path d="M-6.5 -10H${-sx + HW + 4}M-6.5 10H${-sx + HW + 4}" stroke="#6a6f80" stroke-width=".8"/></g>`;
+      back = `<rect x="${-HW - 10}" y="${-HH - 10}" width="${2 * HW + 20}" height="${2 * HH + 20}" rx="14" fill="${c1}" opacity=".22" filter="url(#${u}b)" class="fx-pulse"/>`;
+      front = lit(tube(4, c1, 1.6, `stroke-dasharray="150 8 60 6 400"`), "fx-hum") + lit(tube(9, c2, 1.1, `stroke-dasharray="26 ${2 * HW + 2 * HH} 26 0"`), "fx-neonflick")
+        + `<circle r="1.6" fill="#fff"><animateMotion dur="3.2s" repeatCount="indefinite" path="M${-HW - 4} ${-HH + 3}V${HH - 3}Q${-HW - 4} ${HH + 4} ${-HW + 3} ${HH + 4}H${HW - 3}Q${HW + 4} ${HH + 4} ${HW + 4} ${HH - 3}V${-HH + 3}Q${HW + 4} ${-HH - 4} ${HW - 3} ${-HH - 4}H${-HW + 3}Q${-HW - 4} ${-HH - 4} ${-HW - 4} ${-HH + 3}"/></circle>`
+        + sign(k === "neon2" ? "電脳" : "新宿", sx, -18, c2, "fx-neonflick b") + sign(k === "neon2" ? "夜" : "QG", -sx, 22, c1, "fx-hum")
+        + Array.from({ length: 16 }, () => fxP("fx-rain", -HW - 16 + R() * (2 * HW + 32), -HH - 20, .6 + R() * .5, -R() * 2, `<path d="M0 0L-2 9" stroke="${R() > .5 ? c1 : c2}" stroke-width=".5" opacity=".55"/>`)).join("");
+      break;
+    }
+    // ===== Tempête de foudre : éclairs qui frappent la carte, arc électrique sur le bord =====
+    case "foudre": {
+      const bolt = (x0, y0, x1, y1) => { let s = `M${x0} ${y0}`, br = ""; for (let i = 1; i <= 6; i++) { const t = i / 6, x = x0 + (x1 - x0) * t + (i < 6 ? (R() - .5) * 12 : 0), y = y0 + (y1 - y0) * t + (i < 6 ? (R() - .5) * 6 : 0); s += `L${f1x(x)} ${f1x(y)}`; if (i === 3) br = `M${f1x(x)} ${f1x(y)}l${f1x((R() - .5) * 16)} ${f1x(6 + R() * 8)}l${f1x((R() - .5) * 8)} ${f1x(4 + R() * 6)}`; } return s + br; };
+      const strikes = [[-HW - 20, -HH - 26, -HW + 6, -HH], [HW + 22, -HH - 10, HW, -12], [-HW - 22, 14, -HW, HH - 10], [HW + 12, HH + 22, 10, HH], [8, -HH - 30, -4, -HH]];
+      const zap = strikes.map(([a, b, c, d], i) => `<g class="fx-strike" style="animation-delay:${f1x(-i * .73)}s"><path d="${bolt(a, b, c, d)}" stroke="${c2}" stroke-width="3.4" fill="none" filter="url(#${u}b)"/><path d="${bolt(a, b, c, d)}" stroke="#fff" stroke-width="1" fill="none" stroke-linejoin="bevel"/><circle cx="${c}" cy="${d}" r="5" fill="${c1}" opacity=".7" filter="url(#${u}b)"/></g>`).join("");
+      const arc = (j) => { let s = ""; const n = 40; for (let i = 0; i <= n; i++) { const t = i / n * 2 * Math.PI, ex = Math.cos(t), ey = Math.sin(t), kx = Math.min(1, Math.abs(1 / ex) * .0001 + 1), x = Math.max(-1, Math.min(1, ex * 1.6)) * (HW + 3), y = Math.max(-1, Math.min(1, ey * 1.4)) * (HH + 3); s += `${i ? "L" : "M"}${f1x(x + (R() - .5) * 3 * kx)} ${f1x(y + (R() - .5) * 3)}`; } return `<path class="fx-arc a${j}" d="${s}Z" stroke="${c1}" stroke-width=".8" fill="none"/>`; };
+      back = `<rect x="${-HW - 8}" y="${-HH - 8}" width="${2 * HW + 16}" height="${2 * HH + 16}" rx="12" fill="${c2}" opacity=".35" filter="url(#${u}b)" class="fx-storm"/>`;
+      front = `<g filter="url(#${u}b)" opacity=".6">${arc(0)}</g>${arc(0)}${arc(1)}${arc(2)}${zap}`
+        + Array.from({ length: 8 }, (_, i) => fxP("fx-spark", (R() - .5) * (2 * HW + 10), (R() > .5 ? -1 : 1) * (HH + 2), .9 + R(), -R() * 2, FX_SPARK(i % 2 ? "#fff" : c1, 2.2), (R() - .5) * 20)).join("");
+      break;
+    }
+    // ===== Phénix : ailes de feu qui battent derrière la carte, queue et braises =====
+    case "phenix": {
+      defs += `<linearGradient id="${u}w" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${c2}"/><stop offset=".55" stop-color="${c1}"/><stop offset="1" stop-color="#fff3b0"/></linearGradient>`;
+      const feather = (len, rot, w) => `<path transform="rotate(${rot})" d="M0 0C${f1x(len * .3)} ${f1x(-w)} ${f1x(len * .8)} ${f1x(-w * .7)} ${len} 0C${f1x(len * .8)} ${f1x(w * .5)} ${f1x(len * .3)} ${f1x(w * .6)} 0 0Z" fill="url(#${u}w)" stroke="#fff6" stroke-width=".3"/>`;
+      const wing = (sx) => `<g transform="translate(${sx * (HW - 6)} ${-HH + 18}) scale(${sx} 1)"><g class="fx-wing">${[[64, -58, 7], [70, -40, 8], [72, -22, 8], [66, -5, 8], [56, 12, 7], [44, 28, 6], [32, 44, 5]].map(([l, r, w]) => feather(l, r, w)).join("")}
+        ${[[38, -50, 5], [42, -30, 5], [40, -12, 5], [32, 6, 4]].map(([l, r, w]) => feather(l, r, w).replace(`url(#${u}w)`, c2)).join("")}</g></g>`;
+      back = `<g filter="url(#${u}b)" opacity=".55">${wing(-1)}${wing(1)}</g>${wing(-1)}${wing(1)}
+        <g transform="translate(0 ${HH - 6})">${[-24, -10, 0, 10, 24].map((r, i) => `<g class="fx-tail" style="animation-delay:${-i * .3}s">${feather(46 - Math.abs(r) * .6, 90 + r, 5)}</g>`).join("")}</g>
+        <g transform="translate(0 ${-HH - 4})"><g class="fx-bob"><path d="M-6 6C-6 -2 -2 -8 4 -8C8 -8 10 -6 12 -4L8 -3C9 0 6 4 4 6Z" fill="url(#${u}w)"/>${[-10, -4, 2].map((x, i) => `<path class="fx-flame" style="animation-delay:${-i * .2}s" d="M${x} -6C${x - 2} -12 ${x + 1} -16 ${x + 4} -20C${x + 4} -14 ${x + 6} -10 ${x + 4} -6Z" fill="${c1}"/>`).join("")}<circle cx="5" cy="-4.4" r=".9" fill="#fff"/></g></g>`;
+      front = Array.from({ length: 12 }, (_, i) => fxP("fx-rise", (R() - .5) * (2 * HW + 30), HH + 4, 2.4 + R() * 2, -R() * 4, `<circle r="${f1x(.6 + R())}" fill="${i % 2 ? c1 : "#fff3b0"}"/><circle r="2.4" fill="${c1}" opacity=".3"/>`, (R() - .5) * 30)).join("");
+      break;
+    }
+    // ===== Tempête de sakura : un tourbillon de pétales et une branche en fleur =====
+    case "tempete": {
+      const tilt = 12; defs += fxFrontMask(u, tilt);
+      const swirl = `<g transform="rotate(${tilt})">${Array.from({ length: 22 }, (_, i) => { const rx = HW + 8 + R() * 14, ry = HH + 4 + R() * 12, T = 4 + R() * 3;
+        return `<g><animateMotion dur="${f1x(T)}s" repeatCount="indefinite" rotate="auto" begin="${f1x(-R() * T)}s" path="${fxOrbit(f1x(rx), f1x(ry))}"/><g class="fx-flip" style="animation-delay:${f1x(-R() * 2)}s"><g transform="scale(${f1x(.8 + R() * .6)})">${FX_PETAL(i % 3 ? c1 : "#fff0f6", c2)}</g></g></g>`; }).join("")}</g>`;
+      const flower = (x, y, r) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map((a) => `<ellipse cy="${-r * .55}" rx="${f1x(r * .42)}" ry="${f1x(r * .6)}" fill="${c1}" stroke="${c2}" stroke-width=".4" transform="rotate(${a})"/>`).join("")}<circle r="${f1x(r * .26)}" fill="#ffd24d"/></g>`;
+      back = swirl;
+      front = `<g mask="url(#${u}m)">${swirl}</g><g transform="translate(${-HW - 10} ${-HH - 6})"><g class="fx-sway"><path d="M0 0C10 4 18 8 30 6C36 5 42 8 50 14M14 4C16 10 22 14 28 14M30 6C34 0 40 -2 46 0" stroke="#4a2a1a" stroke-width="2.2" fill="none" stroke-linecap="round"/>${flower(14, 3, 6)}${flower(28, 14, 5)}${flower(33, 4, 7)}${flower(46, 0, 5)}${flower(50, 14, 6)}</g></g>`;
+      break;
+    }
+
+    // ===== Ornements (Atelier) =====
+    case "o-etoile": front = `<g transform="translate(0 ${-HH - 6})"><g class="fx-bob"><g class="fx-spin">${Array.from({ length: 8 }, (_, i) => `<path transform="rotate(${i * 45})" d="M0 -6L1 -22L-1 -22Z" fill="${c1}" opacity="${i % 2 ? .35 : .6}"/>`).join("")}</g>
+      <g filter="url(#${u}b)">${FX_SPARK(c1, 11)}</g>${FX_SPARK(c1, 10)}${FX_SPARK("#fff", 4.5)}</g></g>`
+      + [[-HW + 4, -HH + 14, 3], [HW - 6, -HH + 22, 2.4], [HW - 2, -HH - 4, 2]].map(([x, y, r], i) => `<g transform="translate(${x} ${y})"><g class="fx-tw" style="animation-delay:${-i * .6}s">${FX_SPARK("#fff", r)}</g></g>`).join(""); break;
+    case "o-kanji": defs += `<radialGradient id="${u}r" cx=".4" cy=".35"><stop offset="0" stop-color="#fff6d0"/><stop offset=".55" stop-color="${c1}"/><stop offset="1" stop-color="#5a1a08"/></radialGradient>`;
+      front = `<g transform="translate(0 ${-HH - 7})"><g class="fx-bob"><circle r="13" fill="${c1}" opacity=".45" filter="url(#${u}b)"/><g class="fx-coin"><circle r="10.5" fill="url(#${u}r)" stroke="#ffd98a" stroke-width="1.2"/><circle r="8" fill="none" stroke="#5a1a08" stroke-width=".6" stroke-dasharray="1.4 1.4"/>
+        <text y="4.2" text-anchor="middle" font-size="12" font-weight="900" fill="#3a0e04">宿</text></g></g></g>`; break;
+    case "o-aureole": front = `<g transform="translate(0 ${-HH - 9})"><g class="fx-bob">${Array.from({ length: 9 }, (_, i) => `<path class="fx-tw" style="animation-delay:${-i * .3}s" d="M${-16 + i * 4} 4L${-24 + i * 6} 30L${-21 + i * 6} 30Z" fill="${c1}" opacity=".18"/>`).join("")}
+      <ellipse rx="20" ry="5.5" fill="none" stroke="${c1}" stroke-width="5" opacity=".6" filter="url(#${u}b)"/><ellipse rx="20" ry="5.5" fill="none" stroke="${c1}" stroke-width="2.4"/><ellipse rx="20" ry="5.5" fill="none" stroke="#fff" stroke-width=".7"/>
+      <circle r="1.6" fill="#fff"><animateMotion dur="2.4s" repeatCount="indefinite" path="M20 0A20 5.5 0 1 1 -20 0A20 5.5 0 1 1 20 0"/></circle></g></g>`; break;
+    case "o-cornes": defs += `<linearGradient id="${u}h" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c1}"/><stop offset=".7" stop-color="#2a0a10"/><stop offset="1" stop-color="#ff3a4d"/></linearGradient>`;
+      front = [-1, 1].map((sx) => `<g transform="translate(${sx * (HW - 12)} ${-HH + 2}) scale(${sx * 1.35} 1.35)"><path d="M-6 2C-8 -10 -2 -24 14 -32C10 -26 8 -18 9 -10C9 -4 6 0 4 2Z" fill="url(#${u}h)" stroke="#0b0916" stroke-width=".8"/>
+        ${[0, 1, 2, 3].map((i) => `<path d="M${-5 + i * .6} ${-4 - i * 6}Q${2 + i} ${-3 - i * 6} ${7 - i * .3} ${-1 - i * 6.6}" stroke="#ffffff30" stroke-width=".7" fill="none"/>`).join("")}<circle class="fx-pulse" cx="13" cy="-31" r="2.6" fill="#ff3a4d" opacity=".6" filter="url(#${u}b)"/></g>`).join(""); break;
+    case "o-couronne": defs += `<linearGradient id="${u}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6c8"/><stop offset=".5" stop-color="${c1}"/><stop offset="1" stop-color="#8a5a10"/></linearGradient>`;
+      front = `<g transform="translate(${-HW + 10} ${-HH - 6}) rotate(-16)"><g class="fx-bob"><path d="M-17 7L-20 -11L-10 -2L0 -16L10 -2L20 -11L17 7Z" fill="url(#${u}c)" stroke="#6a400a" stroke-width=".9"/><rect x="-17.5" y="5" width="35" height="5" rx="1.5" fill="url(#${u}c)" stroke="#6a400a" stroke-width=".7"/>
+        ${[[-20, -11, "#4dd6ff"], [0, -16, "#ff2e4d"], [20, -11, "#4dd6ff"]].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="2" fill="${c}" stroke="#fff8" stroke-width=".5"/>`).join("")}${[-9, 0, 9].map((x, i) => `<rect x="${x - 1.6}" y="6" width="3.2" height="3" rx=".6" fill="${["#5af2a0", "#ff2e4d", "#b072ff"][i]}"/>`).join("")}
+        <g transform="translate(6 -6)"><g class="fx-tw">${FX_SPARK("#fff", 3.2)}</g></g></g></g>`; break;
+    case "o-ailes": defs += `<linearGradient id="${u}w" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${c1}" stop-opacity=".95"/><stop offset="1" stop-color="${c1}" stop-opacity=".55"/></linearGradient>`; {
+      const feather = (len, rot, w) => `<path transform="rotate(${rot})" d="M0 0C${f1x(len * .3)} ${f1x(-w)} ${f1x(len * .8)} ${f1x(-w * .7)} ${len} 0C${f1x(len * .8)} ${f1x(w * .5)} ${f1x(len * .3)} ${f1x(w * .6)} 0 0Z" fill="url(#${u}w)" stroke="${c1 < "#8" ? "#ffffff30" : "#00000025"}" stroke-width=".4"/>`;
+      const wing = (sx) => `<g transform="translate(${sx * (HW - 6)} ${-HH + 22}) scale(${sx} 1)"><g class="fx-wing">${[[50, -50, 6], [56, -34, 7], [58, -18, 7], [52, -3, 7], [44, 12, 6], [34, 26, 5]].map(([l, r, w]) => feather(l, r, w)).join("")}${[[30, -40, 4.5], [34, -22, 4.5], [30, -6, 4]].map(([l, r, w]) => feather(l, r, w)).join("")}</g></g>`;
+      back = `<g filter="url(#${u}b)" opacity=".5">${wing(-1)}${wing(1)}</g>${wing(-1)}${wing(1)}`; } break;
+
+    // ===== Particules (Atelier) : légères, pour ne jamais cacher le visage =====
+    case "p-etincelles": front = Array.from({ length: 12 }, () => fxP("fx-rise", (R() - .5) * 2 * HW, HH - 4, 2 + R() * 2, -R() * 4, `<g class="fx-tw">${FX_SPARK(c1, 1.6 + R() * 1.4)}</g>`, (R() - .5) * 18)).join(""); break;
+    case "p-flocons": front = Array.from({ length: 11 }, (_, i) => fxP("fx-fall", (R() - .5) * 2 * HW, -HH - 6, 5 + R() * 4, -R() * 9, `<g class="fx-spin">${FX_FLAKE(i % 3 ? c1 : "#fff")}</g>`, (R() - .5) * 20, .6 + R() * .6)).join(""); break;
+    case "p-petales": front = Array.from({ length: 10 }, (_, i) => fxP("fx-fall", (R() - .5) * 2 * HW, -HH - 6, 4.5 + R() * 3, -R() * 8, `<g class="fx-flip">${FX_PETAL(c1, "#ff6fa3")}</g>`, (R() - .5) * 34, .7 + R() * .5)).join(""); break;
+    case "p-braises": front = Array.from({ length: 14 }, (_, i) => fxP("fx-rise", (R() - .5) * 2 * HW, HH, 2.4 + R() * 2.4, -R() * 5, `<circle r="2.6" fill="${c1}" opacity=".35" filter="url(#${u}b)"/><circle class="fx-tw" r="${f1x(.6 + R() * .7)}" fill="${i % 3 ? "#ffd27a" : c1}"/>`, (R() - .5) * 24)).join(""); break;
+    case "p-lucioles": front = Array.from({ length: 9 }, (_, i) => `<g transform="translate(${f1x((R() - .5) * 2 * HW)} ${f1x((R() - .5) * 2 * HH)})"><g class="fx-wander w${i % 3}" style="animation-delay:${f1x(-R() * 8)}s"><circle r="3.4" fill="${c1}" opacity=".35" filter="url(#${u}b)"/><circle class="fx-blink" style="animation-delay:${f1x(-R() * 3)}s" r="1.1" fill="#fbffd8"/></g></g>`).join(""); break;
+    case "p-runes": {
+      const G = ["ᚠ", "ᚱ", "ᛟ", "ᚨ", "ᛉ", "ᛞ", "ᚦ", "ᛗ"];
+      front = `<g transform="translate(0 ${HH - 4}) scale(1 .3)"><g class="fx-spin slow"><circle r="30" fill="none" stroke="${c1}" stroke-width="1.2" opacity=".7"/><circle r="24" fill="none" stroke="${c1}" stroke-width=".6" stroke-dasharray="2 3" opacity=".8"/>${G.map((g, i) => `<text transform="rotate(${i * 45}) translate(0 -27)" text-anchor="middle" font-size="5" fill="${c1}">${g}</text>`).join("")}</g></g>
+        <ellipse cx="0" cy="${HH - 4}" rx="30" ry="9" fill="${c1}" opacity=".18" filter="url(#${u}b)"/>`
+        + Array.from({ length: 8 }, (_, i) => fxP("fx-rise", (R() - .5) * 50, HH - 6, 3 + R() * 2, -R() * 5, `<text text-anchor="middle" font-size="6" fill="${c1}" opacity=".9">${G[i]}</text>`, (R() - .5) * 10)).join(""); break; }
+    default: return null;
+  }
+  const svg = (inner, side) => inner ? `<span class="kc-dk fx ${side}" aria-hidden="true"><svg class="dk fx-${k}" viewBox="${-HW - 18} ${-HH - 18} ${2 * HW + 36} ${2 * HH + 36}" preserveAspectRatio="none"><defs>${side === "back" || !back ? defs : defs.replace(/id="(fx\d+)/g, 'id="$1F')}</defs>${side === "back" || !back ? inner : inner.replace(/url\(#(fx\d+)/g, "url(#$1F")}</svg></span>` : "";
+  return { back: svg(back, "back"), front: svg(front, "front") };
+}
+// décoration de carte : les nouvelles (fx) ont deux couches, les anciennes une seule devant
+function decoLayers(d) {
+  if (!d) return { back: "", front: "" };
+  return fxBuild(d.k, d.c1, d.c2 || d.c1) || { back: "", front: `<span class="kc-dk" aria-hidden="true">${decoSVG(d, "rect")}</span>` };
+}
+
 // ===== Cosmétiques : Boutique Arcanique, Sanctuaire des Invocations, Atelier Arcanique =====
 // Le serveur décide de tout (achat, tirage, design) ; le navigateur ne fait qu'afficher et animer le résultat.
 ROUTES.push("boutique", "sanctuaire", "atelier");
@@ -5936,7 +6233,7 @@ function zOpenDeco(id) {
     : !has(card.id) ? "" : on ? `<button class="btn big block" type="button" data-zas-ref="" data-slot="deco">Retirer de cette carte</button>`
     : `<button class="btn gold big block" type="button" data-zas-ref="${id}" data-slot="deco">Mettre sur cette carte</button>`;
   $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(d.name)}"><div class="sheet-h"><h2>${esc(d.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="zs-prev" style="--h1:${C.c1};--h2:${C.c2}"><div class="zs-prev-card">${zDecoCard(d, 200, card)}</div></div>
+    <div class="sheet-b"><div class="zd-big" style="--h1:${C.c1};--h2:${C.c2}">${zDecoCard(d, 190, card)}</div>
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[d.rar].color};color:${RAR[d.rar].color}">${RAR[d.rar].label}</span><span class="pill">${C.kanji} ${esc(C.name || "")}</span><span class="pill">Animée</span><span class="pill">Aucun bonus de jeu</span></div>
       ${pick}${act}</div></div>`;
   $("overlay").hidden = false; $("overlay").dataset.zdk = id; $("overlay").dataset.zdp = ""; $("overlay").dataset.zit = "";
@@ -7581,7 +7878,7 @@ const Arena = (() => {
     const d = document.createElement("div"); d.id = "ar-root"; d.className = "ar"; d.hidden = true;
     d.innerHTML = `<canvas id="ar-c"></canvas><div class="ar-vign"></div><div id="ar-tags"></div><div id="ar-pops"></div><div class="ar-flash" id="ar-flash"></div>
       <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm acc" type="button" id="ar-quit">Quitter la partie</button></div>
-      <div class="ar-hint" id="ar-hint"></div>
+      <div class="ar-hint" id="ar-hint"></div><div class="ar-insp" id="ar-insp" hidden></div>
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
       <svg id="ar-aim" aria-hidden="true"><path id="ar-aimPath"/><circle id="ar-aimEnd" r="16"/></svg>
@@ -7943,20 +8240,25 @@ const Arena = (() => {
   // une carte vole d'un point à un autre de l'écran (vol, Étal, défausse)
   function flyCard(c, from, to) {
     if (reduced) return Promise.resolve();
-    const [x0, y0] = from ? screenOf(worldOf(from, 1.2)) : [innerWidth - 60, innerHeight - 140], [x1, y1] = to ? screenOf(worldOf(to, 1.2)) : [innerWidth / 2, innerHeight + 80];
-    const d = document.createElement("div"); d.className = "ar-fly"; d.style.setProperty("--cc", c ? famCol(c) : "var(--gold)"); d.innerHTML = c && typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cfart-${c.def}"></span>` : ico("carte");
+    const [x0, y0] = Array.isArray(from) ? from : from ? screenOf(worldOf(from, 1.2)) : [innerWidth - 60, innerHeight - 140], [x1, y1] = to ? screenOf(worldOf(to, 1.2)) : [innerWidth / 2, innerHeight + 80];
+    const d = document.createElement("div"); d.className = "ar-fly"; d.style.setProperty("--cc", c && c !== "dos" ? famCol(c) : "var(--gold)"); d.innerHTML = c && typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cfart-${c.def}"></span>` : c === "dos" ? `<i class="ar-back">${ico("logo")}</i>` : ico("carte");
     $a("pops").appendChild(d);
     return d.animate([{ transform: `translate(${x0}px, ${y0}px) scale(.5) rotate(-10deg)`, opacity: 0 }, { opacity: 1, offset: .2 }, { transform: `translate(${x1}px, ${y1}px) scale(.8) rotate(8deg)`, opacity: 1 }], { duration: 650 / (window.__arSpeed || 1), easing: "cubic-bezier(.3,.7,.3,1)" }).finished.then(() => d.remove());
   }
+  // présage : la carte du dessus de la pioche vole au centre, se retourne en grand, puis le verdict tombe
   function omen(p, e) {
-    if (!p) return;
-    const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e", [x, y] = screenOf(worldOf(p, 2.4));
-    const d = document.createElement("div"); d.className = "ar-omen"; d.style.cssText = `left:${x}px;top:${y}px;--oc:${c}`;
+    if (!p) return Promise.resolve();
+    const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e";
     const R = CF.cat?.regles || {}, P = R.presage || {}, petite = (CF.table?.vue?.joueurs.length || 4) <= 3;
     const need = { voile: P.voile, defense: petite && R.defensePetite ? R.defensePetite : P.defense, entrave: P.entrave, reprise: R.reprise }[e.quoi];
-    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `explose sur Terre 1 à ${P.orbe.rangMax}` : need ? `il faut ${need.map((k) => nm2[k]).join(" ou ")}` : "";
-    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small>${needTxt ? `<small class="ar-need">${needTxt}</small>` : ""}<b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
-    $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
+    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `Explose sur Terre de 1 à ${P.orbe.rangMax}` : need ? `Il faut ${need.map((x) => nm2[x]).join(" ou ")}` : "";
+    const art = typeof ILLUS_CARTE === "object" && ILLUS_CARTE[k.def] ? `<span class="ar-om-art cfart-${k.def}"></span>` : `<span class="ar-om-art">${ico(CF_ICON[k.def] ? "logo" : "carte")}</span>`;
+    const d = document.createElement("div"); d.className = "ar-om " + (e.favorable ? "ok" : "no"); d.style.setProperty("--oc", c);
+    d.innerHTML = `<p class="ar-om-h"><b>${esc(p.label || nm(p.id))}</b> fait un présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</p>${needTxt ? `<p class="ar-om-need">${needTxt}</p>` : ""}
+      <div class="ar-om-card"><div class="ar-om-in"><div class="ar-om-back">${ico("logo")}</div><div class="ar-om-face">${art}<b class="ar-om-sg">${ico(k.signe || "logo")}<i>${k.rang || ""}</i></b><span class="ar-om-nm">${esc(defOf(k).nom || "")}</span><span class="ar-om-el">${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span></div></div></div>
+      <p class="ar-om-v">${e.favorable ? "Réussi" : "Raté"}</p>`;
+    $a("pops").appendChild(d);
+    return wait(2600).then(() => { d.classList.add("out"); return wait(300); }).then(() => d.remove());
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
   // finish façon TFT : ralenti, bandes cinéma, la caméra plonge sur la victime, le coup final, image figée, bannière
@@ -8178,13 +8480,29 @@ const Arena = (() => {
     if (!R || !st) return;
     const n = hand.length, cw = Math.min(132, Math.max(92, innerWidth * .13)), spread = Math.min(cw * .78, (innerWidth - (innerWidth > 600 ? 340 : 24) - cw) / Math.max(1, n - 1)), fin = finAct();
     hand.forEach((h, i) => {
-      const o = i - (n - 1) / 2, s = st.sel === h.c.uid, picked = st.discard.includes(h.c.uid), rot = o * (R.portrait ? 5 : 6) * Math.min(1, 6 / n), base = R.portrait ? cw * .32 : cw * .55, lift = s || picked ? cw * .55 : Math.abs(o) * Math.abs(o) * 4 * Math.min(1, 6 / n) + base;
-      h.el.style.transform = `translateX(${o * spread}px) translateY(${s || picked ? -lift : lift}px) rotate(${s ? 0 : rot}deg) scale(${s ? 1.22 : 1})`;
+      // la carte choisie reste dans la main (en surbrillance, à peine levée) : on la lit en grand dans le panneau à droite
+      const o = i - (n - 1) / 2, chosen = st.sel === h.c.uid, s = false, picked = st.discard.includes(h.c.uid), rot = o * (R.portrait ? 5 : 6) * Math.min(1, 6 / n), base = R.portrait ? cw * .1 : cw * .16, lift = chosen || picked ? cw * .3 : Math.abs(o) * Math.abs(o) * 4 * Math.min(1, 6 / n) + base;
+      h.el.style.transform = `translateX(${o * spread}px) translateY(${chosen || picked ? -lift : lift}px) rotate(${s ? 0 : rot}deg) scale(${s ? 1.22 : 1})`;
       h.el.style.zIndex = s ? 50 : 10 + i;
       const ok = plays(h.c.uid).length > 0 && !st.discMode;
       h.el.classList.toggle("off", !ok && !st.discMode && !reactUses(h.c));
-      h.el.classList.toggle("ok", ok); h.el.classList.toggle("picked", picked);
+      h.el.classList.toggle("ok", ok); h.el.classList.toggle("picked", picked); h.el.classList.toggle("chosen", chosen);
     });
+    renderInsp();
+  }
+  // panneau de la carte choisie : en grand, son texte complet, et de quoi la jouer
+  let inspKey = "";
+  function renderInsp() {
+    const box = $a("insp"), v = CF.table?.vue, c = st?.sel && !st.discMode ? v?.main?.find((x) => x.uid === st.sel) : null;
+    if (!box) return; if (!c) { inspKey = ""; box.hidden = true; return; }
+    const ps = plays(c.uid), free = ps.find((a) => !a.cible), tg = [...new Set(ps.filter((a) => a.cible).map((a) => a.cible))], key = c.uid + "|" + ps.length + "|" + tg.join(",");
+    if (key === inspKey && !box.hidden) return; inspKey = key;
+    const d = defOf(c), big = cardEl(c); big.classList.add("ar-insp-card"); big.removeAttribute("data-cu");
+    box.innerHTML = `<button class="ar-insp-x" type="button" aria-label="Fermer">✕</button>${big.outerHTML}<p class="ar-insp-t">${esc(d.texte || CF_SHORT[c.def] || "")}</p>
+      <div class="ar-insp-b">${free ? `<button class="btn gold" type="button" data-ip="free">Jouer cette carte</button>` : ""}${tg.map((id) => `<button class="btn ${free ? "" : "gold"}" type="button" data-ip="${esc(id)}">Viser ${esc(champ(id)?.label || nm(id))}</button>`).join("")}${!free && !tg.length ? `<p class="ar-insp-n">${esc(tipFor(c))}</p>` : ""}</div>`;
+    box.hidden = false;
+    box.querySelector(".ar-insp-x").onclick = () => { cancelTarget(); st.sel = null; hint(""); layoutHand(); };
+    box.querySelectorAll("[data-ip]").forEach((b) => { b.onclick = () => { const id = b.dataset.ip; if (id === "free") { cancelTarget(); st.sel = null; layoutHand(); return act(free); } if (!targeting || targeting.uid !== c.uid) startTarget(c.uid); const p = champ(id); if (p) pickTarget(p); }; });
   }
   // en réaction, la carte qui sert (Parade, Riposte, Élixir, une Frappe à défausser) brille
   const reactUses = (c) => { const v = CF.table?.vue, pr = v?.attente; if (!pr || pr.pid !== v.moi || pr.kind === "tour") return false; return (v.actions || []).some((a) => a.carte === c.uid || (a.type === "parer" && c.def === "parade") || (a.type === "riposter" && c.def === "riposte") || (a.type === "elixir" && c.def === "elixir") || (a.type === "defausser" && c.def === "frappe")); };
@@ -8355,7 +8673,7 @@ const Arena = (() => {
       case "esquive": if (p) { shield(p, "#5ac8fa"); pop(p, "Esquivé !", "#5ac8fa", true); } await wait(520); break;
       case "kanji_absorbe": if (p) { pop(p, "Garde : aucun dégât", "#e8c77e", true); emit(50, worldOf(p, 1.3), "#e8c77e", { speed: 2.5, life: .8, grav: 0 }); } await wait(500); break;
       case "elimination": if (p) { p.alive = false; if (e.role) p.role = e.role; await finisher(p, champ(e.par), e); renderTags(); } break;
-      case "presage": omen(p, e); await wait(1300); break;
+      case "presage": await omen(p, e); break;
       case "orbe_explose": if (p) { setOrb(p, false); const o = worldOf(p, 1.6); emit(160, o, "#ff7a1a", { speed: 5, life: 1, grav: 2 }); ring(new THREE.Vector3(o.x, .05, o.z), "#ff7a1a", 4, .8); flash("#ff7a1a", .4); R.shake = .3; } await wait(700); break;
       case "orbe_passe": { const a = champ(e.de), b = champ(e.a); if (a) setOrb(a, false); await beam(a, b, "#ff7a1a", .5); if (b) setOrb(b, true); break; }
       case "sauvetage": case "survie": if (p) { healFx(p); pop(p, "Sauvé !", "#3fdc8f", true); p.pv = e.pv ?? p.pv; renderTags(); } await wait(600); break;
@@ -8364,7 +8682,14 @@ const Arena = (() => {
       case "vol": { await flyCard(e.carte || null, champ(e.cible), p); const v = CF.table.vue; if (e.carte) await spotlight(e.carte, e.pid === v.moi ? `Tu prends cette carte à ${esc(nm(e.cible))}` : `${esc(nm(e.pid))} te prend cette carte`); break; }
       case "vol_public": await flyCard(null, champ(e.cible), p); break;
       case "etal_pris": await flyCard(e.carte, null, p); break;
-      case "pioche_publique": if (p) pop(p, `+${e.n} carte${e.n > 1 ? "s" : ""}`, "#4dd6ff", true); break;
+      // un autre joueur pioche : ses cartes (de dos) volent de la pioche jusqu'à lui
+      case "pioche_publique": {
+        if (!p || p.id === CF.table?.vue?.moi) break;
+        pop(p, `${p.label || nm(p.id)} pioche ${e.n} carte${e.n > 1 ? "s" : ""}`, "#bfe9ff", true);
+        const from = pileScreen(), n = Math.min(e.n || 1, 4);
+        await Promise.all(Array.from({ length: n }, (_, i) => wait(i * 160).then(() => flyCard("dos", from, p))));
+        break;
+      }
       case "defi_perdu": case "effondrement": if (p) hitFx(p, "#ff9b3d"); break;
       case "onde_evitee": case "defi_relance": if (p) pop(p, "Défausse une Frappe", "#f5a524", true); await wait(300); break;
       case "fin": showEnd(); break;
@@ -8377,7 +8702,7 @@ const Arena = (() => {
       const e = st.queue.shift();
       if (logged(e)) { st.log.push(logLine(e)); renderLog(); }
       if (st.queue.length > 24 && e.type !== "fin") continue;
-      try { await play(e); } catch (err) { console.warn(err); }
+      try { await Promise.race([play(e), wait(6000)]); } catch (err) { console.warn(err); }
     }
     if (!st || st.gid !== gid) return;
     st.running = false;
@@ -8475,7 +8800,7 @@ const Arena = (() => {
     return true;
   }
   addEventListener("hashchange", () => { if (st && !location.hash.startsWith("#/confront/" + st.gid)) hide(); });
-  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; } };
+  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; }, _play: (e) => { st?.queue.push(e); runQueue(); } };
 })();
 
 // ===== Ouvertures en 3D : le coffre (×10, 2 boosters) et la pochette (×5, un booster) =====
@@ -9580,18 +9905,32 @@ const World3D = (() => {
   addEventListener("visibilitychange", () => { if (!document.hidden && R && !raf) raf = requestAnimationFrame(frame); });
   // change le panorama du fond, en fondu (appelé à chaque changement de rubrique)
   let bgMesh = null, bgUrl = null, wantBg = null;
+  // l'image est décodée hors du fil principal (createImageBitmap) et les derniers décors restent prêts
+  // sur la carte graphique : changer de rubrique ne fige plus l'écran
+  const bgCache = new Map();
+  function bgTexture(url) {
+    if (bgCache.has(url)) { const t = bgCache.get(url); bgCache.delete(url); bgCache.set(url, t); return t; }
+    const p = fetch(url).then((r) => r.blob()).then((b) => createImageBitmap(b, { imageOrientation: "flipY" })).then((img) => {
+      const t = new T.Texture(img); t.flipY = false; t.colorSpace = T.SRGBColorSpace; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.anisotropy = 8; t.needsUpdate = true;
+      try { R.renderer.initTexture(t); } catch {}
+      return t;
+    }).catch(() => new Promise((ok) => { const img = new Image(); img.onload = () => { const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.needsUpdate = true; ok(t); }; img.src = url; }));
+    bgCache.set(url, p);
+    while (bgCache.size > 4) { const [k, v] = bgCache.entries().next().value; bgCache.delete(k); v.then((t) => { if (bgMesh?.material.map !== t) t.dispose(); }); }
+    return p;
+  }
   function setBg(url) {
     wantBg = url; if (!R || !url || url === bgUrl) return; bgUrl = url;
-    const img = new Image(); img.onload = () => {
+    bgTexture(url).then((t) => {
       if (bgUrl !== url || !R) return;
-      const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.needsUpdate = true; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.anisotropy = 8;
-      const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
+      const img = t.image, Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
       const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#ffffff", fog: false }));
       m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
       // changement net : l'ancien décor disparaît dès que le nouveau est prêt (pas de mélange des deux)
       const old = bgMesh; bgMesh = m;
-      if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); }
-    }; img.src = url;
+      if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.dispose(); if (![...bgCache.values()].length || !bgCache.has(old.userData.url)) old.material.map.dispose(); }
+      m.userData.url = url;
+    });
   }
   // teinte du monde selon le décor : brume, ciel, lumières (accent et ombre du panorama)
   let wantTint = null;

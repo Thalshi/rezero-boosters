@@ -54,10 +54,11 @@ function cosDeco(design, present) {
   else if (fo) style.push(`background:${base}`);
   if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
-  const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? ico("logo") : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
+  // décoration, ornement et particules : calques SVG derrière et devant la carte (src/fx.js)
+  const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco], L = dk ? decoLayers(dk) : { back: "", front: "" };
+  const O = o ? fxBuild("o-" + o.k, o.c1, o.c1) || { back: "", front: "" } : { back: "", front: "" }, P = pa ? fxBuild("p-" + pa.k, pa.c1, pa.c1) || { back: "", front: "" } : { back: "", front: "" };
   // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
-  const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco];
-  return { deco: dk ? `<span class="kc-dk" aria-hidden="true">${decoSVG(dk, "rect")}</span>` : "", za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
+  return { deco: L.back + O.back + L.front + O.front + P.front, za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: "", orn: "" };
 }
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {

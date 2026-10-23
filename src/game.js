@@ -863,6 +863,7 @@ function designOfS(s, cardId) {
 // ===== Décorations d'avatar (Boutique, façon Discord) : animées autour de l'avatar, visibles partout dans l'app =====
 // Créées pour le QG (aucune image reprise de Discord). k : forme animée ; c1, c2 : couleurs ; coll : collection.
 const DECO_COLLS = [
+  { id: "legendes", name: "Légendes du QG", kanji: "龍", tag: "Dragons, katanas, flammes et néons : les décorations les plus folles.", c1: "#ffb020", c2: "#2a0e08" },
   { id: "sakura", name: "Sakura du QG", kanji: "花", tag: "Pétales, fleurs et lanternes des ruelles de Shinjuku.", c1: "#ff8fc0", c2: "#3a1430" },
   { id: "neon", name: "Néon de Shinjuku", kanji: "電", tag: "Anneaux de néon, casques et bugs d'écran.", c1: "#2ee6ff", c2: "#2a0e4a" },
   { id: "feu", name: "Feu et foudre", kanji: "火", tag: "Pour ceux qui frappent fort.", c1: "#ff6a2e", c2: "#2a0a08" },
@@ -872,6 +873,16 @@ const DECO_COLLS = [
   { id: "saisons", name: "Saisons", kanji: "季", tag: "Halloween, Noël et autres fêtes au QG.", c1: "#ff9a2e", c2: "#1a2a14" },
 ];
 const DECOS = [
+  { id: "deco-dragon-or", coll: "legendes", name: "Dragon d'or", k: "dragon", c1: "#ffd24d", c2: "#b8401a", rar: "m" },
+  { id: "deco-dragon-azur", coll: "legendes", name: "Dragon d'azur", k: "dragon2", c1: "#6ae0ff", c2: "#1a3a9e", rar: "l" },
+  { id: "deco-phenix", coll: "legendes", name: "Phénix", k: "phenix", c1: "#ff8a2e", c2: "#c81a1a", rar: "m" },
+  { id: "deco-katanas", coll: "legendes", name: "Lames jumelles", k: "katanas", c1: "#ff2e4d", c2: "#2a1a2a", rar: "l" },
+  { id: "deco-inferno", coll: "legendes", name: "Aura enflammée", k: "inferno", c1: "#ff7a1a", c2: "#c8140a", rar: "l" },
+  { id: "deco-inferno-bleu", coll: "legendes", name: "Flammes spectrales", k: "inferno", c1: "#5ad8ff", c2: "#2a3aff", rar: "e" },
+  { id: "deco-foudre", coll: "legendes", name: "Tempête de foudre", k: "foudre", c1: "#bfe6ff", c2: "#8a4dff", rar: "l" },
+  { id: "deco-tempete", coll: "legendes", name: "Tempête de sakura", k: "tempete", c1: "#ffb3d1", c2: "#e0508a", rar: "l" },
+  { id: "deco-neon-kabuki", coll: "legendes", name: "Néon de Kabukichō", k: "neon", c1: "#ff3df0", c2: "#3de8ff", rar: "e" },
+  { id: "deco-neon-cyber", coll: "legendes", name: "Néon cyber", k: "neon2", c1: "#3dff9e", c2: "#ffd24d", rar: "e" },
   { id: "deco-sakura", coll: "sakura", name: "Sakura", k: "sakura", c1: "#ff9ec4", c2: "#ffd6e8", rar: "r" },
   { id: "deco-sakura-blanc", coll: "sakura", name: "Sakura blanc", k: "sakura", c1: "#ffffff", c2: "#ffd6e8", rar: "e" },
   { id: "deco-petales", coll: "sakura", name: "Pluie de pétales", k: "petales", c1: "#ff9ec4", c2: "#ff5a9e", rar: "pc" },

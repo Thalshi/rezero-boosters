@@ -96,9 +96,9 @@ try {
   await page.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await page.waitForTimeout(2500);
   await page.goto(`${srv.base}/#/boosters`); await page.waitForTimeout(1500);
   await page.screenshot({ path: "/tmp/claude-0/-home-user-rezero-boosters/1145acdc-bf55-528c-b0d2-aec63051172b/scratchpad/shots/x10.png" });
-  t.check("les 36 décorations se dessinent (avatar et carte)", (await page.evaluate(() => DECOS.flatMap((d) => ["round", "rect"].map((sh) => { try { return decoSVG(d, sh).includes("<svg") ? "" : d.id; } catch (e) { return d.id + " " + e.message; } })).filter(Boolean))).length === 0);
+  t.check("toutes les décorations se dessinent (avatar et carte)", (await page.evaluate(() => DECOS.flatMap((d) => ["round", "rect"].map((sh) => { try { return decoSVG(d, sh).includes("<svg") ? "" : d.id; } catch (e) { return d.id + " " + e.message; } })).filter(Boolean))).length === 0);
   await page.goto(`${srv.base}/#/boutique`); await page.waitForTimeout(1500);
-  t.check("la Boutique s'affiche", (await page.locator(".zd-tile").count()) === 36);
+  t.check("la Boutique s'affiche", (await page.locator(".zd-tile").count()) === await page.evaluate(() => DECOS.length));
   await page.goto(`${srv.base}/#/boosters`); await page.waitForTimeout(1500);
   t.check("Boosters : bouton ×10 · 5 coffres", await page.locator('[data-act="open-pack"][data-n="10"]').first().isVisible());
   await page.locator('[data-act="open-pack"][data-n="10"]').first().click(); await page.waitForTimeout(1500);

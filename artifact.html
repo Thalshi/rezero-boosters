@@ -1719,6 +1719,16 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Confrontation : cartes de la table (chacun son deck / partagées), partage du salon ===== */
+.cf-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; }
+.cf-mode { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line3); background: var(--bg2); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }
+.cf-mode b { font: 700 14px var(--body); } .cf-mode small { font: 500 12px/1.4 var(--body); color: var(--mut); }
+.cf-mode.on, .cf-mode:has(input:checked) { border-color: var(--gold); box-shadow: 0 0 14px #f5c51833; }
+.cf-mode input { position: absolute; opacity: 0; pointer-events: none; }
+label.cf-mode { position: relative; }
+.cf-share .row { flex-wrap: wrap; gap: 8px; margin: 12px 0; } .cf-share input { width: 100%; }
+.cf-defis .cf-row { border-color: var(--gold); }
+
 /* ===== Confrontation : choix des cartes façon draft ===== */
 .cf-deckbar { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
 @media (max-width: 800px) { .cf-deckbar { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
@@ -4549,7 +4559,7 @@ function viewProfil() {
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
@@ -5398,6 +5408,27 @@ function cfFace(c, extra = "") {
 const cfChip = (c) => { if (!c) return ""; const d = cfCardDef(c), [col] = cfFam(d); return `<span class="cfc" style="--fc:${col}" title="${esc(d.nom)} : ${esc(CF_SHORT[c.def] || d.texte || "")}">${CF_ICON[c.def] || ico(CF_FAMILY_ICON[d.cat] || "logo")}<span>${esc(d.nom)}</span></span>`; };
 const cfBranch = (b) => CF.cat?.branches?.[b] || { nom: b, kanji: "?" };
 
+// cartes de la table : choisies par l'hôte, visibles avant de rejoindre
+const CF_MODES = [["deck", "Chacun son deck", "Tu joues un perso parmi tes propres cartes."], ["partage", "Cartes partagées", "Les cartes de tous vont au pot : tu peux tirer celles des autres (elles restent à leur propriétaire)."]];
+// partager un salon : la feuille de partage du téléphone, sinon le lien copié ; et le chat du QG en un toucher
+async function cfShare(gid, nom) {
+  const url = `${location.origin}/#/confront/${gid}`, text = `Viens jouer à Confrontation : ${nom || "ma table"} (code ${gid})`;
+  $("overlay").innerHTML = `<div class="sheet cf-share" role="dialog" aria-label="Partager le salon" style="max-width:420px"><h2>Partager le salon</h2>
+    <p class="note">Code <b class="mono">${gid}</b></p><input type="text" readonly value="${esc(url)}" class="gal-note" onclick="this.select()">
+    <div class="row"><button class="btn gold" type="button" data-cfsh="chat">Envoyer dans le chat du QG</button><button class="btn" type="button" data-cfsh="copy">Copier le lien</button>${navigator.share ? `<button class="btn" type="button" data-cfsh="os">Autre appli…</button>` : ""}</div>
+    <button class="btn sm" type="button" data-act="close">Fermer</button></div>`;
+  $("overlay").hidden = false; CF.share = { url, text };
+}
+async function cfShareDo(k) {
+  const { url, text } = CF.share || {}; if (!url) return;
+  try {
+    if (k === "chat") { await srv("chat/send", { text: `${text} ${url}` }); toast("Envoyé dans le chat du QG."); }
+    if (k === "copy") { await navigator.clipboard.writeText(url); toast("Lien copié."); }
+    if (k === "os") await navigator.share({ title: "Confrontation", text, url });
+    $("overlay").hidden = true;
+  } catch (err) { if (err?.name !== "AbortError") toast(err.message || "Partage impossible."); }
+}
+
 function viewConfront() {
   if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
   if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re Zéro : Confrontation");
@@ -5405,13 +5436,16 @@ function viewConfront() {
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
-  const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
+  const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · ${g.partage ? "cartes partagées" : "chacun son deck"} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
   return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
-    <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label><button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
+    <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>
+      <div class="cf-modes" role="radiogroup" aria-label="Cartes de la table">${CF_MODES.map(([k, l, d]) => `<label class="cf-mode"><input type="radio" name="cfMode" value="${k}" ${k === "deck" ? "checked" : ""}><b>${l}</b><small>${d}</small></label>`).join("")}</div>
+      <button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
       <div class="lab-form cf-keep"><label>Rejoindre avec un code <input type="text" id="cfCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"></label><button class="btn" type="button" data-act="cf-code">Ouvrir</button></div></section>
     ${!L ? `<p class="note">Chargement…</p>` : L.error ? `<p class="note">${esc(L.error)}</p>` : `
+    ${L.defis?.length ? `<section class="sec cf-defis"><h2>Défis reçus</h2>${L.defis.map((g) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">Duel · chacun son deck</span><div class="row"><button class="btn sm gold" type="button" data-cfaccept="${g.gid}">Accepter</button><button class="btn sm" type="button" data-cfrefuse="${g.gid}">Refuser</button></div></div>`).join("")}</section>` : ""}
     ${L.miennes.length ? `<section class="sec"><h2>Mes parties</h2>${L.miennes.map((g) => row(g, "Reprendre")).join("")}</section>` : ""}
     <section class="sec"><h2>Salons ouverts</h2>${L.salons.length ? L.salons.map((g) => row(g, "Voir")).join("") : `<p class="note">Aucun salon public pour l'instant. Crée le tien !</p>`}</section>
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
@@ -5427,13 +5461,18 @@ function cfTableHTML() {
   const v = T.vue, acts = v.actions || [], has1 = (t) => acts.find((a) => a.type === t);
   const top = `<div class="cf-top"><div><p class="eyebrow">Confrontation · ${esc(PHASE_LABEL[v.phase])}${v.mode ? ` · ${{ duel: "Duel", trio: "Trio", classique: "Classique" }[v.mode]}` : ""}</p><h1 class="cf-h">${esc(T.nom)}</h1>
     <p class="note">Code <b class="mono">${T.gid}</b>${T.spectateur ? " · tu regardes en spectateur" : ""}</p></div>
-    <div class="row"><button class="btn sm" type="button" data-nav="confront">Salons</button>${has1("abandon") && v.phase !== "lobby" ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Abandonner</button>` : ""}</div></div>`;
+    <div class="row"><button class="btn sm" type="button" data-nav="confront">Salons</button>${v.phase !== "fin" ? `<button class="btn sm" type="button" data-act="cf-share">Partager le salon</button>` : ""}
+      ${has1("quitter") ? `<button class="btn sm acc" type="button" data-cfa='{"type":"quitter"}'>Quitter le salon</button>` : has1("abandon") && (v.phase === "contributions" || v.phase === "choix") ? `<button class="btn sm acc" type="button" data-act="cf-leave">Quitter la table</button>` : has1("abandon") ? `<button class="btn sm acc" type="button" data-act="cf-abandon">Abandonner</button>` : ""}</div></div>`;
   let body = "";
   if (v.phase === "lobby") {
-    body = `<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : ""}</span>`).join("")}</div>
+    const host = v.hote === ME, M = CF_MODES.find((m) => m[0] === (T.partage ? "partage" : "deck"));
+    const modeBox = `<section class="sec cf-modebox"><h2>Cartes de la table</h2>${T.duel ? `<p class="note"><b>Duel</b> : chacun joue son deck.${T.refuse ? " <b>Ton défi a été refusé.</b>" : v.joueurs.length < 2 ? " En attente de la réponse…" : ""}</p>`
+      : host ? `<div class="cf-modes">${CF_MODES.map(([k, l, d]) => `<button type="button" class="cf-mode ${k === M[0] ? "on" : ""}" data-cfmode="${k}" aria-pressed="${k === M[0]}"><b>${l}</b><small>${d}</small></button>`).join("")}</div><p class="note">Tout le monde voit ce choix : rejoindre la table, c'est l'accepter.</p>`
+      : `<div class="cf-modes"><div class="cf-mode on"><b>${M[1]}</b><small>${M[2]}</small></div></div><p class="note">Choisi par l'hôte. Rejoindre la table, c'est l'accepter.</p>`}</section>`;
+    body = `${modeBox}<section class="sec"><h2>Joueurs (${v.joueurs.length}/7)</h2><div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill">${esc(cfName(p.id))}${p.id === v.hote ? " · hôte" : ""}</span>`).join("")}</div>
       <p class="note">${v.joueurs.length < 2 ? "Il faut au moins 2 joueurs. Partage le code de la table." : v.joueurs.length === 2 ? "Mode Duel." : v.joueurs.length === 3 ? "Mode Trio, sans rôles." : `Mode Classique, avec des rôles secrets : ${ROLE_SPLIT[v.joueurs.length].map((x, i) => x ? `${x} ${ROLES[ROLE_ORDER[i]].nom}${x > 1 ? "s" : ""}` : "").filter(Boolean).join(", ")} (${ROLE_BONUS[v.joueurs.length]}).`} <a href="#/confront/regles">Comment jouer</a></p>
       <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
-      ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}${has1("quitter") ? `<button class="btn" type="button" data-cfa='{"type":"quitter"}'>Quitter</button>` : ""}</div></section>`;
+      ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {
     const me = v.joueurs.find((p) => p.id === v.moi);
     if (!CF.list) cfLoadList();
@@ -5461,7 +5500,7 @@ function cfDraft() {
     <div class="chips cf-tabs"><button class="chip" type="button" data-cftab="tous" aria-pressed="${tab === "tous"}">Toutes · ${mine.length}</button>${ids.map((b) => { const n = mine.filter((c) => c.branch === b).length; return `<button class="chip" type="button" data-cftab="${b}" aria-pressed="${tab === b}" ${n ? "" : "disabled"}>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} · ${n}</button>`; }).join("")}</div>
     ${tab !== "tous" ? `<p class="note cf-tab-pow">${cfEmb(tab, "sm")} <b>${esc(cfBranch(tab).nom)}</b> : ${esc(cfBranch(tab).pouvoir)}</p>` : ""}
     ${pool.length ? `<div class="cf-pool">${pool.map((x) => { const c = byId[x.cardId], on = CF.contrib[x.branch] === x.cardId; return `<button type="button" class="cf-pick ${on ? "on" : ""}" data-cfpick="${x.cardId}" data-b="${x.branch}" aria-pressed="${on}">${cardHTML(c, { design: myDesign(c.id) })}<span class="cf-pick-b">${cfEmb(x.branch, "sm")} ${esc(cfBranch(x.branch).nom)}</span>${on ? `<span class="cf-pick-ok">Dans ton deck</span>` : ""}</button>`; }).join("")}</div>` : `<p class="note">Aucune carte de ce style dans ta collection.</p>`}
-    <div class="cf-draft-go"><button class="btn gold big" type="button" data-act="cf-contrib">${picked.length ? `Valider mes cartes (${picked.length}/${ids.length})` : "Jouer avec 2 persos prêtés"}</button></div>`;
+    <div class="cf-draft-go">${!picked.length && !CF.table?.partage && mine.length ? `<button class="btn gold big" type="button" disabled>Choisis au moins une de tes cartes</button>` : `<button class="btn gold big" type="button" data-act="cf-contrib">${picked.length ? `Valider mes cartes (${picked.length}/${ids.length})` : "Jouer avec 2 persos prêtés"}</button>`}</div>`;
 }
 function cfPerso(c, big) {
   if (!c) return "";
@@ -5569,11 +5608,16 @@ document.addEventListener("click", (e) => {
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));
   const c = t.closest("[data-cfc]"); if (c) return cfSelect(c.dataset.cfc);
   const dr = t.closest("[data-cfdrop]"); if (dr) { delete CF.contrib[dr.dataset.cfdrop]; return draw(); }
+  const sh = t.closest("[data-cfsh]"); if (sh) return cfShareDo(sh.dataset.cfsh);
+  const md = t.closest("[data-cfmode]"); if (md) return srv("confront/reglage", { gid: CF.gid, partage: md.dataset.cfmode === "partage" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
+  const ac = t.closest("[data-cfaccept]"); if (ac) return srv("confront/act", { gid: ac.dataset.cfaccept, action: { type: "rejoindre" } }).then(() => { CF.list = null; nav("confront", ac.dataset.cfaccept); }).catch((err) => toast(err.message));
+  const rf = t.closest("[data-cfrefuse]"); if (rf) return srv("confront/refuser", { gid: rf.dataset.cfrefuse }).then(() => { CF.list = null; toast("Défi refusé."); cfLoadList(); draw(); }).catch((err) => toast(err.message));
+  const df = t.closest("[data-cfdefi]"); if (df) return srv("confront/create", { invite: df.dataset.cfdefi }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; toast("Défi envoyé : la table t'attend."); nav("confront", r.gid); }).catch((err) => toast(err.message));
   const pk = t.closest("[data-cfpick]"); if (pk) { const b = pk.dataset.b; CF.contrib[b] = CF.contrib[b] === pk.dataset.cfpick ? null : pk.dataset.cfpick; return draw(); }
   const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
-  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
+  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked, partage: document.querySelector('[name="cfMode"]:checked')?.value === "partage" }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
@@ -5581,7 +5625,8 @@ document.addEventListener("click", (e) => {
   if (act === "cf-deck-clear") { CF.contrib = {}; return draw(); }
   if (act === "cf-deck-save") return srv("confront/deck", { cartes: Object.values(CF.contrib).filter(Boolean) }).then((r) => { if (CF.list) CF.list.deck = r.deck; toast("Deck enregistré : tu pourras le reprendre en un toucher."); draw(); }).catch((err) => toast(err.message));
   if (act === "cf-reload") { CF.list = null; cfLoadList(); return draw(); }
-  if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
+  if (act === "cf-share") return cfShare(CF.gid, CF.table?.nom);
+  if (act === "cf-leave" && sure(t.closest("[data-act]"), "Quitter : la partie est annulée")) return cfAct({ type: "abandon" }).then(() => nav("confront"));
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });
@@ -6342,7 +6387,9 @@ const Arena = (() => {
   let R = null; // le moteur 3D, créé une fois
   let st = null; // la table affichée : { gid, champs, lastSeq, lastSalon, queue, … }
   const $a = (id) => document.getElementById("ar-" + id);
-  const wanted = () => { try { return localStorage.getItem(LS) !== "classique"; } catch (e) { return true; } };
+  // seulement l'arène, comme les boosters : la vue classique ne sert plus que de secours (pas de WebGL) ;
+  // les navigateurs pilotés par les tests la gardent, sauf si un test demande l'arène
+  const wanted = () => { let v = null; try { v = localStorage.getItem(LS); } catch (e) {} return !navigator.webdriver || v === "arene"; };
   const setWanted = (on) => { try { localStorage.setItem(LS, on ? "arene" : "classique"); } catch (e) {} };
   const webgl = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } };
   const usable = () => !failed && wanted() && webgl();
@@ -6369,7 +6416,7 @@ const Arena = (() => {
     if ($a("root")) return;
     const d = document.createElement("div"); d.id = "ar-root"; d.className = "ar"; d.hidden = true;
     d.innerHTML = `<canvas id="ar-c"></canvas><div class="ar-vign"></div><div id="ar-tags"></div><div id="ar-pops"></div><div class="ar-flash" id="ar-flash"></div>
-      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm" type="button" id="ar-classic">Vue classique</button><button class="btn sm acc" type="button" id="ar-quit" hidden>Abandonner</button></div>
+      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm acc" type="button" id="ar-quit" hidden>Abandonner</button></div>
       <div class="ar-hint" id="ar-hint"></div>
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
@@ -6391,7 +6438,6 @@ const Arena = (() => {
       <div class="ar-load" id="ar-load">Entrée dans l'arène…</div>`;
     document.body.appendChild(d);
     $a("back").onclick = () => nav("confront");
-    $a("classic").onclick = () => { setWanted(false); hide(); draw(); };
     $a("quit").onclick = (e) => { if (sure(e.currentTarget, "Confirmer l'abandon")) cfAct({ type: "abandon" }); };
     $a("tabLog").onclick = () => panel("log"); $a("tabChat").onclick = () => panel("chat"); $a("logArr").onclick = () => panel();
     $a("tblBtn").onclick = () => { const t = $a("tbl"); t.classList.toggle("open"); $a("tblArr").textContent = t.classList.contains("open") ? "▴" : "▾"; };
@@ -7155,7 +7201,7 @@ const Arena = (() => {
     return true;
   }
   addEventListener("hashchange", () => { if (st && !location.hash.startsWith("#/confront/" + st.gid)) hide(); });
-  return { wants, sync, hide, usable, setWanted, offer: () => !failed && !wanted() && webgl(), loading: () => !!loading && !THREE && !failed, get st() { return st; } };
+  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; } };
 })();
 
 // ===== Ouvertures en 3D : le coffre (×10, 2 boosters) et la pochette (×5, un booster) =====

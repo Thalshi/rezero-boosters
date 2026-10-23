@@ -41,6 +41,7 @@ try {
     const gid = await table(A);
     const ctx = await browser.newContext({ viewport: vp, hasTouch: label === "mobile" }), page = await ctx.newPage(), errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
+    await ctx.addInitScript(() => localStorage.setItem("cf-vue", "arene"));
     await page.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await page.waitForTimeout(2000);
     await page.evaluate(() => { window.__arSpeed = 4; });
     await page.goto(`${srv.base}/#/confront/${gid}`);
@@ -117,11 +118,8 @@ try {
     t.check("fiche de mon champion : style, arme et équipement en clair", (await page.locator("#ar-sheet").textContent()).includes("Arme") && (await page.locator("#ar-sheet").textContent()).includes("Style"));
     await page.screenshot({ path: join(OUT, `arene-${label}-5-fiche.png`) });
     await page.click("#ar-sheet .ar-x");
-    // vue classique, puis retour dans l'arène
-    await page.click("#ar-classic"); await page.waitForTimeout(800);
-    t.check("vue classique : le plateau d'avant", (await page.locator(".cf-seat").count()) === 4 && await page.locator("#ar-root").isHidden());
-    await page.click('[data-act="cf-arene"]'); await page.waitForTimeout(1200);
-    t.check("retour dans l'arène", await page.locator("#ar-root").isVisible());
+    // seulement l'arène : plus de bouton pour passer à la vue classique
+    t.check("plus de bouton « Vue classique »", (await page.locator("#ar-classic").count()) === 0 && (await page.locator('[data-act="cf-arene"]').count()) === 0);
     await page.click("#ar-back"); await page.waitForTimeout(800);
     t.check("bouton Salons : l'arène se ferme", await page.locator("#ar-root").isHidden());
     t.check("aucune erreur JavaScript", errors.length === 0, errors);

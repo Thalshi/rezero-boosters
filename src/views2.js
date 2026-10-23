@@ -166,25 +166,25 @@ function viewMissions() {
   const doneAch = as.filter((a) => a.claimed).length;
   const achList = as.filter((a) => achF === "all" || (achF === "todo" ? !a.claimed : a.claimed));
   const bonus = (label, reward, done, can, kind) => `<div class="mbonus"><span>${label} → ${rewardText(reward)}</span>${done ? "<span>Fait ✓</span>" : can ? `<button class="btn gold sm" type="button" data-claim="${kind}">Réclamer</button>` : ""}</div>`;
-  return `<div class="wrap page" style="max-width:860px">
+  return `<div class="wrap page mpage">
     ${head("Missions", "Missions <em>&</em> succès")}
     <div><button class="btn acc big" type="button" data-claim="all" ${n ? "" : "disabled"}>Tout réclamer${n ? ` · ${n}` : ""}</button></div>
     <p class="lead">Reviens chaque jour : connexion, pack du jour, missions et prédictions donnent de l'essence et des boosters en plus des gratuits.</p>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
+    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
         ${st.canClaim ? `<button class="btn gold" type="button" data-claim="streak">Jour ${st.next} · ${rewardText(STREAK[st.next - 1])}</button>` : `<span class="pill">Reviens demain</span>`}</div>
       <div class="days">${STREAK.map((r, i) => { const dd = i + 1, done = dd <= st.n, now = st.canClaim && dd === st.next; return `<div class="day ${done ? "done" : ""} ${now ? "now" : ""} ${dd === 7 ? "last" : ""}">J${dd}<i>${KDAY[i]}</i><span>${r.chakra ? `+${r.chakra}` : ""}${r.chakra && r.boosters ? " " : ""}${r.boosters ? `${r.boosters}B` : ""}</span></div>`; }).join("")}</div>
       <p class="mono mut" style="margin:0;font-size:12px">${fmtN(save.counts?.login || 0) ? "" : ""}Série actuelle : ${st.n} jour${st.n > 1 ? "s" : ""} · B = booster</p></div>
     ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
-      ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
+      ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}</div>
+    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
       ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div></div>
+    <div class="mgrid2"><div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
-      <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>
+      <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div></div>
     <section class="sec"><div class="sec-h"><div><p class="eyebrow">Succès</p><h2>Succès <span class="mono mut" style="font-size:18px">${doneAch}/${as.length}</span></h2></div>${seg("achF", [["all", "Tous"], ["todo", "À faire"], ["done", "Obtenus"]], achF)}</div>
-      ${achList.map((a) => { const ok = a.prog >= a.goal; return `<div class="ach ${a.claimed ? "ok" : ""}"><span class="ic">${a.claimed ? "✦" : "?"}</span><div class="bd"><b>${esc(a.label)}</b><p>${esc(a.desc)}</p><div class="bar"><i style="width:${Math.min(1, a.prog / a.goal) * 100}%"></i></div><small>${fmtN(a.prog)}/${fmtN(a.goal)} · ${rewardShort(a.reward)}</small></div>${!a.claimed && ok ? `<button class="btn gold sm" type="button" data-claim="ach" data-id="${a.id}">Réclamer</button>` : ""}</div>`; }).join("") || empty("Rien ici pour l'instant.")}</section>
+      <div class="ach-grid">${achList.map((a) => { const ok = a.prog >= a.goal; return `<div class="ach ${a.claimed ? "ok" : ""}"><span class="ic">${a.claimed ? "✦" : "?"}</span><div class="bd"><b>${esc(a.label)}</b><p>${esc(a.desc)}</p><div class="bar"><i style="width:${Math.min(1, a.prog / a.goal) * 100}%"></i></div><small>${fmtN(a.prog)}/${fmtN(a.goal)} · ${rewardShort(a.reward)}</small></div>${!a.claimed && ok ? `<button class="btn gold sm" type="button" data-claim="ach" data-id="${a.id}">Réclamer</button>` : ""}</div>`; }).join("") || empty("Rien ici pour l'instant.")}</div></section>
   </div>`;
 }
 

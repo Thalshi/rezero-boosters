@@ -4,3 +4,5 @@ tests/node_modules/
 tests/reports/
 tools/preview/dist/
 .local-db/
+tools/illus/.cache/
+__pycache__/

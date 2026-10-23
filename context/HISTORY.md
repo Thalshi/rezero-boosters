@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-10-24 — 20 cartes illustrées par Billy, Créateur refait (14e mise en ligne)
+- 20 nouvelles cartes à partir des visuels de Billy (Unbeaten, Irsy, Seb, 4 Sultran'Zahar, 4 Explosion King, Ed, 2 Goldor, 2 Rorkantarak, 4 Reichi), plus rares que la carte de base de chaque perso ; cadres dessinés retirés. À revoir avec Billy (titres, raretés).
+- Créateur : « Persos et cartes » montre les têtes des persos par épisode ; un perso ouvre toutes ses cartes et skins, on passe au suivant en glissant (ou flèches), épisode modifiable sur place. La liste « Persos par épisode » d'Admin utilise la même vue.
+- Créateur : « Import en masse » : on dépose plein de visuels, chacun devient une carte (perso deviné d'après le nom du fichier, rareté proposée, cadrage et cadre à retirer réglables), puis on peaufine.
+- Outil local tools/illus/persos.py (recadrage, texte effacé, super-résolution) pour les portraits faits par Claude.
+- Envoi d'images : celles envoyées pendant que Claude travaille ne sont pas enregistrées ; envoyer par lots de 5 et attendre « reçu ».
+
 ## 2026-10-23 — Décorations aussi sur l'avatar, 23 nouvelles (13e mise en ligne)
 - Les décorations se portent de nouveau autour de l'avatar (en-tête, profil, classement, comptoir, prédictions), en plus des cartes : un achat, les deux usages. Fiche Boutique avec aperçu carte et avatar, « Porter sur mon avatar » et « Mettre sur cette carte ».
 - Tous les effets spectaculaires existent en version avatar (cercle) et carte (rectangle), avec une version allégée dans les listes.

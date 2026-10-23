@@ -13,12 +13,18 @@ const RUNS = +(process.argv[2] || 8), DAYS = 180;
 const T0 = Date.parse("2026-11-02T07:00:00+01:00");
 
 // les réglages comparés ; « actuel » = ce qui est en production
-const VARIANTS = [
+const VARIANTS = (process.env.GAINS ? [
+  // étape 1 : les gains (recyclage et missions), prix des boosters et des invocations inchangés
+  { id: "actuel", nom: "Actuel (en ligne)", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, confront: null },
+  { id: "g-moitie", nom: "A · recyclage et missions ÷ 2", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [1, 1, 3, 8, 20, 50], MIS: 0.5, confront: { partie: 10, victoire: 10, max: 3 } },
+  { id: "g-tiers", nom: "B · recyclage ÷ 3, missions ÷ 2", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [1, 1, 2, 5, 13, 33], MIS: 0.5, confront: { partie: 10, victoire: 10, max: 3 } },
+  { id: "g-quart", nom: "C · recyclage ÷ 4, missions ÷ 3", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 10, victoire: 10, max: 3 } },
+] : [
   { id: "actuel", nom: "Actuel (en ligne)", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, confront: null },
   { id: "accessible", nom: "Accessible", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 120, COS: 0.8, confront: { partie: 10, victoire: 10, max: 3 } },
   { id: "equilibre", nom: "Équilibré", FREE_MAX: 3, REGEN_H: 3, PRICE: 120, SUMMON_COST: 150, COS: 1, confront: { partie: 10, victoire: 10, max: 3 } },
   { id: "collection", nom: "Collectionneur", FREE_MAX: 2, REGEN_H: 4, PRICE: 150, SUMMON_COST: 180, COS: 1.2, confront: { partie: 8, victoire: 8, max: 2 } },
-];
+]);
 const PROFILES = [
   { id: "occasionnel", label: "Occasionnel", days: [1, 3, 5, 6], hours: [12, 20], social: 0.5, games: 3 / 7 },
   { id: "regulier", label: "Régulier", days: [0, 1, 2, 3, 4, 5, 6], hours: [8, 13, 21], social: 0.9, games: 1 },
@@ -33,6 +39,10 @@ async function engineFor(v) {
   set(/^const PRICE = .*$/m, `const PRICE = ${v.PRICE};`);
   set(/^const SUMMON_COST = .*$/m, `const SUMMON_COST = ${v.SUMMON_COST};`);
   set(/^const COS_PRICE = .*$/m, `const COS_PRICE = { c: ${Math.round(60 * v.COS)}, pc: ${Math.round(120 * v.COS)}, r: ${Math.round(250 * v.COS)}, e: ${Math.round(500 * v.COS)}, l: ${Math.round(1000 * v.COS)}, m: ${Math.round(2000 * v.COS)} };`);
+  // recyclage : essence par doublon selon la rareté (c, pc, r, e, l, m)
+  if (v.REC) ["c", "pc", "r", "e", "l", "m"].forEach((r, i) => set(new RegExp(`^(  ${r}:\\s*\\{ label: .*chakra: )\\d+( \\},)$`, "m"), `$1${v.REC[i]}$2`));
+  // missions, série et succès : l'essence donnée est multipliée par MIS (les boosters offerts ne changent pas)
+  if (v.MIS != null) src = src.replace(/reward: \{ chakra: (\d+) \}/g, (_, n) => `reward: { chakra: ${Math.round(n * v.MIS)} }`).replace(/^const STREAK = .*$/m, (l) => l.replace(/chakra: (\d+)/g, (_, n) => `chakra: ${Math.round(n * v.MIS)}`));
   const f = join(TMP, `game-${v.id}.mjs`); writeFileSync(f, src);
   return import(f + "?" + Date.now());
 }

@@ -280,6 +280,21 @@ export async function gameRoute(req, env, user, path) {
       if (restore) { await env.DB.prepare("DELETE FROM docs WHERE path = ?").bind("devbackup/" + user.id).run(); await bumpRev(env, "devbackup"); }
       return json({ state: r.state });
     }
+    // tout effacer, pour de bon : compte neuf, sans sauvegarde ; ses annonces et ses échanges en cours disparaissent aussi
+    if (path === "/api/game/dev/wipe") {
+      if (!user.dev && !user.admin) return fail(403, "Réservé au dev et à l'admin.");
+      await ensurePlayer(env, user, null);
+      const r = await mutate(env, user.id, (s, now) => { for (const k of Object.keys(s)) delete s[k]; Object.assign(s, { ...G.freshSave(now), linked: true }); return {}; });
+      if (r.error) return fail(400, r.error);
+      await env.DB.batch([
+        env.DB.prepare("DELETE FROM docs WHERE path = ?").bind("devbackup/" + user.id),
+        env.DB.prepare("DELETE FROM docs WHERE coll = 'market' AND json_extract(data, '$.seller') = ? AND json_extract(data, '$.status') = 'open'").bind(user.id),
+        env.DB.prepare("UPDATE docs SET data = json_set(data, '$.status', 'cancelled') WHERE coll = 'trades' AND json_extract(data, '$.status') = 'open' AND (json_extract(data, '$.from') = ? OR json_extract(data, '$.to') = ?)").bind(user.id, user.id),
+      ]);
+      for (const k of ["devbackup", "market", "trades"]) await bumpRev(env, k);
+      await publishStats(env, user.id, r.state);
+      return json({ state: r.state });
+    }
     if (path === "/api/game/dev/backup") {
       if (!user.dev && !user.admin) return fail(403, "Réservé au dev et à l'admin.");
       const bk = await readDoc(env, "devbackup/" + user.id);

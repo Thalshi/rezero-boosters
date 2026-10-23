@@ -21,7 +21,7 @@ const World3D = (() => {
     renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.25 : 1.5)); renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
     const scene = new T.Scene(); scene.background = new T.Color("#07060f"); scene.fog = new T.Fog("#0c0818", 12, 34);
     const camera = new T.PerspectiveCamera(46, 1, 0.1, 100);
-    scene.add(new T.HemisphereLight("#9a7fd0", "#140a20", 0.7));
+    const hemi = new T.HemisphereLight("#9a7fd0", "#140a20", 0.7); scene.add(hemi);
     const pink = new T.PointLight("#ff2e88", 26, 14, 1.6); pink.position.set(5, 2.2, 2); scene.add(pink);
     const cyan = new T.PointLight("#2ee6ff", 22, 14, 1.6); cyan.position.set(-5, 2, 1); scene.add(cyan);
     const gold = new T.PointLight("#ffb060", 18, 10, 1.6); gold.position.set(0, 1.4, -2); scene.add(gold);
@@ -63,7 +63,7 @@ const World3D = (() => {
     const PN = innerWidth < 700 ? 30 : 60, petals = new T.InstancedMesh(new T.PlaneGeometry(.12, .08), new T.MeshBasicMaterial({ color: "#ffb3d6", side: T.DoubleSide, transparent: true, opacity: .85 }), PN), pet = [];
     for (let i = 0; i < PN; i++) pet.push({ p: new T.Vector3((Math.random() - .5) * 20, Math.random() * 9, (Math.random() - .5) * 12 - 2), r: new T.Euler(Math.random() * 6, Math.random() * 6, 0), s: Math.random() });
     scene.add(petals);
-    R = { canvas, renderer, scene, camera, runes, motes, pos, sp, N, petals, pet, PN, pink, cyan, gold, m: new T.Matrix4(), q: new T.Quaternion(), one: new T.Vector3(1, 1, 1),
+    R = { hemi, canvas, renderer, scene, camera, runes, motes, pos, sp, N, petals, pet, PN, pink, cyan, gold, m: new T.Matrix4(), q: new T.Quaternion(), one: new T.Vector3(1, 1, 1),
       tx: 0, ty: 0, x: 0, y: 0, t: 0, last: performance.now() };
     const resize = () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = innerWidth < 700 ? 58 : 46; camera.updateProjectionMatrix(); };
     addEventListener("resize", resize); resize();
@@ -89,7 +89,7 @@ const World3D = (() => {
   }
   function start() {
     if (R || loading || !usable()) return;
-    loading = import("three").then((t) => { T = t; build(); if (wantBg) { const u = wantBg; wantBg = null; setBg(u); } raf = requestAnimationFrame(frame); }).catch(() => { failed = true; });
+    loading = import("three").then((t) => { T = t; build(); if (wantBg) { const u = wantBg; wantBg = null; setBg(u); } if (wantTint) setTint(...wantTint); raf = requestAnimationFrame(frame); }).catch(() => { failed = true; });
   }
   addEventListener("visibilitychange", () => { if (!document.hidden && R && !raf) raf = requestAnimationFrame(frame); });
   // change le panorama du fond, en fondu (appelé à chaque changement de rubrique)
@@ -102,11 +102,21 @@ const World3D = (() => {
       const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
       const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#d4cce4", fog: false, transparent: true, opacity: 0, depthWrite: false }));
       m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
-      const old = bgMesh; bgMesh = m; const t0 = performance.now();
-      const fade = (now) => { const k = Math.min(1, (now - t0) / 700); m.material.opacity = k; if (old) old.material.opacity = 1 - k;
+      // le nouveau décor apparaît par-dessus l'ancien, qui reste entier dessous : pas de creux sombre pendant le fondu
+      const old = bgMesh; bgMesh = m; const t0 = performance.now(); if (old) { old.renderOrder = -2; old.material.transparent = true; old.material.opacity = 1; }
+      const fade = (now) => { const k = Math.min(1, (now - t0) / 600), e = k * k * (3 - 2 * k); m.material.opacity = e;
         if (k < 1) requestAnimationFrame(fade); else { m.material.transparent = false; m.material.depthWrite = true; if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); } } };
       requestAnimationFrame(fade);
     }; img.src = url;
   }
-  return { start, setBg, get on() { return !!R; } };
+  // teinte du monde selon le décor : brume, ciel, lumières (accent et ombre du panorama)
+  let wantTint = null;
+  function setTint(accent, deep) {
+    wantTint = [accent, deep]; if (!R) return;
+    const a = new T.Color(accent), d = new T.Color(deep);
+    R.scene.fog.color.copy(d).multiplyScalar(.7); R.scene.background.copy(d).multiplyScalar(.45);
+    R.hemi.color.copy(a).lerp(new T.Color("#ffffff"), .35); R.hemi.groundColor.copy(d);
+    R.pink.color.copy(a); R.gold.color.copy(a).lerp(new T.Color("#ffb060"), .5);
+  }
+  return { start, setBg, setTint, get on() { return !!R; } };
 })();

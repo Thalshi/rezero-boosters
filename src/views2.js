@@ -179,7 +179,7 @@ function viewMissions() {
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
       ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus("Toutes réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}</div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
       <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>

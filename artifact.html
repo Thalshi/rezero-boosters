@@ -2017,7 +2017,7 @@ function trackS(s, key, n = 1, now = Date.now()) {
 
 // ===== Semaine, premiers pas, succès, pack du jour (repris de Kyara) =====
 const WEEKLY = [
-  { id: "w-open40", label: "Ouvre 40 boosters",                key: "open",    goal: 40, reward: { chakra: 120 } },
+  { id: "w-open25", label: "Ouvre 25 boosters",                key: "open",    goal: 25, reward: { chakra: 100 } },
   { id: "w-legend", label: "Obtiens une Légendaire ou mieux",  key: "legend",  goal: 1,  reward: { chakra: 100 } },
   { id: "w-sold3",  label: "Vends 3 cartes au marché",         key: "sold",    goal: 3,  reward: { chakra: 100 } },
   { id: "w-trade2", label: "Réussis 2 échanges",               key: "trade",   goal: 2,  reward: { chakra: 100 } },
@@ -2029,7 +2029,8 @@ const WEEKLY = [
   { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
 ];
 const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
-const WEEKLY_BONUS = { boosters: 3 };    // toutes les missions de la semaine réclamées
+const WEEKLY_BONUS = { boosters: 3 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
+const WEEKLY_BONUS_N = 3;
 // Confrontation : jouable à l'infini, mais l'essence ne vient que des premières parties valables du jour
 const CF_REWARD = { partie: 10, victoire: 10, max: 3 };
 const FIRST_STEPS = [
@@ -2111,7 +2112,7 @@ function claimAnyS(s, kind, id, now = Date.now()) {
   }
   if (kind === "weekly-bonus") {
     const w = ensureWeeklyS(s, now);
-    if (w.bonus || weeklyS(s, now).some((m) => !m.claimed)) return null;
+    if (w.bonus || weeklyS(s, now).filter((m) => m.claimed).length < WEEKLY_BONUS_N) return null;
     w.bonus = true; giveRewardS(s, WEEKLY_BONUS); return { reward: WEEKLY_BONUS };
   }
   if (kind === "first") {
@@ -2150,7 +2151,7 @@ function claimableCountS(s, now = Date.now()) {
   n += achievementsS(s).filter((a) => a.prog >= a.goal && !a.claimed).length;
   const d = ensureDailyS(s, now), w = ensureWeeklyS(s, now);
   if (!d.bonus && missionsTodayS(s, now).every((m) => m.claimed)) n++;
-  if (!w.bonus && weeklyS(s, now).every((m) => m.claimed)) n++;
+  if (!w.bonus && weeklyS(s, now).filter((m) => m.claimed).length >= WEEKLY_BONUS_N) n++;
   if (!(s.first || {}).bonus && firstStepsS(s).every((f) => f.claimed)) n++;
   return n;
 }
@@ -4329,7 +4330,7 @@ function viewMissions() {
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
       ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus("Toutes réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}</div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
       <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>

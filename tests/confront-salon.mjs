@@ -48,8 +48,8 @@ try {
   t.check("les joueurs du salon sont prévenus", (await B.api("pulse", { after: null })).notifs.items.some((n) => n.kind === "confront" && n.text.includes("fermé")));
 
   t.section("Duel depuis un profil");
-  const d1 = await A.api("confront/create", { invite: IDS.p2 });
-  t.check("défi : table privée de duel, chacun son deck", d1.duel === IDS.p2 && d1.public === false && d1.partage === false && d1.nom.includes("Bram"), d1.nom);
+  const d1 = await A.api("confront/create", { invite: B.id });
+  t.check("défi : table privée de duel, chacun son deck", d1.duel === B.id && d1.public === false && d1.partage === false && d1.nom.includes("Bram"), d1.nom);
   t.check("la personne défiée reçoit une notification", (await B.api("pulse", { after: null })).notifs.items.some((n) => n.kind === "confront" && n.data?.go === "confront/" + d1.gid));
   t.check("le défi apparaît dans ses salons", (await B.api("confront/list")).defis.some((g) => g.gid === d1.gid));
   t.check("le duel n'est pas dans les salons publics", !(await C.api("confront/list")).salons.some((g) => g.gid === d1.gid));
@@ -58,8 +58,8 @@ try {
   t.check("refuser le défi", (await B.api("confront/refuser", { gid: d1.gid })).ok === true && !(await B.api("confront/list")).defis.some((g) => g.gid === d1.gid));
   t.check("le joueur qui a défié est prévenu du refus", (await A.api("pulse", { after: null })).notifs.items.some((n) => n.kind === "confront" && n.text.includes("refusé")));
   t.check("après un refus, on ne peut plus rejoindre", (await B.api("confront/act", { gid: d1.gid, action: { type: "rejoindre" } })).status === 400);
-  t.check("on ne peut pas se défier soi-même", (await A.api("confront/create", { invite: IDS.p1 })).status === 400);
-  const d2 = await A.api("confront/create", { invite: IDS.p2 });
+  t.check("on ne peut pas se défier soi-même", (await A.api("confront/create", { invite: A.id })).status === 400);
+  const d2 = await A.api("confront/create", { invite: B.id });
   const acc = await B.api("confront/act", { gid: d2.gid, action: { type: "rejoindre" } });
   t.check("accepter le défi : les deux à la table", acc.vue?.joueurs.length === 2);
   await A.api("confront/act", { gid: d2.gid, action: { type: "quitter" } });
@@ -87,7 +87,7 @@ try {
     await page.screenshot({ path: `tests/reports/confront-salon-${label}.png`, fullPage: true });
     await page.click('[data-cfa=\'{"type":"quitter"}\']'); await page.waitForTimeout(1000);
     t.check(`${label} · « Quitter le salon »`, (await A.api("confront/list")).miennes.every((g) => g.nom !== "Salon " + label));
-    await page.goto(`${srv.base}/#/profil/${IDS.p2}`); await page.waitForTimeout(2000);
+    await page.goto(`${srv.base}/#/profil/${B.id}`); await page.waitForTimeout(2000);
     await page.click("[data-cfdefi]"); await page.waitForTimeout(1500);
     t.check(`${label} · profil : « Défier en duel » ouvre la table du duel`, page.url().includes("#/confront/") && (await page.locator(".cf-modebox").innerText()).includes("Duel"));
     t.check(`${label} · aucune erreur JavaScript`, errors.length === 0, errors);

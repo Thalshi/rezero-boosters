@@ -56,6 +56,10 @@ async function release(env, h, g) {
     const rc = res?.recompenses?.[p.id];
     if (rc?.eligible) {
       G.trackS(s, "cfPlay", 1, now);
+      // essence : seulement les CF_REWARD.max premières parties valables du jour
+      const day = G.dayKey(now);
+      if (s.cfDay?.day !== day) s.cfDay = { day, n: 0 };
+      if (s.cfDay.n < G.CF_REWARD.max) { s.cfDay.n++; s.chakra += G.CF_REWARD.partie + (rc.gagnant ? G.CF_REWARD.victoire : 0); }
       if (rc.gagnant) {
         G.trackS(s, "cfWin", 1, now); if (p.role) G.trackS(s, "cfWin_" + p.role, 1, now);
         if (p.vivant && p.pv === 1) G.trackS(s, "cfWin1pv", 1, now);

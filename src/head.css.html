@@ -1977,4 +1977,9 @@ input[type="text"], input[type="search"], input:not([type]), textarea, select, .
   filter: drop-shadow(0 1px 0 #5a3f12) drop-shadow(0 2px 0 #2a1d08) drop-shadow(0 4px 8px #000c); }
 @keyframes logo-turn { 0%, 100% { transform: rotate(45deg) rotateX(0deg) rotateY(0deg); } 50% { transform: rotate(45deg) rotateX(18deg) rotateY(-18deg); } }
 @media (prefers-reduced-motion: reduce) { .logo-mk { animation: none; } }
+
+/* monde 3D vivant derrière l'app : la scène remplace le fond CSS (qui reste en secours) */
+.w3d { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -3; pointer-events: none; display: block; }
+html.w3d-on body::before { background: linear-gradient(180deg, #07060f00 0%, #07060f40 45%, #07060fa0 100%); }
+html.w3d-on body::after { display: none; }
 </style>

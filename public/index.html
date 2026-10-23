@@ -2096,9 +2096,9 @@ html.w3d-on body::after { display: none; }
 @keyframes bk-prev { from { transform: rotateY(18deg) translateX(-20px); opacity: .2; filter: brightness(.7); } to { transform: none; opacity: 1; } }
 .bk-run { margin: 0 0 6px; font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #8a6a3a; }
 .bk-page h2 { font-family: var(--disp, Cinzel), serif; color: #3a1d08; font-size: 30px; margin: 0 0 14px; }
-.bk-page h3 { color: #5a2c0a; } .bk-page p, .bk-page li { color: #2e2214; line-height: 1.6; } .bk-page b { color: #1a0f04; }
+.bk-page h3:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #5a2c0a; } .bk-page :is(p, li):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #2e2214; line-height: 1.6; } .bk-page b:not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { color: #1a0f04; }
 .bk-page .rg-n { display: none; }
-.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
+.bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist) *) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
 .bk-page :is(.rg-box, .rg-modes > div, .rg-steps li) :is(span, p) { color: #4a3a24 !important; }
 .bk-page .rg-tbl th, .bk-page .rg-tbl td { color: #2e2214; border-color: #c8a46a66; }
 .bk-page a { color: #8a3a10; }
@@ -2220,6 +2220,19 @@ svg.dk .flow > * { animation: dk-flow 7s linear infinite; } svg.dk .flow.rev > *
 .cf-dl.big { display: inline-flex; align-items: center; margin-left: 10px; padding: 2px 10px; border-radius: 99px; background: #0b0916; border: 1px solid #e8c77e88; color: #f0d38c; font: 700 15px 'JetBrains Mono', monospace; vertical-align: middle; }
 .cf-dl.big::before { content: "⏱"; margin-right: 6px; font-size: 13px; }
 .cf-dl.big.low { color: #fff; background: #ff2e88; border-color: #ff2e88; animation: dk-pulse 1s ease-in-out infinite; }
+/* inventaire de l'Atelier : l'objet sur une carte vierge, et « Mettre sur cette carte » */
+.kc-ghost .kc-a { display: grid; place-items: end center; background: linear-gradient(180deg, #2a2240, #15102a); }
+.kc-sil { width: 78%; height: 88%; fill: #ffffff14; }
+.zt-inv { display: flex; flex-direction: column; }
+.zt-inv .zt-prev { display: grid; place-items: center; padding: 18px 10px 10px; min-height: 250px; overflow: visible; }
+.zt-as { display: flex; flex-direction: column; gap: 6px; padding: 0 12px 12px; margin-top: auto; }
+.zt-as select { width: 100%; font-size: 12px; padding: 6px 8px; }
+/* les fenêtres (partage du salon, fiches) passent au-dessus de l'arène 3D */
+body.ar-on .overlay { z-index: 95; }
+/* emblèmes des rôles en métal */
+.rl-ic:has(.role-emb) { background: radial-gradient(circle, color-mix(in srgb, var(--rc) 30%, transparent), transparent 70%) !important; border: 0 !important; box-shadow: none !important; }
+.rl-ic .role-emb { width: 56px; height: 56px; } .role-emb { width: 1.4em; height: 1.4em; vertical-align: middle; flex: none; }
+.ar-role .role-emb, .ar-rl .role-emb { width: 22px; height: 22px; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -5944,7 +5957,7 @@ function viewAtelier() {
   if (param && has(param) && zDraftCard !== param) { zDraftCard = param; zDraft = null; }
   if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
   const cos = cosOf(save);
-  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length, true]], zAtelierTab);
+  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length + Object.keys(decosOf(save)).length, true]], zAtelierTab);
   if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
   const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, k === "deco" ? (DECO_BY_ID[r] ? r : null) : refCos(save, r)?.id]).filter(([, v]) => v));
@@ -5972,14 +5985,37 @@ function viewAtelier() {
     </div></div>`;
 }
 const sl0Note = () => `<p class="note">Une instance unique ne décore qu'une carte à la fois : la choisir ici la retire de l'autre carte. Les cosmétiques de compte s'utilisent sur autant de cartes que tu veux.</p>`;
-function zInventory() {
-  const cos = cosOf(save), used = usedInstances(save);
-  const items = [...Object.keys(cos.own).filter((id) => COS_BY_ID[id]).map((id) => ({ c: COS_BY_ID[id], kind: "Compte · réutilisable" })),
-    ...cos.inst.filter((it) => COS_BY_ID[it.c]).map((it) => ({ c: COS_BY_ID[it.c], kind: used[it.i] ? `Instance · sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique · libre" }))]
-    .filter((x) => !zInvSlot || x.c.slot === zInvSlot);
-  return `${seg("zInv", [["", "Tout"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
-    ${items.length ? `<div class="zgrid">${items.map((x) => zTile(x.c, "", ` · ${x.kind}`)).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
+// un objet seul, sur une carte vierge (silhouette) : on voit l'effet sans le confondre avec une de tes cartes
+function zGhost(c, deco) {
+  const dz = cosDeco(deco ? { deco: deco.id } : { [c.slot]: c.id }, true), x = deco || c;
+  return `<div class="kcw ${dz.wrap}" style="--w:150px;${dz.za ? `--za:${dz.za};` : ""}">${dz.orn}${dz.deco}<div class="kc r-${x.rar} ${dz.kc} kc-ghost" style="${dz.style}">
+    <div class="kc-h"><b>${esc(x.name)}</b><i>${LETTER[x.rar]}</i></div>
+    <div class="kc-a"><svg class="kc-sil" viewBox="0 0 100 120" aria-hidden="true"><circle cx="50" cy="44" r="20"/><path d="M10 124C12 90 30 74 50 74S88 90 90 124Z"/></svg>${dz.holo}</div>${dz.part}
+    <div class="kc-s">${deco ? "Décoration" : esc(COS_SLOT_LABEL[c.slot])}</div><div class="kc-p"><span>${RAR[x.rar].label}</span></div></div></div>`;
 }
+function zInventory() {
+  const cos = cosOf(save), used = usedInstances(save), mine = [...CARDS, ...SKINS].filter((c) => has(c.id));
+  const onCard = (ref, slot) => Object.entries(cos.designs).filter(([, d]) => d[slot] === ref).map(([cid]) => cid);
+  const items = [...DECOS.filter((d) => decosOf(save)[d.id]).map((d) => ({ deco: d, slot: "deco", ref: d.id, kind: "Décoration · réutilisable" })),
+    ...Object.keys(cos.own).filter((id) => COS_BY_ID[id]).map((id) => ({ c: COS_BY_ID[id], slot: COS_BY_ID[id].slot, ref: "a:" + id, kind: "Compte · réutilisable" })),
+    ...cos.inst.filter((it) => COS_BY_ID[it.c]).map((it) => ({ c: COS_BY_ID[it.c], slot: COS_BY_ID[it.c].slot, ref: "i:" + it.i, kind: used[it.i] ? `Instance · sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique · libre" }))]
+    .filter((x) => !zInvSlot || x.slot === zInvSlot);
+  const tile = (x) => { const on = onCard(x.ref, x.slot), it = x.deco || x.c;
+    return `<div class="zt zt-inv r-${it.rar}"><div class="zt-prev">${zGhost(x.c, x.deco)}</div>
+      <div class="zt-t"><b>${esc(it.name)}</b><span style="color:${RAR[it.rar].color}">${RAR[it.rar].label}</span><small>${x.kind}${on.length && !x.ref.startsWith("i:") ? ` · sur ${on.length} carte${on.length > 1 ? "s" : ""}` : ""}</small></div>
+      ${mine.length ? `<div class="zt-as"><select class="in" aria-label="Carte à décorer" id="zas-${esc(x.ref)}">${mine.map((c) => `<option value="${c.id}" ${on.includes(c.id) ? "selected" : ""}>${esc(nameOf(c))} · ${esc(c.title)}${on.includes(c.id) ? " ✓" : ""}</option>`).join("")}</select>
+        <button class="btn sm gold" type="button" data-zas="${esc(x.ref)}" data-slot="${x.slot}">Mettre sur cette carte</button></div>` : `<p class="note">Ouvre un booster pour avoir une carte à décorer.</p>`}</div>`; };
+  return `${seg("zInv", [["", "Tout"], ["deco", "Décoration"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
+    ${items.length ? `<div class="zgrid">${items.map(tile).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
+}
+// poser un objet de l'inventaire sur une carte : il rejoint son design (le reste du design ne bouge pas)
+async function zAssign(ref, slot) {
+  const card = document.getElementById("zas-" + ref)?.value; if (!card) return;
+  const design = { ...(cosOf(save).designs[card] || {}), [slot]: ref };
+  try { await zCall("design", { card, design }, () => saveDesignS(save, card, design)); toast(`Posé sur ${nameOf(byId[card])}.`); draw(); }
+  catch (e) { toast(e.message); }
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-zas]"); if (b) zAssign(b.dataset.zas, b.dataset.slot); });
 
 // ===== Sanctuaire des Invocations =====
 // Le tirage est fait par le serveur AVANT l'animation ; l'ouverture ne fait que le révéler.
@@ -6421,9 +6457,7 @@ function viewConfront() {
     ${L.miennes.length ? `<section class="sec"><h2>Mes parties</h2>${L.miennes.map((g) => row(g, "Reprendre")).join("")}</section>` : ""}
     <section class="sec"><h2>Salons ouverts</h2>${L.salons.length ? L.salons.map((g) => row(g, "Voir")).join("") : `<p class="note">Aucun salon public pour l'instant. Crée le tien !</p>`}</section>
     ${L.enCours.length ? `<section class="sec"><h2>À regarder</h2>${L.enCours.map((g) => row(g, "Regarder")).join("")}</section>` : ""}`}
-    <section class="sec"><h2>Les rôles</h2><p class="note">À partir de 4 joueurs : deux camps, Gardien et Sentinelles contre Briseurs. Seul le Gardien est connu de tous. Chaque table est réglée pour que chaque camp ait une chance sur deux.</p><div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r, { short: true })).join("")}</div></section>
-    <section class="sec"><h2>Les 8 branches</h2><div class="cf-branches">${(CF.cat?.branchIds || []).map((b) => `<div class="cf-br">${cfEmb(b)}<div><h3>${esc(cfBranch(b).nom)}</h3><p class="note">${esc(cfBranch(b).pouvoir)}</p></div></div>`).join("")}</div>
-      <p class="note">Chaque carte a sa branche : les cartes Épique et plus d'un perso en ont souvent une autre. La rareté ne donne aucune puissance : une Commune et une Mythique de la même branche ont le même pouvoir. <a href="#/confront/regles">Lire le livret complet</a>.</p></section></div>`;
+  </div>`;
 }
 
 function cfTableHTML() {
@@ -6658,6 +6692,37 @@ const ROLES = {
     conseil: "Le Gardien doit tomber en dernier : s'il tombe alors qu'un autre joueur que toi est encore en vie, ce sont les Briseurs qui gagnent. Aide-le parfois contre les Briseurs.",
   },
 };
+// emblèmes des rôles : métal, gemmes et reflets (dégradés SVG), à la place des icônes au trait
+let embN = 0;
+function roleEmb(r) {
+  const u = "re" + ++embN, M = (id, a, b, c) => `<linearGradient id="${u}${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".5" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
+  const defs = `<defs>${M("or", "#fff6c8", "#e8b84a", "#7a4a10")}${M("ac", "#f4fbff", "#8fb4c8", "#2a4258")}${M("rg", "#ff9aa8", "#c8102e", "#4a0410")}
+    <radialGradient id="${u}gm"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="var(--gm1)"/><stop offset="1" stop-color="var(--gm2)"/></radialGradient>
+    <linearGradient id="${u}in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a5a"/><stop offset="1" stop-color="#120c22"/></linearGradient>
+    <filter id="${u}sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#000" flood-opacity=".7"/></filter></defs>`;
+  const shield = "M32 6L54 13V30C54 44 44 54 32 59C20 54 10 44 10 30V13Z";
+  const body = {
+    gardien: `<g filter="url(#${u}sh)"><path d="${shield}" fill="url(#${u}or)"/><path d="M32 11L49 16.5V30C49 41 41 49.5 32 53.5C23 49.5 15 41 15 30V16.5Z" fill="url(#${u}in)"/>
+      <path d="M19 33L23 22L28 28L32 19L36 28L41 22L45 33Z" fill="url(#${u}or)" stroke="#5a3a08" stroke-width=".8" stroke-linejoin="round"/><rect x="19" y="33" width="26" height="4" rx="1.5" fill="url(#${u}or)" stroke="#5a3a08" stroke-width=".8"/>
+      <circle cx="32" cy="35" r="2.4" fill="url(#${u}gm)" style="--gm1:#ff3a5a;--gm2:#6a0418"/><circle cx="24" cy="35" r="1.5" fill="url(#${u}gm)" style="--gm1:#3ad0ff;--gm2:#0a3a6a"/><circle cx="40" cy="35" r="1.5" fill="url(#${u}gm)" style="--gm1:#3ad0ff;--gm2:#0a3a6a"/>
+      <circle cx="32" cy="19" r="1.6" fill="#fff6c8"/><circle cx="23" cy="22" r="1.2" fill="#fff6c8"/><circle cx="41" cy="22" r="1.2" fill="#fff6c8"/>
+      <path d="M32 41V49M28 45H36" stroke="#e8b84a" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></g>
+      <path d="M14 15L32 9V12L17 17Z" fill="#fff" opacity=".35"/>`,
+    sentinelle: `<g filter="url(#${u}sh)"><path d="M10 26C4 22 3 15 5 10C9 16 12 18 16 19Z M54 26C60 22 61 15 59 10C55 16 52 18 48 19Z" fill="url(#${u}ac)"/>
+      <path d="${shield}" fill="url(#${u}ac)"/><path d="M32 11L49 16.5V30C49 41 41 49.5 32 53.5C23 49.5 15 41 15 30V16.5Z" fill="#0c2236"/>
+      <path d="M17 31C21 24 26 21 32 21S43 24 47 31C43 38 38 41 32 41S21 38 17 31Z" fill="#e8f6ff" stroke="#8fe3ff" stroke-width="1"/>
+      <circle cx="32" cy="31" r="7" fill="url(#${u}gm)" style="--gm1:#2ee6ff;--gm2:#0a4a7a"/><circle cx="32" cy="31" r="2.8" fill="#04121c"/><circle cx="34.5" cy="28.5" r="1.4" fill="#fff"/>
+      <path d="M24 46H40M27 49.5H37" stroke="#8fe3ff" stroke-width="1.4" stroke-linecap="round" opacity=".7"/></g>
+      <path d="M14 15L32 9V12L17 17Z" fill="#fff" opacity=".45"/>`,
+    briseur: `<g filter="url(#${u}sh)"><path d="M32 6L54 13V30C54 44 44 54 32 59Z" fill="url(#${u}rg)" transform="translate(2.5 1) rotate(4 32 32)"/><path d="M32 6L10 13V30C10 44 20 54 32 59Z" fill="url(#${u}rg)" transform="translate(-2.5 0) rotate(-4 32 32)"/>
+      <path d="M32 6L29 16L35 24L28 33L34 42L30 59" fill="none" stroke="#120408" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M44 9L20 50" stroke="#2a1018" stroke-width="5" stroke-linecap="round"/><path d="M45.5 7.5L22 48" stroke="url(#${u}ac)" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M17 47L25 52M21 50L17.5 56" stroke="#e8b84a" stroke-width="3" stroke-linecap="round"/><circle cx="16.5" cy="57" r="2.2" fill="url(#${u}gm)" style="--gm1:#ff3a5a;--gm2:#6a0418"/>
+      <circle cx="30" cy="28" r="9" fill="#ff2e4d" opacity=".18"/></g>
+      <path d="M13 15L30 9.5V12L16 17Z" fill="#fff" opacity=".3"/>`,
+  }[r];
+  return body ? `<svg class="role-emb" viewBox="0 0 64 64" aria-hidden="true">${defs}${body}</svg>` : ROLES[r]?.icon || "";
+}
 // deux camps, sans Errant (rôle retiré : il gagnait surtout par hasard) ; mêmes valeurs que worker/confront/config.mjs
 const ROLE_ORDER = ["gardien", "sentinelle", "briseur"];
 const ROLE_SPLIT = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
@@ -6666,7 +6731,7 @@ const ROLE_BONUS = { 4: "Gardien : 2 cartes de plus au départ, Sentinelle : 1",
 function roleCard(r, opts = {}) {
   const R = ROLES[r];
   return `<article class="rl-card ${opts.mine ? "mine" : ""}" style="--rc:${R.col}">
-    <div class="rl-top"><span class="rl-ic">${R.icon}</span><div><p class="rl-k">${R.vu}</p><h3>${opts.mine ? `Tu es ${R.nom}` : R.nom}</h3></div></div>
+    <div class="rl-top"><span class="rl-ic">${roleEmb(r)}</span><div><p class="rl-k">${R.vu}</p><h3>${opts.mine ? `Tu es ${R.nom}` : R.nom}</h3></div></div>
     <p class="rl-but"><b>But</b> ${R.but}</p>
     <p><b>Camp</b> ${R.camp}</p>${opts.short ? "" : `<p><b>À savoir</b> ${R.plus}</p>`}
     <p class="rl-tip">${R.conseil}</p></article>`;
@@ -7900,7 +7965,7 @@ const Arena = (() => {
     if (!p.role) return "";
     const R0 = ROLES[p.role] || { nom: p.role };
     const me = p.id === v.moi, cls = p.role === "gardien" ? "" : me ? "mine" : "brk";
-    return `<span class="ar-role ${cls}">${ico(p.role)} ${esc(R0.nom)}${me && p.role !== "gardien" ? " · toi seul le vois" : ""}</span>`;
+    return `<span class="ar-role ${cls}">${roleEmb(p.role)} ${esc(R0.nom)}${me && p.role !== "gardien" ? " · toi seul le vois" : ""}</span>`;
   }
   const weaponTxt = (j) => (j?.arme ? `${esc(defOf(j.arme).nom?.split(" ")[0] || j.arme.def)} · portée ${defOf(j.arme).portee || 1}` : "Dague · portée 1");
   function renderTags() {
@@ -7930,7 +7995,7 @@ const Arena = (() => {
     const v = CF.table?.vue; if (!v || !st) return;
     const n = v.joueurs.length, split = v.mode === "classique" ? ROLE_SPLIT[n] : null;
     const down = (r) => v.joueurs.filter((j) => j.role === r && !j.vivant).length;
-    $a("tblBd").innerHTML = (split ? `<div class="ar-rl">${ROLE_ORDER.map((r, i) => split[i] ? `<span style="--rc:${ROLE_COL[r]}">${ico(r)} ${split[i]} ${esc(ROLES[r].nom)}${split[i] > 1 ? "s" : ""}${down(r) ? ` · ${down(r)} tombé${down(r) > 1 ? "s" : ""}` : ""}</span>` : "").join("")}</div>` : `<p class="note">${v.mode === "duel" ? "Duel" : "Trio"} : pas de rôle, chacun pour soi.</p>`) +
+    $a("tblBd").innerHTML = (split ? `<div class="ar-rl">${ROLE_ORDER.map((r, i) => split[i] ? `<span style="--rc:${ROLE_COL[r]}">${roleEmb(r)} ${split[i]} ${esc(ROLES[r].nom)}${split[i] > 1 ? "s" : ""}${down(r) ? ` · ${down(r)} tombé${down(r) > 1 ? "s" : ""}` : ""}</span>` : "").join("")}</div>` : `<p class="note">${v.mode === "duel" ? "Duel" : "Trio"} : pas de rôle, chacun pour soi.</p>`) +
       st.champs.map((p) => { const j = p.j || {}, b = cfBranch(p.branch); return `<button type="button" class="ar-pl ${p.alive ? "" : "dead"}" data-pid="${esc(p.id)}" style="--bc:${col(p.branch)}"><span class="ar-av" style="background-image:url(${persoImg(p) || ""})"></span><span><b>${esc(nm(p.id))}</b><em style="color:${p.role ? ROLE_COL[p.role] : "var(--mut)"}">${p.role ? esc(ROLES[p.role]?.nom || p.role) : split ? "rôle caché" : ""}</em>
         <small>${esc(persoName(p))} · <i>${esc(b.nom)}</i> : ${esc(CF_POUVOIR_COURT(p.branch))}</small><small>${p.pv}/${p.pvMax} PV · ${weaponTxt(j)}${(j.equip || []).length ? " · " + j.equip.map((c) => esc(defOf(c).nom)).join(", ") : ""}</small></span></button>`; }).join("");
     $a("tblBd").querySelectorAll("[data-pid]").forEach((el) => { el.onclick = () => showInfo(champ(el.dataset.pid)); });

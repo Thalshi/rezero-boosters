@@ -185,7 +185,7 @@ function viewAtelier() {
   if (param && has(param) && zDraftCard !== param) { zDraftCard = param; zDraft = null; }
   if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
   const cos = cosOf(save);
-  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length, true]], zAtelierTab);
+  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length + Object.keys(decosOf(save)).length, true]], zAtelierTab);
   if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
   const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, k === "deco" ? (DECO_BY_ID[r] ? r : null) : refCos(save, r)?.id]).filter(([, v]) => v));
@@ -213,14 +213,37 @@ function viewAtelier() {
     </div></div>`;
 }
 const sl0Note = () => `<p class="note">Une instance unique ne décore qu'une carte à la fois : la choisir ici la retire de l'autre carte. Les cosmétiques de compte s'utilisent sur autant de cartes que tu veux.</p>`;
-function zInventory() {
-  const cos = cosOf(save), used = usedInstances(save);
-  const items = [...Object.keys(cos.own).filter((id) => COS_BY_ID[id]).map((id) => ({ c: COS_BY_ID[id], kind: "Compte · réutilisable" })),
-    ...cos.inst.filter((it) => COS_BY_ID[it.c]).map((it) => ({ c: COS_BY_ID[it.c], kind: used[it.i] ? `Instance · sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique · libre" }))]
-    .filter((x) => !zInvSlot || x.c.slot === zInvSlot);
-  return `${seg("zInv", [["", "Tout"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
-    ${items.length ? `<div class="zgrid">${items.map((x) => zTile(x.c, "", ` · ${x.kind}`)).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
+// un objet seul, sur une carte vierge (silhouette) : on voit l'effet sans le confondre avec une de tes cartes
+function zGhost(c, deco) {
+  const dz = cosDeco(deco ? { deco: deco.id } : { [c.slot]: c.id }, true), x = deco || c;
+  return `<div class="kcw ${dz.wrap}" style="--w:150px;${dz.za ? `--za:${dz.za};` : ""}">${dz.orn}${dz.deco}<div class="kc r-${x.rar} ${dz.kc} kc-ghost" style="${dz.style}">
+    <div class="kc-h"><b>${esc(x.name)}</b><i>${LETTER[x.rar]}</i></div>
+    <div class="kc-a"><svg class="kc-sil" viewBox="0 0 100 120" aria-hidden="true"><circle cx="50" cy="44" r="20"/><path d="M10 124C12 90 30 74 50 74S88 90 90 124Z"/></svg>${dz.holo}</div>${dz.part}
+    <div class="kc-s">${deco ? "Décoration" : esc(COS_SLOT_LABEL[c.slot])}</div><div class="kc-p"><span>${RAR[x.rar].label}</span></div></div></div>`;
 }
+function zInventory() {
+  const cos = cosOf(save), used = usedInstances(save), mine = [...CARDS, ...SKINS].filter((c) => has(c.id));
+  const onCard = (ref, slot) => Object.entries(cos.designs).filter(([, d]) => d[slot] === ref).map(([cid]) => cid);
+  const items = [...DECOS.filter((d) => decosOf(save)[d.id]).map((d) => ({ deco: d, slot: "deco", ref: d.id, kind: "Décoration · réutilisable" })),
+    ...Object.keys(cos.own).filter((id) => COS_BY_ID[id]).map((id) => ({ c: COS_BY_ID[id], slot: COS_BY_ID[id].slot, ref: "a:" + id, kind: "Compte · réutilisable" })),
+    ...cos.inst.filter((it) => COS_BY_ID[it.c]).map((it) => ({ c: COS_BY_ID[it.c], slot: COS_BY_ID[it.c].slot, ref: "i:" + it.i, kind: used[it.i] ? `Instance · sur ${esc(nameOf(byId[used[it.i]]))}` : "Instance unique · libre" }))]
+    .filter((x) => !zInvSlot || x.slot === zInvSlot);
+  const tile = (x) => { const on = onCard(x.ref, x.slot), it = x.deco || x.c;
+    return `<div class="zt zt-inv r-${it.rar}"><div class="zt-prev">${zGhost(x.c, x.deco)}</div>
+      <div class="zt-t"><b>${esc(it.name)}</b><span style="color:${RAR[it.rar].color}">${RAR[it.rar].label}</span><small>${x.kind}${on.length && !x.ref.startsWith("i:") ? ` · sur ${on.length} carte${on.length > 1 ? "s" : ""}` : ""}</small></div>
+      ${mine.length ? `<div class="zt-as"><select class="in" aria-label="Carte à décorer" id="zas-${esc(x.ref)}">${mine.map((c) => `<option value="${c.id}" ${on.includes(c.id) ? "selected" : ""}>${esc(nameOf(c))} · ${esc(c.title)}${on.includes(c.id) ? " ✓" : ""}</option>`).join("")}</select>
+        <button class="btn sm gold" type="button" data-zas="${esc(x.ref)}" data-slot="${x.slot}">Mettre sur cette carte</button></div>` : `<p class="note">Ouvre un booster pour avoir une carte à décorer.</p>`}</div>`; };
+  return `${seg("zInv", [["", "Tout"], ["deco", "Décoration"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
+    ${items.length ? `<div class="zgrid">${items.map(tile).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
+}
+// poser un objet de l'inventaire sur une carte : il rejoint son design (le reste du design ne bouge pas)
+async function zAssign(ref, slot) {
+  const card = document.getElementById("zas-" + ref)?.value; if (!card) return;
+  const design = { ...(cosOf(save).designs[card] || {}), [slot]: ref };
+  try { await zCall("design", { card, design }, () => saveDesignS(save, card, design)); toast(`Posé sur ${nameOf(byId[card])}.`); draw(); }
+  catch (e) { toast(e.message); }
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-zas]"); if (b) zAssign(b.dataset.zas, b.dataset.slot); });
 
 // ===== Sanctuaire des Invocations =====
 // Le tirage est fait par le serveur AVANT l'animation ; l'ouverture ne fait que le révéler.

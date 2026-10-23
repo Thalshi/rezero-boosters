@@ -35,6 +35,37 @@ const ROLES = {
     conseil: "Le Gardien doit tomber en dernier : s'il tombe alors qu'un autre joueur que toi est encore en vie, ce sont les Briseurs qui gagnent. Aide-le parfois contre les Briseurs.",
   },
 };
+// emblèmes des rôles : métal, gemmes et reflets (dégradés SVG), à la place des icônes au trait
+let embN = 0;
+function roleEmb(r) {
+  const u = "re" + ++embN, M = (id, a, b, c) => `<linearGradient id="${u}${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".5" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
+  const defs = `<defs>${M("or", "#fff6c8", "#e8b84a", "#7a4a10")}${M("ac", "#f4fbff", "#8fb4c8", "#2a4258")}${M("rg", "#ff9aa8", "#c8102e", "#4a0410")}
+    <radialGradient id="${u}gm"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="var(--gm1)"/><stop offset="1" stop-color="var(--gm2)"/></radialGradient>
+    <linearGradient id="${u}in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a5a"/><stop offset="1" stop-color="#120c22"/></linearGradient>
+    <filter id="${u}sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#000" flood-opacity=".7"/></filter></defs>`;
+  const shield = "M32 6L54 13V30C54 44 44 54 32 59C20 54 10 44 10 30V13Z";
+  const body = {
+    gardien: `<g filter="url(#${u}sh)"><path d="${shield}" fill="url(#${u}or)"/><path d="M32 11L49 16.5V30C49 41 41 49.5 32 53.5C23 49.5 15 41 15 30V16.5Z" fill="url(#${u}in)"/>
+      <path d="M19 33L23 22L28 28L32 19L36 28L41 22L45 33Z" fill="url(#${u}or)" stroke="#5a3a08" stroke-width=".8" stroke-linejoin="round"/><rect x="19" y="33" width="26" height="4" rx="1.5" fill="url(#${u}or)" stroke="#5a3a08" stroke-width=".8"/>
+      <circle cx="32" cy="35" r="2.4" fill="url(#${u}gm)" style="--gm1:#ff3a5a;--gm2:#6a0418"/><circle cx="24" cy="35" r="1.5" fill="url(#${u}gm)" style="--gm1:#3ad0ff;--gm2:#0a3a6a"/><circle cx="40" cy="35" r="1.5" fill="url(#${u}gm)" style="--gm1:#3ad0ff;--gm2:#0a3a6a"/>
+      <circle cx="32" cy="19" r="1.6" fill="#fff6c8"/><circle cx="23" cy="22" r="1.2" fill="#fff6c8"/><circle cx="41" cy="22" r="1.2" fill="#fff6c8"/>
+      <path d="M32 41V49M28 45H36" stroke="#e8b84a" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></g>
+      <path d="M14 15L32 9V12L17 17Z" fill="#fff" opacity=".35"/>`,
+    sentinelle: `<g filter="url(#${u}sh)"><path d="M10 26C4 22 3 15 5 10C9 16 12 18 16 19Z M54 26C60 22 61 15 59 10C55 16 52 18 48 19Z" fill="url(#${u}ac)"/>
+      <path d="${shield}" fill="url(#${u}ac)"/><path d="M32 11L49 16.5V30C49 41 41 49.5 32 53.5C23 49.5 15 41 15 30V16.5Z" fill="#0c2236"/>
+      <path d="M17 31C21 24 26 21 32 21S43 24 47 31C43 38 38 41 32 41S21 38 17 31Z" fill="#e8f6ff" stroke="#8fe3ff" stroke-width="1"/>
+      <circle cx="32" cy="31" r="7" fill="url(#${u}gm)" style="--gm1:#2ee6ff;--gm2:#0a4a7a"/><circle cx="32" cy="31" r="2.8" fill="#04121c"/><circle cx="34.5" cy="28.5" r="1.4" fill="#fff"/>
+      <path d="M24 46H40M27 49.5H37" stroke="#8fe3ff" stroke-width="1.4" stroke-linecap="round" opacity=".7"/></g>
+      <path d="M14 15L32 9V12L17 17Z" fill="#fff" opacity=".45"/>`,
+    briseur: `<g filter="url(#${u}sh)"><path d="M32 6L54 13V30C54 44 44 54 32 59Z" fill="url(#${u}rg)" transform="translate(2.5 1) rotate(4 32 32)"/><path d="M32 6L10 13V30C10 44 20 54 32 59Z" fill="url(#${u}rg)" transform="translate(-2.5 0) rotate(-4 32 32)"/>
+      <path d="M32 6L29 16L35 24L28 33L34 42L30 59" fill="none" stroke="#120408" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M44 9L20 50" stroke="#2a1018" stroke-width="5" stroke-linecap="round"/><path d="M45.5 7.5L22 48" stroke="url(#${u}ac)" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M17 47L25 52M21 50L17.5 56" stroke="#e8b84a" stroke-width="3" stroke-linecap="round"/><circle cx="16.5" cy="57" r="2.2" fill="url(#${u}gm)" style="--gm1:#ff3a5a;--gm2:#6a0418"/>
+      <circle cx="30" cy="28" r="9" fill="#ff2e4d" opacity=".18"/></g>
+      <path d="M13 15L30 9.5V12L16 17Z" fill="#fff" opacity=".3"/>`,
+  }[r];
+  return body ? `<svg class="role-emb" viewBox="0 0 64 64" aria-hidden="true">${defs}${body}</svg>` : ROLES[r]?.icon || "";
+}
 // deux camps, sans Errant (rôle retiré : il gagnait surtout par hasard) ; mêmes valeurs que worker/confront/config.mjs
 const ROLE_ORDER = ["gardien", "sentinelle", "briseur"];
 const ROLE_SPLIT = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
@@ -43,7 +74,7 @@ const ROLE_BONUS = { 4: "Gardien : 2 cartes de plus au départ, Sentinelle : 1",
 function roleCard(r, opts = {}) {
   const R = ROLES[r];
   return `<article class="rl-card ${opts.mine ? "mine" : ""}" style="--rc:${R.col}">
-    <div class="rl-top"><span class="rl-ic">${R.icon}</span><div><p class="rl-k">${R.vu}</p><h3>${opts.mine ? `Tu es ${R.nom}` : R.nom}</h3></div></div>
+    <div class="rl-top"><span class="rl-ic">${roleEmb(r)}</span><div><p class="rl-k">${R.vu}</p><h3>${opts.mine ? `Tu es ${R.nom}` : R.nom}</h3></div></div>
     <p class="rl-but"><b>But</b> ${R.but}</p>
     <p><b>Camp</b> ${R.camp}</p>${opts.short ? "" : `<p><b>À savoir</b> ${R.plus}</p>`}
     <p class="rl-tip">${R.conseil}</p></article>`;

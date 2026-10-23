@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-10-23 — Cartes de persos nettoyées (12e mise en ligne)
+- Demande de Reichi : pas de texte écrit sur les cartes, jamais la même personne deux fois sur une image, des visuels nets.
+- Les 58 portraits (+ deux variantes de Rayzo) redécoupés depuis les fiches d'origine : citations, titres et étiquettes retirés (recadrage ou effacement), vues en double supprimées (stalk, kai, seb, sasori, rayzo).
+- Netteté : 516 × 720 au lieu de 344 × 480 ; les petites sources passent par Real-ESRGAN (anime). Sources : assets/persos/ ; sur le site, portraits en fichiers à part (public/persos, page de 3,4 à 2,2 Mo).
+- À vérifier avec Reichi : la carte byakko utilise un dessin d'une fiche titrée « KAI ».
+
 ## 2026-10-23 — L'Errant revient (11e mise en ligne)
 - Remarque de Reichi : un bonus visible (PV, cartes en main) trahit un rôle secret. Seul le Gardien (rôle public) reçoit désormais des bonus ; ceux des Sentinelles, Briseurs et de l'Errant sont retirés.
 - L'Errant a deux pouvoirs invisibles : coup de grâce (s'il élimine lui-même le Gardien, il gagne seul) et double vie, idée de Reichi (à partir de 5 joueurs : faux rôle Sentinelle ou Briseur à sa première mort, retour des enfers avec 2 PV et 3 cartes quand il reste 3 joueurs ou que la partie allait finir sans lui).

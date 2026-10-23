@@ -77,7 +77,7 @@ try {
         } else { await tap(page, play.carte); await page.waitForTimeout(400); await tap(page, play.carte); }
         await page.waitForTimeout(1500);
         const after = (await A.api("confront/state", { gid })).vue;
-        t.check(`carte jouée depuis la main (${def})`, after.journal.some((e) => e.seq > seq0 && e.type === "joue" && e.pid === after.moi), { def, cible: play.cible, hint: await page.locator("#ar-hint").textContent(), sel: await page.evaluate(() => Arena.st.sel), last: after.journal.slice(-5).map((e) => e.seq + e.type), seq0 });
+        t.check(`carte jouée depuis la main (${def})`, after.journal.some((e) => e.seq > seq0 && e.type === "joue" && e.pid === after.moi), { def, cible: play.cible, hint: await page.locator("#ar-hint").textContent(), toast: await page.locator("#toast").textContent().catch(() => ""), sel: await page.evaluate(() => Arena.st.sel), last: after.journal.slice(-5).map((e) => e.seq + e.type), seq0 });
         await page.screenshot({ path: join(OUT, `arene-${label}-3-joue.png`) });
       }
       // fin du tour (en défaussant si besoin)

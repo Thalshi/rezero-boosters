@@ -1,6 +1,6 @@
 # Re Zéro : décisions en attente de ton accord
 
-Chaque point a une valeur **provisoire** déjà en place, réglable sans réécrire le jeu (une constante dans `src/game.js`, puis `python3 build.py`). Rien de cela n'est en production.
+Chaque point a une valeur **provisoire** déjà en place, réglable sans réécrire le jeu (une constante dans `src/game.js`, puis `python3 build.py`). Ces valeurs provisoires sont en production depuis le 22/10/2026 ; simulation globale : `node tests/simulation-economie-globale.mjs` (avec `GAINS=1` pour les options de gains).
 Légende : 🔴 bloque une mise en production · 🟠 à trancher avant le lancement public · 🟢 peut attendre
 
 ## Économie des boosters

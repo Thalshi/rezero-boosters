@@ -484,8 +484,7 @@ let bugs = null;
 function viewAdmin() {
   if (!IS_ADMIN) return `<div class="wrap page">${empty("Cette page est réservée à Billy.")}</div>`;
   const ids = [...new Set([...shared.players.map((p) => p.uid), ...Object.keys(CONFIG.progress), ...Object.keys(CONFIG.extra)])];
-  const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
-  return `<div class="wrap page" style="max-width:900px">${head("Admin", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
+    return `<div class="wrap page" style="max-width:900px">${head("Admin", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
     <div class="card sec"><h3>Créateur</h3><p class="note">Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou crée des cosmétiques. Publié tout de suite.</p><button class="btn gold" type="button" data-nav="createur">Ouvrir le Créateur</button></div>
     <div class="card sec"><h3>Confrontation : branches des cartes</h3><p class="note">Chaque carte a une branche (son pouvoir en partie), avec une variante possible selon la rareté. Une proposition est en place : à toi de l'ajuster.</p><button class="btn" type="button" data-nav="branches">Régler les branches</button></div>
@@ -495,7 +494,7 @@ function viewAdmin() {
     <section class="sec"><h2>Joueurs · ${ids.length}</h2>${ids.length ? `<div class="adm-list">${ids.map((uid) => `<div class="adm-row">${who(uid)}
         <select aria-label="Épisode atteint" data-prog="${uid}"><option value="" ${CONFIG.progress[uid] == null ? "selected" : ""}>Par défaut (${epLabel(CONFIG.def)})</option>${epOptions(CONFIG.progress[uid])}</select>
         <button class="btn sm" type="button" data-bonus="${uid}">Bonus · ${(CONFIG.extra[uid] || []).length}</button></div>`).join("")}</div>` : `<p class="note">Les joueurs apparaissent ici dès qu'ils ouvrent l'app.</p>`}</section>
-    <section class="sec"><h2>Persos par épisode</h2><div class="adm-list">${chars.map(([k, p]) => `<div class="adm-row"><span class="adm-name"><b>${esc(p.name)}${k === "monoco2" ? " (singe)" : ""}</b><span>${FACTIONS[p.fac].label}</span></span><select aria-label="Épisode de ${esc(p.name)}" data-ep="${k}">${epOptions(epOf(k), true)}</select></div>`).join("")}</div></section>
+    <section class="sec"><h2>Persos par épisode</h2><p class="note">Touche un perso pour voir toutes ses cartes et changer son épisode.</p>${crEps().map((e) => { const l = Object.keys(PEOPLE).filter((k) => !k.startsWith("__") && epOfCfg(CONFIG, k) === e); return `<div class="cr-grp"><h3>${epLabel(e)} <small>${l.length}</small></h3><div class="cr-hds">${l.map((k) => crHead(k).replace('data-cr-p="', 'data-adm-p="')).join("")}</div></div>`; }).join("")}</section>
   </div>`;
 }
 // ===== Dev : outils techniques (Reichi) =====

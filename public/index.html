@@ -2339,6 +2339,31 @@ svg.dk .fx-sway2 { animation: fx-sway2 1.8s ease-in-out infinite alternate; }
 @keyframes fx-tendril { from { transform: rotate(-9deg); } to { transform: rotate(11deg); } }
 @keyframes fx-wind { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -166; } }
 @keyframes fx-sway2 { from { transform: rotate(-24deg) translateX(-3px); } to { transform: rotate(24deg) translateX(3px); } }
+.cr-eps { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 4px; }
+.cr-grp { margin-top: 16px; } .cr-grp h3 { margin: 0 0 10px; } .cr-grp h3 small, .cr-sh-h small { color: var(--mut, #b8aecb); font-weight: 500; }
+.cr-hds { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; }
+.cr-hd { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 14px; border: 1px solid #ffffff14; background: #120d22d9; color: var(--fg); cursor: pointer; transition: transform .15s, border-color .15s; }
+.cr-hd:hover { transform: translateY(-3px); border-color: var(--fc); } .cr-hd.on { border-color: var(--gold, #e8c77e); box-shadow: 0 0 0 2px #e8c77e66; }
+.cr-hd b { font-size: 13px; text-align: center; line-height: 1.2; } .cr-hd small { font-size: 11px; color: var(--mut, #b8aecb); } .cr-hd .cr-b { position: absolute; top: 6px; right: 6px; }
+.crh { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; background: var(--raise, #241a3e); }
+.crh .layer, .crh .photo { position: absolute; inset: 0; background-size: cover; background-position: 50% 18%; }
+.cr-hd-img { width: 72px; height: 72px; border-radius: 50%; padding: 3px; background: conic-gradient(var(--fc), #ffffff22, var(--fc)); }
+.cr-sheet { margin-top: 14px; } .cr-sh-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.cr-sh-head { display: flex; align-items: center; gap: 18px; margin: 14px 0; padding: 18px; border-radius: 18px; background: #120d22e6; border: 1px solid #ffffff18; touch-action: pan-y; }
+.cr-sh-img { flex: none; width: 116px; height: 116px; border-radius: 50%; padding: 4px; background: conic-gradient(#e8c77e, #6a4a14, #e8c77e); }
+.cr-sh-t { flex: 1; min-width: 0; } .cr-sh-t h2 { margin: 0; } .cr-sh-t .row { flex-wrap: wrap; gap: 8px; align-items: flex-end; } .cr-sh-ep { margin: 0; }
+.cr-nav { flex: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid #ffffff22; background: #ffffff0d; color: #fff; font-size: 26px; cursor: pointer; }
+.cr-nav:hover { background: #ffffff22; }
+.cr-car { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 4px 16px; } .cr-car > * { scroll-snap-align: start; flex: none; }
+.cr-strip { display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px; margin-top: 10px; border-top: 1px solid #ffffff14; } .cr-strip .cr-hd { flex: none; width: 92px; padding: 8px 4px; } .cr-strip .cr-hd-img { width: 54px; height: 54px; }
+@media (max-width: 600px) { .cr-sh-head { flex-wrap: wrap; justify-content: center; text-align: center; } .cr-sh-t .row { justify-content: center; } .cr-nav { display: none; } .cr-hds { grid-template-columns: repeat(3, 1fr); } }
+.cri-drop { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 34px 20px; border: 2px dashed #ffffff30; border-radius: 16px; background: #0b0916a8; margin: 14px 0; }
+.cri-drop.on { border-color: var(--gold, #e8c77e); background: #2a1d0ca8; } .cri-drop small { color: var(--mut, #b8aecb); max-width: 640px; }
+.cri-bar { justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.cri-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 14px; }
+.cri-it { display: flex; gap: 16px; padding: 14px; border-radius: 14px; background: #120d22e6; border: 1px solid #ffffff18; } .cri-it.ko { border-color: #ff4d5e88; } .cri-it.ok { border-color: #3fdc8f88; }
+.cri-prev { flex: none; } .cri-f { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; } .cri-f .field { margin: 0; } .cri-file { margin: 0; font: 600 12px var(--mono, monospace); color: var(--mut, #b8aecb); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 560px) { .cri-grid { grid-template-columns: 1fr; } .cri-it { flex-direction: column; align-items: center; } .cri-f { width: 100%; } }
 /* décorations d'avatar : couche derrière la photo, couche devant */
 .avd > svg.dk.back, .av-btn > svg.dk.back, .pf-av > svg.dk.back, .zd-av > svg.dk.back { z-index: 0; }
 .avd > img, .avd > .av, .zd-av > img, .zd-av > .zd-ini, .pf-av > img, .pf-av > span:not(.x) { position: relative; z-index: 1; }
@@ -2683,6 +2708,27 @@ const VARIANTS = [
   { id: "billy-fa",  who: "billy",  img: "billyFA",  fa: true, title: "Le Créateur",   rar: "m", pos: "50% 30%", zoom: 1 },
   { id: "reichi-fa", who: "reichi", img: "reichiFA", fa: true, title: "Lame écarlate", rar: "m", pos: "50% 20%", zoom: 1 },
   { id: "teo-6",   who: "teo",   title: "Voit tout",          rar: "m",  pos: "62% 40%", zoom: 1.5, glint: [60, 30], tint: "#b26bff" },
+  // illustrations de Billy (octobre 2026) : une carte par visuel, plus rare que la carte de base
+  { id: "unbeaten-b1", who: "unbeaten", img: "unbeaten2", title: "Champ des vaincus", rar: "m" },
+  { id: "irsy-b2", who: "irsy", img: "irsy2", title: "Bibliothèque interdite", rar: "m" },
+  { id: "seb-b3", who: "seb", img: "seb2", title: "Ami des bêtes", rar: "r" },
+  { id: "sultran-b4", who: "sultran", img: "sultran2", title: "Veilleur du rempart", rar: "m" },
+  { id: "sultran-b5", who: "sultran", img: "sultran3", title: "Le Vide s'ouvre", rar: "m" },
+  { id: "sultran-b6", who: "sultran", img: "sultran4", title: "Main du néant", rar: "m" },
+  { id: "sultran-b7", who: "sultran", img: "sultran5", title: "Trône du Vide", rar: "m" },
+  { id: "explosion-b8", who: "explosion", img: "explosion2", title: "Mèche allumée", rar: "pc" },
+  { id: "explosion-b9", who: "explosion", img: "explosion4", title: "Tir de barrage", rar: "r" },
+  { id: "explosion-b10", who: "explosion", img: "explosion3", title: "Boulet humain", rar: "e" },
+  { id: "explosion-b11", who: "explosion", img: "explosion5", title: "Rien ne l'arrête", rar: "l" },
+  { id: "ed-b12", who: "ed", img: "ed2", title: "Le Parrain", rar: "e" },
+  { id: "goldor-b13", who: "goldor", img: "goldor2", title: "Colosse des cascades", rar: "l" },
+  { id: "goldor-b14", who: "goldor", img: "goldor3", title: "Gardien des îles", rar: "m" },
+  { id: "rorkantarak-b15", who: "rorkantarak", img: "rork2", title: "Éclipse", rar: "l" },
+  { id: "rorkantarak-b16", who: "rorkantarak", img: "rork3", title: "Lune de sang", rar: "m" },
+  { id: "reichi-b17", who: "reichi", img: "reichi2", title: "Crépuscule sur le port", rar: "r" },
+  { id: "reichi-b18", who: "reichi", img: "reichi3", title: "Sous l'averse", rar: "e" },
+  { id: "reichi-b19", who: "reichi", img: "reichi4", title: "Ruelle écarlate", rar: "l" },
+  { id: "reichi-b20", who: "reichi", img: "reichi5", title: "Au-dessus de la ville", rar: "m" },
 ];
 const CARDS = [
   ...Object.entries(PEOPLE).filter(([, p]) => p.rar).map(([id, p]) => ({ id, who: id, title: p.tag, rar: p.rar })),
@@ -3905,6 +3951,26 @@ const packIcon = (p) => PACK_ICON[p.id] || PACK_ICON[p.base] || (p.daily ? "sole
 
 // Images des persos : ajoute une entrée ART.<id> (data:image/...) et la carte l'utilise à la place de l'emblème.
 const PHOTO = {
+  reichi5: "/persos/reichi5.jpg",
+  rork3: "/persos/rork3.jpg",
+  rork2: "/persos/rork2.jpg",
+  goldor3: "/persos/goldor3.jpg",
+  explosion5: "/persos/explosion5.jpg",
+  explosion4: "/persos/explosion4.jpg",
+  explosion3: "/persos/explosion3.jpg",
+  reichi4: "/persos/reichi4.jpg",
+  reichi3: "/persos/reichi3.jpg",
+  reichi2: "/persos/reichi2.jpg",
+  goldor2: "/persos/goldor2.jpg",
+  ed2: "/persos/ed2.jpg",
+  sultran5: "/persos/sultran5.jpg",
+  sultran4: "/persos/sultran4.jpg",
+  explosion2: "/persos/explosion2.jpg",
+  sultran3: "/persos/sultran3.jpg",
+  sultran2: "/persos/sultran2.jpg",
+  seb2: "/persos/seb2.jpg",
+  irsy2: "/persos/irsy2.jpg",
+  unbeaten2: "/persos/unbeaten2.jpg",
   sasori: "/persos/sasori.jpg",
   seb: "/persos/seb.jpg",
   shiro: "/persos/shiro.jpg",
@@ -4727,7 +4793,7 @@ const hashOf = (s) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0
 const hueOf = (who) => hashOf(who) % 360;
 const POW = { c: [52, 9], pc: [64, 9], r: [76, 9], e: [86, 7], l: [93, 5], m: [97, 3] }, AURA = { c: [38, 6], pc: [44, 6], r: [51, 6], e: [58, 7], l: [66, 7], m: [80, 7] };
 const statsOf = (c) => { const h = hashOf(c.id); return [POW[c.rar][0] + (h % POW[c.rar][1]), AURA[c.rar][0] + ((h >> 5) % AURA[c.rar][1])]; };
-const imgKey = (c) => (c.img && ART[c.img] ? c.img : ART[c.who] ? c.who : PHOTO[c.who] ? c.who : null);
+const imgKey = (c) => (c.img && (ART[c.img] || PHOTO[c.img]) ? c.img : ART[c.who] ? c.who : PHOTO[c.who] ? c.who : null);
 function artIn(c) {
   const k = imgKey(c);
   if (!k) return `<div class="mono-a">${initials(PEOPLE[c.who].name)}</div>`;
@@ -5643,8 +5709,7 @@ let bugs = null;
 function viewAdmin() {
   if (!IS_ADMIN) return `<div class="wrap page">${empty("Cette page est réservée à Billy.")}</div>`;
   const ids = [...new Set([...shared.players.map((p) => p.uid), ...Object.keys(CONFIG.progress), ...Object.keys(CONFIG.extra)])];
-  const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
-  return `<div class="wrap page" style="max-width:900px">${head("Admin", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
+    return `<div class="wrap page" style="max-width:900px">${head("Admin", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
     <div class="card sec"><h3>Créateur</h3><p class="note">Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou crée des cosmétiques. Publié tout de suite.</p><button class="btn gold" type="button" data-nav="createur">Ouvrir le Créateur</button></div>
     <div class="card sec"><h3>Confrontation : branches des cartes</h3><p class="note">Chaque carte a une branche (son pouvoir en partie), avec une variante possible selon la rareté. Une proposition est en place : à toi de l'ajuster.</p><button class="btn" type="button" data-nav="branches">Régler les branches</button></div>
@@ -5654,7 +5719,7 @@ function viewAdmin() {
     <section class="sec"><h2>Joueurs · ${ids.length}</h2>${ids.length ? `<div class="adm-list">${ids.map((uid) => `<div class="adm-row">${who(uid)}
         <select aria-label="Épisode atteint" data-prog="${uid}"><option value="" ${CONFIG.progress[uid] == null ? "selected" : ""}>Par défaut (${epLabel(CONFIG.def)})</option>${epOptions(CONFIG.progress[uid])}</select>
         <button class="btn sm" type="button" data-bonus="${uid}">Bonus · ${(CONFIG.extra[uid] || []).length}</button></div>`).join("")}</div>` : `<p class="note">Les joueurs apparaissent ici dès qu'ils ouvrent l'app.</p>`}</section>
-    <section class="sec"><h2>Persos par épisode</h2><div class="adm-list">${chars.map(([k, p]) => `<div class="adm-row"><span class="adm-name"><b>${esc(p.name)}${k === "monoco2" ? " (singe)" : ""}</b><span>${FACTIONS[p.fac].label}</span></span><select aria-label="Épisode de ${esc(p.name)}" data-ep="${k}">${epOptions(epOf(k), true)}</select></div>`).join("")}</div></section>
+    <section class="sec"><h2>Persos par épisode</h2><p class="note">Touche un perso pour voir toutes ses cartes et changer son épisode.</p>${crEps().map((e) => { const l = Object.keys(PEOPLE).filter((k) => !k.startsWith("__") && epOfCfg(CONFIG, k) === e); return `<div class="cr-grp"><h3>${epLabel(e)} <small>${l.length}</small></h3><div class="cr-hds">${l.map((k) => crHead(k).replace('data-cr-p="', 'data-adm-p="')).join("")}</div></div>`; }).join("")}</section>
   </div>`;
 }
 // ===== Dev : outils techniques (Reichi) =====
@@ -7604,19 +7669,17 @@ function viewCreateur() {
   if (!IS_ADMIN && !IS_DEV) return `<div class="wrap page">${empty("Cette page est réservée à l'admin et au dev.")}</div>`;
   if (!SRV) return `<div class="wrap page">${empty("Le Créateur s'utilise sur le site du QG, connecté avec Discord.")}</div>`;
   if (CR.edit) return crEditor();
-  const tabs = seg("crTab", [["persos", "Persos"], ["cartes", "Cartes"], ["cos", "Cosmétiques"], ["log", "Historique"]], CR.tab);
+  const tabs = seg("crTab", [["persos", "Persos et cartes"], ["import", "Import en masse"], ["cos", "Cosmétiques"], ["log", "Historique"]], CR.tab);
   let body = "";
   if (CR.tab === "persos") {
-    const q = CR.q.trim().toLowerCase(), list = Object.entries(PEOPLE).filter(([k, p]) => !k.startsWith("__") && (!q || p.name.toLowerCase().includes(q)))
-      .sort((a, b) => epOfCfg(CONFIG, a[0]) - epOfCfg(CONFIG, b[0]) || a[1].name.localeCompare(b[1].name));
-    body = `<div class="row"><button class="btn gold" type="button" data-cr-new="perso">+ Nouveau perso</button><input class="in cr-q" type="search" id="crQ" placeholder="Chercher un perso" value="${esc(CR.q)}"></div>
-      <div class="cr-list">${list.map(([k, p]) => { const c = byId[k] || ALL_CARDS.find((x) => x.who === k);
-        return `<button type="button" class="cr-row" data-cr-edit="perso" data-id="${k}">${c ? thumb(c) : `<span class="th"></span>`}<span class="cr-n"><b>${esc(p.name)}</b><small>${FACTIONS[p.fac]?.label || ""} · ${epLabel(epOfCfg(CONFIG, k))}</small></span>${crBadge("perso", k)}</button>`; }).join("")}</div>`;
+    body = CR.p && PEOPLE[CR.p] ? crSheet(CR.p) : crBoard();
   } else if (CR.tab === "cartes") {
     const who = CR.who && PEOPLE[CR.who] ? CR.who : "", cards = who ? ALL_CARDS.filter((c) => c.who === who).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank) : [];
     body = `<div class="row"><label class="field">Perso <select id="crWho"><option value="">Choisir un perso…</option>${Object.entries(PEOPLE).filter(([k]) => !k.startsWith("__")).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k, p]) => `<option value="${k}" ${k === who ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
       ${who ? `<button class="btn gold" type="button" data-cr-new="carte">+ Nouvelle carte de ${esc(PEOPLE[who].name)}</button>` : ""}</div>
       ${who ? `<div class="cr-cards">${cards.map((c) => `<button type="button" class="cr-card" data-cr-edit="carte" data-id="${c.id}">${cardHTML(c, {})}${crBadge("carte", c.id)}</button>`).join("")}</div>` : `<p class="note">Choisis un perso pour voir ses cartes, en ajouter une (autre rareté, autre image) ou en retoucher une.</p>`}`;
+  } else if (CR.tab === "import") {
+    body = viewImport();
   } else if (CR.tab === "cos") {
     body = `<div class="row"><button class="btn gold" type="button" data-cr-new="cos">+ Nouveau cosmétique</button></div>
       <div class="zgrid">${COSMETICS.filter((c) => !c.id.startsWith("__")).map((c) => `<button type="button" class="cr-cos" data-cr-edit="cos" data-id="${c.id}">${zTile(c, "", c.only ? " · Sanctuaire" : "")}${crBadge("cos", c.id)}</button>`).join("")}</div>`;
@@ -7755,6 +7818,195 @@ document.addEventListener("change", async (e) => {
     draw();
   }
 });
+
+// ===== Import en masse : plusieurs visuels d'un coup → une carte chacun, à peaufiner ensuite =====
+// Chaque image est recadrée au format carte (516 × 720) dans le navigateur ; on choisit le perso (deviné
+// d'après le nom du fichier), le titre, la rareté, le cadrage et le cadre dessiné à retirer, puis tout part
+// d'un coup. Les cartes créées se retouchent ensuite dans « Persos et cartes », comme les autres.
+const CRI = { items: [], busy: false, n: 0 };
+const CRI_W = 516, CRI_H = 720;
+const criNorm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+// le perso dont le nom (ou l'identifiant) apparaît dans le nom du fichier, le plus long d'abord
+function criGuess(file) {
+  const f = criNorm(file.replace(/\.[a-z0-9]+$/i, ""));
+  const cand = Object.entries(PEOPLE).filter(([k]) => !k.startsWith("__")).flatMap(([k, p]) => [[k, criNorm(k)], [k, criNorm(p.name)]]).filter(([, n]) => n.length >= 2 && f.includes(n));
+  return cand.sort((a, b) => b[1].length - a[1].length)[0]?.[0] || "";
+}
+// rareté proposée : un cran au-dessus de la carte la plus rare du perso (Mythique au plus)
+function criRar(who, skip) {
+  if (!who || !PEOPLE[who]) return "r";
+  const top = Math.max(0, ...ALL_CARDS.filter((c) => c.who === who && !c.skin).map((c) => RAR[c.rar].rank), ...CRI.items.filter((x) => x.who === who && x !== skip).map((x) => RAR[x.rar].rank));
+  return RANKS[Math.min(RANKS.length - 1, top + 1)] || "m";
+}
+function criTitle(who) { const n = ALL_CARDS.filter((c) => c.who === who && !c.skin).length + CRI.items.filter((x) => x.who === who).length; return `Illustration ${n + 1}`; }
+// le recadrage : on retire le cadre (en % de chaque bord), puis on garde le format carte autour du point choisi
+function criRender(it) {
+  const im = it.im, fr = it.frame / 100, x0 = im.width * fr, y0 = im.height * fr, w = im.width - 2 * x0, h = im.height - 2 * y0;
+  let cw = w, ch = w * CRI_H / CRI_W; if (ch > h) { ch = h; cw = h * CRI_W / CRI_H; }
+  const sx = x0 + (w - cw) * it.fx / 100, sy = y0 + (h - ch) * it.fy / 100;
+  const cv = document.createElement("canvas"); cv.width = CRI_W; cv.height = CRI_H;
+  const g = cv.getContext("2d"); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high"; g.drawImage(im, sx, sy, cw, ch, 0, 0, CRI_W, CRI_H);
+  let q = 0.9, u = cv.toDataURL("image/jpeg", q); while (u.length > 380000 && q > 0.4) { q -= 0.08; u = cv.toDataURL("image/jpeg", q); }
+  it.out = u; it.small = cw < CRI_W;
+}
+function criStyle() {
+  let st = document.getElementById("crea-imp"); if (!st) { st = document.createElement("style"); st.id = "crea-imp"; document.head.appendChild(st); }
+  st.textContent = CRI.items.map((x) => `.who-__imp${x.k} .layer{background-image:url(${x.out})}`).join("");
+}
+function criCard(it) {
+  const k = "__imp" + it.k; ART[k] = it.out;
+  const who = it.who && PEOPLE[it.who] ? it.who : "__impw", keep = PEOPLE[who];
+  if (who === "__impw") PEOPLE[who] = { name: it.newName || "Nouveau perso", fac: it.fac || "irl", color: "#5ab0ff", kanji: "" };
+  try { return cardHTML({ id: k, who, img: k, title: it.title || "Titre", rar: it.rar, pos: "50% 50%", zoom: 1 }, { w: 190 }); }
+  finally { if (who === "__impw") { if (keep) PEOPLE[who] = keep; else delete PEOPLE[who]; } }
+}
+function criItem(it, i) {
+  const people = Object.entries(PEOPLE).filter(([k]) => !k.startsWith("__")).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  const rng = (f, label, v, max = 100) => `<label class="field">${label} <b>${v}${f === "frame" ? " %" : "%"}</b><input type="range" min="0" max="${max}" step="${f === "frame" ? 0.5 : 1}" data-cri="${f}" data-i="${i}" value="${v}"></label>`;
+  return `<div class="cri-it ${it.status === "ok" ? "ok" : it.status ? "ko" : ""}" data-cri-box="${i}">
+    <div class="cri-prev" id="criPrev${i}">${criCard(it)}</div>
+    <div class="cri-f"><p class="cri-file">${esc(it.name)}${it.small ? ` <span class="cr-b mod" title="Image plus petite que la carte : elle sera agrandie, donc un peu moins nette">Petite image</span>` : ""}</p>
+      <label class="field">Perso <select data-cri="who" data-i="${i}"><option value="">Choisir…</option><option value="__new" ${it.who === "__new" ? "selected" : ""}>+ Nouveau perso</option>${people.map(([k, p]) => `<option value="${k}" ${k === it.who ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select></label>
+      ${it.who === "__new" ? `<div class="cr-2"><label class="field">Nom <input class="in" maxlength="30" data-cri="newName" data-i="${i}" value="${esc(it.newName || "")}"></label><label class="field">Faction <select data-cri="fac" data-i="${i}">${crOpts(Object.entries(FACTIONS).map(([k, v]) => [k, v.label]), it.fac)}</select></label></div>` : ""}
+      <div class="cr-2"><label class="field">Titre <input class="in" maxlength="40" data-cri="title" data-i="${i}" value="${esc(it.title)}"></label><label class="field">Rareté <select data-cri="rar" data-i="${i}">${crOpts(crRar(), it.rar)}</select></label></div>
+      <div class="cr-2">${rng("fx", "Cadrage horizontal", it.fx)}${rng("fy", "Cadrage vertical", it.fy)}</div>
+      ${rng("frame", "Cadre dessiné à retirer", it.frame, 12)}
+      <div class="row"><button class="btn sm" type="button" data-cri-del="${i}">Retirer</button>${it.status && it.status !== "ok" ? `<span class="note" style="color:var(--abad,#ff4d5e)">${esc(it.status)}</span>` : it.status === "ok" ? `<span class="note">Créée ✓</span>` : ""}</div></div></div>`;
+}
+function viewImport() {
+  const n = CRI.items.length, ready = CRI.items.filter((x) => x.status !== "ok" && x.who && x.title && (x.who !== "__new" || x.newName)).length;
+  return `<div class="cri-drop" id="criDrop"><input type="file" accept="image/*" multiple id="criFiles" hidden>
+      <b>Dépose ici tes visuels, autant que tu veux</b><button class="btn sm gold" type="button" data-cri-pick>ou choisis des fichiers</button>
+      <small>Chaque image devient une carte. Le perso est deviné d'après le nom du fichier (ex. <i>reichi-pluie.webp</i>), la rareté est proposée un cran au-dessus de ses cartes. Tout se modifie ici avant de créer, puis dans « Persos et cartes ».</small></div>
+    ${n ? `<div class="row cri-bar"><label class="zopt-line"><input type="checkbox" id="criFrameAll" ${CRI.frameAll ? "checked" : ""}> Tous ont un cadre dessiné (retirer 5 %)</label>
+      <button class="btn gold big" type="button" data-cri-go ${ready && !CRI.busy ? "" : "disabled"}>${CRI.busy ? "Création…" : `Créer ${ready} carte${ready > 1 ? "s" : ""}`}</button>
+      <button class="btn" type="button" data-cri-clear>Tout vider</button></div>
+      <div class="cri-grid">${CRI.items.map(criItem).join("")}</div>` : ""}`;
+}
+async function criAdd(files) {
+  const list = [...files].filter((f) => /^image\//.test(f.type));
+  for (const f of list) {
+    try {
+      const url = await new Promise((ok, ko) => { const rd = new FileReader(); rd.onload = () => ok(rd.result); rd.onerror = ko; rd.readAsDataURL(f); });
+      const im = await new Promise((ok, ko) => { const x = new Image(); x.onload = () => ok(x); x.onerror = ko; x.src = url; });
+      const who = criGuess(f.name), it = { k: ++CRI.n, name: f.name, im, who, newName: "", fac: "neu", fx: 50, fy: 35, frame: CRI.frameAll ? 5 : 0, status: "" };
+      it.rar = criRar(who); it.title = who ? criTitle(who) : "";
+      criRender(it); CRI.items.push(it);
+    } catch (e) { toast(`${f.name} : image illisible.`); }
+  }
+  criStyle(); draw();
+}
+async function criGo() {
+  if (CRI.busy) return; CRI.busy = true; draw();
+  let ok = 0;
+  for (const it of CRI.items) {
+    if (it.status === "ok" || !it.who || !it.title || (it.who === "__new" && !it.newName)) continue;
+    try {
+      const r = it.who === "__new"
+        ? await srv("creations/save", { kind: "perso", id: null, data: { name: it.newName, fac: it.fac, rar: it.rar, tag: it.title, color: "#5ab0ff", ep: Math.min(EP_MAX, (CONFIG.def || 1) + 1) }, image: it.out })
+        : await srv("creations/save", { kind: "carte", id: null, data: { who: it.who, title: it.title, rar: it.rar, pos: "50% 50%", zoom: 1 }, image: it.out });
+      await creaApply(r); it.status = "ok"; ok++;
+    } catch (e) { it.status = e.message || "Refusée."; }
+    draw();
+  }
+  CRI.busy = false;
+  CRI.items = CRI.items.filter((x) => x.status !== "ok"); criStyle();
+  toast(ok ? `${ok} carte${ok > 1 ? "s" : ""} créée${ok > 1 ? "s" : ""} : à peaufiner dans Persos et cartes.` : "Aucune carte créée.");
+  draw();
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.closest("[data-cri-pick]")) return $("criFiles")?.click();
+  if (t.closest("[data-cri-go]")) return criGo();
+  if (t.closest("[data-cri-clear]")) { CRI.items = []; criStyle(); return draw(); }
+  const d = t.closest("[data-cri-del]"); if (d) { CRI.items.splice(+d.dataset.criDel, 1); criStyle(); return draw(); }
+});
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.id === "criFiles" && t.files?.length) return criAdd(t.files);
+  if (t.id === "criFrameAll") { CRI.frameAll = t.checked; for (const it of CRI.items) { it.frame = t.checked ? 5 : 0; criRender(it); } criStyle(); return draw(); }
+  const f = t.dataset?.cri; if (!f || t.type === "range" || t.tagName === "INPUT" && t.type === "text") return;
+  const it = CRI.items[+t.dataset.i]; if (!it) return;
+  it[f] = t.value;
+  if (f === "who" && t.value && t.value !== "__new") { it.rar = criRar(t.value, it); it.title = it.title && !/^Illustration \d+$/.test(it.title) ? it.title : criTitle(t.value); }
+  draw();
+});
+document.addEventListener("input", (e) => {
+  const t = e.target, f = t.dataset?.cri; if (!f) return;
+  const i = +t.dataset.i, it = CRI.items[i]; if (!it) return;
+  if (t.type === "range") { it[f] = +t.value; criRender(it); criStyle(); const b = t.closest("label")?.querySelector("b"); if (b) b.textContent = `${t.value}${f === "frame" ? " %" : "%"}`; }
+  else it[f] = t.value;
+  const p = $("criPrev" + i); if (p) p.innerHTML = criCard(it);
+  const go = document.querySelector("[data-cri-go]"); if (go && t.type !== "range") { const ready = CRI.items.filter((x) => x.status !== "ok" && x.who && x.title && (x.who !== "__new" || x.newName)).length; go.disabled = !ready || CRI.busy; go.textContent = `Créer ${ready} carte${ready > 1 ? "s" : ""}`; }
+});
+document.addEventListener("dragover", (e) => { if (e.target.closest?.("#criDrop")) { e.preventDefault(); $("criDrop").classList.add("on"); } });
+document.addEventListener("dragleave", (e) => { if (e.target.closest?.("#criDrop")) $("criDrop").classList.remove("on"); });
+document.addEventListener("drop", (e) => { if (e.target.closest?.("#criDrop")) { e.preventDefault(); $("criDrop").classList.remove("on"); criAdd(e.dataTransfer.files); } });
+
+// ===== Persos et cartes : les têtes des persos rangées par épisode ; un perso ouvre toutes ses cartes =====
+// (on passe d'un perso à l'autre en glissant, avec les flèches ou le clavier)
+const crEps = () => [...new Set(Object.keys(PEOPLE).filter((k) => !k.startsWith("__")).map((k) => epOfCfg(CONFIG, k)))].sort((a, b) => a - b);
+const crCardsOf = (k) => ALL_CARDS.filter((c) => c.who === k).sort((a, b) => !!a.skin - !!b.skin || RAR[a.rar].rank - RAR[b.rar].rank);
+const crFace = (k) => byId[k] || crCardsOf(k).find((c) => !c.skin) || crCardsOf(k)[0];
+function crList() {
+  const q = criNorm(CR.q), ep = CR.ep ?? "all";
+  return Object.entries(PEOPLE).filter(([k, p]) => !k.startsWith("__") && (!q || criNorm(p.name).includes(q)) && (ep === "all" || epOfCfg(CONFIG, k) === +ep))
+    .sort((a, b) => epOfCfg(CONFIG, a[0]) - epOfCfg(CONFIG, b[0]) || Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac) || a[1].name.localeCompare(b[1].name)).map(([k]) => k);
+}
+const crHead = (k, extra = "") => { const p = PEOPLE[k], n = crCardsOf(k).length;
+  return `<button type="button" class="cr-hd ${extra}" data-cr-p="${k}" style="--fc:${FACTIONS[p.fac]?.color || "#888"}"><span class="cr-hd-img">${thumb(crFace(k), "crh")}</span><b>${esc(p.name)}</b><small>${n} carte${n > 1 ? "s" : ""}</small>${crBadge("perso", k)}</button>`; };
+function crBoard() {
+  const eps = crEps(), ep = CR.ep ?? "all", list = crList();
+  const chips = `<div class="cr-eps">${[["all", "Tous"], ...eps.map((e) => [String(e), epLabel(e)])].map(([v, l]) => `<button type="button" class="chip ${String(ep) === v ? "on" : ""}" data-cr-ep-f="${v}">${l}</button>`).join("")}</div>`;
+  const groups = ep === "all" ? eps.map((e) => [e, list.filter((k) => epOfCfg(CONFIG, k) === e)]).filter(([, l]) => l.length) : [[+ep, list]];
+  return `<div class="row"><button class="btn gold" type="button" data-cr-new="perso">+ Nouveau perso</button><input class="in cr-q" type="search" id="crQ" placeholder="Chercher un perso" value="${esc(CR.q)}"></div>${chips}
+    ${groups.map(([e, l]) => `<section class="cr-grp"><h3>${epLabel(e)} <small>${l.length} perso${l.length > 1 ? "s" : ""}</small></h3><div class="cr-hds">${l.map((k) => crHead(k)).join("")}</div></section>`).join("") || `<p class="note">Aucun perso.</p>`}`;
+}
+function crSheet(k) {
+  const p = PEOPLE[k], list = crList(), i = list.indexOf(k), prev = list[(i - 1 + list.length) % list.length], next = list[(i + 1) % list.length], cards = crCardsOf(k);
+  CR.who = k;
+  const base = cards.filter((c) => !c.skin), skins = cards.filter((c) => c.skin);
+  const row = (l) => `<div class="cr-car">${l.map((c) => `<button type="button" class="cr-card" data-cr-edit="carte" data-id="${c.id}">${cardHTML(c, { w: 170 })}${crBadge("carte", c.id)}</button>`).join("")}</div>`;
+  return `<div class="cr-sheet" id="crSheet">
+    <div class="cr-sh-top"><button class="btn sm" type="button" data-cr-back>‹ Tous les persos</button><span class="note">${i + 1} / ${list.length} · glisse pour changer de perso</span></div>
+    <div class="cr-sh-head" id="crSwipe">
+      ${list.length > 1 ? `<button class="cr-nav" type="button" data-cr-p="${prev}" aria-label="Perso précédent">‹</button>` : ""}
+      <span class="cr-sh-img">${thumb(crFace(k), "crh")}</span>
+      <div class="cr-sh-t"><h2>${esc(p.name)}</h2><p class="note">${FACTIONS[p.fac]?.label || ""} · ${cards.length} carte${cards.length > 1 ? "s" : ""}</p>
+        <div class="row"><label class="field cr-sh-ep">Épisode <select data-cr-ep="${k}">${epOptions(epOfCfg(CONFIG, k), true)}</select></label>
+          <button class="btn" type="button" data-cr-edit="perso" data-id="${k}">Modifier le perso</button><button class="btn gold" type="button" data-cr-new="carte">+ Nouvelle carte</button></div></div>
+      ${list.length > 1 ? `<button class="cr-nav r" type="button" data-cr-p="${next}" aria-label="Perso suivant">›</button>` : ""}
+    </div>
+    <h3 class="cr-sh-h">Cartes <small>${base.length}</small></h3>${row(base)}
+    ${skins.length ? `<h3 class="cr-sh-h">Skins <small>${skins.length}</small></h3>${row(skins)}` : ""}
+    <div class="cr-strip">${list.map((x) => crHead(x, x === k ? "on" : "")).join("")}</div></div>`;
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const pp = t.closest("[data-cr-p]"); if (pp) { CR.p = pp.dataset.crP; draw(); requestAnimationFrame(() => document.querySelector(".cr-strip .on")?.scrollIntoView({ inline: "center", block: "nearest" })); return; }
+  if (t.closest("[data-cr-back]")) { CR.p = null; return draw(); }
+  const f = t.closest("[data-cr-ep-f]"); if (f) { CR.ep = f.dataset.crEpF; return draw(); }
+});
+document.addEventListener("change", async (e) => {
+  const t = e.target; if (!t.dataset?.crEp) return;
+  try { await crSetEp(t.dataset.crEp, +t.value); toast(`${PEOPLE[t.dataset.crEp].name} : ${epLabel(+t.value)}.`); } catch (err) { toast(err.message); }
+  draw();
+});
+// glisser à gauche ou à droite sur la tête du perso pour passer au suivant / précédent ; flèches du clavier
+let crTouch = null;
+document.addEventListener("touchstart", (e) => { if (e.target.closest?.("#crSwipe")) crTouch = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
+document.addEventListener("touchend", (e) => {
+  if (!crTouch) return; const [x0, y0] = crTouch, t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; crTouch = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) crStep(dx < 0 ? 1 : -1);
+});
+document.addEventListener("keydown", (e) => { if (view === "createur" && CR.tab === "persos" && CR.p && !CR.edit && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName) && (e.key === "ArrowLeft" || e.key === "ArrowRight")) crStep(e.key === "ArrowRight" ? 1 : -1); });
+function crStep(d) {
+  const list = crList(), i = list.indexOf(CR.p); if (i < 0 || list.length < 2) return;
+  CR.p = list[(i + d + list.length) % list.length]; draw();
+  const s = $("crSwipe"); s?.animate([{ transform: `translateX(${d * 40}px)`, opacity: .3 }, { transform: "none", opacity: 1 }], { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" });
+  requestAnimationFrame(() => document.querySelector(".cr-strip .on")?.scrollIntoView({ inline: "center", block: "nearest" }));
+}
+document.addEventListener("click", (e) => { const a = e.target.closest("[data-adm-p]"); if (a) { CR.tab = "persos"; CR.p = a.dataset.admP; CR.edit = null; nav("createur"); } });
 
 // ===== Coffre arcanique : scène 3D, clé, et lecteur de scénarios =====
 // Les cartes et le scénario viennent du serveur (src/game.js : pickScenarioS) ; ici on ne fait que les mettre en scène.

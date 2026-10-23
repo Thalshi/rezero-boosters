@@ -63,7 +63,7 @@ Un joueur ouvre un salon (privé sur invitation ou public : géré par le serveu
 
 ### 4.1 Répartition [Livret pour la structure, Original pour les noms et les réglages]
 
-Deux camps seulement : Gardien et Sentinelles contre Briseurs. L'Errant a été retiré (il gagnait 8 à 23 % des parties, surtout par hasard ; il reste disponible par réglage, `ROLES_AVEC_ERRANT`). Chaque table a un réglage mesuré pour que chaque camp gagne environ une partie sur deux.
+Trois camps : Gardien et Sentinelles, Briseurs, et l'Errant seul (1 / 0 / 2 / 1 à 4 joueurs, 1 / 1 / 2 / 1 à 5, 1 / 1 / 3 / 1 à 6, 1 / 2 / 3 / 1 à 7). L'Errant a deux pouvoirs invisibles : **coup de grâce** (s'il élimine lui-même le Gardien, il gagne seul) et, à partir de 5 joueurs, **double vie** (à sa première mort, la table voit un faux rôle, Sentinelle ou Briseur ; il revient avec 2 PV et 3 cartes quand il ne reste que 3 joueurs en vie, ou quand la partie allait finir sans lui, et son vrai rôle est révélé). Seul le Gardien reçoit des bonus (son rôle est public). Voir `EQUILIBRAGE.md`, correction C10.
 
 | Joueurs | Gardien | Sentinelles | Briseurs | Réglage de la table [Provisoire, mesuré] |
 |---|---|---|---|---|
@@ -94,7 +94,7 @@ Deux camps seulement : Gardien et Sentinelles contre Briseurs. L'Errant a été 
 ## 5. Mise en place
 
 1. **Sièges** : le serveur place les joueurs au hasard autour de la table.
-2. **PV** : chacun reçoit les PV du mode (Duel 6, Trio 5, Classique 4) ; le Gardien en reçoit en plus selon la table : **+2 à 4 joueurs, +0 à 5, +2 à 6, +1 à 7** [Provisoire, corrigé après simulation, voir `EQUILIBRAGE.md` ; hypothèse de départ : +1 partout]. L'Errant reçoit +1 PV à 6 et 7 joueurs [Provisoire, corrigé : sans ce bonus il ne gagnait que 4 à 8 % des parties simulées]. Les PV maximum ne changent plus pendant la partie.
+2. **PV** : chacun reçoit les PV du mode (Duel 6, Trio 5, Classique 4) ; le Gardien en reçoit en plus selon la table : **+1 à 4 joueurs (et 1 carte de plus), +0 à 5, +2 à 6, +1 à 7** [Provisoire, corrigé après simulation, voir `EQUILIBRAGE.md` ; hypothèse de départ : +1 partout]. L'Errant ne reçoit aucun PV en plus (ce serait visible) : sa force vient de ses deux pouvoirs. Les PV maximum ne changent plus pendant la partie.
 3. **Pioche** : les 82 cartes d'action sont mélangées par le serveur.
 4. **Premier joueur** : en classique, le **Gardien** commence [Livret] ; en Duel et en Trio, le premier joueur est tiré au hasard [Original].
 5. **Mains de départ** : chacun reçoit autant de cartes que ses PV maximum, une par une à partir du premier joueur [Livret]. En Duel, le second joueur reçoit **1 carte de plus** pour compenser l'avantage de commencer [Original, Provisoire, mesuré].

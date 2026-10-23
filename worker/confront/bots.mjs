@@ -48,7 +48,9 @@ export function ennemis(v, opts = {}) {
     const restants = autres.filter((p) => p.role !== "gardien");
     if (!restants.length) list = autres.map((p) => ({ p, s: 1 }));
     else list = restants.map((p) => ({ p, s: susp(p) + 0.5 * H(v, p.id, me.id) }));
-    if (g && g.vivant && g.pv <= 1 && restants.length) list = list.filter((x) => x.p.role !== "gardien");
+    // avec le Coup de grâce, l'Errant achève lui-même un Gardien affaibli ; sinon il le garde en vie
+    if (g && g.vivant && g.pv <= 1 && v.errantCoupDeGrace) list = [{ p: g, s: 1e6 }, ...list.filter((x) => x.p !== g)];
+    else if (g && g.vivant && g.pv <= 1 && restants.length) list = list.filter((x) => x.p.role !== "gardien");
   }
   return list.sort((a, b) => b.s - a.s || a.p.pv - b.p.pv).map((x) => x.p);
 }

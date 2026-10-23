@@ -14,10 +14,10 @@ export const MODES = {
 export const modeFor = (n) => (n === 2 ? "duel" : n === 3 ? "trio" : n >= 4 && n <= 7 ? "classique" : null);
 
 /** Répartition des rôles en mode classique (le Gardien est toujours visible).
- * Deux camps seulement, sans Errant (corrigé, voir EQUILIBRAGE.md : l'Errant ne gagnait que 8 à 23 %
- * des parties, surtout par hasard). Chaque table est réglée pour que chaque camp gagne environ une
- * partie sur deux : la victoire dépend des décisions, pas du rôle tiré. Avant : ROLES_AVEC_ERRANT. */
-export const ROLES_PAR_TABLE = {
+ * Trois camps : Gardien et Sentinelles, Briseurs, et l'Errant (seul). L'Errant avait été retiré
+ * (C9, il gagnait 8 à 23 %) puis remis par Reichi avec deux pouvoirs invisibles (C10) : la double vie
+ * et le coup de grâce (voir `errant` plus bas et EQUILIBRAGE.md). Avant : ROLES_DEUX_CAMPS. */
+export const ROLES_DEUX_CAMPS = {
   4: { gardien: 1, sentinelle: 1, briseur: 2 },
   5: { gardien: 1, sentinelle: 2, briseur: 2 },
   6: { gardien: 1, sentinelle: 2, briseur: 3 },
@@ -29,6 +29,7 @@ export const ROLES_AVEC_ERRANT = {
   6: { gardien: 1, sentinelle: 1, briseur: 3, errant: 1 },
   7: { gardien: 1, sentinelle: 2, briseur: 3, errant: 1 },
 };
+export const ROLES_PAR_TABLE = ROLES_AVEC_ERRANT;
 
 // « corrigé » = correction limitée appliquée après mesure (docs/confrontation/EQUILIBRAGE.md) ;
 // la valeur d'avant est indiquée pour pouvoir revenir en arrière sans toucher au code.
@@ -37,17 +38,24 @@ export const DEFAULT_CONFIG = {
   pv: { duel: 6, trio: 5, classique: 4 },
   // Répartition des rôles par taille de table (null = ROLES_PAR_TABLE)
   roles: null,
-  // PV en plus pour le Gardien, par taille de table (corrigé deux fois : +1 partout, puis +2/+0/+2/+1
-  // avec l'Errant ; sans Errant : seul le 6 joueurs en a besoin).
-  // Un nombre (même bonus partout) ou un objet { 4: …, 5: …, 6: …, 7: … }.
-  bonusGardien: { 4: 0, 5: 0, 6: 2, 7: 0 },
-  // PV en plus pour un autre rôle : { role: { taille: n } } (aucun pour l'instant)
+  // PV en plus pour le Gardien, par taille de table. Seuls des bonus du Gardien (rôle public) servent à
+  // équilibrer : des PV ou des cartes en plus pour un rôle secret le trahiraient (remarque de Reichi).
+  // Un nombre (même bonus partout) ou un objet { 4: …, 5: …, 6: …, 7: … }. (C10, avant : 0/0/2/0)
+  bonusGardien: { 4: 1, 5: 0, 6: 2, 7: 1 },
+  // PV en plus pour un autre rôle : { role: { taille: n } } (aucun : ce serait visible)
   bonusPvRole: {},
-  // Réglage fin des camps : cartes en plus dans la main de départ { role: { taille: n } } (mesuré :
-  // chaque camp gagne 49 à 51 % des parties simulées à 4, 5, 6 et 7 joueurs)
-  bonusMainRole: { gardien: { 4: 2, 7: 3 }, sentinelle: { 4: 1 }, briseur: { 5: 2 } },
-  // PV en plus pour l'Errant, par taille de table (corrigé, avant : aucun)
-  bonusErrant: { 4: 0, 5: 0, 6: 1, 7: 1 },
+  // Cartes en plus dans la main de départ { role: { taille: n } } : seulement le Gardien (C10, avant :
+  // Gardien 4: 2 et 7: 3, Sentinelle 4: 1, Briseurs 5: 2)
+  bonusMainRole: { gardien: { 4: 1 } },
+  // PV en plus pour l'Errant : aucun, ce serait visible (C10, avant : +1 à 6 et 7 joueurs)
+  bonusErrant: { 4: 0, 5: 0, 6: 0, 7: 0 },
+  // Pouvoirs de l'Errant, invisibles pour la table (C10) :
+  // - coupDeGrace : s'il élimine lui-même le Gardien, il gagne seul ;
+  // - revenant (à partir de `des` joueurs) : à sa première mort, la table voit un faux rôle (Sentinelle ou
+  //   Briseur) et il part aux enfers ; il revient quand il ne reste que `vivants` joueurs en vie (ou quand
+  //   la partie allait finir sans lui), avec `pv` PV et `cartes` cartes, et son vrai rôle est montré.
+  // - charognard (non utilisé : le soin se voit) : { pv, cartes } à chaque élimination d'un autre joueur.
+  errant: { coupDeGrace: true, revenant: { des: 5, vivants: 3, pv: 2, cartes: 3 }, charognard: null },
   // Limite de main en fin de tour = PV actuels, bornée par [min, max] (max null = pas de plafond)
   limiteMain: { min: 0, max: null },
   // Main de départ : "pv" (autant que les PV max) ou un nombre
@@ -137,6 +145,7 @@ export const DEFAULT_CONFIG = {
 /** Configuration d'origine (avant les corrections mesurées), pour comparer dans les simulations. */
 export const CONFIG_AVANT_CORRECTIONS = {
   roles: ROLES_AVEC_ERRANT,
+  errant: { coupDeGrace: false, revenant: null, charognard: null },
   bonusMainRole: {},
   bonusGardien: 1,
   bonusErrant: { 4: 0, 5: 0, 6: 0, 7: 0 },

@@ -132,7 +132,7 @@ try {
     await page.addInitScript(() => localStorage.setItem("cf-vue", "classique"));
     await page.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await page.waitForTimeout(2500);
     await page.goto(`${srv.base}/#/confront`); await page.waitForTimeout(1500);
-    t.check(`${label} · page des salons et des 8 branches`, (await page.locator(".cf-br").count()) === 8);
+    t.check(`${label} · page des salons (créer une table)`, await page.locator(`[data-act="cf-create"]`).isVisible());
     await page.fill("#cfNom", "Table " + label); await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(900);
     await page.click('[data-cfa=\'{"type":"lancer"}\']'); await page.waitForTimeout(1500);

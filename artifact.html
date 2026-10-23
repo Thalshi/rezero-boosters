@@ -6795,7 +6795,7 @@ function cfPerso(c, big) {
   const art = c.pret || !card ? `<div class="cf-loan">${cfEmb(c.branch, "big")}<span>Carte de prêt</span></div>` : cardHTML(card, { design: c.cosmetique || null });
   return `<div class="cf-perso ${big ? "big" : ""}">${art}<p class="cf-pb"><b>${cfEmb(c.branch, "sm")} ${esc(b.nom)}</b>${big ? `<small>${esc(b.pouvoir)}</small>` : ""}</p></div>`;
 }
-const ROLE_TXT = { gardien: "Gardien : survis, les Sentinelles t'aident.", sentinelle: "Sentinelle : protège le Gardien.", briseur: "Briseur : élimine le Gardien.", errant: "Errant : sois le dernier en vie." };
+const ROLE_TXT = { gardien: "Gardien : survis, les Sentinelles t'aident.", sentinelle: "Sentinelle : protège le Gardien.", briseur: "Briseur : élimine le Gardien.", errant: "Errant : achève toi-même le Gardien, ou sois le dernier en vie. Tu as une seconde vie." };
 function cfBoard(v) {
   const me = v.joueurs.find((p) => p.id === v.moi), pr = v.attente, acts = v.actions || [], mineTurn = pr && me && pr.pid === me.id;
   const seat = (p) => {
@@ -6857,7 +6857,7 @@ function cfHand(v, me, pr, acts) {
 const EVT = {
   debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
-  elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
+  elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, revenant: (e) => `${cfName(e.pid)} revient des enfers : c'était l'Errant !`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
   pioche: (e) => `Tu pioches ${e.n || e.cartes?.length || ""} carte(s).`, pioche_publique: (e) => `${cfName(e.pid)} pioche ${e.n || ""} carte(s).`, delai_expire: (e) => `${cfName(e.pid)} n'a pas répondu à temps.`,
   rejoint: (e) => `${cfName(e.pid)} rejoint la table.`, quitte: (e) => `${cfName(e.pid)} quitte la table.`, contribution: (e) => `${cfName(e.pid)} a apporté ses cartes.`, choix: (e) => `${cfName(e.pid)} a choisi son perso.`,
@@ -6929,9 +6929,9 @@ const ROLES = {
   gardien: {
     nom: "Gardien", kanji: "守", col: "var(--gold)", vu: "Visible de tous",
     icon: RI(`<path d="M18 14l7 7 7-11 7 11 7-7-3 14H21z"/><path d="M14 30h36v10c0 10-8 16-18 20-10-4-18-10-18-20z"/><path d="M32 36v14"/>`),
-    but: "Survivre jusqu'à ce que tous les Briseurs soient éliminés.",
+    but: "Survivre jusqu'à ce que tous les Briseurs et l'Errant soient éliminés.",
     camp: "Avec les Sentinelles, mais tu ne sais pas qui elles sont.",
-    plus: "Tu commences la partie. Selon la table, tu as des PV ou des cartes en plus (voir le tableau « Combien de chaque rôle ? »).",
+    plus: "Tu commences la partie. Selon la table, tu as des PV ou des cartes en plus (voir le tableau « Combien de chaque rôle ? ») : toi seul, puisque ton rôle est connu de tous.",
     conseil: "Frappe avec prudence : si tu élimines une Sentinelle, tu défausses toute ta main et tout ton équipement.",
   },
   sentinelle: {
@@ -6953,17 +6953,17 @@ const ROLES = {
   errant: {
     nom: "Errant", kanji: "孤", col: "#b072ff", vu: "Secret",
     icon: RI(`<path d="M32 8c-9 0-14 7-14 15v9l-6 24h40l-6-24v-9C46 15 41 8 32 8z"/><path d="M25 26c2 2 5 2 7 0M32 26c2 2 5 2 7 0"/><path d="M24 40h16"/>`),
-    but: "Être le dernier joueur en vie, seul contre tous.",
-    camp: "Personne. Tu joues pour toi.",
-    plus: "Tu as un PV de plus à 6 et 7 joueurs.",
-    conseil: "Le Gardien doit tomber en dernier : s'il tombe alors qu'un autre joueur que toi est encore en vie, ce sont les Briseurs qui gagnent. Aide-le parfois contre les Briseurs.",
+    but: "Gagner seul : achever toi-même le Gardien, ou être le dernier en vie.",
+    camp: "Personne. Tu joues pour toi, contre les deux camps.",
+    plus: "Coup de grâce : si c'est toi qui élimines le Gardien, tu gagnes seul (pas les Briseurs). Double vie (à partir de 5 joueurs) : à ta première mort, la table voit un faux rôle, Sentinelle ou Briseur, et tu pars aux enfers. Tu reviens avec 2 PV et 3 cartes quand il ne reste que 3 joueurs en vie, ou quand la partie allait finir sans toi ; ton vrai rôle est alors révélé.",
+    conseil: "Si quelqu'un d'autre achève le Gardien, ce sont les Briseurs qui gagnent : garde-le en vie jusqu'à pouvoir porter le dernier coup toi-même.",
   },
 };
 // emblèmes des rôles : métal, gemmes et reflets (dégradés SVG), à la place des icônes au trait
 let embN = 0;
 function roleEmb(r) {
   const u = "re" + ++embN, M = (id, a, b, c) => `<linearGradient id="${u}${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a}"/><stop offset=".5" stop-color="${b}"/><stop offset="1" stop-color="${c}"/></linearGradient>`;
-  const defs = `<defs>${M("or", "#fff6c8", "#e8b84a", "#7a4a10")}${M("ac", "#f4fbff", "#8fb4c8", "#2a4258")}${M("rg", "#ff9aa8", "#c8102e", "#4a0410")}
+  const defs = `<defs>${M("vi", "#e8c8ff", "#8a4dff", "#2a0e4a")}${M("or", "#fff6c8", "#e8b84a", "#7a4a10")}${M("ac", "#f4fbff", "#8fb4c8", "#2a4258")}${M("rg", "#ff9aa8", "#c8102e", "#4a0410")}
     <radialGradient id="${u}gm"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="var(--gm1)"/><stop offset="1" stop-color="var(--gm2)"/></radialGradient>
     <linearGradient id="${u}in" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a5a"/><stop offset="1" stop-color="#120c22"/></linearGradient>
     <filter id="${u}sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#000" flood-opacity=".7"/></filter></defs>`;
@@ -6987,13 +6987,20 @@ function roleEmb(r) {
       <path d="M17 47L25 52M21 50L17.5 56" stroke="#e8b84a" stroke-width="3" stroke-linecap="round"/><circle cx="16.5" cy="57" r="2.2" fill="url(#${u}gm)" style="--gm1:#ff3a5a;--gm2:#6a0418"/>
       <circle cx="30" cy="28" r="9" fill="#ff2e4d" opacity=".18"/></g>
       <path d="M13 15L30 9.5V12L16 17Z" fill="#fff" opacity=".3"/>`,
+    errant: `<g filter="url(#${u}sh)"><path d="M32 4C20 4 12 14 12 28V58L20 52L26 58L32 52L38 58L44 52L52 58V28C52 14 44 4 32 4Z" fill="url(#${u}vi)"/>
+      <path d="M32 10C23 10 18 18 18 28V50L22 47L26 51L32 46L38 51L42 47L46 50V28C46 18 41 10 32 10Z" fill="#0a0614"/>
+      <path d="M22 30C24 26 28 26 30 30C28 32 24 32 22 30Z M34 30C36 26 40 26 42 30C40 32 36 32 34 30Z" fill="url(#${u}gm)" style="--gm1:#d9a0ff;--gm2:#5a1a9e"/>
+      <circle cx="26" cy="29.5" r="1.1" fill="#fff"/><circle cx="38" cy="29.5" r="1.1" fill="#fff"/>
+      <path d="M26 40Q32 44 38 40" stroke="#b072ff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".8"/></g>
+      <path d="M18 14C22 8 28 6 32 6V9C28 9 23 11 20 16Z" fill="#fff" opacity=".35"/>`,
   }[r];
   return body ? `<svg class="role-emb" viewBox="0 0 64 64" aria-hidden="true">${defs}${body}</svg>` : ROLES[r]?.icon || "";
 }
-// deux camps, sans Errant (rôle retiré : il gagnait surtout par hasard) ; mêmes valeurs que worker/confront/config.mjs
-const ROLE_ORDER = ["gardien", "sentinelle", "briseur"];
-const ROLE_SPLIT = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
-const ROLE_BONUS = { 4: "Gardien : 2 cartes de plus au départ, Sentinelle : 1", 5: "chaque Briseur : 2 cartes de plus au départ", 6: "Gardien : 2 PV de plus", 7: "Gardien : 3 cartes de plus au départ" };
+// trois camps : Gardien et Sentinelles, Briseurs, Errant ; mêmes valeurs que worker/confront/config.mjs
+// (seul le Gardien, dont le rôle est public, reçoit des bonus : sinon ils trahiraient les rôles secrets)
+const ROLE_ORDER = ["gardien", "sentinelle", "briseur", "errant"];
+const ROLE_SPLIT = { 4: [1, 0, 2, 1], 5: [1, 1, 2, 1], 6: [1, 1, 3, 1], 7: [1, 2, 3, 1] };
+const ROLE_BONUS = { 4: "Gardien : 1 PV et 1 carte de plus · Errant sans double vie", 5: "aucun", 6: "Gardien : 2 PV de plus", 7: "Gardien : 1 PV de plus" };
 // fiche d'un rôle (livret, salon, et « ton rôle » pendant la partie)
 function roleCard(r, opts = {}) {
   const R = ROLES[r];
@@ -7061,12 +7068,13 @@ function rgFullHTML() {
 
     ${sec("roles", 2, "Les rôles (mode Classique)", `<p>Au début de la partie, chacun reçoit un rôle au hasard. Le <b>Gardien</b> se montre à tous ; les autres rôles restent <b>secrets</b> : tu ne connais que le tien. Un rôle se révèle quand son joueur est éliminé, et tous à la fin.</p>
       <div class="rl-grid">${ROLE_ORDER.map((r) => roleCard(r)).join("")}</div>
-      <h3>Combien de chaque rôle ?</h3><p>Deux camps de taille proche. Chaque table a un petit réglage pour que <b>chaque camp gagne environ une partie sur deux</b> (mesuré sur 2 000 parties simulées par table) : ce n'est pas le rôle tiré qui décide, ce sont tes choix.</p>
+      <h3>Combien de chaque rôle ?</h3><p>Trois camps : le Gardien et ses Sentinelles, les Briseurs, et l'Errant seul. Chaque table a un petit réglage pour que <b>chaque camp ait ses chances</b> (mesuré sur 1 500 parties simulées par table : chaque camp gagne entre 21 et 41 % des parties) : ce n'est pas le rôle tiré qui décide, ce sont tes choix.</p>
       <div class="tbl-wrap"><table class="rg-tbl"><thead><tr><th>Joueurs</th>${ROLE_ORDER.map((r) => `<th style="color:${ROLES[r].col}">${ROLES[r].nom}s</th>`).join("")}<th>Réglage de la table</th></tr></thead>
         <tbody>${Object.entries(ROLE_SPLIT).map(([n, v]) => `<tr><td>${n}</td>${v.map((x) => `<td>${x || "–"}</td>`).join("")}<td class="rg-bonus">${ROLE_BONUS[n]}</td></tr>`).join("")}</tbody></table></div>
       <h3>Qui gagne ?</h3><p>Le serveur vérifie après chaque élimination :</p>
-      <ol class="rg-ol"><li>Le <b>Gardien</b> vient de tomber : les <b>Briseurs</b> gagnent, tous, même ceux déjà éliminés.</li>
-        <li>Plus aucun Briseur en vie : le <b>Gardien et les Sentinelles</b> gagnent, même ceux déjà éliminés.</li><li>Sinon, on continue.</li></ol>
+      <ol class="rg-ol"><li>Le <b>Gardien</b> vient de tomber sous les coups de l'<b>Errant</b> : l'Errant gagne seul (coup de grâce).</li>
+        <li>Le <b>Gardien</b> vient de tomber autrement : les <b>Briseurs</b> gagnent, tous, même ceux déjà éliminés (sauf si l'Errant est le dernier en vie : il gagne seul).</li>
+        <li>Plus aucun Briseur ni Errant en vie : le <b>Gardien et les Sentinelles</b> gagnent, même ceux déjà éliminés. Attention : si l'Errant est aux enfers, il revient d'abord.</li><li>Sinon, on continue.</li></ol>
       <div class="rg-box"><b>Récompense et pénalité</b><p>Éliminer un <b>Briseur</b> fait piocher 3 cartes, quel que soit ton rôle. Si le <b>Gardien élimine une Sentinelle</b>, il défausse toute sa main et tout ce qui est posé devant lui.</p></div>`)}
 
     ${sec("perso", 3, "Ton personnage et sa branche", `<p>Les personnages viennent de vos collections : chacun peut <b>apporter au plus une carte par branche</b>. Pour chaque branche que tu laisses vide, le jeu ajoute une <b>carte de prêt</b> (un personnage générique). Tout est mélangé, puis chacun reçoit <b>deux propositions secrètes</b> et en choisit une.</p>
@@ -8220,7 +8228,7 @@ const Arena = (() => {
     renderTags(); renderTable(); renderLog();
   }
   const logged = (e) => !["attente", "attente_annulee", "phase", "choix_prive", "propositions", "reserve", "contribution", "choix", "rejoint"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === CF.table?.vue?.moi);
-  const LOG_COL = { degats: "#ff4d5e", elimination: "#ff4d5e", pare: "#2ee6ff", esquive: "#2ee6ff", riposte: "#2ee6ff", sauvetage: "#3fdc8f", survie: "#3fdc8f", presage: "#f5c518", orbe_explose: "#ff7a1a" };
+  const LOG_COL = { degats: "#ff4d5e", elimination: "#ff4d5e", revenant: "#b072ff", pare: "#2ee6ff", esquive: "#2ee6ff", riposte: "#2ee6ff", sauvetage: "#3fdc8f", survie: "#3fdc8f", presage: "#f5c518", orbe_explose: "#ff7a1a" };
   const logLine = (e) => ({ html: cfEvent(e), col: LOG_COL[e.type] || (e.type === "joue" ? famCol(e.carte) : null), tour: e.type === "tour", t: e.tour || e.n });
   function renderLog() {
     if (!st) return;
@@ -8555,6 +8563,14 @@ const Arena = (() => {
       case "riposte": if (p) { shield(p); pop(p, "Riposte !", "#2ee6ff", true); } await wait(300); await attackFx(p, champ(e.cible)); break;
       case "esquive": if (p) { shield(p, "#5ac8fa"); pop(p, "Esquivé !", "#5ac8fa", true); } await wait(520); break;
       case "kanji_absorbe": if (p) { pop(p, "Garde : aucun dégât", "#e8c77e", true); emit(50, worldOf(p, 1.3), "#e8c77e", { speed: 2.5, life: .8, grav: 0 }); } await wait(500); break;
+      // l'Errant revient des enfers : le champion se relève dans une gerbe violette, son vrai rôle apparaît
+      case "revenant": if (p) {
+        p.alive = true; p.role = "errant";
+        banner(`${p.label || nm(p.id)} revient des enfers : c'était l'Errant !`, "#b072ff");
+        emit(160, worldOf(p, .4), "#b072ff", { speed: 3.4, life: 1.4, grav: -2.5 });
+        tween(.9, (t) => { p.body.rotation.x = -(1 - t) * 1.45; p.body.position.y = -(1 - t) * .1; p.aura.material.opacity = .25 * t; p.ringM.material.color.setScalar(.1 + t * .9); }, easeOut);
+        await wait(1200); renderTags();
+      } break;
       case "elimination": if (p) { p.alive = false; if (e.role) p.role = e.role; await finisher(p, champ(e.par), e); renderTags(); } break;
       case "presage": await omen(p, e); break;
       case "orbe_explose": if (p) { setOrb(p, false); const o = worldOf(p, 1.6); emit(160, o, "#ff7a1a", { speed: 5, life: 1, grav: 2 }); ring(new THREE.Vector3(o.x, .05, o.z), "#ff7a1a", 4, .8); flash("#ff7a1a", .4); R.shake = .3; } await wait(700); break;

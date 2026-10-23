@@ -53,7 +53,7 @@ try {
     t.check("4 champions avec leur étiquette", (await page.locator(".ar-tag").count()) === 4);
     const v0 = (await A.api("confront/state", { gid })).vue;
     t.check("ma main : les cartes du serveur", (await page.locator(".ar-hc").count()) === v0.main.length, { dom: await page.locator(".ar-hc").count(), main: v0.main.length });
-    t.check("mon rôle secret est affiché", (await page.locator("#ar-chip").innerText()).includes({ gardien: "Gardien", sentinelle: "Sentinelle", briseur: "Briseur" }[v0.monRole]));
+    t.check("mon rôle secret est affiché", (await page.locator("#ar-chip").innerText()).includes({ gardien: "Gardien", sentinelle: "Sentinelle", briseur: "Briseur", errant: "Errant" }[v0.monRole]));
     // la fiche du rôle s'ouvre au début : on la ferme
     if (await page.locator("#ar-roleOk").isVisible().catch(() => false)) await page.click("#ar-roleOk");
     await page.screenshot({ path: join(OUT, `arene-${label}-1.png`) });

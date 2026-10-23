@@ -212,7 +212,7 @@ function cfPerso(c, big) {
   const art = c.pret || !card ? `<div class="cf-loan">${cfEmb(c.branch, "big")}<span>Carte de prêt</span></div>` : cardHTML(card, { design: c.cosmetique || null });
   return `<div class="cf-perso ${big ? "big" : ""}">${art}<p class="cf-pb"><b>${cfEmb(c.branch, "sm")} ${esc(b.nom)}</b>${big ? `<small>${esc(b.pouvoir)}</small>` : ""}</p></div>`;
 }
-const ROLE_TXT = { gardien: "Gardien : survis, les Sentinelles t'aident.", sentinelle: "Sentinelle : protège le Gardien.", briseur: "Briseur : élimine le Gardien.", errant: "Errant : sois le dernier en vie." };
+const ROLE_TXT = { gardien: "Gardien : survis, les Sentinelles t'aident.", sentinelle: "Sentinelle : protège le Gardien.", briseur: "Briseur : élimine le Gardien.", errant: "Errant : achève toi-même le Gardien, ou sois le dernier en vie. Tu as une seconde vie." };
 function cfBoard(v) {
   const me = v.joueurs.find((p) => p.id === v.moi), pr = v.attente, acts = v.actions || [], mineTurn = pr && me && pr.pid === me.id;
   const seat = (p) => {
@@ -274,7 +274,7 @@ function cfHand(v, me, pr, acts) {
 const EVT = {
   debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
-  elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
+  elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, revenant: (e) => `${cfName(e.pid)} revient des enfers : c'était l'Errant !`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
   pioche: (e) => `Tu pioches ${e.n || e.cartes?.length || ""} carte(s).`, pioche_publique: (e) => `${cfName(e.pid)} pioche ${e.n || ""} carte(s).`, delai_expire: (e) => `${cfName(e.pid)} n'a pas répondu à temps.`,
   rejoint: (e) => `${cfName(e.pid)} rejoint la table.`, quitte: (e) => `${cfName(e.pid)} quitte la table.`, contribution: (e) => `${cfName(e.pid)} a apporté ses cartes.`, choix: (e) => `${cfName(e.pid)} a choisi son perso.`,

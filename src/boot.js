@@ -113,3 +113,21 @@ setInterval(() => { if (view === "boosters" && !opening && $("overlay").hidden &
 // en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
 setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => header()).catch(() => {}); }, 45000);
 connect();
+
+// le monde du QG en fond du site (même décor que l'arène 3D)
+try { if (typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table) document.documentElement.style.setProperty("--world", `url(${ILLUS_DECOR.table})`); } catch (e) {}
+// cartes : inclinaison et reflet qui suivent le doigt ou la souris
+(() => {
+  let on = null;
+  const reset = (w) => { const k = w?.querySelector(".kc"); if (!k) return; w.classList.remove("tilt"); k.style.removeProperty("--rx"); k.style.removeProperty("--ry"); k.style.setProperty("--shine", 0); };
+  document.addEventListener("pointermove", (e) => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const w = e.target.closest?.(".kcw"); if (on && on !== w) { reset(on); on = null; } if (!w || w.closest(".o3, #ar-root")) return;
+    const k = w.querySelector(".kc"), r = w.getBoundingClientRect(); if (!k || !r.width) return;
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; on = w; w.classList.add("tilt");
+    k.style.setProperty("--ry", `${(x - 0.5) * 18}deg`); k.style.setProperty("--rx", `${(0.5 - y) * 14}deg`);
+    k.style.setProperty("--mx", `${x * 100}%`); k.style.setProperty("--my", `${y * 100}%`); k.style.setProperty("--shine", 1);
+  }, { passive: true });
+  document.addEventListener("pointerleave", () => { if (on) { reset(on); on = null; } });
+  document.addEventListener("pointerup", (e) => { if (e.pointerType === "touch" && on) { reset(on); on = null; } });
+})();

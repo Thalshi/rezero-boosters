@@ -1719,6 +1719,13 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Ouverture 3D : récapitulatif dans la scène ===== */
+.o3-recap { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; pointer-events: auto; }
+.o3-recap-h .eyebrow { margin: 0; } .o3-recap-h h2 { margin: 2px 0 0; font: 800 clamp(22px, 4vw, 34px) var(--disp); text-shadow: 0 2px 18px #000; }
+.o3-recap .row { flex-wrap: wrap; gap: 8px; }
+.o3-recap-tip { margin: 0; font-size: 12px; color: var(--fg2); text-shadow: 0 1px 6px #000; }
+.o3.recap .o3-tools { display: none; }
+
 /* ===== Arène : salon, choix des cartes et choix du perso par-dessus la scène 3D ===== */
 .ar.pre .ar-top, .ar.pre .ar-hand, .ar.pre .ar-side, .ar.pre .ar-tbl, .ar.pre .ar-chip, .ar.pre .ar-react, .ar.pre .ar-hint, .ar.pre #ar-aim { display: none !important; }
 .ar-pre { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
@@ -1809,6 +1816,39 @@ label.cf-mode { position: relative; }
 .ar-cp-back .ic { width: 40%; height: auto; } .ar-cp-back b { position: absolute; bottom: 6px; font: 700 12px var(--body); }
 @media (max-width: 600px) { .ar-side { flex-direction: row; align-items: center; } .ar-deck { display: grid !important; width: 40px; height: 58px; } .ar-elems { inset: -10px; } .ar-elems i { width: 16px; height: 16px; } }
 .ar-omen .ar-need { color: #fff; font-size: 9px; letter-spacing: 0; margin-top: 1px; }
+
+/* ===================== Le monde du QG : le site dans le même univers que la 3D (23/10/2026) =====================
+   Fond : le temple de nuit de l'arène, fixe et assombri, qui se fond dans le noir des scènes 3D (pas de bascule).
+   Panneaux en verre sombre, boutons comme dans l'arène, cartes qui s'inclinent et irisent comme les cartes 3D. */
+html { background: #07060f; }
+body { background: transparent; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background: linear-gradient(180deg, #07060f55 0%, #07060fb0 38%, #07060f 72%), var(--world, none) 50% 0% / cover no-repeat, #07060f;
+  filter: saturate(1.05); }
+body::after { content: ""; position: fixed; left: 50%; bottom: -38vh; width: 160vw; height: 70vh; transform: translateX(-50%); z-index: -1; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(closest-side, transparent 78%, #e8c77e22 79%, transparent 80.5%, transparent 84%, #e8c77e14 85%, transparent 86%), radial-gradient(closest-side, #2a2338aa, #07060f00 70%); }
+/* panneaux : verre sombre, on devine le monde derrière */
+.card, .mbox, .sheet, .z-bar, .cf-row, .cf-howto, .np-panel, #notifPanel, .acc-stats > div, .lab-form, .test-zone {
+  background: #0b0916c7 !important; -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2);
+  border-color: #e8c77e33 !important; box-shadow: inset 0 1px 0 #ffffff0d, 0 10px 30px #0006; }
+.hd { background: #07060fcc; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+/* boutons : comme dans l'arène (sombre à fin liseré, doré taillé pour l'action, rose plein pour quitter) */
+.btn { background: #0b0916e6; border: 1px solid #e8c77e40; border-radius: 6px; box-shadow: inset 0 1px 0 #ffffff0f; }
+.btn:hover:not(:disabled) { border-color: #e8c77e99; box-shadow: inset 0 1px 0 #ffffff14, 0 0 14px #e8c77e22; }
+.btn.gold { border-radius: 0; }
+.btn.acc { background: linear-gradient(180deg, #ff5aa5, #c4166a); border: 0; border-radius: 6px; color: #fff; }
+/* cartes : épaisseur, inclinaison sous le doigt et reflet irisé qui suit, comme les cartes 3D */
+.kcw { perspective: 900px; }
+.kc { transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transform-style: preserve-3d; transition: transform .25s ease-out, box-shadow .25s; }
+.kc::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit; opacity: var(--shine, 0); transition: opacity .25s;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 30%), #ffffff40, transparent 45%),
+    conic-gradient(from calc(var(--ry, 0deg) * 6) at var(--mx, 50%) var(--my, 30%), #ff2e8826, #2ee6ff26, #f5c51826, #b072ff26, #ff2e8826);
+  mix-blend-mode: screen; }
+.kcw.tilt .kc { transition: transform .08s linear, box-shadow .25s; box-shadow: 0 0 0 1px #ffffff14, 0 18px 40px #000a, 0 0 26px color-mix(in srgb, var(--rc) 45%, transparent); }
+/* entrée dans une ouverture ou dans l'arène : fondu depuis le même noir, pas de coupure */
+.o3, #ar-root:not([hidden]) { animation: world-in .5s ease-out both; }
+@keyframes world-in { from { opacity: 0; filter: brightness(.4); } to { opacity: 1; filter: none; } }
+@media (prefers-reduced-motion: reduce) { .kc { transform: none !important; } .o3, #ar-root { animation: none !important; } }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -4804,18 +4844,24 @@ function drawOpening() {
   }
   if (o.phase === "cards") return Reveal.render(el, o, top);
   delete el.dataset.rv;
-  const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
-  el.innerHTML = `${top}<section class="stage">
-    <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    ${titlesWonHTML(o.titles)}
+  const r = recapParts(o);
+  el.innerHTML = `${top}<section class="stage">${r.head}
     <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
-    <div class="row" style="justify-content:center">
+    ${r.actions}</section>`;
+}
+// titre et boutons du récapitulatif : partagés par la page et l'ouverture en 3D (les cartes restent alors dans la scène)
+function recapParts(o) {
+  const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
+  const head = `<p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    ${titlesWonHTML(o.titles)}`;
+  const actions = `<div class="row" style="justify-content:center">
       ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
         : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
         : o.pk.daily ? "" : againBtn(o)}
       ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
       ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
-      <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
+      <button class="btn big" type="button" data-act="stage-close">Fermer</button></div>`;
+  return { head, actions };
 }
 // « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
 function againBtn(o) {
@@ -7540,7 +7586,9 @@ const Open3D = (() => {
         g.font = "700 30px Inter, sans-serif"; g.fillStyle = "#e8c77e"; g.fillText(E.packLine || "P O C H E T T E   ·   5   C A R T E S", w / 2, h * .72 + 56);
       } else { g.textAlign = "center"; drawIcon(g, "logo", w / 2, h * .5, 6, "#e8c77e88", 1.4); g.font = "700 26px Inter, sans-serif"; g.fillStyle = "#a99cc8"; g.fillText("QG DE SHINJUKU", w / 2, h * .66); }
     };
-    const foil = (map) => new THREE.MeshPhysicalMaterial({ map, metalness: 0.75, roughness: 0.26, clearcoat: 0.6, clearcoatRoughness: 0.4, iridescence: 0.9, iridescenceIOR: 1.5, iridescenceThicknessRange: [180, 820], side: THREE.DoubleSide, envMapIntensity: 1.1 });
+    // papier métallisé froissé : un relief de plis (carte de normales) et une brillance irrégulière, pour que la lumière glisse dessus
+    const crinkle = crinkleMaps(THREE);
+    const foil = (map) => new THREE.MeshPhysicalMaterial({ map, normalMap: crinkle.normal, normalScale: new THREE.Vector2(0.55, 0.55), roughnessMap: crinkle.rough, metalness: 0.8, roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.25, iridescence: 0.9, iridescenceIOR: 1.5, iridescenceThicknessRange: [180, 820], side: THREE.DoubleSide, envMapIntensity: 1.25 });
     const frontC = document.createElement("canvas"); frontC.width = TX; frontC.height = TY;
     const frontTex = new THREE.CanvasTexture(frontC); frontTex.colorSpace = THREE.SRGBColorSpace; frontTex.anisotropy = 8;
     const repaint = () => { paint(frontC.getContext("2d"), TX, TY, false); frontTex.needsUpdate = true; }; repaint();
@@ -7567,6 +7615,29 @@ const Open3D = (() => {
     const shaftMat = additive({ map: E.shaftTex, color: "#ffffff", opacity: 0, side: THREE.DoubleSide });
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.55, 4.2, 48, 1, true), shaftMat); shaft.position.y = TEAR + 2.1; tilt.add(shaft);
     E.pk = { pack, tilt, cap, strips, slit, slitMat, slitLine, light, shaft, shaftMat, p: 0, dir: 1, repaint };
+  }
+  // plis du papier : lignes de froissure tracées au hasard (hauteur), puis converties en carte de normales
+  function crinkleMaps(THREE) {
+    const W = 512, H = 768, hc = document.createElement("canvas"); hc.width = W; hc.height = H; const g = hc.getContext("2d");
+    g.fillStyle = "#808080"; g.fillRect(0, 0, W, H);
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (let i = 0; i < 260; i++) {
+      const x = rnd() * W, y = rnd() * H, a = rnd() * Math.PI, l = 30 + rnd() * 160, w = 1 + rnd() * 3, up = rnd() < 0.5;
+      const gr = g.createLinearGradient(x - Math.sin(a) * w * 3, y + Math.cos(a) * w * 3, x + Math.sin(a) * w * 3, y - Math.cos(a) * w * 3);
+      gr.addColorStop(0, "#80808000"); gr.addColorStop(0.5, up ? "#ffffff30" : "#00000030"); gr.addColorStop(1, "#80808000");
+      g.strokeStyle = gr; g.lineWidth = w * 6; g.beginPath(); g.moveTo(x - Math.cos(a) * l / 2, y - Math.sin(a) * l / 2); g.lineTo(x + Math.cos(a) * l / 2, y + Math.sin(a) * l / 2); g.stroke();
+    }
+    const hd = g.getImageData(0, 0, W, H).data, nc = document.createElement("canvas"); nc.width = W; nc.height = H;
+    const ng = nc.getContext("2d"), out = ng.createImageData(W, H), rc = document.createElement("canvas"); rc.width = W; rc.height = H;
+    const rg = rc.getContext("2d"), rout = rg.createImageData(W, H), h = (x, y) => hd[(((y + H) % H) * W + ((x + W) % W)) * 4] / 255;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const dx = (h(x + 1, y) - h(x - 1, y)) * 3, dy = (h(x, y + 1) - h(x, y - 1)) * 3, l = Math.hypot(dx, dy, 1), i = (y * W + x) * 4;
+      out.data[i] = (-dx / l * 0.5 + 0.5) * 255; out.data[i + 1] = (dy / l * 0.5 + 0.5) * 255; out.data[i + 2] = (1 / l * 0.5 + 0.5) * 255; out.data[i + 3] = 255;
+      const r = 150 + (h(x, y) - 0.5) * 300 + Math.abs(dx) * 120; rout.data[i] = rout.data[i + 1] = rout.data[i + 2] = Math.max(60, Math.min(255, r)); rout.data[i + 3] = 255;
+    }
+    ng.putImageData(out, 0, 0); rg.putImageData(rout, 0, 0);
+    const normal = new THREE.CanvasTexture(nc), rough = new THREE.CanvasTexture(rc);
+    return { normal, rough };
   }
   function setTear(p) {
     const P = E.pk; P.p = p; const front = p * PW;
@@ -7709,7 +7780,7 @@ const Open3D = (() => {
     return `${top}<section class="o3" id="o3"><div class="o3-host" id="o3Host"></div><div class="o3-vign"></div><div class="o3-flash" id="o3Flash"></div>
       <div class="o3-title" id="o3Title"></div><p class="o3-hint" id="o3Hint"></p>
       <div class="o3-fx" id="o3Fx"><div class="o3-fx-bg"></div><canvas class="o3-fx-c" id="o3FxC"></canvas><div class="o3-fx-name" id="o3FxName"><b></b><span></span></div></div>
-      <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button>
+      <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button><div class="o3-recap" id="o3Recap" hidden></div>
         <div class="o3-tools"><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
       <p class="o3-sub">${esc(o.pk.name)}${o.pk.daily || o.pk.cos ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
   }
@@ -7721,7 +7792,7 @@ const Open3D = (() => {
     $("o3Fx").onclick = () => cur?.fxSkip?.();
     if (!E.on) { E.on = true; E.last = performance.now(); requestAnimationFrame(frame); }
     resize(); hint(cur?.phase === "idle" ? cur.hint : cur?.phase === "cards" ? "Touche une carte pour la retourner" : "");
-    if (cur?.phase === "cards") $("o3All").hidden = false; if (cur?.phase === "done") $("o3Done").hidden = false;
+    if (cur?.phase === "cards") $("o3All").hidden = false; if (cur?.phase === "done") showRecap();
   }
   function start(o) {
     stop(true);
@@ -8044,7 +8115,7 @@ const Open3D = (() => {
     c.flip.rotation.set(0, Math.PI, 0); c.root.position.copy(start);
     if (big && alive(me)) { await wait(150); await cutscene(c); }
     c.busy = false;
-    if (alive(me) && cur.cards.every((x) => x.flipped)) { cur.phase = "done"; $("o3All").hidden = true; $("o3Done").hidden = false; hint(""); }
+    if (alive(me) && cur.cards.every((x) => x.flipped)) { cur.phase = "done"; $("o3All").hidden = true; hint(""); showRecap(); }
   }
   function burst(c) {
     const p = new E.THREE.Vector3(); c.tilt.getWorldPosition(p); p.z += 0.15;
@@ -8060,6 +8131,13 @@ const Open3D = (() => {
   async function flipAll() {
     $("o3All").hidden = true;
     for (const c of cur?.cards || []) if (!c.flipped && cur) { if (c.rk >= 4) await flipCard(c); else { flipCard(c); await wait(220); } }
+  }
+  // fin de l'ouverture : les boutons apparaissent par-dessus la scène, sans récapitulatif
+  function showRecap() {
+    const box = $("o3Recap"); if (!box || !cur) return;
+    // juste les boutons (Encore, Ma collection, Fermer) : les cartes retournées restent dans la scène
+    box.innerHTML = recapParts(cur.o).actions.replace(/<button class="btn big" type="button" data-share[^>]*>Partager<\/button>/, "");
+    box.hidden = false; $("o3").classList.add("recap");
   }
   function finish() { const o = cur?.o; stop(); if (o) { o.phase = "done"; drawOpening(); } }
 
@@ -8158,7 +8236,12 @@ const Open3D = (() => {
   function onClick(e) {
     if (!cur) return;
     if (cur.kind === "chest" && cur.phase === "idle") { if (hit(e)) openChest(); return; }
-    if (cur.phase === "cards" || cur.phase === "done") { const h = hit(e); if (h?.object.userData.card) flipCard(h.object.userData.card); }
+    if (cur.phase === "cards" || cur.phase === "done") {
+      const h = hit(e), c = h?.object.userData.card; if (!c) return;
+      // carte déjà retournée, une fois tout retourné : sa fiche
+      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab) { const id = c.x.c.id; closeStage(); return nav("carte", id); }
+      flipCard(c);
+    }
   }
 
   // ---------- boucle ----------
@@ -8345,5 +8428,23 @@ setInterval(() => { if (view === "boosters" && !opening && $("overlay").hidden &
 // en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
 setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => header()).catch(() => {}); }, 45000);
 connect();
+
+// le monde du QG en fond du site (même décor que l'arène 3D)
+try { if (typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table) document.documentElement.style.setProperty("--world", `url(${ILLUS_DECOR.table})`); } catch (e) {}
+// cartes : inclinaison et reflet qui suivent le doigt ou la souris
+(() => {
+  let on = null;
+  const reset = (w) => { const k = w?.querySelector(".kc"); if (!k) return; w.classList.remove("tilt"); k.style.removeProperty("--rx"); k.style.removeProperty("--ry"); k.style.setProperty("--shine", 0); };
+  document.addEventListener("pointermove", (e) => {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const w = e.target.closest?.(".kcw"); if (on && on !== w) { reset(on); on = null; } if (!w || w.closest(".o3, #ar-root")) return;
+    const k = w.querySelector(".kc"), r = w.getBoundingClientRect(); if (!k || !r.width) return;
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; on = w; w.classList.add("tilt");
+    k.style.setProperty("--ry", `${(x - 0.5) * 18}deg`); k.style.setProperty("--rx", `${(0.5 - y) * 14}deg`);
+    k.style.setProperty("--mx", `${x * 100}%`); k.style.setProperty("--my", `${y * 100}%`); k.style.setProperty("--shine", 1);
+  }, { passive: true });
+  document.addEventListener("pointerleave", () => { if (on) { reset(on); on = null; } });
+  document.addEventListener("pointerup", (e) => { if (e.pointerType === "touch" && on) { reset(on); on = null; } });
+})();
 
 </script>

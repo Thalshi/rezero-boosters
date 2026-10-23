@@ -537,18 +537,24 @@ function drawOpening() {
   }
   if (o.phase === "cards") return Reveal.render(el, o, top);
   delete el.dataset.rv;
-  const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
-  el.innerHTML = `${top}<section class="stage">
-    <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    ${titlesWonHTML(o.titles)}
+  const r = recapParts(o);
+  el.innerHTML = `${top}<section class="stage">${r.head}
     <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
-    <div class="row" style="justify-content:center">
+    ${r.actions}</section>`;
+}
+// titre et boutons du récapitulatif : partagés par la page et l'ouverture en 3D (les cartes restent alors dans la scène)
+function recapParts(o) {
+  const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
+  const head = `<p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    ${titlesWonHTML(o.titles)}`;
+  const actions = `<div class="row" style="justify-content:center">
       ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
         : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
         : o.pk.daily ? "" : againBtn(o)}
       ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
       ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
-      <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
+      <button class="btn big" type="button" data-act="stage-close">Fermer</button></div>`;
+  return { head, actions };
 }
 // « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
 function againBtn(o) {

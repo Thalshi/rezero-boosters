@@ -712,7 +712,7 @@ const COSMETICS = [
   { id: "aura-spectre", slot: "aura", name: "Aura spectrale", rar: "l", k: "flow", c1: "#e8f4ff" },
   { id: "aura-ecarlate", slot: "aura", name: "Aura écarlate", rar: "m", k: "flow", c1: "#ff2e4d", only: "sanctuaire" },
   { id: "orn-etoile", slot: "orn", name: "Étoile du QG", rar: "c", k: "etoile", c1: "#f5c518" },
-  { id: "orn-kanji", slot: "orn", name: "Kanji flottant 零", rar: "pc", k: "kanji", c1: "#ff4d2e" },
+  { id: "orn-kanji", slot: "orn", name: "Emblème flottant", rar: "pc", k: "kanji", c1: "#ff4d2e" },
   { id: "orn-aureole", slot: "orn", name: "Auréole", rar: "r", k: "aureole", c1: "#fff3b0" },
   { id: "orn-cornes", slot: "orn", name: "Cornes d'ombre", rar: "r", k: "cornes", c1: "#3a2a4a" },
   { id: "orn-couronne", slot: "orn", name: "Couronne d'or", rar: "e", k: "couronne", c1: "#f5c518" },
@@ -880,12 +880,12 @@ const CHEST_SCENARIOS = [
   // 6 spectaculaires
   { id: "sp-colonne", cat: "spectacle", name: "Colonne céleste", w: 4, when: (x) => x.best === "m", beats: [["insert"], ["turn"], ["tint"], ["column"], ["quake"], ["open"]] },
   { id: "sp-etoiles", cat: "spectacle", name: "Ciel d'étoiles", w: 3, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["stars"], ["tint"], ["open"]] },
-  { id: "sp-kanji", cat: "spectacle", name: "Kanji géant", w: 3, when: (x) => x.rank >= 3 && x.newTop, beats: [["insert"], ["turn"], ["tint"], ["kanji", "零"], ["open"]] },
+  { id: "sp-kanji", cat: "spectacle", name: "Emblème géant", w: 3, when: (x) => x.rank >= 3 && x.newTop, beats: [["insert"], ["turn"], ["tint"], ["kanji", "零"], ["open"]] },
   { id: "sp-orbite", cat: "spectacle", name: "Orbite des cartes", w: 3, when: (x) => x.n.r + x.n.e + x.n.l + x.n.m >= 3, beats: [["insert"], ["turn"], ["tint"], ["orbit"], ["open"]] },
   { id: "sp-seisme", cat: "spectacle", name: "Séisme", w: 2, when: (x) => x.rank >= 4, beats: [["insert"], ["turn"], ["tint"], ["quake"], ["shake", 3], ["open"]] },
   { id: "sp-aurore", cat: "spectacle", name: "Aurore", w: 3, when: (x) => x.rank >= 3, beats: [["insert"], ["turn"], ["tint"], ["aurora"], ["open"]] },
   // 4 secrets (jamais annoncés au joueur avant d'être vus)
-  { id: "se-createur", cat: "secret", name: "Le créateur", w: 1, when: (x) => x.list.some((c) => c.who === "billy" && RANKS.indexOf(c.rar) >= 3), beats: [["insert"], ["turn"], ["tint"], ["banner", "Billy a signé ce coffre"], ["kanji", "創"], ["open"]] },
+  { id: "se-createur", cat: "secret", name: "Le créateur", w: 1, when: (x) => x.list.some((c) => c.who === "billy" && RANKS.indexOf(c.rar) >= 3), beats: [["insert"], ["turn"], ["tint"], ["banner", "Billy a signé ce coffre"], ["kanji"], ["open"]] },
   { id: "se-arcenciel", cat: "secret", name: "Arc-en-ciel", w: 1, when: (x) => new Set(x.rars).size >= 5, beats: [["insert"], ["turn"], ["ladder"], ["banner", "Cinq raretés, un seul coffre"], ["aurora"], ["open"]] },
   { id: "se-minuit", cat: "secret", name: "Minuit à Shinjuku", w: 1, when: (x) => x.hour === 0 && x.rank >= 2, beats: [["insert"], ["turn"], ["blackout"], ["stars"], ["banner", "Minuit à Shinjuku"], ["tint"], ["open"]] },
   { id: "se-miroir", cat: "secret", name: "Miroir", w: 1, when: (x) => x.list.some((c, i) => RANKS.indexOf(c.rar) >= 3 && x.ids.indexOf(c.id) !== i), beats: [["insert"], ["turn"], ["tint"], ["twin"], ["banner", "Deux fois la même carte"], ["open"]] },

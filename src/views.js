@@ -51,7 +51,7 @@ function cosDeco(design, present) {
   else if (fo) style.push(`background:${base}`);
   if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
-  const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? "零" : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
+  const orn = o ? `<span class="cz-orn cz-orn-${o.k}" style="--zo:${o.c1}" aria-hidden="true">${o.k === "kanji" ? ico("logo") : o.k === "etoile" ? "★" : o.k === "couronne" ? '<svg viewBox="0 0 40 22"><path d="M2 20L5 4l9 9 6-11 6 11 9-9 3 16z" fill="currentColor"/><circle cx="20" cy="3" r="2.4" fill="#fff6"/></svg>' : ""}</span>` : "";
   // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
   return { za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: pa ? `<span class="cz-part cz-part-${pa.k}" style="--zp:${pa.c1}" aria-hidden="true"></span>` : "", orn };
 }
@@ -63,7 +63,7 @@ function cardHTML(c, o = {}) {
     style="${c.skin ? `--hue:${hueOf(c.who)}deg;--h:${(hueOf(c.who) + 200) % 360};--chr:${chromaOf(c.who)[1]};` : ""}${dz ? dz.style : ""}" aria-label="${soon ? "Carte secrète" : `${p.name}, ${c.title}, ${RAR[c.rar].label}${o.gold ? ", dorée" : ""}${locked ? ", pas encore obtenue" : ""}`}">
     ${o.tag ? `<span class="kc-tag">${o.tag}</span>` : ""}
     <div class="kc-h"><b>${soon ? "???" : esc(p.name)}</b><i>${LETTER[c.rar]}</i></div>
-    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${p.kanji || ""}</span>`}<span class="kc-no">${noOf(c.id)}</span>${soon || locked ? "" : brTag(c.id)}</div>${dz ? dz.part : ""}
+    <div class="kc-a">${soon ? "" : artIn(c)}${c.skin && !soon ? `<span class="skx"></span>${c.skin === "chroma" ? '<i class="kc-sw"></i>' : ""}` : ""}${dz ? dz.holo : ""}${soon ? "" : `<span class="kc-jp">${ico(FAC_ICON(p.fac))}</span>`}<span class="kc-no">${noOf(c.id)}</span>${soon || locked ? "" : brTag(c.id)}</div>${dz ? dz.part : ""}
     <div class="kc-s">${soon ? "Bientôt dans l'anime" : esc(subOf(c))}</div>
     <div class="kc-p"><span>POW ${soon ? "??" : pw}</span><span>AURA ${soon ? "??" : au}</span></div>
     ${o.isNew ? '<span class="kc-new">Nouveau</span>' : o.count > 1 ? `<span class="kc-n">×${o.count}</span>` : ""}
@@ -85,30 +85,30 @@ const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src=
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
 // titre choisi par un joueur (le sien vient de la sauvegarde, les autres du classement partagé)
 const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
-const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${t.kanji}</i>${esc(t.name)}</span>` : "");
+const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${ico(TITLE_ICON[t.cat])}</i>${esc(t.name)}</span>` : "");
 const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
 const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${av(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
-const titleOf = (unique) => unique >= ALL_CARDS.length ? ["神", "Légende"] : unique >= 90 ? ["達人", "Maître"] : unique >= 50 ? ["鑑定士", "Expert"] : unique >= 20 ? ["熟", "Confirmé"] : ["初", "Débutant"];
+const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légende"] : unique >= 90 ? [ico("rang4"), "Maître"] : unique >= 50 ? [ico("rang3"), "Expert"] : unique >= 20 ? [ico("rang2"), "Confirmé"] : [ico("rang1"), "Débutant"];
 
 // --- en-tête, menu ---
 let menuOpen = false;
 const MENU = () => [
-  ["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
-  ["missions", "務", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "華", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "対", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "店", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "召", "Sanctuaire"]] : []), ["atelier", "飾", "Atelier"], ["pred", "予", "Prédictions", openPredCount(), "gold"], ["wiki", "典", "Wiki"],
-  ["classement", "順", "Classement"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"], ["createur", "創", "Créateur"], ["branches", "枝", "Branches"], ["galerie", "図", "Galerie"], ["labo", "験", "Labo"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : []),
+  ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
+  ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
+  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"], ["createur", "createur", "Créateur"], ["branches", "branches", "Branches"], ["galerie", "galerie", "Galerie"], ["labo", "labo", "Labo"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
   const cur = (v) => (view === v || (v === "wiki" && view === "carte") ? 'aria-current="page"' : "");
   // barre du bas (téléphone) : les 5 endroits où l'on va le plus
-  const tb = $("tabbar"), tabs = [["boosters", "札", "Boosters"], ["collection", "集", "Collection"], ["market", "市", "Marché", pendingTrades().length],
-    featureOn(CONFIG, "confrontation") ? ["confront", "対", "Combat"] : ["pred", "予", "Prédictions", openPredCount()], ["profil", "我", "Profil", 0, "moi"]];
-  if (tb) tb.innerHTML = tabs.map(([v, k, l, n, p]) => `<button type="button" data-nav="${v}" ${p ? `data-p="${p}"` : ""} ${view === v ? 'aria-current="page"' : ""}><b aria-hidden="true">${k}</b>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("");
+  const tb = $("tabbar"), tabs = [["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
+    featureOn(CONFIG, "confrontation") ? ["confront", "confront", "Combat"] : ["pred", "pred", "Prédictions", openPredCount()], ["profil", "profil", "Profil", 0, "moi"]];
+  if (tb) tb.innerHTML = tabs.map(([v, k, l, n, p]) => `<button type="button" data-nav="${v}" ${p ? `data-p="${p}"` : ""} ${view === v ? 'aria-current="page"' : ""}><b aria-hidden="true">${ico(k)}</b>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("");
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
-    <a href="#/pred" class="ev" ${cur("pred")}>予 Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
+    <a href="#/pred" class="ev" ${cur("pred")}>${ico("pred")} Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
-      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "典", "Wiki"], ["classement", "順", "Classement"], ["raretes", "稀", "Raretés"], ["regles", "規", "Règles"], ["infos", "報", "Infos"], ["nouveautes", "新", "Nouveautés"], ["avis", "声", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "管", "Admin"]] : []), ...(IS_DEV ? [["dev", "技", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${k}</i>${l}</a>`).join("")}</div></div>`;
+      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
 }
 let ACCT = null;
 async function loadAccount() {
@@ -138,7 +138,7 @@ function drawMenu() {
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
     <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié M</small><b>${save.sinceMythic}/${MYTHIC_PITY}</b></div></div>
   </div>
-  <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${k}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
+  <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${ico(k)}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
   <div class="m-foot">${SRV || ME ? `<button type="button" data-nav="profil" data-p="${ME}">Mon profil public</button>` : `<button type="button" data-nav="profil" data-p="moi">Mon profil</button>`}
     ${window.DISCORD_LOGIN && a ? `<a href="/auth/logout">Se déconnecter</a>` : `<button type="button" data-nav="infos">Infos sur le jeu</button>`}</div>`;
 }
@@ -216,11 +216,11 @@ function qsHTML() {
   const st = streakState(), n = toClaim();
   const next = save.free < FREE_MAX ? `prochain dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}` : "réserve pleine";
   return `<div class="qs">
-    <div style="--c:var(--acc)"><span class="k">箱</span><b>${save.free}/${FREE_MAX}</b><span>gratuits · ${next}</span></div>
-    <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">務</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
-    <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">連</span><b>J${st.n}/7</b><span>connexion à la suite</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
-    <div style="--c:var(--gold)"><span class="k">金</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le booster doré</span></div>
-    <div style="--c:var(--acc)"><span class="k">神</span><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
+    <div style="--c:var(--acc)"><span class="k">${ico("coffre")}</span><b>${save.free}/${FREE_MAX}</b><span>gratuits · ${next}</span></div>
+    <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
+    <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">${ico("feu")}</span><b>J${st.n}/7</b><span>connexion à la suite</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
+    <div style="--c:var(--gold)"><span class="k">${ico("piece")}</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le booster doré</span></div>
+    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
   </div>`;
 }
 function packsForTab() {
@@ -228,7 +228,7 @@ function packsForTab() {
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
-  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>零</i>RE ZÉRO</span><span class="emb">${p.kanji}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
+  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>${ico("logo")}</i>RE ZÉRO</span><span class="emb">${ico(packIcon(p))}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
 }
 function selPack() {
   const list = packsForTab();
@@ -257,7 +257,7 @@ function boosterZone() {
     <div class="boost-zone">
       <div class="packrail">${list.map((p) => `<button class="pk" type="button" data-pick="${p.id}" aria-pressed="${p.id === pk.id}">${bstHTML(p)}<span class="lbl ${p.limited ? "lim" : ""}">${label(p)}</span></button>`).join("")}</div>
       <div class="pkd" style="--pc:${pk.color}">
-        <div class="pkd-h"><span class="e">${pk.kanji}</span><div><h3>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name}</h3><p>${pk.sub}</p></div></div>
+        <div class="pkd-h"><span class="e">${ico(packIcon(pk))}</span><div><h3>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name}</h3><p>${pk.sub}</p></div></div>
         <div class="mini4"><div><b>${PACK}</b><span>cartes par booster</span></div><div><b style="color:var(--r-${pk.daily ? "e" : "r"})">${pk.daily ? "Épique" : "Rare"}</b><span>ou mieux, garantie</span></div>
           <div><b style="color:var(--acc)">${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
@@ -331,7 +331,7 @@ function viewCollection() {
   list.sort(col.sort === "rar" ? (a, b) => RAR[b.rar].rank - RAR[a.rar].rank || CATALOG_NO[a.id] - CATALOG_NO[b.id] : col.sort === "name" ? (a, b) => nameOf(a).localeCompare(nameOf(b)) : (a, b) => CATALOG_NO[a.id] - CATALOG_NO[b.id]);
   const bars = FACS().map((f) => [f, ...facProgress(f)]);
   return `<div class="wrap page">
-    ${head("Album · コレクション", "Ma collection")}
+    ${head("Album", "Ma collection")}
     <div class="bigstats"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${Math.round(st.unique / ALL_CARDS.length * 100)} %</b><span>Complétion</span></div><div><b>${dupes}</b><span>Doublons</span></div></div>
     <div class="row"><button class="btn sq" type="button" data-act="recycle" ${dv ? "" : "disabled"}>♻ Recycler les doublons${dv ? ` · +${dv} ◆` : ""}</button>
       <button class="btn sq" type="button" data-act="craft" ${craftableDupes(save).length >= CRAFT_COST ? "" : "disabled"}>✦ Combiner ${CRAFT_COST} doublons → 1 skin</button>
@@ -358,7 +358,7 @@ function albumsHTML() {
 // ===== Wiki : tous les persos =====
 function viewWiki() {
   return `<div class="wrap page">
-    ${head("Wiki · 図鑑", "Les persos de l'anime", "Chaque perso apparu dans Re Zéro : LoL. Obtiens sa carte pour débloquer sa fiche complète : pouvoir, apparence, caractère, citations et cote au marché.")}
+    ${head("Wiki", "Les persos de l'anime", "Chaque perso apparu dans Re Zéro : LoL. Obtiens sa carte pour débloquer sa fiche complète : pouvoir, apparence, caractère, citations et cote au marché.")}
     ${Object.entries(FACTIONS).map(([f, F]) => { const list = CARDS.filter((c) => c.who === c.id && PEOPLE[c.who].fac === f || (c.id.endsWith("-1") && PEOPLE[c.who].fac === f && !CARDS.some((x) => x.id === c.who)));
       return `<section class="sec"><div class="sec-h"><h2 style="color:${F.color}">${F.label}</h2><span class="mono mut" style="font-size:13px">${list.filter((c) => visible(c)).length}/${list.length} connus</span></div>
         <div class="cgrid">${list.map((c) => cardFor(c, { click: true })).join("")}</div></section>`; }).join("")}
@@ -402,10 +402,10 @@ function viewCard() {
   const same = ALL_CARDS.filter((x) => x.id !== c.id && (c.skin ? x.who === c.who : !x.skin && PEOPLE[x.who].fac === p.fac)).slice(0, 12);
   const open = shared.market.filter((l) => l.card === c.id && l.status === "open");
   const row = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : "");
-  return `<div class="wk-head"><span class="ghost">${p.kanji || ""}</span><div class="wrap head">
+  return `<div class="wk-head"><span class="ghost">${ico(FAC_ICON(p.fac))}</span><div class="wrap head">
       <div class="crumb"><button type="button" data-nav="wiki">Wiki</button><i>/</i><button type="button" data-nav="collection">${c.skin ? "Skins du QG" : f.label}</button><i>/</i><span style="color:var(--fg)">${esc(p.name)}</span></div>
       <div class="row"><span class="pill acc">${c.skin ? "Skins du QG" : f.label}</span><span class="pill out" style="border-color:${R.color};color:${R.color}">${R.label}</span><span class="pill box">${got ? `Possédée ×${o.n + o.gold}` : "Non possédée"}</span>${wishSet().has(c.id) && !got ? '<span class="pill box" style="color:var(--wish);border-color:var(--wish)">♥ Dans tes envies</span>' : ""}</div>
-      <h1>${esc(p.name)}</h1><p class="mono mut" style="margin:0">${p.kanji || ""} · ${noOf(c.id)} · ${esc(c.title)}</p></div></div>
+      <h1>${esc(p.name)}</h1><p class="mono mut" style="margin:0">${noOf(c.id)} · ${esc(c.title)}</p></div></div>
     <div class="wrap page" style="padding-top:28px">
     <div class="wk-grid">
       <div class="wk-card card">${cardHTML(c, { locked: !got, gold: !o.n && o.gold > 0, design: myDesign(c.id) })}
@@ -413,7 +413,7 @@ function viewCard() {
         <div class="row" style="width:100%">
           ${got ? `${DB && canShare ? `<button class="btn acc sm" type="button" data-sell="${c.id}">Vendre</button>` : ""}
             ${SRV ? `<button class="btn sm" type="button" data-show="${c.id}">${(save.showcase || []).includes(c.id) ? "★ Retirer de la vitrine" : "☆ Vitrine"}</button>` : ""}
-            <button class="btn sm" type="button" data-nav="atelier" data-p="${c.id}">飾 Personnaliser</button>
+            <button class="btn sm" type="button" data-nav="atelier" data-p="${c.id}">${ico("atelier")} Personnaliser</button>
             ${o.n + o.gold > 1 ? `<button class="btn sm" type="button" data-dis="${c.id}" data-gold="${o.n > 1 ? "" : 1}">Désenchanter · +${cardValue(c.id, !(o.n > 1))} ◆</button>` : ""}
             ${canChat() ? `<button class="btn sm" type="button" data-act="chat-show" data-p="${c.id}">Montrer au comptoir</button>` : ""}
             <button class="btn sm" type="button" data-share="${c.id}" data-gold="${!o.n && o.gold ? 1 : ""}">Partager</button>`

@@ -318,6 +318,8 @@ try {
   const cr = await P.api.api("confront/create", { nom: "Campagne", public: true });
   const gid = cr.gid;
   await Q.api.api("confront/act", { gid, action: { type: "rejoindre" } });
+  // vue classique ici (boutons data-cfa) : l'arène 3D a son propre test, et deux arènes en WebGL logiciel ralentissent trop la machine de test
+  for (const J of [P, Q]) await J.page.evaluate(() => localStorage.setItem("cf-vue", "classique"));
   for (const J of [P, Q]) { await J.go("confront/" + gid); await J.page.waitForTimeout(1500); }
   await P.page.click('[data-act="cf-bot"]'); await P.page.waitForTimeout(1200);
   await P.page.click(`[data-cfa='{"type":"lancer"}']`); await P.page.waitForTimeout(2200);

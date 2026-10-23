@@ -22,7 +22,7 @@ async function cfAct(action) {
 }
 const cfCardDef = (c) => CF.cat?.cartes?.[c?.def] || { nom: c?.def || "?", kanji: "?" };
 const cfSigne = (id) => CF.cat?.signes?.find((x) => x.id === id) || { kanji: "", nom: id };
-const cfAction = (c, extra = "") => { if (!c) return ""; const d = cfCardDef(c), sg = cfSigne(c.signe); return `<span class="cfa ${extra}" title="${esc(d.texte || "")}"><b>${d.kanji}</b><span>${esc(d.nom)}</span><small>${sg.kanji}${c.rang}</small></span>`; };
+const cfAction = (c, extra = "") => { if (!c) return ""; const d = cfCardDef(c), sg = cfSigne(c.signe); return `<span class="cfa ${extra}" title="${esc(d.texte || "")}"><b>${CF_ICON[c.def] || ico(CF_FAMILY_ICON[d.cat] || "logo")}</b><span>${esc(d.nom)}</span><small>${ico(c.signe)}${c.rang}</small></span>`; };
 
 // ===== Illustrations du QG (src/illus.js) : déclarées une fois en CSS, utilisées par classe =====
 (() => {
@@ -35,7 +35,7 @@ const cfAction = (c, extra = "") => { if (!c) return ""; const d = cfCardDef(c),
   ].join("\n");
   const st = document.createElement("style"); st.id = "illus-css"; st.textContent = css; document.head.appendChild(st);
 })();
-const cfEmb = (b, cls = "") => (typeof ILLUS_BRANCHE === "object" && ILLUS_BRANCHE[b] ? `<i class="cf-emb cfemb-${b} ${cls}" aria-hidden="true"></i>` : `<b>${cfBranch(b).kanji}</b>`);
+const cfEmb = (b, cls = "") => (typeof ILLUS_BRANCHE === "object" && ILLUS_BRANCHE[b] ? `<i class="cf-emb cfemb-${b} ${cls}" aria-hidden="true"></i>` : ico("logo"));
 // ===== Visuels des cartes d'action (cadres façon Legends of Runeterra, icônes originales) =====
 // famille → couleur et libellé ; chaque carte a une icône, une règle courte et son signe de présage dans le coin
 const CF_FAM = {
@@ -85,23 +85,23 @@ function cfFace(c, extra = "") {
   const d = cfCardDef(c), [col, fam] = cfFam(d), sg = cfSigne(c.signe);
   const when = d.type === "reaction" ? "Hors de ton tour" : d.type === "equipement" ? "Équipement" : d.type === "differe" ? "Effet plus tard" : "À ton tour";
   return `<span class="cff ${extra}" style="--fc:${col}" title="${esc(d.texte || "")}">
-    <span class="cff-band">${fam}<i>${sg.kanji}<b>${c.rang}</b></i></span>
-    ${typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cff-art pic cfart-${c.def}"></span>` : `<span class="cff-art">${CF_ICON[c.def] || `<b>${d.kanji}</b>`}</span>`}
+    <span class="cff-band">${fam}<i>${ico(c.signe)}<b>${c.rang}</b></i></span>
+    ${typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cff-art pic cfart-${c.def}"></span>` : `<span class="cff-art">${CF_ICON[c.def] || ico(CF_FAMILY_ICON[d.cat] || "logo")}</span>`}
     <span class="cff-name">${esc(d.nom)}</span><span class="cff-rule">${esc(CF_SHORT[c.def] || d.texte || "")}</span><span class="cff-when">${when}</span></span>`;
 }
 // petite pastille (équipement posé, défausse, journal)
-const cfChip = (c) => { if (!c) return ""; const d = cfCardDef(c), [col] = cfFam(d); return `<span class="cfc" style="--fc:${col}" title="${esc(d.nom)} : ${esc(CF_SHORT[c.def] || d.texte || "")}">${CF_ICON[c.def] || d.kanji}<span>${esc(d.nom)}</span></span>`; };
+const cfChip = (c) => { if (!c) return ""; const d = cfCardDef(c), [col] = cfFam(d); return `<span class="cfc" style="--fc:${col}" title="${esc(d.nom)} : ${esc(CF_SHORT[c.def] || d.texte || "")}">${CF_ICON[c.def] || ico(CF_FAMILY_ICON[d.cat] || "logo")}<span>${esc(d.nom)}</span></span>`; };
 const cfBranch = (b) => CF.cat?.branches?.[b] || { nom: b, kanji: "?" };
 
 function viewConfront() {
-  if (!SRV) return `<div class="wrap page">${head("Confrontation · 対決", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
+  if (!SRV) return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation")}${empty("Les parties se jouent sur le site du QG, avec ton compte Discord.")}</div>`;
   if (!featureOn(CONFIG, "confrontation") && !IS_ADMIN) return closedHTML("Re Zéro : Confrontation");
   if (param === "regles") return viewRegles();
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
   const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
-  return `<div class="wrap page">${head("Confrontation · 対決", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
+  return `<div class="wrap page">${head("Confrontation", "Re Zéro : Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label><button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
@@ -133,14 +133,17 @@ function cfTableHTML() {
     const me = v.joueurs.find((p) => p.id === v.moi), mine = CF.list?.cartes || [];
     if (!CF.list) cfLoadList();
     body = `<section class="sec"><h2>Choisis tes cartes</h2><p class="note">Chaque carte de ta collection a une branche (son style de jeu). Prends jusqu'à une carte par branche : à l'étape suivante, <b>tu choisis ton perso parmi elles</b>. Si tu n'en prends aucune, on te prête 2 persos. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
-      ${me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span><b>${cfBranch(b).kanji}</b> ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">Aucune</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
+      ${me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">Aucune</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
         <button class="btn gold" type="button" data-act="cf-contrib">Valider mes cartes</button>` : `<p class="note">Cartes enregistrées. En attente des autres…</p>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
-  } else body = cfBoard(v);
+  } else if (Arena.wants(T)) { setTimeout(() => Arena.sync(CF.table), 0); return `<div class="wrap page cf-page">${top}<p class="note">La partie se joue dans l'arène.</p></div>`; }
+  else if (Arena.loading()) return `<div class="wrap page cf-page">${top}<p class="note">Entrée dans l'arène…</p></div>`;
+  else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
+  if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
   return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
 }
 function cfPerso(c, big) {
@@ -254,6 +257,7 @@ document.addEventListener("click", (e) => {
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
+  if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });
 });
 document.addEventListener("change", (e) => { const b = e.target.dataset?.cfb; if (b) CF.contrib[b] = e.target.value || null; });

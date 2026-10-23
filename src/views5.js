@@ -1,7 +1,7 @@
 // ===== Défilé des Légendes =====
 // Les joueurs inscrivent une carte (copie figée avec son design), le QG vote, Billy modère et clôt.
 ROUTES.push("defile");
-NICON.defile = "華";
+NICON.defile = "★";
 const DEF = { loaded: false, loading: false, current: null, hall: null, archives: [], canVote: false, pick: null };
 async function defLoad(force) {
   if (!SRV || DEF.loading || (DEF.loaded && !force)) return;
@@ -21,12 +21,12 @@ function hallHTML() {
   defLoad();
   const h = DEF.hall; if (!h || !byId[h.card]) return "";
   return `<section class="sec def-hall"><div class="def-hall-in"><div class="def-hall-card">${defCard(h)}</div>
-    <div><p class="eyebrow gold">Défilé des Légendes · 華</p><h2>${esc(h.name)} remporte ${esc(h.title)}</h2><p class="note">${h.votes} vote${h.votes > 1 ? "s" : ""} du QG. Sa carte reste ici jusqu'au ${new Date(h.until).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>
+    <div><p class="eyebrow gold">Défilé des Légendes</p><h2>${esc(h.name)} remporte ${esc(h.title)}</h2><p class="note">${h.votes} vote${h.votes > 1 ? "s" : ""} du QG. Sa carte reste ici jusqu'au ${new Date(h.until).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}.</p>
     <div class="row"><button class="btn sm" type="button" data-nav="defile">Voir le Défilé</button><button class="btn sm" type="button" data-nav="profil" data-p="${h.uid}">Son profil</button></div></div></div></section>`;
 }
 function viewDefile() {
   if (!featureOn(CONFIG, "defile") && !IS_ADMIN) return closedHTML("Défilé des Légendes");
-  if (!SRV) return `<div class="wrap page">${head("Défilé · 華", "Défilé des Légendes")}${empty("Le Défilé se joue sur le site du QG, avec ton compte Discord.")}</div>`;
+  if (!SRV) return `<div class="wrap page">${head("Défilé", "Défilé des Légendes")}${empty("Le Défilé se joue sur le site du QG, avec ton compte Discord.")}</div>`;
   // l'état du Défilé change pendant qu'on joue (Billy ouvre, les votes s'ouvrent) : on le recharge en arrivant, puis toutes les 20 s
   defLoad();
   clearTimeout(DEF.timer); DEF.timer = setTimeout(() => { if (view === "defile" && !document.activeElement?.closest?.(".cf-keep")) defLoad(true); }, 20000);
@@ -61,7 +61,7 @@ function viewDefile() {
     ${phase === "votes" ? `<button class="btn gold sm" type="button" data-act="def-close">Clore et récompenser</button>` : ""}</div>
     <p class="note">Récompenses provisoires (à valider) : ${DEFILE_REWARDS.map((v, i) => `${i + 1}${i ? "e" : "er"} ${v} ◆`).join(", ")}, plus ${DEFILE_PARTICIPATION} ◆ pour chaque participant ; titres « ${DEFILE_TITLES.join(" », « ")} » (et « Habitué du Défilé » après 5 participations). La fréquence (semaine ou mois) est à décider : c'est toi qui ouvres et fermes.</p></section>` : "";
   const arch = DEF.archives.length ? `<section class="sec"><h2>Archives</h2><div class="def-arch">${DEF.archives.map((a) => `<div class="def-arch-i"><div class="def-arch-c">${a.podium[0] ? defCard(a.podium[0]) : ""}</div><div><b>${esc(a.title)}</b><p class="note">${new Date(a.t).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · ${a.n} carte${a.n > 1 ? "s" : ""} · ${a.voters} votant${a.voters > 1 ? "s" : ""}</p><p class="note">${a.podium.map((p, i) => `${i + 1}. ${esc(p.name)} (${p.votes})`).join(" · ")}</p></div></div>`).join("")}</div></section>` : "";
-  return `<div class="wrap page">${head("Défilé des Légendes · 華", d ? esc(d.title) : "Défilé des Légendes", "Montre ta plus belle carte personnalisée. Le QG vote, la gagnante s'affiche à l'accueil pendant une semaine.")}
+  return `<div class="wrap page">${head("Défilé des Légendes", d ? esc(d.title) : "Défilé des Légendes", "Montre ta plus belle carte personnalisée. Le QG vote, la gagnante s'affiche à l'accueil pendant une semaine.")}
     ${d ? `<div class="z-bar"><span>Étape : <b>${PH[phase]}</b></span><span>${((n) => `${n} inscrit${n > 1 ? "s" : ""}`)(d.entries.filter((e) => !e.removed).length)}</span></div>` : ""}
     ${body}${admin}${arch}</div>`;
 }

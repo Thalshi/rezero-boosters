@@ -50,7 +50,7 @@ function viewMarket() {
       ${open.length ? `<div class="mk-grid">${open.map((l) => lsHTML(l)).join("")}</div>` : empty(shared.market.some((l) => l.status === "open") ? "Aucune annonce ne correspond." : "Rien en vente pour l'instant. Sois le premier à mettre un doublon sur le marché.")}`;
   }
   return `<div class="wrap page">
-    ${head("Hôtel des ventes · 市場", "Le marché", "Achète la carte qui te manque, vends tes doublons au plus offrant, échange directement avec les autres joueurs du QG.")}
+    ${head("Hôtel des ventes", "Le marché", "Achète la carte qui te manque, vends tes doublons au plus offrant, échange directement avec les autres joueurs du QG.")}
     ${sharedNote()}${gateHTML()}
     ${tabs}${body}
   </div>`;
@@ -149,7 +149,7 @@ function openTradeBuilder(uid) {
 
 // ===== Missions =====
 let achF = "all";
-const KDAY = ["一", "二", "三", "四", "五", "六", "金"];
+const KDAY = ["1", "2", "3", "4", "5", "6", "★"];
 function mrHTML(m, kind, id) {
   const ok = kind === "first" ? m.done : m.prog >= m.goal, goal = kind === "first" ? 1 : m.goal, prog = kind === "first" ? (m.done ? 1 : 0) : m.prog;
   return `<div class="mr ${m.claimed ? "claimed" : ""}"><div class="t">${esc(m.label)}<span>${fmtN(prog)}/${fmtN(goal)}</span></div>
@@ -167,30 +167,30 @@ function viewMissions() {
   const achList = as.filter((a) => achF === "all" || (achF === "todo" ? !a.claimed : a.claimed));
   const bonus = (label, reward, done, can, kind) => `<div class="mbonus"><span>${label} → ${rewardText(reward)}</span>${done ? "<span>Fait ✓</span>" : can ? `<button class="btn gold sm" type="button" data-claim="${kind}">Réclamer</button>` : ""}</div>`;
   return `<div class="wrap page" style="max-width:860px">
-    ${head("Missions · 任務", "Missions <em>&</em> succès")}
+    ${head("Missions", "Missions <em>&</em> succès")}
     <div><button class="btn acc big" type="button" data-claim="all" ${n ? "" : "disabled"}>Tout réclamer${n ? ` · ${n}` : ""}</button></div>
     <p class="lead">Reviens chaque jour : connexion, pack du jour, missions et prédictions donnent de l'essence et des boosters en plus des gratuits.</p>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion · 連続</p><h2>Série de 7 jours</h2></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Connexion</p><h2>Série de 7 jours</h2></div>
         ${st.canClaim ? `<button class="btn gold" type="button" data-claim="streak">Jour ${st.next} · ${rewardText(STREAK[st.next - 1])}</button>` : `<span class="pill">Reviens demain</span>`}</div>
       <div class="days">${STREAK.map((r, i) => { const dd = i + 1, done = dd <= st.n, now = st.canClaim && dd === st.next; return `<div class="day ${done ? "done" : ""} ${now ? "now" : ""} ${dd === 7 ? "last" : ""}">J${dd}<i>${KDAY[i]}</i><span>${r.chakra ? `+${r.chakra}` : ""}${r.chakra && r.boosters ? " " : ""}${r.boosters ? `${r.boosters}B` : ""}</span></div>`; }).join("")}</div>
       <p class="mono mut" style="margin:0;font-size:12px">${fmtN(save.counts?.login || 0) ? "" : ""}Série actuelle : ${st.n} jour${st.n > 1 ? "s" : ""} · B = booster</p></div>
-    ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue · 歓迎</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
+    ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
       ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour · 日課</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
       ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Les 3 réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine · 週課</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
       ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus("Les 3 réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}</div>
-    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions · 予言</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
+    <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
       <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>
-    <section class="sec"><div class="sec-h"><div><p class="eyebrow">Succès · 実績</p><h2>Succès <span class="mono mut" style="font-size:18px">${doneAch}/${as.length}</span></h2></div>${seg("achF", [["all", "Tous"], ["todo", "À faire"], ["done", "Obtenus"]], achF)}</div>
+    <section class="sec"><div class="sec-h"><div><p class="eyebrow">Succès</p><h2>Succès <span class="mono mut" style="font-size:18px">${doneAch}/${as.length}</span></h2></div>${seg("achF", [["all", "Tous"], ["todo", "À faire"], ["done", "Obtenus"]], achF)}</div>
       ${achList.map((a) => { const ok = a.prog >= a.goal; return `<div class="ach ${a.claimed ? "ok" : ""}"><span class="ic">${a.claimed ? "✦" : "?"}</span><div class="bd"><b>${esc(a.label)}</b><p>${esc(a.desc)}</p><div class="bar"><i style="width:${Math.min(1, a.prog / a.goal) * 100}%"></i></div><small>${fmtN(a.prog)}/${fmtN(a.goal)} · ${rewardShort(a.reward)}</small></div>${!a.claimed && ok ? `<button class="btn gold sm" type="button" data-claim="ach" data-id="${a.id}">Réclamer</button>` : ""}</div>`; }).join("") || empty("Rien ici pour l'instant.")}</section>
   </div>`;
 }
 
 // ===== Prédictions (en plus de Kyara) =====
 function viewPred() {
-  if (!DB) return `<div class="wrap page">${head("Prédictions · 予言", "Prédis la <em>suite</em>")}<div class="card">${offlineMsg("faire tes prédictions")}</div></div>`;
+  if (!DB) return `<div class="wrap page">${head("Prédictions", "Prédis la <em>suite</em>")}<div class="card">${offlineMsg("faire tes prédictions")}</div></div>`;
   const qs = pred.questions, eps = [...new Set(qs.map((q) => q.ep))].sort((a, b) => b - a);
   const counts = (q) => { const c = q.options.map(() => 0); for (const v of pred.all) { const a = v.answers?.[q.id]; if (a != null && c[a] != null) c[a]++; } return c; };
   const board = Object.entries(pred.scores).sort((a, b) => b[1] - a[1]);
@@ -215,7 +215,7 @@ function viewPred() {
   const unit = (p) => `${p.pts} pt${p.pts > 1 ? "s" : ""}`; unit.short = "points";
   const bl = board.map(([uid, pts]) => ({ uid, pts, unique: (shared.players.find((p) => p.uid === uid) || {}).unique || 0 }));
   return `<div class="wrap page" style="max-width:900px">
-    ${head("Prédictions · 予言", "Prédis la <em>suite</em>", "Événements, trahisons, combats, alliances : vote pour ce que tu crois qu'il va se passer dans le prochain épisode. Chaque bonne réponse rapporte des points et l'essence fixée par Billy. Les meilleurs prophètes gagnent des bonus dans l'anime.")}
+    ${head("Prédictions", "Prédis la <em>suite</em>", "Événements, trahisons, combats, alliances : vote pour ce que tu crois qu'il va se passer dans le prochain épisode. Chaque bonne réponse rapporte des points et l'essence fixée par Billy. Les meilleurs prophètes gagnent des bonus dans l'anime.")}
     <div class="card stat4"><div><b>${myPts}</b><span>Tes points</span></div><div class="acc"><b>${good.length}</b><span>Bonnes réponses</span></div><div><b>${fmtN(earned)}</b><span>Essence gagnée</span></div><div><b>${rank ? `#${rank}` : "—"}</b><span>Ton rang</span></div></div>
     ${sharedNote()}
     ${qs.length ? eps.map((ep) => `<section class="sec"><div class="sec-h"><h2>Épisode ${ep}</h2><span class="mono mut" style="font-size:13px">${qs.filter((q) => q.ep === ep).length} question${qs.filter((q) => q.ep === ep).length > 1 ? "s" : ""}</span></div>${qs.filter((q) => q.ep === ep).map(qHTML).join("")}</section>`).join("")
@@ -234,13 +234,13 @@ function viewPred() {
 
 // ===== Classement =====
 const BOARDS = [
-  ["collection", "収集", "Collection", (p) => p.unique ?? p.cards, "cartes", "Classés par nombre de cartes différentes. Les Mythiques départagent les égalités."],
-  ["mythics", "神話", "Mythiques", (p) => p.mythics || 0, "mythiques", "Classés par nombre de Mythiques différentes."],
-  ["skins", "衣装", "Skins", (p) => p.skins || 0, "skins", "Classés par nombre de skins des membres du QG."],
-  ["pred", "予言", "Prédictions", (p) => pred.scores[p.uid] || 0, "points", "Classés par points de prédiction sur les épisodes."],
-  ["ach", "実績", "Succès", (p) => p.ach || 0, "succès", "Classés par nombre de succès obtenus."],
-  ["commerce", "商売", "Commerce", (p) => (p.sales || 0) + (p.trades || 0), "ventes et échanges", "Classés par ventes au marché et échanges réussis."],
-  ["boosters", "開封", "Boosters", (p) => p.opened || 0, "boosters", "Classés par nombre de boosters ouverts."],
+  ["collection", "collection", "Collection", (p) => p.unique ?? p.cards, "cartes", "Classés par nombre de cartes différentes. Les Mythiques départagent les égalités."],
+  ["mythics", "couronne", "Mythiques", (p) => p.mythics || 0, "mythiques", "Classés par nombre de Mythiques différentes."],
+  ["skins", "atelier", "Skins", (p) => p.skins || 0, "skins", "Classés par nombre de skins des membres du QG."],
+  ["pred", "pred", "Prédictions", (p) => pred.scores[p.uid] || 0, "points", "Classés par points de prédiction sur les épisodes."],
+  ["ach", "classement", "Succès", (p) => p.ach || 0, "succès", "Classés par nombre de succès obtenus."],
+  ["commerce", "market", "Commerce", (p) => (p.sales || 0) + (p.trades || 0), "ventes et échanges", "Classés par ventes au marché et échanges réussis."],
+  ["boosters", "boosters", "Boosters", (p) => p.opened || 0, "boosters", "Classés par nombre de boosters ouverts."],
 ];
 let rankQ = "";
 function viewClassement() {
@@ -249,8 +249,8 @@ function viewClassement() {
   const unit = (p) => `${fmtN(score(p))} ${unitTxt}`; unit.short = unitTxt;
   const q = rankQ.trim().toLowerCase();
   return `<div class="wrap page" style="max-width:900px">
-    ${head("Classement · ランキング", "Les meilleurs collectionneurs")}
-    <div class="chips">${BOARDS.map(([k, kj, l]) => `<button class="chip" type="button" data-seg="rankTab" data-v="${k}" aria-pressed="${boardTab === k}"><span class="kj">${kj}</span>${l}</button>`).join("")}</div>
+    ${head("Classement", "Les meilleurs collectionneurs")}
+    <div class="chips">${BOARDS.map(([k, kj, l]) => `<button class="chip" type="button" data-seg="rankTab" data-v="${k}" aria-pressed="${boardTab === k}"><span class="kj">${ico(kj)}</span>${l}</button>`).join("")}</div>
     <p class="lead">${desc}</p>
     <div class="search">${icon.search}<input class="in" id="rankQ" type="search" placeholder="Chercher un joueur pour se comparer…" value="${esc(rankQ)}"></div>
     ${list.length ? `${q ? "" : podiumHTML(list, score, unit)}
@@ -281,13 +281,13 @@ function titlesSection(p, isMe) {
   const prog = isMe ? Object.fromEntries(titlesProgressS(save).map((x) => [x.id, x])) : {};
   const item = (t) => {
     const has = own.has(t.id), on = p.titleShown === t.id, pr = prog[t.id];
-    const tag = `<span class="ttl-k">${t.kanji}</span><span class="ttl-t"><b>${esc(t.name)}</b><small>${esc(t.desc)}${!has && pr?.goal > 1 ? ` · ${fmtN(pr.prog)}/${fmtN(pr.goal)}` : ""}</small></span>`;
+    const tag = `<span class="ttl-k">${ico(TITLE_ICON[t.cat])}</span><span class="ttl-t"><b>${esc(t.name)}</b><small>${esc(t.desc)}${!has && pr?.goal > 1 ? ` · ${fmtN(pr.prog)}/${fmtN(pr.goal)}` : ""}</small></span>`;
     return isMe && has ? `<button class="ttl-i r-${t.rar} ${on ? "on" : ""}" type="button" data-title="${on ? "" : t.id}" aria-pressed="${on}" title="${on ? "Ne plus l'afficher" : "L'afficher près de ton pseudo"}">${tag}${on ? `<em>Affiché</em>` : ""}</button>`
       : `<div class="ttl-i r-${t.rar} ${has ? "" : "lock"}">${tag}</div>`;
   };
   const list = TITLES.filter((t) => own.has(t.id) || (isMe && titlesAll));
   const cats = Object.entries(TITLE_CATS).map(([k, l]) => [l, list.filter((t) => t.cat === k)]).filter(([, l]) => l.length);
-  return `<section class="sec ttl-sec"><p class="eyebrow mut">Titres · 称号</p><h2>${isMe ? "Mes titres" : "Ses titres"} <small class="note">${own.size}/${TITLES.length}</small></h2>
+  return `<section class="sec ttl-sec"><p class="eyebrow mut">Titres</p><h2>${isMe ? "Mes titres" : "Ses titres"} <small class="note">${own.size}/${TITLES.length}</small></h2>
     ${isMe ? `<p class="note">${own.size ? "Touche un titre pour l'afficher près de ton pseudo (classement, Confrontation, Défilé)." : "Aucun titre pour l'instant : ils se gagnent en ouvrant, en invoquant, en jouant à Confrontation, au Défilé et aux prédictions."}</p>` : ""}
     ${cats.map(([l, ts]) => `<p class="ttl-cat">${l}</p><div class="ttl-grid">${ts.map(item).join("")}</div>`).join("")}
     ${isMe ? `<button class="btn sm" type="button" data-act="titles-all">${titlesAll ? "Masquer les titres à gagner" : `Voir les ${TITLES.length - own.size} titres à gagner`}</button>` : ""}</section>`;
@@ -302,7 +302,7 @@ function announceTitles(ids) {
 }
 const takeTitles = () => { const l = titlesPending; titlesPending = []; return l; };
 function titlesWonHTML(ids) {
-  return ids?.length ? `<div class="ttl-won">${ids.map((id) => { const t = TITLE_BY_ID[id]; return `<button class="ttl-i r-${t.rar} won" type="button" data-title="${t.id}"><span class="ttl-k">${t.kanji}</span><span class="ttl-t"><small>Nouveau titre</small><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span><em>${save.titleShown === t.id ? "Affiché" : "L'afficher"}</em></button>`; }).join("")}</div>` : "";
+  return ids?.length ? `<div class="ttl-won">${ids.map((id) => { const t = TITLE_BY_ID[id]; return `<button class="ttl-i r-${t.rar} won" type="button" data-title="${t.id}"><span class="ttl-k">${ico(TITLE_ICON[t.cat])}</span><span class="ttl-t"><small>Nouveau titre</small><b>${esc(t.name)}</b><small>${esc(t.desc)}</small></span><em>${save.titleShown === t.id ? "Affiché" : "L'afficher"}</em></button>`; }).join("")}</div>` : "";
 }
 function flushTitles() {
   const ids = takeTitles(); if (!ids.length) return;
@@ -331,7 +331,7 @@ function viewProfil() {
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
       <span class="pf-av">${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}</span>
-      <p class="eyebrow">Collectionneur · コレクター</p>
+      <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
@@ -340,7 +340,7 @@ function viewProfil() {
     </div></div>
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
-    ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette · 看板</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette · 看板</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
+    ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
     ${titlesSection(p, isMe)}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
       ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
@@ -358,7 +358,7 @@ function viewRaretes() {
   const DESC = { c: "Cadre gris mat, aucun effet.", pc: "Cadre vert, filet lumineux.", r: "Cadre bleu, halo externe léger.", e: "Cadre violet, premier reflet holo animé.", l: "Cadre or brossé, holo et forte lueur.", m: "Cadre rouge, holo arc-en-ciel et aura de feu." };
   const ROLE = { c: "Figurants et persos de passage", pc: "Persos secondaires", r: "Persos qui comptent dans l'histoire", e: "Persos clés d'un arc", l: "Les grandes figures de l'anime", m: "Les plus puissants et les plus importants" };
   return `<div class="wrap page">
-    ${head("Système de rareté · レアリティ", "De Commune à Mythique", "La rareté d'un perso dépend de son importance dans l'anime de Billy : plus il pèse dans l'histoire, plus sa carte est rare.")}
+    ${head("Système de rareté", "De Commune à Mythique", "La rareté d'un perso dépend de son importance dans l'anime de Billy : plus il pèse dans l'histoire, plus sa carte est rare.")}
     <div class="rar-ex">${RANKS.map((k) => { const c = ex(k); return `<div>${c ? cardHTML(c, { soon: !visible(c), click: visible(c) }) : ""}<h3 style="--c:${RAR[k].color}"><i></i>${RAR[k].label}</h3><p class="mono">${pct(per(k) / 100)} des cartes tirées</p><p>${ROLE[k]}</p><p>${DESC[k]}</p></div>`; }).join("")}</div>
     <section class="sec prose"><h2>Et aussi</h2>
       <p><b style="color:var(--gold)">Dorée.</b> Tous les ${GOLD_EVERY} boosters, ta meilleure carte sort dorée (et ${pct(GOLD_CHANCE)} de chance à chaque carte). Une dorée vaut trois fois plus au recyclage.</p>
@@ -369,7 +369,7 @@ function viewRaretes() {
   </div>`;
 }
 function viewRegles() {
-  return `<div class="wrap page">${head("Règles · 規則", "Les règles du QG")}
+  return `<div class="wrap page">${head("Règles", "Les règles du QG")}
     <ol class="rules">
       <li><b>Pas de triche.</b> Scripts, robots, failles ou outils qui jouent à ta place sont interdits. Une faille trouvée se signale dans Avis et bugs.</li>
       <li><b>Respect au comptoir.</b> Insultes, harcèlement et spam dans le chat mènent à la sourdine ou au bannissement.</li>
@@ -381,7 +381,7 @@ function viewRegles() {
     </ol></div>`;
 }
 function viewInfos() {
-  return `<div class="wrap page">${head("Infos · 情報", "Re Zéro : LoL")}
+  return `<div class="wrap page">${head("Infos", "Re Zéro : LoL")}
     <div class="prose">
       <p>Re Zéro : LoL est l'anime que Billy réalise sur les membres du serveur Discord <b>QG de Shinjuku</b>. Un épisode sort environ chaque mois. Ce jeu de cartes reprend tous ses persos.</p>
       <h2>L'histoire</h2>
@@ -407,7 +407,7 @@ const CHANGELOG = [
 ];
 function viewNouveautes() {
   const L = { n: "Nouveau", a: "Amélioré", c: "Corrigé" };
-  return `<div class="wrap page">${head("Nouveautés · 新着", "Quoi de neuf ?")}
+  return `<div class="wrap page">${head("Nouveautés", "Quoi de neuf ?")}
     <div class="log">${CHANGELOG.map(([d, v, items]) => `<h3>${v}<small>${d}</small></h3>${items.map(([k, t]) => `<div class="${k}"><em>${L[k]}</em><span>${esc(t)}</span></div>`).join("")}`).join("")}</div></div>`;
 }
 let myStars = 0;
@@ -415,7 +415,7 @@ function viewAvis() {
   const rv = shared.avis || [], mine = rv.find((r) => r.uid === ME);
   if (!myStars && mine) myStars = mine.stars;
   const avg = rv.length ? rv.reduce((a, r) => a + r.stars, 0) / rv.length : 0;
-  return `<div class="wrap page" style="max-width:860px">${head("Avis et bugs · 声", "Ton avis compte", "Dis ce que tu penses du jeu, propose des idées ou signale un bug. Billy lit tout.")}
+  return `<div class="wrap page" style="max-width:860px">${head("Avis et bugs", "Ton avis compte", "Dis ce que tu penses du jeu, propose des idées ou signale un bug. Billy lit tout.")}
     ${DB && canShare ? `<form class="card sec" id="avisForm"><h3>${mine ? "Modifier mon avis" : "Donner mon avis"}</h3>
       <div class="starpick">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-star="${n}" class="${n <= myStars ? "on" : ""}" aria-label="${n} étoile${n > 1 ? "s" : ""}">★</button>`).join("")}</div>
       <textarea class="in" id="avisText" rows="3" maxlength="400" placeholder="Ce que tu aimes, ce qui manque…">${esc(mine?.text || "")}</textarea>
@@ -444,7 +444,7 @@ function viewAdmin() {
   if (!IS_ADMIN) return `<div class="wrap page">${empty("Cette page est réservée à Billy.")}</div>`;
   const ids = [...new Set([...shared.players.map((p) => p.uid), ...Object.keys(CONFIG.progress), ...Object.keys(CONFIG.extra)])];
   const chars = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac));
-  return `<div class="wrap page" style="max-width:900px">${head("Admin · 管理", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
+  return `<div class="wrap page" style="max-width:900px">${head("Admin", "Qui peut packer quoi", "Chaque perso est rattaché à l'épisode où il apparaît. Un joueur ne peut packer que les persos des épisodes qu'il a atteints : les autres restent cachés. Tu peux aussi offrir un perso en bonus à un joueur, par exemple pour une bonne prédiction.")}
     <div class="card sec"><label class="field" for="cfgDef">Épisode atteint par défaut<select id="cfgDef" data-cfg="def">${epOptions(CONFIG.def)}</select></label><p class="note">Passer à l'épisode suivant prévient tout le monde dans les notifications.</p></div>
     <div class="card sec"><h3>Créateur</h3><p class="note">Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou crée des cosmétiques. Publié tout de suite.</p><button class="btn gold" type="button" data-nav="createur">Ouvrir le Créateur</button></div>
     <div class="card sec"><h3>Confrontation : branches des cartes</h3><p class="note">Chaque carte a une branche (son pouvoir en partie), avec une variante possible selon la rareté. Une proposition est en place : à toi de l'ajuster.</p><button class="btn" type="button" data-nav="branches">Régler les branches</button></div>
@@ -474,7 +474,7 @@ function viewDev() {
   loadDev();
   const st = devData.stats, au = devData.audit;
   const kv = (label, v) => `<div><b>${v ?? "—"}</b><span>${label}</span></div>`;
-  return `<div class="wrap page" style="max-width:1000px">${head("Dev · 開発", "Outils du développeur", "Ce qui se passe sous le capot : état du serveur, contrôle des comptes et bugs signalés. Tout ici est en lecture seule.")}
+  return `<div class="wrap page" style="max-width:1000px">${head("Dev", "Outils du développeur", "Ce qui se passe sous le capot : état du serveur, contrôle des comptes et bugs signalés. Tout ici est en lecture seule.")}
     <div class="row"><button class="btn sm" type="button" data-act="dev-refresh">↻ Actualiser</button>${st?.now ? `<span class="mono mut" style="font-size:12px">mis à jour ${ago(st.now)}</span>` : ""}</div>
     ${!st ? `<div class="card">${empty("Chargement…")}</div>` : st.error ? `<div class="card">${empty(esc(st.error))}</div>` : `
     <section class="sec"><h2>Serveur</h2>
@@ -510,7 +510,7 @@ const glowOf = (o) => { const best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank
 function drawOpening() {
   const o = opening, el = $("stage");
   el.hidden = false; el.style.setProperty("--glow", glowOf(o));
-  const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">験 Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
+  const top = `<div class="stage-top"><button class="back" type="button" data-act="stage-back" aria-label="Retour">‹</button>${o.lab ? `<span class="wal lab-pill">${ico("labo")} Labo · rien n'est réel</span>` : `<span class="wal"><span class="bar"><i style="width:${Math.min(100, save.free / FREE_MAX * 100)}%"></i></span>${save.free}/${FREE_MAX}<span class="sep"></span><span class="ess"><span class="dia"></span>${fmtN(save.chakra)}</span></span>`}<span style="width:40px"></span></div>`;
   if ((Coffre.isChest(o.pk) || o.scenario) && Coffre.draw(el, o, top)) return;
   if (o.phase === "pack") {
     const chest = o.pk.skins || o.pk.base === "coffre";
@@ -608,7 +608,7 @@ function drawChat() {
        <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatIn" maxlength="300" placeholder="Écris au QG… (@Nom pour mentionner)" aria-label="Message">
        <button class="btn sm" type="button" data-act="chat-card" title="Montrer une de tes cartes">Carte</button><button class="btn acc sm" type="submit">Envoyer</button></form>`
     : `<p class="note">${window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour discuter avec le QG.` : "Le comptoir s'active quand tu es connecté à l'app."}</p>`;
-  $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir · 酒場</small>Le QG en direct</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>
+  $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir</small>Le QG en direct</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>
     <div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
   drawChatList();
 }

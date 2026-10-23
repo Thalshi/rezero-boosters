@@ -19,7 +19,7 @@ function viewGalerie() {
   if (!gal.qaMap) { galLoadQA(); gal.qaMap = {}; }
   const list = galList(), n = Object.values(gal.qaMap).length, bad = Object.values(gal.qaMap).filter((x) => x.s === "revoir").length;
   const design = gal.cos ? { [COS_BY_ID[gal.cos].slot]: gal.cos } : null;
-  return `<div class="wrap page">${head("Admin · 図", "Galerie", "Toutes les cartes du jeu, même cachées aux joueurs ou non possédées. Aperçu seulement : rien n'est ajouté à une collection.")}
+  return `<div class="wrap page">${head("Admin", "Galerie", "Toutes les cartes du jeu, même cachées aux joueurs ou non possédées. Aperçu seulement : rien n'est ajouté à une collection.")}
     <div class="z-bar"><span><b>${ALL_CARDS.length}</b> cartes</span><span>Contrôle qualité : <b>${n}</b> vérifiées, <b>${bad}</b> à revoir</span><button class="btn sm" type="button" data-nav="labo">Ouvrir le labo</button></div>
     ${seg("galRar", [["", "Toutes"], ...RANKS.map((r) => [r, RAR[r].label])], gal.rar)}
     <div class="gal-f">
@@ -68,7 +68,7 @@ function viewLabo() {
   const s = lab.s, cos = s ? cosOf(s) : null;
   const forced = lab.picks.filter(Boolean).length, cats = { classique: "Classiques", fake: "Feintes", transfo: "Transformations", spectacle: "Spectaculaires", secret: "Secrets" };
   const ctxNow = forced === PACK ? chestCtx(lab.picks.map((id, i) => ({ id, gold: lab.golds[i], isNew: !s?.owned?.[id] }))) : null;
-  return `<div class="wrap page">${head("Admin · 験", "Laboratoire", "Une partie de test rien qu'à toi, gardée à part par le serveur. Les ouvertures, invocations et soldes d'ici ne touchent jamais ta vraie collection, le classement, le marché ni le fil du QG.")}
+  return `<div class="wrap page">${head("Admin", "Laboratoire", "Une partie de test rien qu'à toi, gardée à part par le serveur. Les ouvertures, invocations et soldes d'ici ne touchent jamais ta vraie collection, le classement, le marché ni le fil du QG.")}
     <div class="lab-warn">Bac à sable : rien de ce qui se passe ici n'est réel.</div>
     <section class="sec"><h2>Partie de test</h2>
       ${s ? `<div class="card stat4"><div><b>${fmtN(s.chakra)}</b><span>Essence de test</span></div><div><b>${s.free}</b><span>Boosters gratuits</span></div><div><b>${statsS(s).unique}</b><span>Cartes</span></div><div><b>${cos.inst.length + Object.keys(cos.own).length}</b><span>Cosmétiques</span></div></div>

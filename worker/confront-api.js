@@ -57,7 +57,7 @@ async function release(env, h, g) {
     if (rc?.eligible) {
       G.trackS(s, "cfPlay", 1, now);
       if (rc.gagnant) {
-        G.trackS(s, "cfWin", 1, now); G.trackS(s, "cfWin_" + p.role, 1, now);
+        G.trackS(s, "cfWin", 1, now); if (p.role) G.trackS(s, "cfWin_" + p.role, 1, now);
         if (p.vivant && p.pv === 1) G.trackS(s, "cfWin1pv", 1, now);
         if (n >= 7) G.trackS(s, "cfWin7", 1, now);
       }
@@ -90,9 +90,10 @@ const names = async (env, ids) => {
   const rows = real.length ? (await env.DB.prepare(`SELECT id, name, avatar FROM users WHERE id IN (${real.map(() => "?").join(",")})`).bind(...real).all()).results : [];
   return Object.fromEntries([...rows.map((r) => [r.id, { name: r.name, avatar: r.avatar }]), ...ids.filter(isBot).map((id) => [id, { name: "Bot " + id.slice(4), bot: true }])]);
 };
+const SALON_MAX = 40, SALON_LEN = 120, SALON_GAP = 2000, SALON_EMOTES = ["salut", "haha", "respect", "defi", "grr", "quoi", "ouin", "pardon"];
 async function viewOf(env, g, uid) {
   const me = g.state.players.some((p) => p.id === uid) ? uid : null;
-  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me) };
+  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me), salon: (g.salon || []).slice(-SALON_MAX) };
 }
 // cartes de collection apportables : celles du joueur, avec leur branche (rien d'autre du catalogue n'est envoyé)
 // proposition : branche donnée à la création (carte, puis perso créé depuis l'app), sinon la table proposée
@@ -165,6 +166,20 @@ export async function confrontRoute(env, user, path, body, h) {
       const out = act(g.state, "bot:" + n, { type: "rejoindre" }, now);
       if (out.error) return { error: out.error.message };
       g.state = out.state; return {};
+    });
+    return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
+  }
+  // salon de la table : messages courts et émotes, visibles de tous ; seuls les joueurs de la table écrivent
+  if (a === "salon") {
+    const kind = body.kind === "emote" ? "emote" : "msg", v = String(body.v || "").replace(/\s+/g, " ").trim().slice(0, SALON_LEN);
+    if (kind === "emote" ? !SALON_EMOTES.includes(v) : !v) return fail(400, "Message vide.");
+    const r = await edit(env, h, gid, (g, now) => {
+      if (!g.state.players.some((p) => p.id === user.id)) return { error: "Seuls les joueurs de la table peuvent écrire.", status: 403 };
+      g.salon ||= [];
+      const last = g.salon.filter((m) => m.pid === user.id).at(-1);
+      if (last && now - last.t < SALON_GAP) return { error: "Doucement : un message toutes les 2 secondes.", status: 429 };
+      g.salon.push({ id: (g.salon.at(-1)?.id || 0) + 1, pid: user.id, t: now, kind, v }); g.salon = g.salon.slice(-SALON_MAX);
+      return {};
     });
     return r.error ? fail(r.status || 400, r.error) : json(await viewOf(env, r.g, user.id));
   }

@@ -70,16 +70,11 @@ try {
   await Q.api("confront/act", { gid: s2.gid, action: { type: "quitter" } });
   t.check("le dernier quitte : le salon se ferme", !(await P.api("confront/list")).salons.some((g) => g.gid === s2.gid));
 
-  t.section("compte vierge");
-  const sw = await fetch(`${srv.base}/auth/test`, { headers: { cookie: A.cookie }, redirect: "manual" });
-  const tc = (sw.headers.get("set-cookie") || "").split(";")[0];
-  const meT = await (await fetch(`${srv.base}/api/me`, { headers: { cookie: tc } })).json();
-  t.check("le compte vierge est un autre compte", meT.test === true && meT.id === "t" + A.id.slice(1) && /\(test\)$/.test(meT.name), meT);
-  const stT = await (await fetch(`${srv.base}/api/game/state`, { method: "POST", headers: { cookie: tc, "content-type": "application/json" }, body: "{}" })).json();
-  t.check("il démarre vide", Object.keys(stT.state?.owned || {}).length === 0);
-  t.check("un joueur normal n'y a pas droit", (await fetch(`${srv.base}/auth/test`, { headers: { cookie: P.cookie }, redirect: "manual" })).status === 403);
-  const bk = await fetch(`${srv.base}/auth/test?back=1`, { headers: { cookie: tc }, redirect: "manual" }), rc = (bk.headers.get("set-cookie") || "").split(";")[0];
-  t.check("retour au vrai compte", (await (await fetch(`${srv.base}/api/me`, { headers: { cookie: rc } })).json()).id === A.id);
+  t.section("tout effacer");
+  t.check("un joueur normal ne peut pas tout effacer", (await P.api("dev/wipe")).status === 403);
+  await A.api("open", { pack: "mix" }).catch(() => null);
+  const wp = await A.api("dev/wipe");
+  t.check("tout effacer : compte neuf, sans sauvegarde", wp.state && Object.keys(wp.state.owned).length === 0 && (await A.api("dev/backup")).backup === null, wp.error);
 
   t.section("prédictions");
   const q1 = await A.coll("POST", "predq", { ep: 2, text: "Qui gagne ?", options: ["Kuradai", "Sasori"], points: 1, reward: 50, status: "open", answer: null, endsAt: Date.now() - 1000, t: Date.now() });

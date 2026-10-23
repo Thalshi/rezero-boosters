@@ -2236,4 +2236,14 @@ body.ar-on .overlay { z-index: 95; }
 .chip[aria-pressed="true"], .utabs button[aria-pressed="true"], .seg button[aria-pressed="true"] { color: #fff3d0 !important; border-color: #e8c77e99 !important; }
 button.zdrop { cursor: pointer; color: var(--fg); font: inherit; transition: transform .2s, box-shadow .2s; } button.zdrop:hover { transform: translateY(-3px); box-shadow: 0 10px 22px #000a, 0 0 18px #e8c77e33; }
 .av-btn.is-test::after { content: "TEST"; position: absolute; left: 50%; bottom: -10px; translate: -50% 0; padding: 1px 6px; border-radius: 99px; background: #ff2e88; color: #fff; font: 800 9px Inter, sans-serif; letter-spacing: .08em; z-index: 3; }
+/* ===== le design suit le décor de la rubrique : voile, panneaux en verre teinté, liserés ===== */
+html { --sc: #ea5560; --sc-deep: #2a1822; }
+html.w3d-on body::before { background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--sc-deep) 30%, transparent) 40%, color-mix(in srgb, var(--sc-deep) 75%, #07060f) 100%); transition: background .6s; }
+:is(.card, .mbox, .zt, .zd-tile, .rk, .cf-row, .ach, .zdrop, .zs-tile):not(.mhero):not(.bk-page) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sc-deep) 62%, #0b0916d0), color-mix(in srgb, var(--sc-deep) 30%, #07060fe0)) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.25); backdrop-filter: blur(10px) saturate(1.25);
+  border-color: color-mix(in srgb, var(--sc) 30%, #ffffff12) !important; }
+:is(.card, .mbox):not(.mhero):hover { box-shadow: 0 12px 30px #0009, 0 0 26px color-mix(in srgb, var(--sc) 22%, transparent); }
+.head h1 em, h1 em { color: var(--sc) !important; text-shadow: 0 0 22px color-mix(in srgb, var(--sc) 55%, transparent); }
+.nav-tabs [aria-current], .tabs [aria-current="page"] { box-shadow: inset 0 -2px 0 var(--sc); }
 </style>

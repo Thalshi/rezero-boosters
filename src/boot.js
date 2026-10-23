@@ -49,6 +49,10 @@ document.addEventListener("click", (e) => {
   const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
   if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
   if (act === "dev-grant") return srv("dev/grant").then((r) => { if (r.state) { Object.assign(save, r.state); persist?.(); } toast("+50 000 ◆ et 60 boosters gratuits (local)."); draw(); }).catch((e) => toast(e.message));
+  if (act === "dev-wipe") {
+    const b = t.closest("[data-act]"); if (!sure(b, "Sûr ? Tout sera perdu")) return;
+    return srv("dev/wipe").then(() => { toast("Compte effacé : tu repars de zéro."); setTimeout(() => location.reload(), 900); }).catch((e) => toast(e.message));
+  }
   if (act === "dev-reset" || act === "dev-restore") {
     const b = t.closest("[data-act]"); if (!sure(b, act === "dev-reset" ? "Confirmer : compte neuf" : "Confirmer la restauration")) return;
     return srv(act === "dev-reset" ? "dev/reset" : "dev/restore").then(() => { toast(act === "dev-reset" ? "Compte remis à zéro. Ton vrai compte est sauvegardé." : "Ton vrai compte est de retour."); setTimeout(() => location.reload(), 900); }).catch((err) => toast(err.message));
@@ -121,14 +125,17 @@ connect();
 
 // le monde du QG en fond du site (même décor que l'arène 3D)
 // un panorama par rubrique (créations de Reichi) : fond 3D et en-tête des pages
+// couleurs de chaque panorama (accent lumineux, ombre profonde) : toute l'interface s'y accorde
+const DECOR_PAL = { v1: ["#e0566a", "#2c2029"], v2: ["#ea5560", "#2a1822"], v3: ["#e8567c", "#231722"], v4: ["#8fa8ff", "#1f1a34"], v5: ["#ea6e6c", "#38252e"], v6: ["#ec7a6f", "#36262c"], v7: ["#e46aa6", "#362a3d"], v8: ["#9b8cff", "#1a0e2d"] };
 const DECOR_VIEW = { boosters: "v2", collection: "v1", wiki: "v1", carte: "v1", market: "v4", missions: "v5", pred: "v8", classement: "v6", profil: "v6", sanctuaire: "v7", boutique: "v3", atelier: "v3", defile: "v6", confront: "v4", regles: "v5", infos: "v5", raretes: "v1", nouveautes: "v2", avis: "v5" };
 function syncDecor() {
   try {
     if (typeof ILLUS_DECOR !== "object") return;
     const v = location.hash.replace(/^#\/?/, "").split("/")[0] || "boosters", url = ILLUS_DECOR["v" + (DECOR_VIEW[v] || "v2").slice(1)] || ILLUS_DECOR.table;
     if (!url) return;
-    document.documentElement.style.setProperty("--world", `url(${url})`);
-    World3D.setBg?.(url);
+    const key = DECOR_VIEW[v] || "v2", pal = DECOR_PAL[key] || DECOR_PAL.v2, st = document.documentElement.style;
+    st.setProperty("--world", `url(${url})`); st.setProperty("--sc", pal[0]); st.setProperty("--sc-deep", pal[1]);
+    World3D.setBg?.(url); World3D.setTint?.(pal[0], pal[1]);
   } catch (e) {}
 }
 syncDecor(); addEventListener("hashchange", syncDecor);

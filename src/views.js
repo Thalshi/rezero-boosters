@@ -130,7 +130,6 @@ async function loadStyles() {
 const brTag = (id) => { const b = MY_BR[id]; return b ? `<span class="kc-br" title="Style en Confrontation : ${esc(cfBranch(b).nom)}">${cfEmb(b, "sm")}</span>` : ""; };
 function drawAvatar() {
   const a = ACCT;
-  $("avBtn")?.classList.toggle("is-test", !!a?.test);
   $("avImg").outerHTML = a?.avatar ? `<img id="avImg" src="${esc(a.avatar)}" alt="">` : `<span id="avImg">${a?.name ? esc(a.name[0].toUpperCase()) : "I"}</span>`;
 }
 function drawMenu() {

@@ -2236,6 +2236,16 @@ body.ar-on .overlay { z-index: 95; }
 .chip[aria-pressed="true"], .utabs button[aria-pressed="true"], .seg button[aria-pressed="true"] { color: #fff3d0 !important; border-color: #e8c77e99 !important; }
 button.zdrop { cursor: pointer; color: var(--fg); font: inherit; transition: transform .2s, box-shadow .2s; } button.zdrop:hover { transform: translateY(-3px); box-shadow: 0 10px 22px #000a, 0 0 18px #e8c77e33; }
 .av-btn.is-test::after { content: "TEST"; position: absolute; left: 50%; bottom: -10px; translate: -50% 0; padding: 1px 6px; border-radius: 99px; background: #ff2e88; color: #fff; font: 800 9px Inter, sans-serif; letter-spacing: .08em; z-index: 3; }
+/* ===== le design suit le décor de la rubrique : voile, panneaux en verre teinté, liserés ===== */
+html { --sc: #ea5560; --sc-deep: #2a1822; }
+html.w3d-on body::before { background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--sc-deep) 30%, transparent) 40%, color-mix(in srgb, var(--sc-deep) 75%, #07060f) 100%); transition: background .6s; }
+:is(.card, .mbox, .zt, .zd-tile, .rk, .cf-row, .ach, .zdrop, .zs-tile):not(.mhero):not(.bk-page) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sc-deep) 62%, #0b0916d0), color-mix(in srgb, var(--sc-deep) 30%, #07060fe0)) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(1.25); backdrop-filter: blur(10px) saturate(1.25);
+  border-color: color-mix(in srgb, var(--sc) 30%, #ffffff12) !important; }
+:is(.card, .mbox):not(.mhero):hover { box-shadow: 0 12px 30px #0009, 0 0 26px color-mix(in srgb, var(--sc) 22%, transparent); }
+.head h1 em, h1 em { color: var(--sc) !important; text-shadow: 0 0 22px color-mix(in srgb, var(--sc) 55%, transparent); }
+.nav-tabs [aria-current], .tabs [aria-current="page"] { box-shadow: inset 0 -2px 0 var(--sc); }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -4514,7 +4524,6 @@ async function loadStyles() {
 const brTag = (id) => { const b = MY_BR[id]; return b ? `<span class="kc-br" title="Style en Confrontation : ${esc(cfBranch(b).nom)}">${cfEmb(b, "sm")}</span>` : ""; };
 function drawAvatar() {
   const a = ACCT;
-  $("avBtn")?.classList.toggle("is-test", !!a?.test);
   $("avImg").outerHTML = a?.avatar ? `<img id="avImg" src="${esc(a.avatar)}" alt="">` : `<span id="avImg">${a?.name ? esc(a.name[0].toUpperCase()) : "I"}</span>`;
 }
 function drawMenu() {
@@ -5189,11 +5198,10 @@ let devLocal = false;
 function testZone() {
   if (devBackup === undefined) { devBackup = null; srv("dev/backup").then((r) => { devBackup = r.backup || false; devLocal = !!r.local; draw(); }).catch(() => { devBackup = false; }); }
   const b = devBackup;
-  const onTest = !!ACCT?.test;
-  return `<section class="sec card test-zone"><p class="eyebrow">Tests · dev et admin seulement</p><h2>Compte vierge</h2>
-    <p class="note">Un deuxième compte, rien qu'à toi, qui démarre vide comme un nouveau joueur. Ton vrai compte n'est pas touché : garde-le dans une fenêtre et ouvre le compte vierge dans une fenêtre privée (connecte-toi avec Discord puis clique ici) pour jouer avec les deux en même temps.</p>
-    <div class="row">${onTest ? `<span class="pill gold">Tu es sur ton compte vierge</span><a class="btn gold" href="/auth/test?back=1">Revenir à mon vrai compte</a>` : `<a class="btn gold" href="/auth/test">Ouvrir mon compte vierge</a>`}</div>
-    <h2 style="margin-top:18px">Repartir de zéro</h2>
+  return `<section class="sec card test-zone"><p class="eyebrow">Tests · dev et admin seulement</p><h2>Tout effacer</h2>
+    <p class="note">Vide ton compte <b>pour de bon</b> : cartes, essence, boosters, cosmétiques, décorations, titres, missions, tout repart de zéro comme un nouveau joueur. Tes annonces au marché et tes échanges en cours disparaissent. <b>Aucune sauvegarde</b> : on ne peut pas revenir en arrière.</p>
+    <div class="row"><button class="btn acc" type="button" data-act="dev-wipe">Tout effacer définitivement</button></div>
+    <h2 style="margin-top:18px">Repartir de zéro (avec sauvegarde)</h2>
     <p class="note">Ton compte redevient celui d'un nouveau joueur (aucune carte, essence et boosters de départ), pour tester le jeu comme quelqu'un qui arrive. Ton vrai compte est mis de côté et tu le récupères en un clic. Les cartes que tu as en vente au marché restent en vente.</p>
     ${b ? `<p class="note"><b>Ton vrai compte est sauvegardé</b> depuis le ${new Date(b.t).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} : ${b.cartes} cartes, ${b.opened} boosters ouverts, ${fmtN(b.chakra)} ◆. Repartir de zéro encore une fois ne l'écrase pas.</p>` : ""}
     <div class="row"><button class="btn acc" type="button" data-act="dev-reset">Repartir de zéro</button>${b ? `<button class="btn gold" type="button" data-act="dev-restore">Récupérer mon vrai compte</button>` : ""}</div>
@@ -9363,7 +9371,7 @@ const World3D = (() => {
     renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 700 ? 1.25 : 1.5)); renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
     const scene = new T.Scene(); scene.background = new T.Color("#07060f"); scene.fog = new T.Fog("#0c0818", 12, 34);
     const camera = new T.PerspectiveCamera(46, 1, 0.1, 100);
-    scene.add(new T.HemisphereLight("#9a7fd0", "#140a20", 0.7));
+    const hemi = new T.HemisphereLight("#9a7fd0", "#140a20", 0.7); scene.add(hemi);
     const pink = new T.PointLight("#ff2e88", 26, 14, 1.6); pink.position.set(5, 2.2, 2); scene.add(pink);
     const cyan = new T.PointLight("#2ee6ff", 22, 14, 1.6); cyan.position.set(-5, 2, 1); scene.add(cyan);
     const gold = new T.PointLight("#ffb060", 18, 10, 1.6); gold.position.set(0, 1.4, -2); scene.add(gold);
@@ -9405,7 +9413,7 @@ const World3D = (() => {
     const PN = innerWidth < 700 ? 30 : 60, petals = new T.InstancedMesh(new T.PlaneGeometry(.12, .08), new T.MeshBasicMaterial({ color: "#ffb3d6", side: T.DoubleSide, transparent: true, opacity: .85 }), PN), pet = [];
     for (let i = 0; i < PN; i++) pet.push({ p: new T.Vector3((Math.random() - .5) * 20, Math.random() * 9, (Math.random() - .5) * 12 - 2), r: new T.Euler(Math.random() * 6, Math.random() * 6, 0), s: Math.random() });
     scene.add(petals);
-    R = { canvas, renderer, scene, camera, runes, motes, pos, sp, N, petals, pet, PN, pink, cyan, gold, m: new T.Matrix4(), q: new T.Quaternion(), one: new T.Vector3(1, 1, 1),
+    R = { hemi, canvas, renderer, scene, camera, runes, motes, pos, sp, N, petals, pet, PN, pink, cyan, gold, m: new T.Matrix4(), q: new T.Quaternion(), one: new T.Vector3(1, 1, 1),
       tx: 0, ty: 0, x: 0, y: 0, t: 0, last: performance.now() };
     const resize = () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.fov = innerWidth < 700 ? 58 : 46; camera.updateProjectionMatrix(); };
     addEventListener("resize", resize); resize();
@@ -9431,7 +9439,7 @@ const World3D = (() => {
   }
   function start() {
     if (R || loading || !usable()) return;
-    loading = import("three").then((t) => { T = t; build(); if (wantBg) { const u = wantBg; wantBg = null; setBg(u); } raf = requestAnimationFrame(frame); }).catch(() => { failed = true; });
+    loading = import("three").then((t) => { T = t; build(); if (wantBg) { const u = wantBg; wantBg = null; setBg(u); } if (wantTint) setTint(...wantTint); raf = requestAnimationFrame(frame); }).catch(() => { failed = true; });
   }
   addEventListener("visibilitychange", () => { if (!document.hidden && R && !raf) raf = requestAnimationFrame(frame); });
   // change le panorama du fond, en fondu (appelé à chaque changement de rubrique)
@@ -9444,13 +9452,23 @@ const World3D = (() => {
       const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
       const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#d4cce4", fog: false, transparent: true, opacity: 0, depthWrite: false }));
       m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
-      const old = bgMesh; bgMesh = m; const t0 = performance.now();
-      const fade = (now) => { const k = Math.min(1, (now - t0) / 700); m.material.opacity = k; if (old) old.material.opacity = 1 - k;
+      // le nouveau décor apparaît par-dessus l'ancien, qui reste entier dessous : pas de creux sombre pendant le fondu
+      const old = bgMesh; bgMesh = m; const t0 = performance.now(); if (old) { old.renderOrder = -2; old.material.transparent = true; old.material.opacity = 1; }
+      const fade = (now) => { const k = Math.min(1, (now - t0) / 600), e = k * k * (3 - 2 * k); m.material.opacity = e;
         if (k < 1) requestAnimationFrame(fade); else { m.material.transparent = false; m.material.depthWrite = true; if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); } } };
       requestAnimationFrame(fade);
     }; img.src = url;
   }
-  return { start, setBg, get on() { return !!R; } };
+  // teinte du monde selon le décor : brume, ciel, lumières (accent et ombre du panorama)
+  let wantTint = null;
+  function setTint(accent, deep) {
+    wantTint = [accent, deep]; if (!R) return;
+    const a = new T.Color(accent), d = new T.Color(deep);
+    R.scene.fog.color.copy(d).multiplyScalar(.7); R.scene.background.copy(d).multiplyScalar(.45);
+    R.hemi.color.copy(a).lerp(new T.Color("#ffffff"), .35); R.hemi.groundColor.copy(d);
+    R.pink.color.copy(a); R.gold.color.copy(a).lerp(new T.Color("#ffb060"), .5);
+  }
+  return { start, setBg, setTint, get on() { return !!R; } };
 })();
 
 // ===== Gestion : tout ce qui sert à l'admin et au dev, dans une seule rubrique à onglets =====
@@ -9520,6 +9538,10 @@ document.addEventListener("click", (e) => {
   const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
   if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
   if (act === "dev-grant") return srv("dev/grant").then((r) => { if (r.state) { Object.assign(save, r.state); persist?.(); } toast("+50 000 ◆ et 60 boosters gratuits (local)."); draw(); }).catch((e) => toast(e.message));
+  if (act === "dev-wipe") {
+    const b = t.closest("[data-act]"); if (!sure(b, "Sûr ? Tout sera perdu")) return;
+    return srv("dev/wipe").then(() => { toast("Compte effacé : tu repars de zéro."); setTimeout(() => location.reload(), 900); }).catch((e) => toast(e.message));
+  }
   if (act === "dev-reset" || act === "dev-restore") {
     const b = t.closest("[data-act]"); if (!sure(b, act === "dev-reset" ? "Confirmer : compte neuf" : "Confirmer la restauration")) return;
     return srv(act === "dev-reset" ? "dev/reset" : "dev/restore").then(() => { toast(act === "dev-reset" ? "Compte remis à zéro. Ton vrai compte est sauvegardé." : "Ton vrai compte est de retour."); setTimeout(() => location.reload(), 900); }).catch((err) => toast(err.message));
@@ -9592,14 +9614,17 @@ connect();
 
 // le monde du QG en fond du site (même décor que l'arène 3D)
 // un panorama par rubrique (créations de Reichi) : fond 3D et en-tête des pages
+// couleurs de chaque panorama (accent lumineux, ombre profonde) : toute l'interface s'y accorde
+const DECOR_PAL = { v1: ["#e0566a", "#2c2029"], v2: ["#ea5560", "#2a1822"], v3: ["#e8567c", "#231722"], v4: ["#8fa8ff", "#1f1a34"], v5: ["#ea6e6c", "#38252e"], v6: ["#ec7a6f", "#36262c"], v7: ["#e46aa6", "#362a3d"], v8: ["#9b8cff", "#1a0e2d"] };
 const DECOR_VIEW = { boosters: "v2", collection: "v1", wiki: "v1", carte: "v1", market: "v4", missions: "v5", pred: "v8", classement: "v6", profil: "v6", sanctuaire: "v7", boutique: "v3", atelier: "v3", defile: "v6", confront: "v4", regles: "v5", infos: "v5", raretes: "v1", nouveautes: "v2", avis: "v5" };
 function syncDecor() {
   try {
     if (typeof ILLUS_DECOR !== "object") return;
     const v = location.hash.replace(/^#\/?/, "").split("/")[0] || "boosters", url = ILLUS_DECOR["v" + (DECOR_VIEW[v] || "v2").slice(1)] || ILLUS_DECOR.table;
     if (!url) return;
-    document.documentElement.style.setProperty("--world", `url(${url})`);
-    World3D.setBg?.(url);
+    const key = DECOR_VIEW[v] || "v2", pal = DECOR_PAL[key] || DECOR_PAL.v2, st = document.documentElement.style;
+    st.setProperty("--world", `url(${url})`); st.setProperty("--sc", pal[0]); st.setProperty("--sc-deep", pal[1]);
+    World3D.setBg?.(url); World3D.setTint?.(pal[0], pal[1]);
   } catch (e) {}
 }
 syncDecor(); addEventListener("hashchange", syncDecor);

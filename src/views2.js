@@ -348,11 +348,10 @@ let devLocal = false;
 function testZone() {
   if (devBackup === undefined) { devBackup = null; srv("dev/backup").then((r) => { devBackup = r.backup || false; devLocal = !!r.local; draw(); }).catch(() => { devBackup = false; }); }
   const b = devBackup;
-  const onTest = !!ACCT?.test;
-  return `<section class="sec card test-zone"><p class="eyebrow">Tests · dev et admin seulement</p><h2>Compte vierge</h2>
-    <p class="note">Un deuxième compte, rien qu'à toi, qui démarre vide comme un nouveau joueur. Ton vrai compte n'est pas touché : garde-le dans une fenêtre et ouvre le compte vierge dans une fenêtre privée (connecte-toi avec Discord puis clique ici) pour jouer avec les deux en même temps.</p>
-    <div class="row">${onTest ? `<span class="pill gold">Tu es sur ton compte vierge</span><a class="btn gold" href="/auth/test?back=1">Revenir à mon vrai compte</a>` : `<a class="btn gold" href="/auth/test">Ouvrir mon compte vierge</a>`}</div>
-    <h2 style="margin-top:18px">Repartir de zéro</h2>
+  return `<section class="sec card test-zone"><p class="eyebrow">Tests · dev et admin seulement</p><h2>Tout effacer</h2>
+    <p class="note">Vide ton compte <b>pour de bon</b> : cartes, essence, boosters, cosmétiques, décorations, titres, missions, tout repart de zéro comme un nouveau joueur. Tes annonces au marché et tes échanges en cours disparaissent. <b>Aucune sauvegarde</b> : on ne peut pas revenir en arrière.</p>
+    <div class="row"><button class="btn acc" type="button" data-act="dev-wipe">Tout effacer définitivement</button></div>
+    <h2 style="margin-top:18px">Repartir de zéro (avec sauvegarde)</h2>
     <p class="note">Ton compte redevient celui d'un nouveau joueur (aucune carte, essence et boosters de départ), pour tester le jeu comme quelqu'un qui arrive. Ton vrai compte est mis de côté et tu le récupères en un clic. Les cartes que tu as en vente au marché restent en vente.</p>
     ${b ? `<p class="note"><b>Ton vrai compte est sauvegardé</b> depuis le ${new Date(b.t).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} : ${b.cartes} cartes, ${b.opened} boosters ouverts, ${fmtN(b.chakra)} ◆. Repartir de zéro encore une fois ne l'écrase pas.</p>` : ""}
     <div class="row"><button class="btn acc" type="button" data-act="dev-reset">Repartir de zéro</button>${b ? `<button class="btn gold" type="button" data-act="dev-restore">Récupérer mon vrai compte</button>` : ""}</div>

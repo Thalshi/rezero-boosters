@@ -126,7 +126,7 @@ function viewConfront() {
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>
-      <div class="cf-modes" role="radiogroup" aria-label="Cartes de la table">${CF_MODES.map(([k, l, d]) => `<label class="cf-mode"><input type="radio" name="cfMode" value="${k}" ${k === "deck" ? "checked" : ""}><b>${l}</b><small>${d}</small></label>`).join("")}</div>
+      <p class="note">Les cartes de la table (chacun son deck ou cartes partagées) se choisissent dans le salon.</p>
       <button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
       <div class="lab-form cf-keep"><label>Rejoindre avec un code <input type="text" id="cfCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"></label><button class="btn" type="button" data-act="cf-code">Ouvrir</button></div></section>
     ${!L ? `<p class="note">Chargement…</p>` : L.error ? `<p class="note">${esc(L.error)}</p>` : `
@@ -317,7 +317,7 @@ document.addEventListener("click", (e) => {
   const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
-  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked, partage: document.querySelector('[name="cfMode"]:checked')?.value === "partage" }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
+  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });

@@ -5611,7 +5611,7 @@ function viewConfront() {
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>
-      <div class="cf-modes" role="radiogroup" aria-label="Cartes de la table">${CF_MODES.map(([k, l, d]) => `<label class="cf-mode"><input type="radio" name="cfMode" value="${k}" ${k === "deck" ? "checked" : ""}><b>${l}</b><small>${d}</small></label>`).join("")}</div>
+      <p class="note">Les cartes de la table (chacun son deck ou cartes partagées) se choisissent dans le salon.</p>
       <button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
       <div class="lab-form cf-keep"><label>Rejoindre avec un code <input type="text" id="cfCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"></label><button class="btn" type="button" data-act="cf-code">Ouvrir</button></div></section>
     ${!L ? `<p class="note">Chargement…</p>` : L.error ? `<p class="note">${esc(L.error)}</p>` : `
@@ -5802,7 +5802,7 @@ document.addEventListener("click", (e) => {
   const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
-  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked, partage: document.querySelector('[name="cfMode"]:checked')?.value === "partage" }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
+  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
@@ -7800,8 +7800,9 @@ const Open3D = (() => {
   // ---------- mise en place selon l'écran ----------
   function slotsFor(n, portrait) {
     if (n <= 5) return portrait ? [[-1.2, 2.55], [0, 2.55], [1.2, 2.55], [-0.6, 0.85], [0.6, 0.85]].slice(0, n).map(([x, y]) => ({ x, y, z: 2.2, rz: 0, s: 1 })) : [-2.6, -1.3, 0, 1.3, 2.6].slice(0, n).map((x, i) => ({ x, y: 1.75 - Math.abs(i - 2) * 0.09, z: 2.2 - Math.abs(i - 2) * 0.08, rz: -(i - 2) * 0.045, s: 1 }));
-    if (portrait) { const rows = [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9]]; const out = []; rows.forEach((r, j) => r.forEach((_, k) => out.push({ x: (k - (r.length - 1) / 2) * 0.86, y: 3.0 - j * 1.12, z: 2.2, rz: 0, s: 0.74 }))); return out; }
-    return Array.from({ length: n }, (_, i) => { const k = i % 5, j = Math.floor(i / 5); return { x: (k - 2) * 1.12, y: 2.45 - j * 1.32, z: 2.2, rz: -(k - 2) * 0.03, s: 0.82 }; });
+    // coffre (10 cartes) : deux arcs comme le prototype, les cartes du bord tournées vers le joueur
+    if (portrait) { const rows = [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9]]; const out = []; rows.forEach((r, j) => r.forEach((_, k) => { const d = k - (r.length - 1) / 2; out.push({ x: d * 0.86, y: 3.0 - j * 1.12 - Math.abs(d) * 0.06, z: 2.2 - Math.abs(d) * 0.08, rz: -d * 0.05, ry: -d * 0.12, s: 0.74 }); })); return out; }
+    return Array.from({ length: n }, (_, i) => { const k = i % 5, j = Math.floor(i / 5), d = k - 2; return { x: d * 1.18, y: 2.5 - j * 1.36 - Math.abs(d) * 0.08, z: 2.2 - Math.abs(d) * 0.12, rz: -d * 0.045, ry: -d * 0.1, s: 0.84 }; });
   }
   function resize() {
     const w = innerWidth, h = innerHeight, a = w / h, THREE = E.THREE;
@@ -7817,7 +7818,7 @@ const Open3D = (() => {
     if (!cur) return;
     const v = cur.phase === "cards" || cur.phase === "done" ? E.lay.cardCam : cur.kind === "chest" ? E.lay.chestCam : E.lay.packCam;
     E.cam.pos.copy(v.pos); E.cam.look.copy(v.look);
-    cur.cards.forEach((c, i) => { const s = E.lay.slots[i]; c.home.set(s.x, s.y, s.z); c.homeRz = s.rz; c.s = s.s; if (!c.busy) { c.root.position.copy(c.home); c.root.rotation.z = c.homeRz; c.root.scale.setScalar(c.s); } });
+    cur.cards.forEach((c, i) => { const s = E.lay.slots[i]; c.home.set(s.x, s.y, s.z); c.homeRz = s.rz; c.s = s.s; if (!c.busy) { c.root.position.copy(c.home); c.root.rotation.z = c.homeRz; c.root.rotation.y = s.ry || 0; c.root.scale.setScalar(c.s); } });
   }
 
   // ---------- page ----------
@@ -8129,7 +8130,7 @@ const Open3D = (() => {
       const p0 = c.root.position.clone(), mid = P0.mid, spin = (i % 5 - 2) * 0.6, sc0 = c.root.scale.x, r0 = c.root.rotation.x;
       await tween(0.6, (t) => {
         const u = 1 - t; c.root.position.set(u * u * p0.x + 2 * u * t * mid.x + t * t * s.x, u * u * p0.y + 2 * u * t * mid.y + t * t * s.y, u * u * p0.z + 2 * u * t * mid.z + t * t * s.z);
-        c.root.scale.setScalar(lerp(sc0, c.s, t)); c.root.rotation.set(lerp(r0, 0, t), 0, lerp(spin, s.rz, t));
+        c.root.scale.setScalar(lerp(sc0, c.s, t)); c.root.rotation.set(lerp(r0, 0, t), (s.ry || 0) * t, lerp(spin, s.rz, t));
       }, easeOut);
       c.busy = false;
       if (c.rk >= 3) tween(0.6, (t) => { c.halo.material.opacity = t * (c.rk >= 4 ? 0.28 : 0.2); c.edgeMat.emissiveIntensity = t * 0.6; });

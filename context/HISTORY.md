@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-23 — Décorations aussi sur l'avatar, 23 nouvelles (13e mise en ligne)
+- Les décorations se portent de nouveau autour de l'avatar (en-tête, profil, classement, comptoir, prédictions), en plus des cartes : un achat, les deux usages. Fiche Boutique avec aperçu carte et avatar, « Porter sur mon avatar » et « Mettre sur cette carte ».
+- Tous les effets spectaculaires existent en version avatar (cercle) et carte (rectangle), avec une version allégée dans les listes.
+- 23 nouvelles décorations, 3 nouvelles collections (Esprits du Japon, Cosmos, Éléments) : carpes koï, masque d'oni, lotus, papillons, galaxie, comètes, lune de sang, couronne de givre, marée, ombres vivantes, chaînes, plumes, hologramme, shurikens. 69 décorations au total.
+
 ## 2026-10-23 — Cartes de persos nettoyées (12e mise en ligne)
 - Demande de Reichi : pas de texte écrit sur les cartes, jamais la même personne deux fois sur une image, des visuels nets.
 - Les 58 portraits (+ deux variantes de Rayzo) redécoupés depuis les fiches d'origine : citations, titres et étiquettes retirés (recadrage ou effacement), vues en double supprimées (stalk, kai, seb, sasori, rayzo).

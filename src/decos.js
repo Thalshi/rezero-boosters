@@ -78,7 +78,16 @@ function decoSVG(d, shape = "round") {
   return `<svg class="dk dk-${d.k} ${R ? "rect" : ""}" viewBox="${vb}" ${R ? 'preserveAspectRatio="none"' : ""} aria-hidden="true"><defs>${grad}</defs>${b}</svg>`;
 }
 // décoration portée par un joueur (la sienne vient de sa sauvegarde, celle des autres de leur profil public)
-// les décorations se posent sur les cartes, plus autour des avatars
-function decoOfUid() { return null; }
+// (la même décoration se porte autour de l'avatar et se pose sur les cartes)
+function decoOfUid(uid) {
+  const id = uid === ME || uid === "moi" ? save.cos?.deco : (shared.players || []).find((p) => p.uid === uid)?.deco;
+  return id ? DECO_BY_ID[id] : null;
+}
+// décoration autour d'un avatar : les effets (fx.js) ont une couche derrière la photo et une devant ;
+// lite : version allégée pour les listes (classement, chat), où beaucoup d'avatars s'affichent à la fois
+function avDecoHTML(d, lite = true) {
+  if (!d) return { back: "", front: "" };
+  return (typeof fxBuild === "function" && fxBuild(d.k, d.c1, d.c2 || d.c1, "round", lite)) || { back: "", front: decoSVG(d) };
+}
 // un avatar avec sa décoration (même rendu que av(), entouré)
-const avd = (uid, cls = "", d = undefined) => { const dd = d === undefined ? decoOfUid(uid) : d; return dd ? `<span class="avd">${av(uid, cls)}${decoSVG(dd)}</span>` : av(uid, cls); };
+const avd = (uid, cls = "", d = undefined, lite = true) => { const dd = d === undefined ? decoOfUid(uid) : d; if (!dd) return av(uid, cls); const L = avDecoHTML(dd, lite); return `<span class="avd">${L.back}${av(uid, cls)}${L.front}</span>`; };

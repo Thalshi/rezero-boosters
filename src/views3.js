@@ -350,3 +350,24 @@ document.addEventListener("change", (e) => {
   if (e.target.id === "zCard") { zDraftCard = e.target.value; zDraft = null; nav("atelier", zDraftCard); }
   if (e.target.id === "zSkip") { zSkipAnim = e.target.checked; try { localStorage.setItem("rz-skip-summon", zSkipAnim ? "1" : "0"); } catch (err) {} }
 });
+
+// ===== Profil : changer la décoration de son avatar parmi celles qu'on possède =====
+function pfDecoSheet() {
+  const own = DECOS.filter((d) => decosOf(save)[d.id]).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank), cur = save.cos?.deco || "";
+  const tile = (d) => `<button type="button" class="pfd-t ${(d?.id || "") === cur ? "on" : ""}" data-pfd="${d?.id || ""}">${zMeAv(d, 74)}<b>${d ? esc(d.name) : "Aucune"}</b>${d ? `<small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>` : "<small>Avatar simple</small>"}</button>`;
+  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="Décoration de l'avatar"><div class="sheet-h"><h2>Décoration de l'avatar</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b">${own.length ? `<p class="note">Touche une décoration pour la porter. Elle se voit partout autour de ton avatar : en-tête, profil, classement, comptoir.</p><div class="pfd-grid">${tile(null)}${own.map(tile).join("")}</div>` : `<p class="note">Tu n'as encore aucune décoration.</p>`}
+      <button class="btn block" type="button" data-nav="boutique">${own.length ? "En voir d'autres à la Boutique" : "Voir les décorations à la Boutique"}</button></div></div>`;
+  $("overlay").hidden = false;
+}
+document.addEventListener("click", async (e) => {
+  if (e.target.closest("[data-pf-deco]")) return pfDecoSheet();
+  const t = e.target.closest("[data-pfd]"); if (!t) return;
+  const id = t.dataset.pfd || null;
+  try {
+    const r = await zCall("deco/equip", { id }, () => equipDecoS(save, id));
+    if (r?.state) Object.assign(save, r.state);
+    toast(id ? `${DECO_BY_ID[id].name} : portée.` : "Décoration retirée.");
+    header(); draw(); pfDecoSheet();
+  } catch (err) { toast(err.message); }
+});

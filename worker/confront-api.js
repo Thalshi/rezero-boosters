@@ -1,4 +1,4 @@
-// Re Zéro : Confrontation · salons et parties côté serveur.
+// Re : LOL · Confrontation · salons et parties côté serveur.
 // Le moteur (worker/confront/engine.mjs) décide de tout ; ici on garde l'état, on vérifie la collection,
 // on verrouille les cartes apportées pendant la partie et on ne montre à chacun que viewFor(état, lui).
 // Stockage : docs « confront/<gid> » (fermé à l'API des documents). Aucune carte ne change jamais de propriétaire.
@@ -135,7 +135,7 @@ async function branchChoices(env) {
 
 export async function confrontRoute(env, user, path, body, h) {
   if (!path.startsWith("/api/game/confront/")) return null;
-  if (!G.featureOn(h.cfg, "confrontation") && !user.admin) return fail(403, "Re Zéro : Confrontation n'est pas encore ouvert.");
+  if (!G.featureOn(h.cfg, "confrontation") && !user.admin) return fail(403, "Re : LOL · Confrontation n'est pas encore ouvert.");
   const a = path.slice("/api/game/confront/".length);
   // règles des présages (quel élément réussit quoi) et des tables, pour les expliquer dans la pioche
   if (a === "catalogue") { const C = DEFAULT_CONFIG; return json({ branches: BRANCHES, branchIds: BRANCH_IDS, cartes: CARD_DEFS, signes: SIGNES, regles: { presage: C.presage, defensePetite: C.petiteTable.defense, reprise: C.precision.repriseSiParee, equipMax: C.equipMax, retraits: C.retraitsParMode } }); }

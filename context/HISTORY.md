@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-24 — Nom « Re : LOL », Branches en têtes, décoration depuis le profil (15e mise en ligne)
+- Le jeu s'appelle maintenant « Re : LOL » partout (logo, titre de l'onglet, boosters, infos, Confrontation « Re : LOL · Confrontation »).
+- Branches des cartes : même système que le Créateur (têtes par épisode avec les emblèmes de leurs branches, fiche du perso avec toutes ses cartes et skins, une branche par carte, glisser pour changer de perso).
+- Profil : « Décoration de l'avatar » (ou toucher son avatar) pour porter une autre décoration possédée ou aucune.
+
 ## 2026-10-24 — 20 cartes illustrées par Billy, Créateur refait (14e mise en ligne)
 - 20 nouvelles cartes à partir des visuels de Billy (Unbeaten, Irsy, Seb, 4 Sultran'Zahar, 4 Explosion King, Ed, 2 Goldor, 2 Rorkantarak, 4 Reichi), plus rares que la carte de base de chaque perso ; cadres dessinés retirés. À revoir avec Billy (titres, raretés).
 - Créateur : « Persos et cartes » montre les têtes des persos par épisode ; un perso ouvre toutes ses cartes et skins, on passe au suivant en glissant (ou flèches), épisode modifiable sur place. La liste « Persos par épisode » d'Admin utilise la même vue.

@@ -1,5 +1,5 @@
 // ===== Confrontation : livret de règles illustré (#/confront/regles) et fiches des rôles =====
-// Textes originaux, écrits pour Re Zéro à partir de docs/confrontation/REGLES.md (règles appliquées par le moteur).
+// Textes originaux, écrits pour Re : LOL à partir de docs/confrontation/REGLES.md (règles appliquées par le moteur).
 const RI = (d, vb = "0 0 64 64") => `<svg viewBox="${vb}" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const ROLES = {
   gardien: {
@@ -109,7 +109,7 @@ function viewRegles() {
   const lab = Object.fromEntries(RG_TOC);
   const pages = [{ t: "L'essentiel", h: quick ? quick.innerHTML : "" }, ...secs.map((x) => ({ t: lab[x.id.replace("rg-", "")] || x.querySelector("h2")?.textContent || "", h: x.innerHTML }))];
   const k = Math.max(0, Math.min(pages.length - 1, RGB.page)), dir = RGB.dir; RGB.dir = 0;
-  return `<div class="wrap page rg rgb">${head("Confrontation · Livret", "Comment jouer", "Le livret de Re Zéro : Confrontation, page par page. De 2 à 7 joueurs, environ 20 à 40 minutes.")}
+  return `<div class="wrap page rg rgb">${head("Confrontation · Livret", "Comment jouer", "Le livret de Re : LOL · Confrontation, page par page. De 2 à 7 joueurs, environ 20 à 40 minutes.")}
     <div class="book">
       <nav class="bk-tabs" aria-label="Chapitres">${pages.map((p, i) => `<button type="button" data-bk="${i}" ${i === k ? 'aria-current="page"' : ""}><b>${i || "★"}</b><span>${esc(p.t)}</span></button>`).join("")}</nav>
       <div class="bk-body"><div class="bk-spine" aria-hidden="true"></div>
@@ -127,7 +127,7 @@ function rgFullHTML() {
   const defs = Object.entries(cat.cartes || {}), total = defs.reduce((a, [, d]) => a + (d.qte || 0), 0);
   const fam = (f) => defs.filter(([, d]) => RG_FAM_OF(d) === f);
   const sec = (id, n, title, body) => `<section class="sec rg-sec" id="rg-${id}"><p class="rg-n">${n}</p><h2>${title}</h2>${body}</section>`;
-  return `<div class="wrap page rg">${head("Confrontation · Livret", "Comment jouer", "Le livret complet de Re Zéro : Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
+  return `<div class="wrap page rg">${head("Confrontation · Livret", "Comment jouer", "Le livret complet de Re : LOL · Confrontation. De 2 à 7 joueurs, environ 20 à 40 minutes. Le serveur applique toutes ces règles : tu ne peux pas te tromper, mais mieux vaut savoir ce qui t'attend.")}
     <div class="row"><button class="btn sm" type="button" data-nav="confront">‹ Retour aux salons</button></div>
     <section class="sec rg-quick"><h2>En 30 secondes</h2><ol class="rg-steps">
       <li><b>Un camp</b><span>Gardien et Sentinelles contre Briseurs, à partir de 4 joueurs. Seul le Gardien est connu : à toi de deviner qui est avec toi.</span></li>
@@ -231,20 +231,66 @@ function viewBranches() {
   const ids = CF.cat?.branchIds || [], opts = (sel) => ids.map((b) => `<option value="${b}" ${b === sel ? "selected" : ""}>${esc(cfBranch(b).nom)}</option>`).join("");
   const count = Object.fromEntries(ids.map((b) => [b, 0])); for (const c of ALL_CARDS) count[brxOf(c.id)]++;
   const changed = Object.keys(BRX.data.choix).length;
-  const people = Object.entries(PEOPLE).sort((a, b) => Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac))
-    .map(([who, p]) => ({ who, p, cards: ALL_CARDS.filter((c) => c.who === who).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank) }))
-    .filter((x) => x.cards.length && (BRX.filtre !== "modif" || x.cards.some((c) => BRX.data.choix[c.id])) && (BRX.filtre !== "var" || new Set(x.cards.map((c) => brxOf(c.id))).size > 1));
-  return `<div class="wrap page" style="max-width:980px">${head("Admin · Confrontation", "Branches des cartes", "Chaque carte a une branche, qui donne son pouvoir en Confrontation. Proposition de départ : la branche du perso, et une deuxième branche pour ses cartes Épique, Légendaire et Mythique. Ce n'est jamais plus fort, juste différent. Tu changes ce que tu veux : c'est pris en compte dès la prochaine partie.")}
-    <div class="brx-sum">${ids.map((b) => `<span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} <b>${count[b]}</b></span>`).join("")}</div>
-    <p class="note">${changed ? `${changed} carte${changed > 1 ? "s" : ""} modifiée${changed > 1 ? "s" : ""} par toi.` : "Aucune modification : tout suit la proposition."} Cette page cite des persos pas encore débloqués : ne la montre pas aux joueurs.</p>
-    ${seg("brxF", [["", "Tous les persos"], ["var", "Avec variantes"], ["modif", "Modifiés"]], BRX.filtre)}
-    <div class="brx-list">${people.map(({ who, p, cards }) => `<div class="brx-p">
-      <div class="brx-h"><b>${esc(p.name)}</b><span class="note">${FACTIONS[p.fac]?.label || ""}</span>
-        <label class="brx-all">Toutes ses cartes <select data-brxall="${who}" aria-label="Branche de toutes les cartes de ${esc(p.name)}"><option value="">Choisir…</option>${opts("")}<option value="__prop">Revenir à la proposition</option></select></label></div>
-      <div class="brx-cards">${cards.map((c) => { const b = brxOf(c.id), mod = !!BRX.data.choix[c.id];
-        return `<label class="brx-c ${mod ? "mod" : ""}"><span class="brx-r" style="--rc:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="brx-t">${esc(subOf(c))}</span>
-          <span class="brx-sel">${cfEmb(b, "sm")}<select data-brx="${c.id}" aria-label="Branche de ${esc(p.name)} · ${esc(subOf(c))}">${opts(b)}</select></span>${mod ? `<small>modifiée · proposé : ${esc(cfBranch(BRX.data.proposees[c.id]).nom)}</small>` : ""}</label>`; }).join("")}</div></div>`).join("")}</div></div>`;
+  const keep = (who) => { const cards = ALL_CARDS.filter((c) => c.who === who); return cards.length && (BRX.filtre !== "modif" || cards.some((c) => BRX.data.choix[c.id])) && (BRX.filtre !== "var" || new Set(cards.map((c) => brxOf(c.id))).size > 1); };
+  const list = brxList(keep);
+  const top = `<div class="brx-sum">${ids.map((b) => `<span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} <b>${count[b]}</b></span>`).join("")}</div>
+    <p class="note">${changed ? `${changed} carte${changed > 1 ? "s" : ""} modifiée${changed > 1 ? "s" : ""} par toi.` : "Aucune modification : tout suit la proposition."} Cette page cite des persos pas encore débloqués : ne la montre pas aux joueurs.</p>`;
+  const body = BRX.p && PEOPLE[BRX.p] && list.includes(BRX.p) ? brxSheet(BRX.p, list, opts) : brxBoard(list);
+  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Confrontation", "Branches des cartes", "Chaque carte a une branche, qui donne son pouvoir en Confrontation. Proposition de départ : la branche du perso, et une deuxième branche pour ses cartes Épique, Légendaire et Mythique. Ce n'est jamais plus fort, juste différent. Touche un perso pour régler ses cartes.")}
+    ${top}${seg("brxF", [["", "Tous les persos"], ["var", "Avec variantes"], ["modif", "Modifiés"]], BRX.filtre)}${body}</div>`;
 }
+// les persos dans l'ordre des épisodes (filtre d'épisode et recherche, comme le Créateur)
+function brxList(keep) {
+  const q = criNorm(BRX.q || ""), ep = BRX.ep ?? "all";
+  return Object.entries(PEOPLE).filter(([k, p]) => !k.startsWith("__") && keep(k) && (!q || criNorm(p.name).includes(q)) && (ep === "all" || epOfCfg(CONFIG, k) === +ep))
+    .sort((a, b) => epOfCfg(CONFIG, a[0]) - epOfCfg(CONFIG, b[0]) || Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac) || a[1].name.localeCompare(b[1].name)).map(([k]) => k);
+}
+// la tête d'un perso, avec les emblèmes des branches de ses cartes
+const brxHead = (k, on = "") => { const bs = [...new Set(ALL_CARDS.filter((c) => c.who === k).map((c) => brxOf(c.id)))], mod = ALL_CARDS.some((c) => c.who === k && BRX.data.choix[c.id]);
+  return crHead(k, on).replace('data-cr-p="', 'data-brx-p="').replace("</small>", `</small><span class="brx-hb">${bs.map((b) => cfEmb(b, "sm")).join("")}</span>${mod ? `<span class="cr-b mod">Modifié</span>` : ""}`); };
+function brxBoard(list) {
+  const eps = [...new Set(list.map((k) => epOfCfg(CONFIG, k)))].sort((a, b) => a - b), ep = BRX.ep ?? "all", allEps = crEps();
+  const chips = `<div class="cr-eps">${[["all", "Tous"], ...allEps.map((e) => [String(e), epLabel(e)])].map(([v, l]) => `<button type="button" class="chip ${String(ep) === v ? "on" : ""}" data-brx-ep="${v}">${l}</button>`).join("")}</div>`;
+  return `<div class="row" style="margin-top:12px"><input class="in cr-q" type="search" id="brxQ" placeholder="Chercher un perso" value="${esc(BRX.q || "")}"></div>${chips}
+    ${eps.map((e) => { const l = list.filter((k) => epOfCfg(CONFIG, k) === e); return `<section class="cr-grp"><h3>${epLabel(e)} <small>${l.length} perso${l.length > 1 ? "s" : ""}</small></h3><div class="cr-hds">${l.map((k) => brxHead(k)).join("")}</div></section>`; }).join("") || `<p class="note">Aucun perso.</p>`}`;
+}
+function brxSheet(k, list, opts) {
+  const p = PEOPLE[k], i = list.indexOf(k), prev = list[(i - 1 + list.length) % list.length], next = list[(i + 1) % list.length];
+  const cards = ALL_CARDS.filter((c) => c.who === k).sort((a, b) => !!a.skin - !!b.skin || RAR[a.rar].rank - RAR[b.rar].rank);
+  const cell = (c) => { const b = brxOf(c.id), mod = !!BRX.data.choix[c.id];
+    return `<div class="brx-cc ${mod ? "mod" : ""}" title="${esc(cfBranch(b).nom)} : ${esc(cfBranch(b).pouvoir || "")}">${cardHTML(c, { w: 150 })}<label class="brx-sel">${cfEmb(b, "sm")}<select data-brx="${c.id}" aria-label="Branche de ${esc(p.name)} · ${esc(subOf(c))}">${opts(b)}</select></label>
+      ${mod ? `<small class="note">modifiée · proposé : ${esc(cfBranch(BRX.data.proposees[c.id]).nom)}</small>` : ""}</div>`; };
+  const base = cards.filter((c) => !c.skin), skins = cards.filter((c) => c.skin);
+  return `<div class="cr-sheet">
+    <div class="cr-sh-top"><button class="btn sm" type="button" data-brx-back>‹ Tous les persos</button><span class="note">${i + 1} / ${list.length} · glisse pour changer de perso</span></div>
+    <div class="cr-sh-head" id="brxSwipe">
+      ${list.length > 1 ? `<button class="cr-nav" type="button" data-brx-p="${prev}" aria-label="Perso précédent">‹</button>` : ""}
+      <span class="cr-sh-img">${thumb(crFace(k), "crh")}</span>
+      <div class="cr-sh-t"><h2>${esc(p.name)}</h2><p class="note">${FACTIONS[p.fac]?.label || ""} · ${epLabel(epOfCfg(CONFIG, k))} · ${cards.length} carte${cards.length > 1 ? "s" : ""}</p>
+        <div class="row"><label class="field cr-sh-ep">Toutes ses cartes <select data-brxall="${k}" aria-label="Branche de toutes les cartes de ${esc(p.name)}"><option value="">Choisir…</option>${opts("")}<option value="__prop">Revenir à la proposition</option></select></label></div></div>
+      ${list.length > 1 ? `<button class="cr-nav r" type="button" data-brx-p="${next}" aria-label="Perso suivant">›</button>` : ""}
+    </div>
+    <h3 class="cr-sh-h">Cartes <small>${base.length}</small></h3><div class="cr-car">${base.map(cell).join("")}</div>
+    ${skins.length ? `<h3 class="cr-sh-h">Skins <small>${skins.length}</small></h3><div class="cr-car">${skins.map(cell).join("")}</div>` : ""}
+    <div class="cr-strip">${list.map((x) => brxHead(x, x === k ? "on" : "")).join("")}</div></div>`;
+}
+function brxStep(d) {
+  const list = [...document.querySelectorAll(".cr-strip [data-brx-p]")].map((x) => x.dataset.brxP), i = list.indexOf(BRX.p); if (i < 0 || list.length < 2) return;
+  BRX.p = list[(i + d + list.length) % list.length]; draw();
+  $("brxSwipe")?.animate([{ transform: `translateX(${d * 40}px)`, opacity: .3 }, { transform: "none", opacity: 1 }], { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" });
+  requestAnimationFrame(() => document.querySelector(".cr-strip .on")?.scrollIntoView({ inline: "center", block: "nearest" }));
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const pp = t.closest("[data-brx-p]"); if (pp) { BRX.p = pp.dataset.brxP; draw(); scrollTo(0, 0); requestAnimationFrame(() => document.querySelector(".cr-strip .on")?.scrollIntoView({ inline: "center", block: "nearest" })); return; }
+  if (t.closest("[data-brx-back]")) { BRX.p = null; return draw(); }
+  const f = t.closest("[data-brx-ep]"); if (f) { BRX.ep = f.dataset.brxEp; return draw(); }
+});
+document.addEventListener("input", (e) => { if (e.target.id !== "brxQ") return; BRX.q = e.target.value; clearTimeout(BRX.qT); BRX.qT = setTimeout(() => { draw(); const i = $("brxQ"); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 250); });
+let brxTouch = null;
+document.addEventListener("touchstart", (e) => { if (e.target.closest?.("#brxSwipe")) brxTouch = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
+document.addEventListener("touchend", (e) => { if (!brxTouch) return; const [x0, y0] = brxTouch, t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; brxTouch = null; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) brxStep(dx < 0 ? 1 : -1); });
+document.addEventListener("keydown", (e) => { if (view === "branches" && BRX.p && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName) && (e.key === "ArrowLeft" || e.key === "ArrowRight")) brxStep(e.key === "ArrowRight" ? 1 : -1); });
 VIEWS.branches = viewBranches;
 ADMIN_SEG.brxF = (v) => { BRX.filtre = v; };
 document.addEventListener("change", (e) => {

@@ -243,7 +243,7 @@ function packsForTab() {
   return packsNow().filter((p) => !p.limited);
 }
 function bstHTML(p) {
-  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>${ico("logo")}</i>RE ZÉRO</span><span class="emb">${ico(packIcon(p))}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
+  return `<div class="bst ${p.skins || p.base === "coffre" ? "coffre" : ""}" style="--pc:${p.color}"><span class="brand"><i>${ico("logo")}</i>RE : LOL</span><span class="emb">${ico(packIcon(p))}</span><span class="nm">${p.daily ? p.name.replace("Pack du jour · ", "") : p.name}</span><span class="sub">${p.daily ? "Pack du jour" : p.sub.split(" · ")[0]}</span><span class="n5">${p.count || PACK} ${p.cos ? "objets" : "cartes"}</span></div>`;
 }
 function selPack() {
   const list = packsForTab();
@@ -375,7 +375,7 @@ function albumsHTML() {
 // ===== Wiki : tous les persos =====
 function viewWiki() {
   return `<div class="wrap page">
-    ${head("Wiki", "Les persos de l'anime", "Chaque perso apparu dans Re Zéro : LoL. Obtiens sa carte pour débloquer sa fiche complète : pouvoir, apparence, caractère, citations et cote au marché.")}
+    ${head("Wiki", "Les persos de l'anime", "Chaque perso apparu dans Re : LOL. Obtiens sa carte pour débloquer sa fiche complète : pouvoir, apparence, caractère, citations et cote au marché.")}
     ${Object.entries(FACTIONS).map(([f, F]) => { const list = CARDS.filter((c) => c.who === c.id && PEOPLE[c.who].fac === f || (c.id.endsWith("-1") && PEOPLE[c.who].fac === f && !CARDS.some((x) => x.id === c.who)));
       return `<section class="sec"><div class="sec-h"><h2 style="color:${F.color}">${F.label}</h2><span class="mono mut" style="font-size:13px">${list.filter((c) => visible(c)).length}/${list.length} connus</span></div>
         <div class="cgrid">${list.map((c) => cardFor(c, { click: true })).join("")}</div></section>`; }).join("")}
@@ -441,7 +441,7 @@ function viewCard() {
         ${got ? `<div class="card"><dl class="facts">
           ${MY_BR[c.id] ? `<dt>Style en Confrontation</dt><dd class="kc-brd">${cfEmb(MY_BR[c.id], "sm")} <b>${esc(cfBranch(MY_BR[c.id]).nom)}</b> · ${esc(cfBranch(MY_BR[c.id]).pouvoir || "")}</dd>` : ""}
           ${row("Pouvoir", esc(p.power))}${row("Apparence", esc(p.look))}${row("Caractère", esc(p.mood))}
-          <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re Zéro : LoL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
+          <dt>Apparitions</dt><dd>${epOf(c.who) < HIDDEN ? `Re : LOL · épisode ${epOf(c.who)}` : "Bientôt dans l'anime"}${APPEARS[c.who] ? ` · ${APPEARS[c.who]}` : ""}</dd>
           ${quotes.length ? `<dt>Citations</dt><dd class="quotes">${quotes.map((q) => `<q>${esc(q)}</q>`).join("")}</dd>` : ""}
           <dt>Exemplaires</dt><dd>${o.n} normale${o.n > 1 ? "s" : ""} · ${o.gold} dorée${o.gold > 1 ? "s" : ""}</dd>
           <dt>Recyclage</dt><dd>${R.chakra} ◆ (dorée : ${R.chakra * 3} ◆)</dd>

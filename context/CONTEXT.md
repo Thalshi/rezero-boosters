@@ -6,7 +6,7 @@
 ---
 
 ## Le projet
-- Jeu web de cartes à collectionner (ouverture de boosters) sur Re Zéro : LoL, l'anime de Billy dont les persos sont les membres du serveur Discord QG de Shinjuku.
+- Jeu web de cartes à collectionner (ouverture de boosters) sur Re : LOL, l'anime de Billy dont les persos sont les membres du serveur Discord QG de Shinjuku.
 - Un épisode sort environ chaque mois. L'épisode 1 est sorti, l'épisode 2 est attendu.
 - L'interface est partie de celle de Kyara (kyara.games), avec en plus des prédictions sur les épisodes. Depuis le 22/10/2026, design « Arcane Néon » choisi par Reichi : or et bleu nuit, lueurs rose et cyan, titres en Cinzel, cadres taillés, barre du bas sur téléphone.
 

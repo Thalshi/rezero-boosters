@@ -1,4 +1,4 @@
-# Re Zéro : LoL · jeu de cartes
+# Re : LOL · jeu de cartes
 
 Jeu web de boosters sur l'anime de Billy (serveur Discord QG de Shinjuku). Interface calquée sur Kyara, prédictions en plus.
 

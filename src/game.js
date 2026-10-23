@@ -1217,5 +1217,5 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 
 // ===== Interrupteurs par fonctionnalité (réglés par l'admin dans config/game, sans redéployer) =====
 // Absent = activé. Permet de déployer le code puis d'ouvrir chaque nouveauté quand ses valeurs sont validées.
-const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re Zéro : Confrontation"]];
+const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re : LOL · Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;

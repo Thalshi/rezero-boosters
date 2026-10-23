@@ -228,7 +228,7 @@ const Open3D = (() => {
         const cy = h * .47; g.beginPath(); g.arc(w / 2, cy, 170, 0, 7); g.fillStyle = "#0b0716"; g.fill(); g.strokeStyle = "#e8c77e"; g.lineWidth = 8; g.stroke();
         g.beginPath(); g.arc(w / 2, cy, 148, 0, 7); g.strokeStyle = "#ff2e8888"; g.lineWidth = 3; g.stroke();
         drawIcon(g, "logo", w / 2, cy, 9.5, "#e8c77e", 1.5);
-        g.textAlign = "center"; g.fillStyle = "#f0e6d2"; g.font = "900 86px Cinzel, serif"; g.fillText("RE ZÉRO", w / 2, h * .72);
+        g.textAlign = "center"; g.fillStyle = "#f0e6d2"; g.font = "900 86px Cinzel, serif"; g.fillText("RE : LOL", w / 2, h * .72);
         g.font = "700 30px Inter, sans-serif"; g.fillStyle = "#e8c77e"; g.fillText(E.packLine || "P O C H E T T E   ·   5   C A R T E S", w / 2, h * .72 + 56);
       } else { g.textAlign = "center"; drawIcon(g, "logo", w / 2, h * .5, 6, "#e8c77e88", 1.4); g.font = "700 26px Inter, sans-serif"; g.fillStyle = "#a99cc8"; g.fillText("QG DE SHINJUKU", w / 2, h * .66); }
     };

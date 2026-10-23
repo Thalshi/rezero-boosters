@@ -2234,6 +2234,7 @@ body.ar-on .overlay { z-index: 95; }
 .zdrop.got { border-color: #3fdc8f66; } .zdrop.got small { color: #3fdc8f; }
 .chips.chips-wrap { flex-wrap: wrap; overflow: visible; mask-image: none; -webkit-mask-image: none; }
 .chip[aria-pressed="true"], .utabs button[aria-pressed="true"], .seg button[aria-pressed="true"] { color: #fff3d0 !important; border-color: #e8c77e99 !important; }
+button.zdrop { cursor: pointer; color: var(--fg); font: inherit; transition: transform .2s, box-shadow .2s; } button.zdrop:hover { transform: translateY(-3px); box-shadow: 0 10px 22px #000a, 0 0 18px #e8c77e33; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -5930,6 +5931,28 @@ function viewSanctuaire() {
       <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
     </div>${zDrops()}</div>`;
 }
+// aperçu d'un objet du Sanctuaire sur une de tes cartes (au choix) ; s'il est à toi, on peut le poser
+let zPrevCard = null;
+function zDropOpen(id) {
+  const c = COS_BY_ID[id]; if (!c) return;
+  const cos = cosOf(save), mine = [...CARDS, ...SKINS].filter((x) => has(x.id));
+  if (!zPrevCard || !has(zPrevCard)) zPrevCard = zSample()?.id;
+  const card = byId[zPrevCard], used = usedInstances(save);
+  const ref = cos.own[id] ? "a:" + id : (cos.inst.find((x) => x.c === id && !used[x.i]) || cos.inst.find((x) => x.c === id)) ? "i:" + (cos.inst.find((x) => x.c === id && !used[x.i]) || cos.inst.find((x) => x.c === id)).i : null;
+  const design = card && has(card.id) ? { ...(designOfS(save, card.id) || {}), [c.slot]: id } : { [c.slot]: id };
+  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(c.name)}"><div class="sheet-h"><h2>${esc(c.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><div class="zs-prev" style="--h1:${RAR[c.rar].color};--h2:#15141a"><div class="zs-prev-card">${card ? cardHTML(card, { design, present: true }) : zGhost(c)}</div></div>
+      <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${c.only ? `<span class="pill">Exclusif du Sanctuaire</span>` : ""}</div>
+      ${mine.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mine.map((x) => `<option value="${x.id}" ${x.id === zPrevCard ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : `<p class="note">Ouvre un booster pour le voir sur une de tes cartes.</p>`}
+      ${ref && card ? `<button class="btn gold big block" type="button" data-zas-ref="${ref}" data-slot="${c.slot}">Mettre sur cette carte</button>` : `<p class="note">${ref ? "" : "Pas encore à toi : il sort des invocations."}</p>`}</div></div>`;
+  $("overlay").hidden = false; $("overlay").dataset.zdrop = id;
+}
+document.addEventListener("click", (e) => {
+  const d = e.target.closest("[data-zdrop]"); if (d) return zDropOpen(d.dataset.zdrop);
+  const b = e.target.closest("[data-zas-ref]"); if (b) { const card = zPrevCard, slot = b.dataset.slot, design = { ...(cosOf(save).designs[card] || {}), [slot]: b.dataset.zasRef };
+    zCall("design", { card, design }, () => saveDesignS(save, card, design)).then(() => { toast(`Posé sur ${nameOf(byId[card])}.`); $("overlay").hidden = true; draw(); }).catch((err) => toast(err.message)); }
+});
+document.addEventListener("change", (e) => { if (e.target.id === "zPrevCard") { zPrevCard = e.target.value; zDropOpen($("overlay").dataset.zdrop); } });
 // tout ce qu'une invocation peut donner, rareté par rareté, avec la chance de chaque objet et ce que tu as déjà
 let zDropR = "";
 function zDrops() {
@@ -5937,7 +5960,7 @@ function zDrops() {
   const rows = RANKS.filter((r) => !zDropR || r === zDropR).map((r) => { const list = SUMMON_POOL(r); if (!list.length) return "";
     const per = SUMMON_RATES[r] / list.length;
     return `<div class="zdrop-r"><div class="zdrop-h"><b style="color:${RAR[r].color}">${RAR[r].label}</b><span class="note">${String(SUMMON_RATES[r]).replace(".", ",")} % au total · ${list.length} objet${list.length > 1 ? "s" : ""} · ${per.toFixed(per < 1 ? 2 : 1).replace(".", ",")} % chacun</span></div>
-      <div class="zdrop-g">${list.map((c) => `<div class="zdrop ${got.has(c.id) ? "got" : ""}">${zGhost(c)}<b>${esc(c.name)}</b><small>${COS_SLOT_LABEL[c.slot]}${c.only ? " · exclusif" : ""}${got.has(c.id) ? " · ✓ obtenu" : ""}</small></div>`).join("")}</div></div>`; }).join("");
+      <div class="zdrop-g">${list.map((c) => `<button type="button" class="zdrop ${got.has(c.id) ? "got" : ""}" data-zdrop="${c.id}">${zGhost(c)}<b>${esc(c.name)}</b><small>${COS_SLOT_LABEL[c.slot]}${c.only ? " · exclusif" : ""}${got.has(c.id) ? " · ✓ obtenu" : ""}</small></button>`).join("")}</div></div>`; }).join("");
   return `<section class="sec zdrops"><div class="sec-h"><div><p class="eyebrow">Récompenses possibles</p><h2>Ce que tu peux obtenir</h2></div></div>
     ${rarChips("zDropR", zDropR)}${rows}</section>`;
 }

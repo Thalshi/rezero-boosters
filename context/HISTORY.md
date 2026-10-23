@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-23 — L'Errant revient (11e mise en ligne)
+- Remarque de Reichi : un bonus visible (PV, cartes en main) trahit un rôle secret. Seul le Gardien (rôle public) reçoit désormais des bonus ; ceux des Sentinelles, Briseurs et de l'Errant sont retirés.
+- L'Errant a deux pouvoirs invisibles : coup de grâce (s'il élimine lui-même le Gardien, il gagne seul) et double vie, idée de Reichi (à partir de 5 joueurs : faux rôle Sentinelle ou Briseur à sa première mort, retour des enfers avec 2 PV et 3 cartes quand il reste 3 joueurs ou que la partie allait finir sans lui).
+- Trois camps réglés par simulation (1 500 parties par table) : chaque camp gagne entre 21 et 41 %. Livre, arène (retour des enfers animé), historique et docs (C10) à jour.
+
 ## 2026-10-23 — Décorations de cartes spectaculaires, arène plus lisible (10e mise en ligne)
 - Décorations : uniquement pour les cartes (plus autour des avatars), aperçu et pose depuis la Boutique. Nouvelle collection « Légendes du QG » : dragons qui tournent autour de la carte (derrière puis devant), phénix, lames jumelles, aura enflammée, flammes spectrales, foudre, tempête de sakura, néons. Ornements et particules de l'Atelier redessinés.
 - Arène : la carte touchée s'affiche en grand dans un panneau avec « Jouer » ou « Viser … » ; main remontée ; on voit les autres piocher (cartes de dos qui volent) ; présage montré en grand (carte retournée, ce qu'il faut, réussi ou raté) ; bouton Émotes de nouveau visible ; une animation ne peut plus figer la partie.

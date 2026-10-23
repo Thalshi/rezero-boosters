@@ -1661,7 +1661,7 @@ body.ar-on { overflow: hidden; }
 #ar-chatForm { display: flex; gap: 6px; } #ar-chatForm input { flex: 1; min-width: 0; height: 34px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--aline); background: #120d22; color: var(--af); font: 500 13px var(--body); }
 .ar-mute { display: flex; gap: 6px; align-items: center; margin-top: 8px; font: 500 11px var(--body); color: var(--am); }
 /* émotes */
-.ar-emob { position: absolute; left: 14px; bottom: calc(118px + env(safe-area-inset-bottom)); z-index: 7; background: #0b0916e6; }
+.ar .ar-emob { position: absolute; left: 14px; bottom: calc(118px + env(safe-area-inset-bottom)); z-index: 7; background: #0b0916e6; }
 .ar-emob .ic { width: 20px; height: 20px; color: var(--ag); }
 .ar-emow { position: absolute; left: 14px; bottom: calc(166px + env(safe-area-inset-bottom)); z-index: 8; display: none; grid-template-columns: repeat(4, 64px); gap: 6px; padding: 10px; border-radius: 16px; background: #0b0916f2; border: 1px solid var(--aline); box-shadow: 0 10px 30px #000c; }
 .ar-emow.on { display: grid; }
@@ -1705,7 +1705,7 @@ body.ar-on { overflow: hidden; }
   .ar-chip { top: calc(50px + env(safe-area-inset-top)); } .ar-chip small { display: none; }
   .ar-tbl { top: calc(100px + env(safe-area-inset-top)); width: 220px; }
   .ar-log { top: calc(50px + env(safe-area-inset-top)); width: 150px; } .ar-log:not(.open) .ar-tabs button:not(#ar-logArr) { padding: 5px 4px; font-size: 10px; letter-spacing: .02em; } .ar-log .ar-last { display: none; } .ar-log.open { width: calc(100vw - 28px); z-index: 9; }
-  .ar-emob span { display: none; } .ar-emob { padding: 0 10px; bottom: calc(186px + env(safe-area-inset-bottom)); }
+  .ar-emob span { display: none; } .ar .ar-emob { padding: 0 10px; bottom: calc(186px + env(safe-area-inset-bottom)); }
   .ar-emow { bottom: calc(232px + env(safe-area-inset-bottom)); grid-template-columns: repeat(4, 58px); }
   .ar-side { bottom: calc(186px + env(safe-area-inset-bottom)); } .ar-deck { display: none; } .ar-side .btn { height: 36px; font-size: 13px; padding: 0 12px; }
   .ar-wp { display: none; }

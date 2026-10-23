@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-23 — Test en local avec une base riche
+- Lanceur `tools/local/lancer.bat` (Windows) et `lancer.sh` : serveur local, base gardée dans `.local-db`, connexion admin et dev automatique.
+- En local seulement : chaque nouveau compte part avec 100 000 ◆ et 60 boosters ; bouton « Me donner 50 000 ◆ et 60 boosters » dans Gestion → Compte de test. Rien ne change en production.
+- Reichi va tester chaque rubrique et faire ses retours.
+
 ## 2026-10-23 — Sixième mise en production : économie dure, salons de Confrontation
 - En production (accord de Reichi, « déploie tout ») : économie dure (gratuit toutes les 3 h, booster et invocation 150 ◆, probabilités dures, recyclage 0/1/1/4/10/25, Légendaire garantie au 40e booster, Mythique jamais garantie, anti-doublons 40 %), missions refaites (2 du jour, 5 de la semaine avec bonus dès 3, série surtout en boosters ; anciens tirages refaits), Confrontation récompensée sur 3 parties par jour.
 - Confrontation : chacun son deck ou cartes partagées, « Je suis prêt » avant le lancement, fermer le salon (créateur), partager le salon (chat du QG, lien), défier en duel depuis un profil (accepter, refuser), seulement l'arène 3D, « Quitter la partie » à tout moment (avant : seulement pendant son tour).

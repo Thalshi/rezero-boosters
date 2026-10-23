@@ -238,6 +238,8 @@ async function ensurePlayer(env, user, guest) {
     const n = G.importSaveS(cand);
     if (n.imported.cards) { s = n; s.imported.from = src; imported = src; break; }
   }
+  // Base de test locale (lanceur tools/local) : chaque nouveau compte part avec de quoi tout essayer.
+  if (env.DEV_LOGIN === "1" && env.LOCAL_RICH === "1") { s.chakra = (s.chakra || 0) + 100000; s.free = Math.max(s.free || 0, 60); }
   s.updated = Date.now();
   await env.DB.prepare("INSERT OR IGNORE INTO players (uid, data, version, updated) VALUES (?, ?, 1, ?)").bind(user.id, JSON.stringify(s), Date.now()).run();
   await publishStats(env, user.id, s);
@@ -281,7 +283,15 @@ export async function gameRoute(req, env, user, path) {
     if (path === "/api/game/dev/backup") {
       if (!user.dev && !user.admin) return fail(403, "Réservé au dev et à l'admin.");
       const bk = await readDoc(env, "devbackup/" + user.id);
-      return json({ backup: bk ? { t: bk.data.t, opened: bk.data.save?.opened || 0, cartes: Object.keys(bk.data.save?.owned || {}).length, chakra: bk.data.save?.chakra || 0 } : null });
+      return json({ backup: bk ? { t: bk.data.t, opened: bk.data.save?.opened || 0, cartes: Object.keys(bk.data.save?.owned || {}).length, chakra: bk.data.save?.chakra || 0 } : null, local: env.DEV_LOGIN === "1" });
+    }
+    // serveur LOCAL uniquement (wrangler dev avec DEV_LOGIN) : de quoi tout tester sans attendre ; n'existe jamais en production
+    if (path === "/api/game/dev/grant") {
+      if (env.DEV_LOGIN !== "1") return fail(404, "Introuvable.");
+      if (!user.dev && !user.admin) return fail(403, "Réservé au dev et à l'admin.");
+      await ensurePlayer(env, user, null);
+      const r = await mutate(env, user.id, (s) => { s.chakra = (s.chakra || 0) + 50000; s.free = Math.max(s.free || 0, 60); return {}; });
+      return r.error ? fail(400, r.error) : json({ state: r.state });
     }
     if (path === "/api/game/dev/stats") {
       if (!user.dev) return fail(403, "Réservé au dev.");

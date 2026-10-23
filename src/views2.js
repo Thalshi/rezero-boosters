@@ -319,13 +319,16 @@ async function setShownTitle(id) {
 }
 // tests sur un vrai compte (dev et admin) : repartir de zéro, puis revenir à son vrai compte
 let devBackup;
+let devLocal = false;
 function testZone() {
-  if (devBackup === undefined) { devBackup = null; srv("dev/backup").then((r) => { devBackup = r.backup || false; draw(); }).catch(() => { devBackup = false; }); }
+  if (devBackup === undefined) { devBackup = null; srv("dev/backup").then((r) => { devBackup = r.backup || false; devLocal = !!r.local; draw(); }).catch(() => { devBackup = false; }); }
   const b = devBackup;
   return `<section class="sec card test-zone"><p class="eyebrow">Tests · dev et admin seulement</p><h2>Repartir de zéro</h2>
     <p class="note">Ton compte redevient celui d'un nouveau joueur (aucune carte, essence et boosters de départ), pour tester le jeu comme quelqu'un qui arrive. Ton vrai compte est mis de côté et tu le récupères en un clic. Les cartes que tu as en vente au marché restent en vente.</p>
     ${b ? `<p class="note"><b>Ton vrai compte est sauvegardé</b> depuis le ${new Date(b.t).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} : ${b.cartes} cartes, ${b.opened} boosters ouverts, ${fmtN(b.chakra)} ◆. Repartir de zéro encore une fois ne l'écrase pas.</p>` : ""}
-    <div class="row"><button class="btn acc" type="button" data-act="dev-reset">Repartir de zéro</button>${b ? `<button class="btn gold" type="button" data-act="dev-restore">Récupérer mon vrai compte</button>` : ""}</div></section>`;
+    <div class="row"><button class="btn acc" type="button" data-act="dev-reset">Repartir de zéro</button>${b ? `<button class="btn gold" type="button" data-act="dev-restore">Récupérer mon vrai compte</button>` : ""}</div>
+    ${devLocal ? `<h2 style="margin-top:18px">Ressources de test (serveur local)</h2><p class="note">Seulement sur ton serveur local : +50 000 ◆ et 60 boosters gratuits pour tout essayer sans attendre. N'existe pas en ligne.</p>
+    <div class="row"><button class="btn gold" type="button" data-act="dev-grant">Me donner 50 000 ◆ et 60 boosters</button></div>` : ""}</section>`;
 }
 function viewProfil() {
   const uid = param, isMe = !uid || uid === "moi" || uid === ME;

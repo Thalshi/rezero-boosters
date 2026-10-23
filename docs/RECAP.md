@@ -13,6 +13,10 @@ Branche : dev/re-zero-complet (dernier commit c6e3557). Rien n'est en production
 
 Le Défilé, Confrontation, la Galerie et le Labo ont besoin du serveur : il faut le lancer chez toi.
 
+**Le plus simple (base de test riche)** : installe Node.js (https://nodejs.org), récupère la branche `main`, puis double-clique `tools/local/lancer.bat` (Windows) ou lance `tools/local/lancer.sh` (Mac, Linux). Le navigateur s'ouvre connecté en admin et dev. Chaque compte créé en local part avec 100 000 ◆ et 60 boosters, et Gestion → Compte de test → « Me donner 50 000 ◆ et 60 boosters » en redonne. La base locale est gardée dans `.local-db` (supprime ce dossier pour repartir de zéro). Pour un 2e joueur, ouvre une fenêtre privée sur `http://localhost:8787/auth/dev?id=100000000000000002&name=Joueur2`.
+
+À la main :
+
 ```
 git fetch origin
 git checkout dev/re-zero-complet

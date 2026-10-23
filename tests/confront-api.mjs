@@ -125,6 +125,9 @@ try {
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(900);
     await page.click('[data-cfa=\'{"type":"lancer"}\']'); await page.waitForTimeout(1500);
     t.check(`${label} · contributions : une liste par branche`, (await page.locator("[data-cfb]").count()) === 8);
+    // les menus se remplissent avec MES cartes, sans attendre qu'autre chose bouge à la table (bug vu en production)
+    await page.waitForTimeout(1500);
+    t.check(`${label} · contributions : mes cartes sont proposées`, (await page.locator("[data-cfb] option[value]:not([value=''])").count()) > 0);
     await page.screenshot({ path: join(OUT, `confront-contrib-${label}.png`), fullPage: true });
     await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1800);
     await page.click(".cf-prop .btn >> nth=0"); await page.waitForTimeout(2500);

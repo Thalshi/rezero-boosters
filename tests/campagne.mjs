@@ -280,7 +280,7 @@ try {
 
   await etape("5. Défilé des Légendes à plusieurs (admin, 3 joueurs, mobile)", async () => {
   await A.go("defile"); await A.page.waitForTimeout(1200);
-  if (await A.page.locator("#defTitle").count()) { await A.page.fill("#defTitle", "Défilé de la campagne"); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1200); }
+  if (await A.page.locator("#defTitle").count()) { await A.page.fill("#defTitle", "Défilé de la campagne"); await A.page.click('[data-act="def-prev"]'); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1200); }
   for (const J of [P, Q]) { await J.page.reload(); await J.page.waitForTimeout(2000); await J.go("defile"); await J.page.waitForTimeout(1500); await J.page.click('[data-act="def-enter"]'); await J.page.waitForTimeout(1200); }
   R = await joueur(IDS.p3, "Joueur réduit", { vp: "mobile", reduced: true });
   await R.go("defile"); await R.page.waitForTimeout(1500); await R.page.click('[data-act="def-enter"]'); await R.page.waitForTimeout(1200);
@@ -304,7 +304,7 @@ try {
   await R.go("boosters"); await R.page.reload(); await R.page.waitForTimeout(2500);
   t.check("accueil : le gagnant est affiché", (await R.page.locator(".def-hall .kcw").count()) === 1);
   // nouvelle édition et retrait avec motif dans la page
-  await A.page.fill("#defTitle", "Deuxième"); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1000);
+  await A.page.fill("#defTitle", "Deuxième"); await A.page.click('[data-act="def-prev"]'); await A.page.click('[data-act="def-new"]'); await A.page.waitForTimeout(1000);
   await R.go("defile"); await R.page.waitForTimeout(1200); await R.page.click('[data-act="def-enter"]'); await R.page.waitForTimeout(1000);
   await A.page.reload(); await A.page.waitForTimeout(2000); await A.go("defile"); await A.page.waitForTimeout(1200);
   await A.page.click(`[data-defrm="${R.id}"]`); await A.page.waitForTimeout(300);

@@ -60,7 +60,7 @@ try {
     await page.click('[data-zset][data-ref^="i:"] >> nth=0'); await page.click("[data-zsave]"); await page.waitForTimeout(800);
     t.check(`${label} · Atelier : design enregistré`, await page.evaluate((c) => !!cosOf(save).designs[c], card));
     // Défilé : Reichi ouvre, deux joueurs s'inscrivent et votent
-    await go("defile"); await page.fill("#defTitle", "Défilé de test"); await page.click('[data-act="def-new"]'); await page.waitForTimeout(1200);
+    await go("defile"); await page.fill("#defTitle", "Défilé de test"); await page.click('[data-act="def-prev"]'); await page.click('[data-act="def-new"]'); await page.waitForTimeout(1200);
     await page.click('[data-act="def-enter"]'); await page.waitForTimeout(1000);
     await who("300000000000000003"); await go("defile"); await page.waitForTimeout(1200); await page.click('[data-act="def-enter"]'); await page.waitForTimeout(1000);
     await who("666024039776518157"); await go("defile"); await page.waitForTimeout(1200); await page.click('[data-act="def-votes"]'); await page.waitForTimeout(1000);

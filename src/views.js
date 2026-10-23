@@ -79,7 +79,7 @@ const icon = {
 const dia = '<span class="dia f"></span>';
 const head = (eb, title, lead = "") => `<div class="head"><p class="eyebrow">${eb}</p><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}</div>`;
 const seg = (name, items, cur, cls = "") => `<div class="seg ${cls}" role="tablist">${items.map(([k, l, dot]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${dot ? '<i class="dot"></i>' : ""}</button>`).join("")}</div>`;
-const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
+const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n, plain]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? plain ? `<span class="tcount">${n}</span>` : `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
 const rarChips = (name, cur) => `<div class="chips">${[["", "Toutes"], ...RANKS.map((k) => [k, RAR[k].label])].map(([k, l]) => `<button class="chip" type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${k ? `<i class="d" style="background:${RAR[k].color}"></i>` : ""}${l}</button>`).join("")}</div>`;
 const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`;
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
@@ -169,16 +169,18 @@ function todos() {
   if (save.free >= FREE_MAX) out.push({ text: "Tes boosters gratuits sont pleins : ouvre-les pour qu'ils se rechargent.", go: "boosters" });
   const p = SRV ? pendingTrades().length : 0; if (p) out.push({ text: `${p} échange${p > 1 ? "s" : ""} attend${p > 1 ? "ent" : ""} ta réponse.`, go: "trades" });
   const q = openPredCount(); if (q) out.push({ text: `${q} prédiction${q > 1 ? "s" : ""} attend${q > 1 ? "ent" : ""} ton vote.`, go: "pred" });
-  return out;
+  // une fois touchée, la notif disparaît (elle revient si le texte change, ou 12 h plus tard)
+  const off = notifOff().todo, now = Date.now();
+  return out.filter((x) => !(off[x.text] > now - 12 * 3600e3));
 }
 function drawNotifs() {
   const box = $("notifPanel"); if (!box) return;
   const td = todos();
   const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
   box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
-    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
+    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}" data-ntodo="${esc(x.text)}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
     <div class="np-sec">Récent</div>
-    ${SRV ? (notif.items.length ? notif.items.map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
       : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
       : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
     ${"Notification" in window ? `<button class="btn sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
@@ -263,7 +265,7 @@ function boosterZone() {
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
         <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
-        ${fill.length ? `<p class="note">Pas encore de ${fill.map((r) => RAR[r].label).join(", ")} dans ce booster : ces raretés viennent du Mix, avec les mêmes chances.</p>` : ""}
+        ${fill.length ? `<p class="note">Pas encore de carte ${fill.map((r) => RAR[r].label).join(" ni ")} dans ce booster : ${fill.length > 1 ? "ces raretés viennent" : "cette rareté vient"} du Mix, avec les mêmes chances.</p>` : ""}
         ${btn}
       </div>
     </div>

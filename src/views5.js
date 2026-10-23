@@ -30,7 +30,10 @@ function viewDefile() {
   // l'état du Défilé change pendant qu'on joue (Billy ouvre, les votes s'ouvrent) : on le recharge en arrivant, puis toutes les 20 s
   defLoad();
   clearTimeout(DEF.timer); DEF.timer = setTimeout(() => { if (view === "defile" && !document.activeElement?.closest?.(".cf-keep")) defLoad(true); }, 20000);
-  const d = DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
+  // aperçu (admin) : la page telle que les joueurs la verront une fois les inscriptions ouvertes, sans rien envoyer
+  const prev = IS_ADMIN && DEF.preview != null && (!DEF.current || DEF.current.phase === "clos") ? { title: DEF.preview || "Défilé des Légendes", phase: "inscriptions", entries: [] } : null;
+  if (!prev) DEF.preview = null;
+  const d = prev || DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
   const PH = { inscriptions: "Inscriptions ouvertes", votes: "Votes ouverts", clos: "Terminé" };
   const mineCards = [...CARDS, ...SKINS].filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
   if (!DEF.pick || !has(DEF.pick)) DEF.pick = save.featured && has(save.featured) ? save.featured : mineCards[0]?.id || null;
@@ -56,14 +59,16 @@ function viewDefile() {
         ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>${DEF.rm === e.uid ? `<div class="def-rm cf-keep"><input type="text" id="defRmWhy" maxlength="200" class="gal-note" placeholder="Motif envoyé au joueur"><button class="btn sm acc" type="button" data-defrmgo="${e.uid}">Retirer l'inscription</button></div>` : ""}` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
   }
   const admin = IS_ADMIN ? `<section class="sec def-admin"><p class="eyebrow">Admin</p><h2>Gérer le Défilé</h2>
-    <div class="row">${!d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px"><button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions</button>` : ""}
+    ${prev ? `<p class="note">Notification envoyée à tout le QG : « Le ${esc(prev.title)} est ouvert : inscris ta plus belle carte ! »</p>` : ""}
+    <div class="row">${prev ? `<button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions pour de vrai</button><button class="btn sm" type="button" data-act="def-prev-off">Modifier</button>`
+      : !d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px" value="${esc(DEF.draft || "")}"><button class="btn gold sm" type="button" data-act="def-prev">Voir l'aperçu</button>` : ""}
     ${phase === "inscriptions" ? `<button class="btn gold sm" type="button" data-act="def-votes">Fermer les inscriptions et ouvrir les votes</button>` : ""}
     ${phase === "votes" ? `<button class="btn gold sm" type="button" data-act="def-close">Clore et récompenser</button>` : ""}</div>
     <p class="note">Récompenses provisoires (à valider) : ${DEFILE_REWARDS.map((v, i) => `${i + 1}${i ? "e" : "er"} ${v} ◆`).join(", ")}, plus ${DEFILE_PARTICIPATION} ◆ pour chaque participant ; titres « ${DEFILE_TITLES.join(" », « ")} » (et « Habitué du Défilé » après 5 participations). La fréquence (semaine ou mois) est à décider : c'est toi qui ouvres et fermes.</p></section>` : "";
   const arch = DEF.archives.length ? `<section class="sec"><h2>Archives</h2><div class="def-arch">${DEF.archives.map((a) => `<div class="def-arch-i"><div class="def-arch-c">${a.podium[0] ? defCard(a.podium[0]) : ""}</div><div><b>${esc(a.title)}</b><p class="note">${new Date(a.t).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · ${a.n} carte${a.n > 1 ? "s" : ""} · ${a.voters} votant${a.voters > 1 ? "s" : ""}</p><p class="note">${a.podium.map((p, i) => `${i + 1}. ${esc(p.name)} (${p.votes})`).join(" · ")}</p></div></div>`).join("")}</div></section>` : "";
   return `<div class="wrap page">${head("Défilé des Légendes", d ? esc(d.title) : "Défilé des Légendes", "Montre ta plus belle carte personnalisée. Le QG vote, la gagnante s'affiche à l'accueil pendant une semaine.")}
     ${d ? `<div class="z-bar"><span>Étape : <b>${PH[phase]}</b></span><span>${((n) => `${n} inscrit${n > 1 ? "s" : ""}`)(d.entries.filter((e) => !e.removed).length)}</span></div>` : ""}
-    ${body}${admin}${arch}</div>`;
+    ${prev ? `<div class="def-prev-bar"><b>Aperçu</b> Voici ce que les joueurs verront. Rien n'est envoyé tant que tu n'as pas ouvert les inscriptions.</div><div inert>${body}</div>` : body}${admin}${prev ? "" : arch}</div>`;
 }
 VIEWS.defile = viewDefile;
 // à chaque arrivée sur la page, on recharge l'état du Défilé (il a pu s'ouvrir ou passer aux votes entre-temps)
@@ -76,7 +81,9 @@ document.addEventListener("click", (e) => {
   const a = t.closest("[data-act]")?.dataset.act; if (!a || !a.startsWith("def-")) return;
   if (a === "def-enter") return defAct("defile/enter", { card: DEF.pick }, "Ta carte défile !");
   if (a === "def-withdraw") return defAct("defile/withdraw", {}, "Inscription retirée.");
-  if (a === "def-new") return defAct("defile/admin", { action: "new", title: $("defTitle")?.value || "" }, "Défilé ouvert.");
+  if (a === "def-prev") { DEF.draft = ($("defTitle")?.value || "").trim(); DEF.preview = DEF.draft; scrollTo(0, 0); return draw(); }
+  if (a === "def-prev-off") { DEF.preview = null; return draw(); }
+  if (a === "def-new") { const title = DEF.preview ?? ($("defTitle")?.value || ""); DEF.preview = null; DEF.draft = ""; return defAct("defile/admin", { action: "new", title }, "Défilé ouvert."); }
   if (a === "def-votes") return defAct("defile/admin", { action: "votes" }, "Votes ouverts.");
   if (a === "def-close" && sure(t.closest("[data-act]"), "Confirmer : clore et récompenser")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
 });

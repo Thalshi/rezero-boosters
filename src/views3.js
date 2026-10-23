@@ -120,7 +120,7 @@ function viewAtelier() {
   if (param && has(param) && zDraftCard !== param) { zDraftCard = param; zDraft = null; }
   if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
   const cos = cosOf(save);
-  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length]], zAtelierTab);
+  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length, true]], zAtelierTab);
   if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
   const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, refCos(save, r)?.id]).filter(([, v]) => v));

@@ -1707,6 +1707,13 @@ body.ar-on { overflow: hidden; }
 @keyframes o3name { 0%, 20% { opacity: 0; transform: translateX(-30px) skewX(-12deg); } 30% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(20px); } }
 #stage .stage-top { position: relative; z-index: 3; }
 @media (max-width: 600px) { .o3-sub { display: none; } }
+/* compteur discret dans un onglet (nombre d'objets, pas une alerte) */
+.utabs .tcount { margin-left: 6px; font: 600 12px var(--mono, monospace); color: var(--mut); }
+
+/* Défilé : bandeau d'aperçu (admin) */
+.def-prev-bar { margin: 0 0 18px; padding: 12px 16px; border: 1px dashed var(--gold); border-radius: 12px; background: #f5c5180f; color: var(--fg2); }
+.def-prev-bar b { color: var(--gold); margin-right: 8px; text-transform: uppercase; letter-spacing: .12em; font-size: 12px; }
+
 /* Gestion : barre d'onglets commune aux pages admin et dev */
 .gest { padding-top: 24px; } .gest .eyebrow { margin-bottom: 6px; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
@@ -3599,6 +3606,15 @@ let MYNAME = "";
 const NICON = { sold: "◆", trade: "⇄", mention: "@", episode: "★", pred: "?", announce: "!" };
 const canChat = () => (SRV ? true : !!(DB && ME && canShare));
 
+// notifs touchées : on les retire de la cloche (sur cet appareil)
+function notifOff() { try { const o = JSON.parse(lsGet("rzlol-notif-off") || "{}"); return { todo: o.todo || {}, ids: o.ids || [] }; } catch (e) { return { todo: {}, ids: [] }; } }
+function dismissNotif(el) {
+  const o = notifOff();
+  if (el.dataset.ntodo) o.todo[el.dataset.ntodo] = Date.now();
+  if (el.dataset.nid) o.ids = [...o.ids, +el.dataset.nid].slice(-300);
+  lsSet("rzlol-notif-off", JSON.stringify(o)); badges();
+}
+const shownNotifs = () => { const ids = new Set(notifOff().ids); return notif.items.filter((n) => !ids.has(n.id)); };
 function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
 function badges() {
@@ -3720,7 +3736,7 @@ document.addEventListener("click", (e) => {
   if (t.closest("#bellBtn")) return toggleNotifs();
   if (notif.open && !t.closest("#notifPanel")) toggleNotifs(false);
   if (t.closest("#chatFab")) return openChat(true);
-  const ng = t.closest("[data-ngo]"); if (ng) return goTo(ng.dataset.ngo);
+  const ng = t.closest("[data-ngo]"); if (ng) { dismissNotif(ng); if (!ng.dataset.ngo) return drawNotifs(); return goTo(ng.dataset.ngo); }
   const del = t.closest("[data-chatdel]"); if (del) return deleteChat(del.dataset.chatdel);
   const mn = t.closest("[data-mention]"); if (mn && $("chatIn")) { const i = $("chatIn"); i.value = (i.value ? i.value.replace(/\s*$/, " ") : "") + "@" + mn.dataset.mention + " "; return i.focus(); }
   const act = t.closest("[data-act]")?.dataset.act;
@@ -3824,7 +3840,7 @@ const icon = {
 const dia = '<span class="dia f"></span>';
 const head = (eb, title, lead = "") => `<div class="head"><p class="eyebrow">${eb}</p><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ""}</div>`;
 const seg = (name, items, cur, cls = "") => `<div class="seg ${cls}" role="tablist">${items.map(([k, l, dot]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${dot ? '<i class="dot"></i>' : ""}</button>`).join("")}</div>`;
-const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
+const utabs = (name, items, cur) => `<div class="utabs" role="tablist">${items.map(([k, l, n, plain]) => `<button type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${l}${n ? plain ? `<span class="tcount">${n}</span>` : `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>`;
 const rarChips = (name, cur) => `<div class="chips">${[["", "Toutes"], ...RANKS.map((k) => [k, RAR[k].label])].map(([k, l]) => `<button class="chip" type="button" data-seg="${name}" data-v="${k}" aria-pressed="${cur === k}">${k ? `<i class="d" style="background:${RAR[k].color}"></i>` : ""}${l}</button>`).join("")}</div>`;
 const av = (uid, cls = "") => `<img class="${cls}" data-uid="${uid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`;
 const nm = (uid) => `<b data-uid="${uid}">…</b>`;
@@ -3914,16 +3930,18 @@ function todos() {
   if (save.free >= FREE_MAX) out.push({ text: "Tes boosters gratuits sont pleins : ouvre-les pour qu'ils se rechargent.", go: "boosters" });
   const p = SRV ? pendingTrades().length : 0; if (p) out.push({ text: `${p} échange${p > 1 ? "s" : ""} attend${p > 1 ? "ent" : ""} ta réponse.`, go: "trades" });
   const q = openPredCount(); if (q) out.push({ text: `${q} prédiction${q > 1 ? "s" : ""} attend${q > 1 ? "ent" : ""} ton vote.`, go: "pred" });
-  return out;
+  // une fois touchée, la notif disparaît (elle revient si le texte change, ou 12 h plus tard)
+  const off = notifOff().todo, now = Date.now();
+  return out.filter((x) => !(off[x.text] > now - 12 * 3600e3));
 }
 function drawNotifs() {
   const box = $("notifPanel"); if (!box) return;
   const td = todos();
   const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
   box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
-    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
+    ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}" data-ntodo="${esc(x.text)}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
     <div class="np-sec">Récent</div>
-    ${SRV ? (notif.items.length ? notif.items.map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
       : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
       : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
     ${"Notification" in window ? `<button class="btn sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
@@ -4008,7 +4026,7 @@ function boosterZone() {
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
         <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
-        ${fill.length ? `<p class="note">Pas encore de ${fill.map((r) => RAR[r].label).join(", ")} dans ce booster : ces raretés viennent du Mix, avec les mêmes chances.</p>` : ""}
+        ${fill.length ? `<p class="note">Pas encore de carte ${fill.map((r) => RAR[r].label).join(" ni ")} dans ce booster : ${fill.length > 1 ? "ces raretés viennent" : "cette rareté vient"} du Mix, avec les mêmes chances.</p>` : ""}
         ${btn}
       </div>
     </div>
@@ -4955,7 +4973,7 @@ function viewAtelier() {
   if (param && has(param) && zDraftCard !== param) { zDraftCard = param; zDraft = null; }
   if (!zDraftCard || !has(zDraftCard)) { zDraftCard = (save.featured && has(save.featured) ? save.featured : mine[0]?.id) || null; zDraft = null; }
   const cos = cosOf(save);
-  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length]], zAtelierTab);
+  const tabs = utabs("zAt", [["design", "Personnaliser"], ["inv", "Inventaire", cos.inst.length + Object.keys(cos.own).length, true]], zAtelierTab);
   if (!zDraftCard) return `<div class="wrap page">${head("Atelier Arcanique", "Atelier Arcanique")}<p class="note">Ouvre d'abord un booster : il te faut une carte à personnaliser.</p></div>`;
   if (!zDraft) zDraft = { ...(cos.designs[zDraftCard] || {}) };
   const c = byId[zDraftCard], resolved = Object.fromEntries(Object.entries(zDraft).map(([k, r]) => [k, refCos(save, r)?.id]).filter(([, v]) => v));
@@ -5226,7 +5244,10 @@ function viewDefile() {
   // l'état du Défilé change pendant qu'on joue (Billy ouvre, les votes s'ouvrent) : on le recharge en arrivant, puis toutes les 20 s
   defLoad();
   clearTimeout(DEF.timer); DEF.timer = setTimeout(() => { if (view === "defile" && !document.activeElement?.closest?.(".cf-keep")) defLoad(true); }, 20000);
-  const d = DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
+  // aperçu (admin) : la page telle que les joueurs la verront une fois les inscriptions ouvertes, sans rien envoyer
+  const prev = IS_ADMIN && DEF.preview != null && (!DEF.current || DEF.current.phase === "clos") ? { title: DEF.preview || "Défilé des Légendes", phase: "inscriptions", entries: [] } : null;
+  if (!prev) DEF.preview = null;
+  const d = prev || DEF.current, phase = d?.phase, mine = d?.entries.find((e) => e.uid === ME);
   const PH = { inscriptions: "Inscriptions ouvertes", votes: "Votes ouverts", clos: "Terminé" };
   const mineCards = [...CARDS, ...SKINS].filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
   if (!DEF.pick || !has(DEF.pick)) DEF.pick = save.featured && has(save.featured) ? save.featured : mineCards[0]?.id || null;
@@ -5252,14 +5273,16 @@ function viewDefile() {
         ${IS_ADMIN && phase !== "clos" ? `<button class="btn sm acc" type="button" data-defrm="${e.uid}">Retirer…</button>${DEF.rm === e.uid ? `<div class="def-rm cf-keep"><input type="text" id="defRmWhy" maxlength="200" class="gal-note" placeholder="Motif envoyé au joueur"><button class="btn sm acc" type="button" data-defrmgo="${e.uid}">Retirer l'inscription</button></div>` : ""}` : ""}</div>`).join("")}</div>` : `<p class="note">Personne n'est encore inscrit.</p>`}</section>`;
   }
   const admin = IS_ADMIN ? `<section class="sec def-admin"><p class="eyebrow">Admin</p><h2>Gérer le Défilé</h2>
-    <div class="row">${!d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px"><button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions</button>` : ""}
+    ${prev ? `<p class="note">Notification envoyée à tout le QG : « Le ${esc(prev.title)} est ouvert : inscris ta plus belle carte ! »</p>` : ""}
+    <div class="row">${prev ? `<button class="btn gold sm" type="button" data-act="def-new">Ouvrir les inscriptions pour de vrai</button><button class="btn sm" type="button" data-act="def-prev-off">Modifier</button>`
+      : !d || phase === "clos" ? `<input type="text" id="defTitle" maxlength="80" placeholder="Titre (ex. Défilé de novembre)" class="gal-note" style="max-width:320px" value="${esc(DEF.draft || "")}"><button class="btn gold sm" type="button" data-act="def-prev">Voir l'aperçu</button>` : ""}
     ${phase === "inscriptions" ? `<button class="btn gold sm" type="button" data-act="def-votes">Fermer les inscriptions et ouvrir les votes</button>` : ""}
     ${phase === "votes" ? `<button class="btn gold sm" type="button" data-act="def-close">Clore et récompenser</button>` : ""}</div>
     <p class="note">Récompenses provisoires (à valider) : ${DEFILE_REWARDS.map((v, i) => `${i + 1}${i ? "e" : "er"} ${v} ◆`).join(", ")}, plus ${DEFILE_PARTICIPATION} ◆ pour chaque participant ; titres « ${DEFILE_TITLES.join(" », « ")} » (et « Habitué du Défilé » après 5 participations). La fréquence (semaine ou mois) est à décider : c'est toi qui ouvres et fermes.</p></section>` : "";
   const arch = DEF.archives.length ? `<section class="sec"><h2>Archives</h2><div class="def-arch">${DEF.archives.map((a) => `<div class="def-arch-i"><div class="def-arch-c">${a.podium[0] ? defCard(a.podium[0]) : ""}</div><div><b>${esc(a.title)}</b><p class="note">${new Date(a.t).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} · ${a.n} carte${a.n > 1 ? "s" : ""} · ${a.voters} votant${a.voters > 1 ? "s" : ""}</p><p class="note">${a.podium.map((p, i) => `${i + 1}. ${esc(p.name)} (${p.votes})`).join(" · ")}</p></div></div>`).join("")}</div></section>` : "";
   return `<div class="wrap page">${head("Défilé des Légendes", d ? esc(d.title) : "Défilé des Légendes", "Montre ta plus belle carte personnalisée. Le QG vote, la gagnante s'affiche à l'accueil pendant une semaine.")}
     ${d ? `<div class="z-bar"><span>Étape : <b>${PH[phase]}</b></span><span>${((n) => `${n} inscrit${n > 1 ? "s" : ""}`)(d.entries.filter((e) => !e.removed).length)}</span></div>` : ""}
-    ${body}${admin}${arch}</div>`;
+    ${prev ? `<div class="def-prev-bar"><b>Aperçu</b> Voici ce que les joueurs verront. Rien n'est envoyé tant que tu n'as pas ouvert les inscriptions.</div><div inert>${body}</div>` : body}${admin}${prev ? "" : arch}</div>`;
 }
 VIEWS.defile = viewDefile;
 // à chaque arrivée sur la page, on recharge l'état du Défilé (il a pu s'ouvrir ou passer aux votes entre-temps)
@@ -5272,7 +5295,9 @@ document.addEventListener("click", (e) => {
   const a = t.closest("[data-act]")?.dataset.act; if (!a || !a.startsWith("def-")) return;
   if (a === "def-enter") return defAct("defile/enter", { card: DEF.pick }, "Ta carte défile !");
   if (a === "def-withdraw") return defAct("defile/withdraw", {}, "Inscription retirée.");
-  if (a === "def-new") return defAct("defile/admin", { action: "new", title: $("defTitle")?.value || "" }, "Défilé ouvert.");
+  if (a === "def-prev") { DEF.draft = ($("defTitle")?.value || "").trim(); DEF.preview = DEF.draft; scrollTo(0, 0); return draw(); }
+  if (a === "def-prev-off") { DEF.preview = null; return draw(); }
+  if (a === "def-new") { const title = DEF.preview ?? ($("defTitle")?.value || ""); DEF.preview = null; DEF.draft = ""; return defAct("defile/admin", { action: "new", title }, "Défilé ouvert."); }
   if (a === "def-votes") return defAct("defile/admin", { action: "votes" }, "Votes ouverts.");
   if (a === "def-close" && sure(t.closest("[data-act]"), "Confirmer : clore et récompenser")) return defAct("defile/admin", { action: "close" }, "Défilé clos.");
 });

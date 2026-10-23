@@ -143,6 +143,8 @@ try {
     await page.click('[data-act="cf-deck-use"]'); await page.waitForTimeout(300);
     t.check(`${label} · deck enregistré puis repris en un toucher`, (await page.locator(".cf-slot.on").count()) === 1);
     await page.screenshot({ path: join(OUT, `confront-contrib-${label}.png`), fullPage: true });
+    // sur mobile, le même joueur a encore ses cartes engagées dans la partie « ordi » : il joue avec des persos prêtés
+    if (label === "mobile") { await page.click('[data-act="cf-deck-clear"]'); await page.waitForTimeout(200); }
     await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1800);
     await page.click(".cf-prop .btn >> nth=0"); await page.waitForTimeout(2500);
     t.check(`${label} · table de jeu affichée`, (await page.locator(".cf-seat").count()) === 2 && (await page.locator(".cf-hand .cf-card").count()) > 0);

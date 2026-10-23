@@ -136,7 +136,7 @@ function drawMenu() {
       <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
     ${guest && window.DISCORD_LOGIN ? `<div class="disc-box">Lie ton compte Discord pour ne pas perdre ta collection et jouer avec le QG.<a class="btn-disc" href="/auth/login">${icon.discord}Se connecter avec Discord</a></div>` : ""}
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
-    <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié M</small><b>${save.sinceMythic}/${MYTHIC_PITY}</b></div></div>
+    <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié L</small><b>${save.sinceLegend || 0}/${LEGEND_PITY}</b></div></div>
   </div>
   <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${ico(k)}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
   <div class="m-foot">${SRV || ME ? `<button type="button" data-nav="profil" data-p="${ME}">Mon profil public</button>` : `<button type="button" data-nav="profil" data-p="moi">Mon profil</button>`}
@@ -222,7 +222,7 @@ function qsHTML() {
     <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
     <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">${ico("feu")}</span><b>J${st.n}/7</b><span>connexion à la suite</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
     <div style="--c:var(--gold)"><span class="k">${ico("piece")}</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le booster doré</span></div>
-    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div>
+    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div>
   </div>`;
 }
 function packsForTab() {
@@ -261,7 +261,7 @@ function boosterZone() {
       <div class="pkd" style="--pc:${pk.color}">
         <div class="pkd-h"><span class="e">${ico(packIcon(pk))}</span><div><h3>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name}</h3><p>${pk.sub}</p></div></div>
         <div class="mini4"><div><b>${PACK}</b><span>cartes par booster</span></div><div><b style="color:var(--r-${pk.daily ? "e" : "r"})">${pk.daily ? "Épique" : "Rare"}</b><span>ou mieux, garantie</span></div>
-          <div><b style="color:var(--acc)">${Math.max(0, MYTHIC_PITY - save.sinceMythic)}</b><span>avant Mythique sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
+          <div><b style="color:var(--r-l)">${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
         <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>

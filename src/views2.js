@@ -177,9 +177,9 @@ function viewMissions() {
     ${(save.first || {}).bonus ? "" : `<div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Bienvenue</p><h2>Premiers pas</h2></div><span class="pill gold">Tout fait → ${rewardText(FIRST_BONUS)}</span></div>
       ${fs.map((f) => mrHTML(f, "first", f.id)).join("")}${bonus("Tout fait", FIRST_BONUS, false, fs.every((f) => f.claimed), "first-bonus")}</div>`}
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Du jour</p><h2>Missions du jour</h2></div><span class="pill">↻ ${left(nextDay)}</span></div>
-      ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Les 3 réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
+      ${ms.map((m) => mrHTML(m, "mission", m.id)).join("")}${bonus("Toutes réclamées", DAILY_BONUS, !!d.bonus, ms.every((m) => m.claimed), "daily-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">De la semaine</p><h2>Missions de la semaine</h2></div><span class="pill">↻ ${left(nextWeek)}</span></div>
-      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus("Les 3 réclamées", WEEKLY_BONUS, !!w.bonus, ws.every((m) => m.claimed), "weekly-bonus")}</div>
+      ${ws.map((m) => mrHTML(m, "weekly", m.id)).join("")}${bonus(`${WEEKLY_BONUS_N} sur ${ws.length} réclamées`, WEEKLY_BONUS, !!w.bonus, ws.filter((m) => m.claimed).length >= WEEKLY_BONUS_N, "weekly-bonus")}</div>
     <div class="mbox"><div class="mbox-h"><div><p class="eyebrow">Prédictions</p><h2>Prédis l'épisode</h2></div><span class="pill gold">Jusqu'à ${Math.max(PRED_REWARD, ...pred.questions.map(predRewardOf))} ◆ par bonne réponse</span></div>
       <p class="note">${openPredCount() ? `${openPredCount()} question${openPredCount() > 1 ? "s" : ""} attend${openPredCount() > 1 ? "ent" : ""} ton vote.` : "Tu as voté pour toutes les questions ouvertes."} Billy fixe la récompense de chaque question.</p>
       <button class="btn vio block" type="button" data-nav="pred">Faire mes prédictions</button></div>
@@ -373,7 +373,7 @@ function viewRaretes() {
     <section class="sec prose"><h2>Et aussi</h2>
       <p><b style="color:var(--gold)">Dorée.</b> Tous les ${GOLD_EVERY} boosters, ta meilleure carte sort dorée (et ${pct(GOLD_CHANCE)} de chance à chaque carte). Une dorée vaut trois fois plus au recyclage.</p>
       <p><b style="color:var(--r-e)">Skins du QG.</b> Les membres du serveur ont chacun six skins, comme dans LoL : ${SKIN_LINES.map((l) => `${l.name} (${RAR[l.rar].label})`).join(", ")}. Ils sortent du Coffre hextech ou en combinant ${CRAFT_COST} doublons.</p>
-      <p><b style="color:var(--acc)">Mythique garantie.</b> Si tu n'as pas eu de Mythique depuis ${MYTHIC_PITY} boosters, la suivante est garantie.</p>
+      <p><b style="color:var(--r-l)">Légendaire garantie.</b> Si tu n'as pas eu de Légendaire ni de Mythique depuis ${LEGEND_PITY} boosters, le suivant t'en donne une. La Mythique, elle, n'est jamais garantie.</p>
       <p><b style="color:var(--wish)">Booster divin.</b> Environ 1 booster sur ${Math.round(1 / DIVINE_CHANCE)} est divin : que des Légendaires et des Mythiques.</p>
       <p><b>POW et AURA.</b> Les deux chiffres en bas de chaque carte montrent la puissance du perso. Plus la carte est rare, plus ils sont hauts.</p></section>
   </div>`;
@@ -531,7 +531,7 @@ function drawOpening() {
       <div class="floor"></div>
       <p class="hint">${o.pk.cos ? `<b>${o.pk.name}</b> · ${o.cards.length} objets` : o.pk.daily ? `Thème du jour : <b>${o.pk.name.replace("Pack du jour · ", "")}</b>` : `<b>${o.pk.name}</b> · ${o.paid ? "acheté" : "gratuit"}`}</p>
       <p class="hint">${chest ? "Touche le coffre pour l'ouvrir" : o.pk.cos ? "Tire la pochette vers le haut (ou touche-la)" : "Tire le booster vers le haut (ou touche-le)"}</p>
-      <p class="sub">${o.pk.cos ? `Mythique garantie dans ${Math.max(0, SUMMON_PITY_M - cosOf(save).sinceM)} invocations au plus` : `Mythique garantie dans ${Math.max(0, MYTHIC_PITY - save.sinceMythic)} boosters au plus`}</p></section>`;
+      <p class="sub">${o.pk.cos ? `Légendaire garantie dans ${Math.max(0, SUMMON_PITY_L - cosOf(save).sinceL)} invocations au plus` : `Légendaire garantie dans ${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))} boosters au plus`}</p></section>`;
     const p = $("pack"); if (!chest) bindPull(p);
     return;
   }

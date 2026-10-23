@@ -93,7 +93,7 @@ t.section("Probabilités réelles comparées aux chances affichées");
       const s = G.freshSave(T0), hit = Object.fromEntries(RANKS.map((r) => [r, 0]));
       let value = 0;
       for (let i = 0; i < N; i++) {
-        s.sinceMythic = 0; // le pity est vérifié à part : ici, les chances de base
+        s.sinceMythic = 0; s.sinceLegend = 0; // le pity est vérifié à part : ici, les chances de base
         const r = G.openPackS(s, pk, pool, rng, T0, mix);
         for (const rr of RANKS) if (r.cards.some((c) => G.CARD_BY_ID[c.id].rar === rr)) hit[rr]++;
         value += r.cards.reduce((a, c) => a + G.cardValue(c.id, c.gold), 0);
@@ -142,30 +142,29 @@ t.section("Pack du jour : rotation sur deux ans");
   t.note(`épisode 1, à partir du ${G.dayKey(T0)} : ${first.join(", ")}`);
 }
 
-t.section("Pity Mythique et cartes dorées");
+t.section("Légendaire garantie (jamais la Mythique) et cartes dorées");
 {
   const cfg = G.configFrom({ def: 2 }), s = G.freshSave(T0); let gap = 0, maxGap = 0, goldGap = 0, maxGold = 0, reset = true;
   for (let i = 0; i < 3000; i++) {
     s.free = 1; const r = G.takeAndOpenS(s, "mix", false, cfg, null, rng, T0);
-    const m = r.cards.some((c) => G.CARD_BY_ID[c.id].rar === "m"), g = r.cards.some((c) => c.gold);
-    gap = m ? 0 : gap + 1; maxGap = Math.max(maxGap, gap); goldGap = g ? 0 : goldGap + 1; maxGold = Math.max(maxGold, goldGap);
-    if ((m && s.sinceMythic !== 0) || (g && s.sinceGold !== 0)) reset = false;
+    const l = r.cards.some((c) => rank(G.CARD_BY_ID[c.id].rar) >= 4), g = r.cards.some((c) => c.gold);
+    gap = l ? 0 : gap + 1; maxGap = Math.max(maxGap, gap); goldGap = g ? 0 : goldGap + 1; maxGold = Math.max(maxGold, goldGap);
+    if ((l && s.sinceLegend !== 0) || (g && s.sinceGold !== 0)) reset = false;
   }
-  t.check(`une Mythique au plus tous les ${G.MYTHIC_PITY} boosters (3 000 ouvertures)`, maxGap < G.MYTHIC_PITY, { plus_longue_série: maxGap });
+  t.check(`une Légendaire ou mieux au plus tous les ${G.LEGEND_PITY} boosters (3 000 ouvertures)`, maxGap < G.LEGEND_PITY, { plus_longue_série: maxGap });
   t.check(`une carte dorée au plus tous les ${G.GOLD_EVERY} boosters`, maxGold < G.GOLD_EVERY, { plus_longue_série: maxGold });
-  t.check("compteurs remis à zéro après une Mythique ou une dorée", reset);
+  t.check("compteurs remis à zéro après une Légendaire (ou mieux) ou une dorée", reset);
   let forcedOk = true;
   for (let i = 0; i < 200; i++) {
-    const s1 = G.freshSave(T0); s1.sinceMythic = G.MYTHIC_PITY - 1; s1.sinceGold = G.GOLD_EVERY - 1;
+    const s1 = G.freshSave(T0); s1.sinceLegend = G.LEGEND_PITY - 1; s1.sinceGold = G.GOLD_EVERY - 1;
     const r = G.takeAndOpenS(s1, "vilains", false, cfg, null, rng, T0);
-    if (!r.cards.some((c) => G.CARD_BY_ID[c.id].rar === "m") || !r.cards.some((c) => c.gold) || s1.sinceMythic || s1.sinceGold) forcedOk = false;
+    if (!r.cards.some((c) => rank(G.CARD_BY_ID[c.id].rar) >= 4) || !r.cards.some((c) => c.gold) || s1.sinceLegend || s1.sinceGold) forcedOk = false;
   }
-  t.check("au 120e booster sans Mythique, la Mythique arrive (même dans un thème), avec la dorée garantie", forcedOk);
-  const noM = G.configFrom({ def: 2, ep: { kai: G.HIDDEN, sultran: G.HIDDEN, rayzo: G.HIDDEN, teo: G.HIDDEN, billy: G.HIDDEN, reichi: G.HIDDEN } });
-  const s2 = G.freshSave(T0); s2.sinceMythic = G.MYTHIC_PITY + 5; let lplus = 0;
-  for (let i = 0; i < 400; i++) { s2.free = 1; const r = G.takeAndOpenS(s2, "mix", false, noM, null, rng, T0); lplus += r.cards.filter((c) => rank(G.CARD_BY_ID[c.id].rar) >= 4).length; }
-  // sans pity emballé, les Légendaires restent rares (≈ 0,14 par booster) au lieu d'une par booster
-  t.check("sans Mythique débloquée : le pity ne force rien et ne s'emballe pas", s2.sinceMythic === G.MYTHIC_PITY + 5 && lplus < 400 * 0.3, { légendaires_par_booster: +(lplus / 400).toFixed(2) });
+  t.check(`au ${G.LEGEND_PITY}e booster sans Légendaire, elle arrive (même dans un thème), avec la dorée garantie`, forcedOk);
+  t.check("la Mythique n'est jamais garantie", G.MYTHIC_PITY === 0 && G.SUMMON_PITY_M === 0);
+  const s3 = G.freshSave(T0); s3.sinceMythic = 5000; let m3 = 0;
+  for (let i = 0; i < 300; i++) { s3.free = 1; s3.sinceLegend = 0; const r = G.takeAndOpenS(s3, "mix", false, cfg, null, rng, T0); m3 += r.cards.filter((c) => G.CARD_BY_ID[c.id].rar === "m").length; }
+  t.check("même après des milliers de boosters sans Mythique, rien n'est forcé", m3 < 300 * 0.1, { mythiques_par_booster: +(m3 / 300).toFixed(3) });
 }
 
 t.section("Économie");

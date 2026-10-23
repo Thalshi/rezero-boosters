@@ -13,7 +13,11 @@ const RUNS = +(process.argv[2] || 8), DAYS = 180;
 const T0 = Date.parse("2026-11-02T07:00:00+01:00");
 
 // les réglages comparés ; « actuel » = ce qui est en production
-const VARIANTS = process.env.DURE ? [
+const VARIANTS = process.env.FINAL ? [
+  // le réglage final, tel qu'il est écrit dans le moteur (rien n'est remplacé sauf les prix déjà identiques)
+  { id: "final-sans", nom: "Final sans anti-doublons", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, confront: { partie: 10, victoire: 10, max: 3 }, PROB: { NEW_BIAS: "0" } },
+  { id: "final", nom: "Final · D + missions refaites + Légendaire garantie + 40 % des tirages vers une carte manquante", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, confront: { partie: 10, victoire: 10, max: 3 } },
+] : process.env.DURE ? [
   // économie dure : gains de C, boosters plus lents ou plus chers, et probabilités plus dures (D et E)
   { id: "g-quart", nom: "C · recyclage ÷ 4, missions ÷ 3 (probabilités actuelles)", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 10, victoire: 10, max: 3 } },
   { id: "d-dure", nom: "D · C + gratuit toutes les 3 h, booster 150 ◆, probabilités dures", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 10, victoire: 10, max: 3 }, PROB: { SLOT: "{ c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 }", LAST: "{ r: 86, e: 11, l: 2.5, m: 0.5 }", DAILY_LAST: "{ e: 90, l: 8.5, m: 1.5 }", MYTHIC_PITY: "150", GOLD_CHANCE: "0.01", SUMMON_RATES: "{ c: 42, pc: 30, r: 18, e: 7.5, l: 2.1, m: 0.4 }", SUMMON_PITY_M: "100" } },
@@ -84,7 +88,7 @@ function simulate(G, v, pf, seed) {
           // Défilé tous les 14 jours : participation, et parfois le podium (une table de ~15 joueurs)
           if (d % 14 === 6 && rng() < pf.social) { let g = G.DEFILE_PARTICIPATION; const r = rng(); if (r < 0.07) g += G.DEFILE_REWARDS[0]; else if (r < 0.14) g += G.DEFILE_REWARDS[1]; else if (r < 0.21) g += G.DEFILE_REWARDS[2]; s.chakra += g; st.gagne.defile += g; }
           // Confrontation : parties valables du jour, récompense plafonnée
-          if (v.confront) { let n = Math.floor(pf.games) + (rng() < pf.games % 1 ? 1 : 0); n = Math.min(n, v.confront.max); for (let k = 0; k < n; k++) { const g = v.confront.partie + (rng() < 0.5 ? v.confront.victoire : 0); s.chakra += g; st.gagne.confront += g; } }
+          if (v.confront) { const n = Math.floor(pf.games) + (rng() < pf.games % 1 ? 1 : 0); for (let k = 0; k < n; k++) { const win = rng() < 0.5; G.trackS(s, "cfPlay", 1, now); if (win) G.trackS(s, "cfWin", 1, now); if (k >= v.confront.max) continue; const g = v.confront.partie + (win ? v.confront.victoire : 0); s.chakra += g; st.gagne.confront += g; } }
         }
         G.regenS(s, now);
         while (open(done() < 1 ? "mix" : "coffre", false, now)) G.regenS(s, now);

@@ -373,8 +373,9 @@ const Open3D = (() => {
   // ---------- mise en place selon l'écran ----------
   function slotsFor(n, portrait) {
     if (n <= 5) return portrait ? [[-1.2, 2.55], [0, 2.55], [1.2, 2.55], [-0.6, 0.85], [0.6, 0.85]].slice(0, n).map(([x, y]) => ({ x, y, z: 2.2, rz: 0, s: 1 })) : [-2.6, -1.3, 0, 1.3, 2.6].slice(0, n).map((x, i) => ({ x, y: 1.75 - Math.abs(i - 2) * 0.09, z: 2.2 - Math.abs(i - 2) * 0.08, rz: -(i - 2) * 0.045, s: 1 }));
-    if (portrait) { const rows = [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9]]; const out = []; rows.forEach((r, j) => r.forEach((_, k) => out.push({ x: (k - (r.length - 1) / 2) * 0.86, y: 3.0 - j * 1.12, z: 2.2, rz: 0, s: 0.74 }))); return out; }
-    return Array.from({ length: n }, (_, i) => { const k = i % 5, j = Math.floor(i / 5); return { x: (k - 2) * 1.12, y: 2.45 - j * 1.32, z: 2.2, rz: -(k - 2) * 0.03, s: 0.82 }; });
+    // coffre (10 cartes) : deux arcs comme le prototype, les cartes du bord tournées vers le joueur
+    if (portrait) { const rows = [[0, 1, 2], [3, 4, 5, 6], [7, 8, 9]]; const out = []; rows.forEach((r, j) => r.forEach((_, k) => { const d = k - (r.length - 1) / 2; out.push({ x: d * 0.86, y: 3.0 - j * 1.12 - Math.abs(d) * 0.06, z: 2.2 - Math.abs(d) * 0.08, rz: -d * 0.05, ry: -d * 0.12, s: 0.74 }); })); return out; }
+    return Array.from({ length: n }, (_, i) => { const k = i % 5, j = Math.floor(i / 5), d = k - 2; return { x: d * 1.18, y: 2.5 - j * 1.36 - Math.abs(d) * 0.08, z: 2.2 - Math.abs(d) * 0.12, rz: -d * 0.045, ry: -d * 0.1, s: 0.84 }; });
   }
   function resize() {
     const w = innerWidth, h = innerHeight, a = w / h, THREE = E.THREE;
@@ -390,7 +391,7 @@ const Open3D = (() => {
     if (!cur) return;
     const v = cur.phase === "cards" || cur.phase === "done" ? E.lay.cardCam : cur.kind === "chest" ? E.lay.chestCam : E.lay.packCam;
     E.cam.pos.copy(v.pos); E.cam.look.copy(v.look);
-    cur.cards.forEach((c, i) => { const s = E.lay.slots[i]; c.home.set(s.x, s.y, s.z); c.homeRz = s.rz; c.s = s.s; if (!c.busy) { c.root.position.copy(c.home); c.root.rotation.z = c.homeRz; c.root.scale.setScalar(c.s); } });
+    cur.cards.forEach((c, i) => { const s = E.lay.slots[i]; c.home.set(s.x, s.y, s.z); c.homeRz = s.rz; c.s = s.s; if (!c.busy) { c.root.position.copy(c.home); c.root.rotation.z = c.homeRz; c.root.rotation.y = s.ry || 0; c.root.scale.setScalar(c.s); } });
   }
 
   // ---------- page ----------
@@ -702,7 +703,7 @@ const Open3D = (() => {
       const p0 = c.root.position.clone(), mid = P0.mid, spin = (i % 5 - 2) * 0.6, sc0 = c.root.scale.x, r0 = c.root.rotation.x;
       await tween(0.6, (t) => {
         const u = 1 - t; c.root.position.set(u * u * p0.x + 2 * u * t * mid.x + t * t * s.x, u * u * p0.y + 2 * u * t * mid.y + t * t * s.y, u * u * p0.z + 2 * u * t * mid.z + t * t * s.z);
-        c.root.scale.setScalar(lerp(sc0, c.s, t)); c.root.rotation.set(lerp(r0, 0, t), 0, lerp(spin, s.rz, t));
+        c.root.scale.setScalar(lerp(sc0, c.s, t)); c.root.rotation.set(lerp(r0, 0, t), (s.ry || 0) * t, lerp(spin, s.rz, t));
       }, easeOut);
       c.busy = false;
       if (c.rk >= 3) tween(0.6, (t) => { c.halo.material.opacity = t * (c.rk >= 4 ? 0.28 : 0.2); c.edgeMat.emissiveIntensity = t * 0.6; });

@@ -126,7 +126,7 @@ function viewConfront() {
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
     <section class="sec"><h2>Créer une table</h2><div class="lab-form cf-keep"><label>Nom <input type="text" id="cfNom" maxlength="40" placeholder="Table de ${esc(ACCT?.name || "moi")}"></label><label class="zopt-line"><input type="checkbox" id="cfPub" checked> Publique (visible de tous)</label>
-      <div class="cf-modes" role="radiogroup" aria-label="Cartes de la table">${CF_MODES.map(([k, l, d]) => `<label class="cf-mode"><input type="radio" name="cfMode" value="${k}" ${k === "deck" ? "checked" : ""}><b>${l}</b><small>${d}</small></label>`).join("")}</div>
+      <p class="note">Les cartes de la table (chacun son deck ou cartes partagées) se choisissent dans le salon.</p>
       <button class="btn gold" type="button" data-act="cf-create">Créer</button></div>
       <div class="lab-form cf-keep"><label>Rejoindre avec un code <input type="text" id="cfCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase;width:120px"></label><button class="btn" type="button" data-act="cf-code">Ouvrir</button></div></section>
     ${!L ? `<p class="note">Chargement…</p>` : L.error ? `<p class="note">${esc(L.error)}</p>` : `
@@ -144,6 +144,19 @@ function cfTableHTML() {
   if (!T) return `<div class="wrap page"><p class="note">Chargement de la table…</p></div>`;
   if (T.ferme && T.vue?.phase === "lobby") return `<div class="wrap page">${empty("Ce salon a été fermé par l'hôte.")}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
   if (T.error) return `<div class="wrap page">${empty(esc(T.error))}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
+  const v = T.vue;
+  // la table se joue dans l'arène 3D, du salon jusqu'à la fin (la page classique reste en secours sans WebGL)
+  if (Arena.wants(T)) { setTimeout(() => Arena.sync(CF.table), 0); return `<div class="wrap page cf-page"><p class="note">La table est dans l'arène.</p></div>`; }
+  if (Arena.loading()) return `<div class="wrap page cf-page"><p class="note">Entrée dans l'arène…</p></div>`;
+  const { top, body: pre } = cfParts(T);
+  let body = pre;
+  if (!body) body = cfBoard(v);
+  Arena.hide();
+  return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+}
+// en-tête (boutons de la table) et contenu des étapes d'avant-partie : salon, choix des cartes, choix du perso ;
+// partagés par la page classique et l'arène 3D (mêmes boutons, mêmes règles)
+function cfParts(T) {
   const v = T.vue, acts = v.actions || [], has1 = (t) => acts.find((a) => a.type === t);
   const top = `<div class="cf-top"><div><p class="eyebrow">Confrontation · ${esc(PHASE_LABEL[v.phase])}${v.mode ? ` · ${{ duel: "Duel", trio: "Trio", classique: "Classique" }[v.mode]}` : ""}</p><h1 class="cf-h">${esc(T.nom)}</h1>
     <p class="note">Code <b class="mono">${T.gid}</b>${T.spectateur ? " · tu regardes en spectateur" : ""}</p></div>
@@ -172,11 +185,8 @@ function cfTableHTML() {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
-  } else if (Arena.wants(T)) { setTimeout(() => Arena.sync(CF.table), 0); return `<div class="wrap page cf-page">${top}<p class="note">La partie se joue dans l'arène.</p></div>`; }
-  else if (Arena.loading()) return `<div class="wrap page cf-page">${top}<p class="note">Entrée dans l'arène…</p></div>`;
-  else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
-  if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
-  return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+  }
+  return { top, body };
 }
 // ===== Choix des cartes façon draft : le deck (une carte par style) en haut, ta collection en vraies cartes =====
 function cfDraft() {
@@ -307,7 +317,7 @@ document.addEventListener("click", (e) => {
   const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
-  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked, partage: document.querySelector('[name="cfMode"]:checked')?.value === "partage" }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
+  if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });

@@ -73,12 +73,11 @@ try {
     await ctx.grantPermissions(["clipboard-read", "clipboard-write"]).catch(() => {});
     await page.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await page.waitForTimeout(2500);
     await page.goto(`${srv.base}/#/confront`); await page.waitForTimeout(1500);
-    t.check(`${label} · création : les deux modes, « chacun son deck » coché`, (await page.locator('[name="cfMode"]').count()) === 2 && (await page.locator('[name="cfMode"][value="deck"]').isChecked()));
-    await page.click('label.cf-mode:has([value="partage"])');
+    t.check(`${label} · création : pas de choix du mode en double (il se fait dans le salon)`, (await page.locator('[name="cfMode"]').count()) === 0);
     await page.fill("#cfNom", "Salon " + label); await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
-    t.check(`${label} · salon : le mode choisi est affiché et modifiable par l'hôte`, (await page.locator('.cf-modebox .cf-mode.on').innerText()).includes("partagées") && (await page.locator("[data-cfmode]").count()) === 2);
-    await page.click('[data-cfmode="deck"]'); await page.waitForTimeout(800);
-    t.check(`${label} · l'hôte repasse en « chacun son deck »`, (await page.locator('.cf-modebox .cf-mode.on').innerText()).includes("Chacun son deck"));
+    t.check(`${label} · salon : « chacun son deck » par défaut, modifiable par l'hôte`, (await page.locator('.cf-modebox .cf-mode.on').innerText()).includes("Chacun son deck") && (await page.locator("[data-cfmode]").count()) === 2);
+    await page.click('[data-cfmode="partage"]'); await page.waitForTimeout(800);
+    t.check(`${label} · l'hôte passe en « cartes partagées »`, (await page.locator('.cf-modebox .cf-mode.on').innerText()).includes("partagées"));
     await page.click('[data-act="cf-share"]'); await page.waitForTimeout(400);
     t.check(`${label} · partager : le lien du salon`, (await page.locator(".cf-share input").inputValue()).includes("/#/confront/"));
     await page.click('[data-cfsh="chat"]'); await page.waitForTimeout(1000);

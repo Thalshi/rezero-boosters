@@ -1719,6 +1719,36 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Arène : salon, choix des cartes et choix du perso par-dessus la scène 3D ===== */
+.ar.pre .ar-top, .ar.pre .ar-hand, .ar.pre .ar-side, .ar.pre .ar-tbl, .ar.pre .ar-chip, .ar.pre .ar-react, .ar.pre .ar-hint, .ar.pre #ar-aim { display: none !important; }
+.ar-pre { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
+.ar-pre > * { pointer-events: auto; }
+.ar-pre-top { position: absolute; left: 14px; right: 14px; top: calc(10px + env(safe-area-inset-top)); }
+.ar-pre-top .cf-top { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; justify-content: space-between; margin: 0; padding: 0; border: 0; }
+.ar-pre-top .cf-top > div:first-child { display: none; }
+.ar-pre-top .row { gap: 6px; flex-wrap: wrap; }
+.ar-pre-top .btn { background: #0b0916e6; }
+.ar-pre-top .btn.acc { background: linear-gradient(180deg, #ff5aa5, #c4166a); color: #fff; border: 0; }
+.ar-pre-body { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); width: min(720px, calc(100vw - 24px)); max-height: calc(100% - 150px); overflow: auto; overscroll-behavior: contain;
+  background: #0b0916f0; border: 1px solid var(--ap, #ff2e88); border-radius: 14px; padding: 14px 18px; box-sizing: border-box; box-shadow: 0 0 40px #ff2e8833; animation: ar-rin .3s ease-out; }
+.ar-pre-body .sec { margin: 0 0 12px; padding: 0; } .ar-pre-body .sec:last-child { margin-bottom: 0; }
+.ar-pre-body h2 { font: 700 17px var(--body); margin: 0 0 8px; }
+.ar-pre-body .note { color: var(--fg2); }
+.ar-pre-body.ph-contributions { top: auto; bottom: 0; width: min(1180px, 100vw); max-height: min(68vh, calc(100% - 70px)); border-radius: 16px 16px 0 0; border-bottom: 0; }
+.ar-pre-body.ph-contributions .cf-draft-go { bottom: 0; background: linear-gradient(transparent, #0b0916 40%); }
+.ar-pre-body.ph-contributions .cf-pool { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+.ar-pre-body.ph-lobby { left: 14px; top: 64px; transform: none; width: min(400px, calc(100vw - 28px)); }
+.ar-pre-body.ph-lobby .cf-modes { grid-template-columns: 1fr; }
+.ar-pre-body.ph-choix .cf-perso.big .kcw { --w: min(200px, 40vw); }
+.ar-pre-body.ph-choix { background: #0b0916d0; width: min(860px, calc(100vw - 24px)); }
+.ar-pre-body.ph-choix .cf-props { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; perspective: 900px; }
+.ar-pre-body.ph-choix .cf-prop { transition: transform .25s; }
+.ar-pre-body.ph-choix .cf-prop:first-child:not(:only-child) { transform: rotateY(14deg); } .ar-pre-body.ph-choix .cf-prop:last-child:not(:only-child) { transform: rotateY(-14deg); }
+.ar-pre-body.ph-choix .cf-prop:hover { transform: translateY(-6px) scale(1.03); }
+.ar-tag.pre .ar-st { font: 700 10px var(--mono, monospace); letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: #ffffff14; color: var(--fg2); }
+.ar-tag.pre.ok .ar-st { background: #3fbf7f33; color: #7fe0ad; }
+@media (max-width: 600px) { .ar-pre-body { top: 112px; max-height: calc(100% - 180px); padding: 12px; } .ar-pre-body.ph-contributions { max-height: 72vh; } .ar-pre-body.ph-lobby { left: 0; top: auto; bottom: 0; width: 100vw; max-height: 52vh; border-radius: 16px 16px 0 0; } .ar-pre-body.ph-choix .cf-perso.big .kcw { --w: 150px; } }
+
 /* ===== Confrontation : cartes de la table (chacun son deck / partagées), partage du salon ===== */
 .cf-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; }
 .cf-mode { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line3); background: var(--bg2); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }

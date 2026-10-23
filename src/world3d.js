@@ -25,16 +25,7 @@ const World3D = (() => {
     const pink = new T.PointLight("#ff2e88", 26, 14, 1.6); pink.position.set(5, 2.2, 2); scene.add(pink);
     const cyan = new T.PointLight("#2ee6ff", 22, 14, 1.6); cyan.position.set(-5, 2, 1); scene.add(cyan);
     const gold = new T.PointLight("#ffb060", 18, 10, 1.6); gold.position.set(0, 1.4, -2); scene.add(gold);
-    // le temple au fond (même image que l'arène)
-    if (typeof ILLUS_DECOR === "object" && ILLUS_DECOR.table) {
-      const img = new Image(); img.onload = () => {
-        const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.needsUpdate = true; t.wrapS = T.RepeatWrapping;
-        const Rr = 22, th = 2.2, KEEP = .42, Hd = Rr * th / (img.width / img.height) * KEEP;
-        t.repeat.set(-1, KEEP); t.offset.y = 1 - KEEP;
-        const back = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 64, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#a898c0", fog: false }));
-        back.position.set(0, Hd / 2 - 1.2, 0); scene.add(back);
-      }; img.src = ILLUS_DECOR.table;
-    }
+    // le décor au fond : un panorama par rubrique (setBg), posé sur un grand cylindre
     // le sol de pierre et le cercle de runes
     const floorTex = tex(1024, 1024, (g, w) => {
       g.fillStyle = "#231d30"; g.fillRect(0, 0, w, w); g.translate(w / 2, w / 2);
@@ -98,8 +89,24 @@ const World3D = (() => {
   }
   function start() {
     if (R || loading || !usable()) return;
-    loading = import("three").then((t) => { T = t; build(); raf = requestAnimationFrame(frame); }).catch(() => { failed = true; });
+    loading = import("three").then((t) => { T = t; build(); if (wantBg) { const u = wantBg; wantBg = null; setBg(u); } raf = requestAnimationFrame(frame); }).catch(() => { failed = true; });
   }
   addEventListener("visibilitychange", () => { if (!document.hidden && R && !raf) raf = requestAnimationFrame(frame); });
-  return { start, get on() { return !!R; } };
+  // change le panorama du fond, en fondu (appelé à chaque changement de rubrique)
+  let bgMesh = null, bgUrl = null, wantBg = null;
+  function setBg(url) {
+    wantBg = url; if (!R || !url || url === bgUrl) return; bgUrl = url;
+    const img = new Image(); img.onload = () => {
+      if (bgUrl !== url || !R) return;
+      const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.needsUpdate = true; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.anisotropy = 8;
+      const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
+      const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#d4cce4", fog: false, transparent: true, opacity: 0, depthWrite: false }));
+      m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
+      const old = bgMesh; bgMesh = m; const t0 = performance.now();
+      const fade = (now) => { const k = Math.min(1, (now - t0) / 700); m.material.opacity = k; if (old) old.material.opacity = 1 - k;
+        if (k < 1) requestAnimationFrame(fade); else { m.material.transparent = false; m.material.depthWrite = true; if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); } } };
+      requestAnimationFrame(fade);
+    }; img.src = url;
+  }
+  return { start, setBg, get on() { return !!R; } };
 })();

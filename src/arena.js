@@ -106,8 +106,10 @@ const Arena = (() => {
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
     const composer = new mods.EffectComposer(renderer); composer.addPass(new mods.RenderPass(scene, camera));
     const bloom = new mods.UnrealBloomPass(new THREE.Vector2(512, 512), 0.45, 0.5, 0.92); composer.addPass(bloom); composer.addPass(new mods.OutputPass());
-    scene.add(new THREE.HemisphereLight("#9a7fd0", "#1a0f24", 0.55));
-    const sun = new THREE.DirectionalLight("#ffd9b0", 1.6); sun.position.set(4, 9, 6); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+    scene.add(new THREE.HemisphereLight("#b9a6e6", "#2a1a38", 1.0));
+    // lumière de face (depuis la caméra) : les cartes et leurs portraits restent lisibles
+    const fill = new THREE.DirectionalLight("#fff2e0", 1.1); fill.position.set(0, 6, 12); scene.add(fill);
+    const sun = new THREE.DirectionalLight("#ffd9b0", 2.1); sun.position.set(4, 9, 6); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
     Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7 }); scene.add(sun);
     for (const [x, z, c] of [[-5, -3, "#ff9a4a"], [5, -3, "#ff9a4a"], [-4.5, 3, "#ff7ab8"], [4.5, 3, "#ff7ab8"]]) { const l = new THREE.PointLight(c, 10, 9, 1.6); l.position.set(x, 1.8, z); scene.add(l); }
     R = { renderer, scene, camera, composer, bloom, tweens: [], clockT: 0, shake: 0, cam: { pos: new THREE.Vector3(), look: new THREE.Vector3(), base: { pos: new THREE.Vector3(), look: new THREE.Vector3() } }, ray: new THREE.Raycaster(), ndc: new THREE.Vector2(), glyphs: {}, last: performance.now(), on: false, portrait: false };
@@ -210,10 +212,10 @@ const Arena = (() => {
       const fr = g.createLinearGradient(0, 0, w, h); fr.addColorStop(0, c); fr.addColorStop(.5, "#1a1230"); fr.addColorStop(1, c);
       g.fillStyle = fr; g.beginPath(); g.roundRect(0, 0, w, h, 28); g.fill();
       g.save(); g.beginPath(); g.roundRect(12, 12, w - 24, h - 24, 20); g.clip(); g.fillStyle = "#1a1230"; g.fillRect(0, 0, w, h);
-      if (img) { const s = Math.max((w - 24) / img.width, (h - 24) / img.height); g.drawImage(img, (w - img.width * s) / 2, 12, img.width * s, img.height * s); }
+      if (img) { const s = Math.max((w - 24) / img.width, (h - 24) / img.height); g.drawImage(img, (w - img.width * s) / 2, (h - img.height * s) / 2, img.width * s, img.height * s); }
       // dos de carte avant le choix du perso : l'emblème du jeu, en or
       else if (!p.perso) { g.save(); g.translate(w / 2 - 96, h / 2 - 130); g.scale(8, 8); g.strokeStyle = "#e8c77e"; g.lineWidth = .9; g.lineCap = g.lineJoin = "round"; g.shadowColor = "#e8c77e"; g.shadowBlur = 6; for (const d of iconPaths("logo")) g.stroke(new Path2D(d)); g.restore(); }
-      const sh = g.createLinearGradient(0, h * .6, 0, h); sh.addColorStop(0, "#0000"); sh.addColorStop(1, "#000d"); g.fillStyle = sh; g.fillRect(0, 0, w, h);
+      const sh = g.createLinearGradient(0, h * .72, 0, h); sh.addColorStop(0, "#0000"); sh.addColorStop(1, "#0009"); g.fillStyle = sh; g.fillRect(0, 0, w, h);
       g.restore();
       g.fillStyle = "#fff"; g.font = "700 36px Cinzel, serif"; g.textAlign = "center"; g.fillText(p.label.slice(0, 18), w / 2, h - 44);
     });
@@ -240,10 +242,10 @@ const Arena = (() => {
     const ringM = new THREE.Mesh(new THREE.TorusGeometry(.8, .035, 8, 64), new THREE.MeshBasicMaterial({ color: new THREE.Color(c).multiplyScalar(1.5), toneMapped: false })); ringM.rotation.x = Math.PI / 2; ringM.position.y = .29; root.add(ringM);
     const bill = new THREE.Group(); bill.position.y = .3; root.add(bill);
     const body = new THREE.Group(); bill.add(body);
-    const face = new THREE.MeshStandardMaterial({ map: champTex(p, null), roughness: .4, metalness: .1, emissive: "#000" });
+    const face0 = champTex(p, null), face = new THREE.MeshStandardMaterial({ map: face0, roughness: .45, metalness: .05, emissive: "#ffffff", emissiveMap: face0, emissiveIntensity: .55 });
     const card = new THREE.Mesh(new THREE.BoxGeometry(1.15, 1.67, .04), [0, 1, 2, 3, 4, 5].map((i) => (i === 4 ? face : new THREE.MeshStandardMaterial({ color: c, metalness: .9, roughness: .3 }))));
     card.position.y = .95; card.castShadow = true; body.add(card);
-    loadImg(persoImg(p)).then((img) => { if (img) { face.map = champTex(p, img); face.needsUpdate = true; } });
+    loadImg(persoImg(p)).then((img) => { if (img) { face.map = face.emissiveMap = champTex(p, img); face.needsUpdate = true; } });
     const aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: R.radial, color: c, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: .25 })); aura.scale.set(2.4, 2.8, 1); aura.position.set(0, 1, -.1); body.add(aura);
     const wHold = new THREE.Group(); wHold.position.set(.82, 1.05, .15); body.add(wHold);
     card.userData.p = ped.userData.p = p;

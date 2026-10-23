@@ -42,10 +42,9 @@ try {
     t.check("la pochette s'ouvre : 5 cartes face cachée", await until(page, () => Open3D.state?.phase === "cards" && Open3D.state.cards === 5));
     await page.screenshot({ path: join(OUT, `o3-${label}-cartes.png`) });
     await page.evaluate(() => Open3D.flipAll());
-    t.check("toutes retournées, puis le bouton du récapitulatif", await until(page, () => Open3D.state?.phase === "done" && !document.getElementById("o3Done").hidden, 90000));
+    t.check("toutes retournées : le récapitulatif s'affiche dans la scène 3D", await until(page, () => Open3D.state?.phase === "done" && !document.getElementById("o3Recap").hidden && !!document.querySelector('#o3Recap [data-act="stage-close"]'), 90000));
+    t.check("récapitulatif : les cartes restent en 3D, pas de page plate", (await page.evaluate(() => Open3D.state?.cards)) === 5 && (await page.locator(".summary").count()) === 0);
     await page.screenshot({ path: join(OUT, `o3-${label}-retournees.png`) });
-    await page.click("#o3Done");
-    t.check("récapitulatif : les 5 cartes du serveur", await until(page, () => document.querySelectorAll(".summary .kcw, .summary > *").length === 5, 10000));
     t.check("les cartes sont bien dans la collection", Object.keys((await A.api("state")).state.owned).length >= owned0);
     await page.click('[data-act="stage-close"]'); await page.waitForTimeout(500);
 
@@ -58,8 +57,8 @@ try {
     await page.screenshot({ path: join(OUT, `o3-${label}-coffre-cartes.png`) });
     await page.evaluate(() => Open3D.flipAll());
     t.check("coffre : toutes retournées", await until(page, () => Open3D.state?.phase === "done", 120000));
-    await page.click("#o3Done");
-    t.check("coffre : récapitulatif de 10 cartes", await until(page, () => document.querySelectorAll(".summary > *").length === 10, 10000));
+    t.check("coffre : récapitulatif dans la scène, 10 cartes en 3D", await until(page, () => !document.getElementById("o3Recap").hidden && Open3D.state?.cards === 10, 10000));
+    await page.screenshot({ path: join(OUT, `o3-${label}-coffre-recap.png`) });
     await page.click('[data-act="stage-close"]'); await page.waitForTimeout(500);
 
     // les 30 scénarios du coffre, rejoués en 3D (ordi seulement : c'est long en rendu logiciel)

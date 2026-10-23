@@ -230,7 +230,9 @@ const Open3D = (() => {
         g.font = "700 30px Inter, sans-serif"; g.fillStyle = "#e8c77e"; g.fillText(E.packLine || "P O C H E T T E   ·   5   C A R T E S", w / 2, h * .72 + 56);
       } else { g.textAlign = "center"; drawIcon(g, "logo", w / 2, h * .5, 6, "#e8c77e88", 1.4); g.font = "700 26px Inter, sans-serif"; g.fillStyle = "#a99cc8"; g.fillText("QG DE SHINJUKU", w / 2, h * .66); }
     };
-    const foil = (map) => new THREE.MeshPhysicalMaterial({ map, metalness: 0.75, roughness: 0.26, clearcoat: 0.6, clearcoatRoughness: 0.4, iridescence: 0.9, iridescenceIOR: 1.5, iridescenceThicknessRange: [180, 820], side: THREE.DoubleSide, envMapIntensity: 1.1 });
+    // papier métallisé froissé : un relief de plis (carte de normales) et une brillance irrégulière, pour que la lumière glisse dessus
+    const crinkle = crinkleMaps(THREE);
+    const foil = (map) => new THREE.MeshPhysicalMaterial({ map, normalMap: crinkle.normal, normalScale: new THREE.Vector2(0.55, 0.55), roughnessMap: crinkle.rough, metalness: 0.8, roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.25, iridescence: 0.9, iridescenceIOR: 1.5, iridescenceThicknessRange: [180, 820], side: THREE.DoubleSide, envMapIntensity: 1.25 });
     const frontC = document.createElement("canvas"); frontC.width = TX; frontC.height = TY;
     const frontTex = new THREE.CanvasTexture(frontC); frontTex.colorSpace = THREE.SRGBColorSpace; frontTex.anisotropy = 8;
     const repaint = () => { paint(frontC.getContext("2d"), TX, TY, false); frontTex.needsUpdate = true; }; repaint();
@@ -257,6 +259,29 @@ const Open3D = (() => {
     const shaftMat = additive({ map: E.shaftTex, color: "#ffffff", opacity: 0, side: THREE.DoubleSide });
     const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.55, 4.2, 48, 1, true), shaftMat); shaft.position.y = TEAR + 2.1; tilt.add(shaft);
     E.pk = { pack, tilt, cap, strips, slit, slitMat, slitLine, light, shaft, shaftMat, p: 0, dir: 1, repaint };
+  }
+  // plis du papier : lignes de froissure tracées au hasard (hauteur), puis converties en carte de normales
+  function crinkleMaps(THREE) {
+    const W = 512, H = 768, hc = document.createElement("canvas"); hc.width = W; hc.height = H; const g = hc.getContext("2d");
+    g.fillStyle = "#808080"; g.fillRect(0, 0, W, H);
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (let i = 0; i < 260; i++) {
+      const x = rnd() * W, y = rnd() * H, a = rnd() * Math.PI, l = 30 + rnd() * 160, w = 1 + rnd() * 3, up = rnd() < 0.5;
+      const gr = g.createLinearGradient(x - Math.sin(a) * w * 3, y + Math.cos(a) * w * 3, x + Math.sin(a) * w * 3, y - Math.cos(a) * w * 3);
+      gr.addColorStop(0, "#80808000"); gr.addColorStop(0.5, up ? "#ffffff30" : "#00000030"); gr.addColorStop(1, "#80808000");
+      g.strokeStyle = gr; g.lineWidth = w * 6; g.beginPath(); g.moveTo(x - Math.cos(a) * l / 2, y - Math.sin(a) * l / 2); g.lineTo(x + Math.cos(a) * l / 2, y + Math.sin(a) * l / 2); g.stroke();
+    }
+    const hd = g.getImageData(0, 0, W, H).data, nc = document.createElement("canvas"); nc.width = W; nc.height = H;
+    const ng = nc.getContext("2d"), out = ng.createImageData(W, H), rc = document.createElement("canvas"); rc.width = W; rc.height = H;
+    const rg = rc.getContext("2d"), rout = rg.createImageData(W, H), h = (x, y) => hd[(((y + H) % H) * W + ((x + W) % W)) * 4] / 255;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const dx = (h(x + 1, y) - h(x - 1, y)) * 3, dy = (h(x, y + 1) - h(x, y - 1)) * 3, l = Math.hypot(dx, dy, 1), i = (y * W + x) * 4;
+      out.data[i] = (-dx / l * 0.5 + 0.5) * 255; out.data[i + 1] = (dy / l * 0.5 + 0.5) * 255; out.data[i + 2] = (1 / l * 0.5 + 0.5) * 255; out.data[i + 3] = 255;
+      const r = 150 + (h(x, y) - 0.5) * 300 + Math.abs(dx) * 120; rout.data[i] = rout.data[i + 1] = rout.data[i + 2] = Math.max(60, Math.min(255, r)); rout.data[i + 3] = 255;
+    }
+    ng.putImageData(out, 0, 0); rg.putImageData(rout, 0, 0);
+    const normal = new THREE.CanvasTexture(nc), rough = new THREE.CanvasTexture(rc);
+    return { normal, rough };
   }
   function setTear(p) {
     const P = E.pk; P.p = p; const front = p * PW;
@@ -399,7 +424,7 @@ const Open3D = (() => {
     return `${top}<section class="o3" id="o3"><div class="o3-host" id="o3Host"></div><div class="o3-vign"></div><div class="o3-flash" id="o3Flash"></div>
       <div class="o3-title" id="o3Title"></div><p class="o3-hint" id="o3Hint"></p>
       <div class="o3-fx" id="o3Fx"><div class="o3-fx-bg"></div><canvas class="o3-fx-c" id="o3FxC"></canvas><div class="o3-fx-name" id="o3FxName"><b></b><span></span></div></div>
-      <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button>
+      <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button><div class="o3-recap" id="o3Recap" hidden></div>
         <div class="o3-tools"><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
       <p class="o3-sub">${esc(o.pk.name)}${o.pk.daily || o.pk.cos ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
   }
@@ -411,7 +436,7 @@ const Open3D = (() => {
     $("o3Fx").onclick = () => cur?.fxSkip?.();
     if (!E.on) { E.on = true; E.last = performance.now(); requestAnimationFrame(frame); }
     resize(); hint(cur?.phase === "idle" ? cur.hint : cur?.phase === "cards" ? "Touche une carte pour la retourner" : "");
-    if (cur?.phase === "cards") $("o3All").hidden = false; if (cur?.phase === "done") $("o3Done").hidden = false;
+    if (cur?.phase === "cards") $("o3All").hidden = false; if (cur?.phase === "done") showRecap();
   }
   function start(o) {
     stop(true);
@@ -734,7 +759,7 @@ const Open3D = (() => {
     c.flip.rotation.set(0, Math.PI, 0); c.root.position.copy(start);
     if (big && alive(me)) { await wait(150); await cutscene(c); }
     c.busy = false;
-    if (alive(me) && cur.cards.every((x) => x.flipped)) { cur.phase = "done"; $("o3All").hidden = true; $("o3Done").hidden = false; hint(""); }
+    if (alive(me) && cur.cards.every((x) => x.flipped)) { cur.phase = "done"; $("o3All").hidden = true; hint(""); showRecap(); }
   }
   function burst(c) {
     const p = new E.THREE.Vector3(); c.tilt.getWorldPosition(p); p.z += 0.15;
@@ -750,6 +775,12 @@ const Open3D = (() => {
   async function flipAll() {
     $("o3All").hidden = true;
     for (const c of cur?.cards || []) if (!c.flipped && cur) { if (c.rk >= 4) await flipCard(c); else { flipCard(c); await wait(220); } }
+  }
+  // récapitulatif dans la scène : les cartes restent en 3D, le titre et les boutons s'affichent par-dessus
+  function showRecap() {
+    const box = $("o3Recap"); if (!box || !cur) return;
+    const r = recapParts(cur.o); box.innerHTML = `<div class="o3-recap-h">${r.head}</div>${r.actions}<p class="o3-recap-tip">Touche une carte pour voir sa fiche</p>`;
+    box.hidden = false; $("o3").classList.add("recap");
   }
   function finish() { const o = cur?.o; stop(); if (o) { o.phase = "done"; drawOpening(); } }
 
@@ -848,7 +879,12 @@ const Open3D = (() => {
   function onClick(e) {
     if (!cur) return;
     if (cur.kind === "chest" && cur.phase === "idle") { if (hit(e)) openChest(); return; }
-    if (cur.phase === "cards" || cur.phase === "done") { const h = hit(e); if (h?.object.userData.card) flipCard(h.object.userData.card); }
+    if (cur.phase === "cards" || cur.phase === "done") {
+      const h = hit(e), c = h?.object.userData.card; if (!c) return;
+      // carte déjà retournée, une fois tout retourné : sa fiche
+      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab) { const id = c.x.c.id; closeStage(); return nav("carte", id); }
+      flipCard(c);
+    }
   }
 
   // ---------- boucle ----------

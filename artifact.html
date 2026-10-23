@@ -1719,6 +1719,13 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Ouverture 3D : récapitulatif dans la scène ===== */
+.o3-recap { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; pointer-events: auto; }
+.o3-recap-h .eyebrow { margin: 0; } .o3-recap-h h2 { margin: 2px 0 0; font: 800 clamp(22px, 4vw, 34px) var(--disp); text-shadow: 0 2px 18px #000; }
+.o3-recap .row { flex-wrap: wrap; gap: 8px; }
+.o3-recap-tip { margin: 0; font-size: 12px; color: var(--fg2); text-shadow: 0 1px 6px #000; }
+.o3.recap .o3-tools { display: none; }
+
 /* ===== Arène : salon, choix des cartes et choix du perso par-dessus la scène 3D ===== */
 .ar.pre .ar-top, .ar.pre .ar-hand, .ar.pre .ar-side, .ar.pre .ar-tbl, .ar.pre .ar-chip, .ar.pre .ar-react, .ar.pre .ar-hint, .ar.pre #ar-aim { display: none !important; }
 .ar-pre { position: absolute; inset: 0; z-index: 7; pointer-events: none; }
@@ -4804,18 +4811,24 @@ function drawOpening() {
   }
   if (o.phase === "cards") return Reveal.render(el, o, top);
   delete el.dataset.rv;
-  const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
-  el.innerHTML = `${top}<section class="stage">
-    <p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
-    ${titlesWonHTML(o.titles)}
+  const r = recapParts(o);
+  el.innerHTML = `${top}<section class="stage">${r.head}
     <div class="summary ${o.cards.length > 5 ? "ten" : ""}">${o.cards.map((x) => itemHTML(x, { click: true, design: o.lab ? null : myDesign(x.c.id) })).join("")}</div>
-    <div class="row" style="justify-content:center">
+    ${r.actions}</section>`;
+}
+// titre et boutons du récapitulatif : partagés par la page et l'ouverture en 3D (les cartes restent alors dans la scène)
+function recapParts(o) {
+  const news = o.cards.filter((x) => x.isNew).length, best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]);
+  const head = `<p class="eyebrow gold">Résultat</p><h2>${o.pk.cos ? (news ? `${news} nouvel${news > 1 ? "s" : ""} objet${news > 1 ? "s" : ""}` : "Ajouté à ton inventaire") : news ? `${news} nouvelle${news > 1 ? "s" : ""} carte${news > 1 ? "s" : ""}` : "Que des doublons"}</h2>
+    ${titlesWonHTML(o.titles)}`;
+  const actions = `<div class="row" style="justify-content:center">
       ${o.lab ? `${o.pk.cos ? "" : `<button class="btn gold big" type="button" data-act="lab-replay">Rejouer</button>`}<button class="btn big" type="button" data-act="lab-back">Retour au labo</button>`
         : o.pk.cos ? `<button class="btn gold big" type="button" data-act="summon-again" ${save.chakra < summonCost(o.n) ? "disabled" : ""}>Encore ×${o.n} · ${fmtN(summonCost(o.n))} ◆</button>`
         : o.pk.daily ? "" : againBtn(o)}
       ${o.lab ? "" : o.pk.cos ? `<button class="btn big" type="button" data-act="to-atelier">Équiper à l'Atelier</button>` : `<button class="btn big" type="button" data-act="to-col">Ma collection</button>`}
       ${!o.lab && !o.pk.cos && (RAR[best.c.rar].rank >= 3 || best.gold) ? `<button class="btn big" type="button" data-share="${best.c.id}" data-gold="${best.gold ? 1 : ""}">Partager</button>` : ""}
-      <button class="btn big" type="button" data-act="stage-close">Fermer</button></div></section>`;
+      <button class="btn big" type="button" data-act="stage-close">Fermer</button></div>`;
+  return { head, actions };
 }
 // « Encore » : même nombre de boosters si possible (2 gratuits ou de quoi en acheter 2), sinon un seul
 function againBtn(o) {
@@ -7709,7 +7722,7 @@ const Open3D = (() => {
     return `${top}<section class="o3" id="o3"><div class="o3-host" id="o3Host"></div><div class="o3-vign"></div><div class="o3-flash" id="o3Flash"></div>
       <div class="o3-title" id="o3Title"></div><p class="o3-hint" id="o3Hint"></p>
       <div class="o3-fx" id="o3Fx"><div class="o3-fx-bg"></div><canvas class="o3-fx-c" id="o3FxC"></canvas><div class="o3-fx-name" id="o3FxName"><b></b><span></span></div></div>
-      <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button>
+      <div class="o3-bar"><button class="btn gold" type="button" id="o3All" hidden>Tout retourner</button><button class="btn gold big" type="button" id="o3Done" hidden>Voir le récapitulatif</button><div class="o3-recap" id="o3Recap" hidden></div>
         <div class="o3-tools"><button class="btn sm" type="button" data-act="skip">Passer</button></div></div>
       <p class="o3-sub">${esc(o.pk.name)}${o.pk.daily || o.pk.cos ? "" : ` · ${o.paid ? "acheté" : "gratuit"}`}</p></section>`;
   }
@@ -7721,7 +7734,7 @@ const Open3D = (() => {
     $("o3Fx").onclick = () => cur?.fxSkip?.();
     if (!E.on) { E.on = true; E.last = performance.now(); requestAnimationFrame(frame); }
     resize(); hint(cur?.phase === "idle" ? cur.hint : cur?.phase === "cards" ? "Touche une carte pour la retourner" : "");
-    if (cur?.phase === "cards") $("o3All").hidden = false; if (cur?.phase === "done") $("o3Done").hidden = false;
+    if (cur?.phase === "cards") $("o3All").hidden = false; if (cur?.phase === "done") showRecap();
   }
   function start(o) {
     stop(true);
@@ -8044,7 +8057,7 @@ const Open3D = (() => {
     c.flip.rotation.set(0, Math.PI, 0); c.root.position.copy(start);
     if (big && alive(me)) { await wait(150); await cutscene(c); }
     c.busy = false;
-    if (alive(me) && cur.cards.every((x) => x.flipped)) { cur.phase = "done"; $("o3All").hidden = true; $("o3Done").hidden = false; hint(""); }
+    if (alive(me) && cur.cards.every((x) => x.flipped)) { cur.phase = "done"; $("o3All").hidden = true; hint(""); showRecap(); }
   }
   function burst(c) {
     const p = new E.THREE.Vector3(); c.tilt.getWorldPosition(p); p.z += 0.15;
@@ -8060,6 +8073,12 @@ const Open3D = (() => {
   async function flipAll() {
     $("o3All").hidden = true;
     for (const c of cur?.cards || []) if (!c.flipped && cur) { if (c.rk >= 4) await flipCard(c); else { flipCard(c); await wait(220); } }
+  }
+  // récapitulatif dans la scène : les cartes restent en 3D, le titre et les boutons s'affichent par-dessus
+  function showRecap() {
+    const box = $("o3Recap"); if (!box || !cur) return;
+    const r = recapParts(cur.o); box.innerHTML = `<div class="o3-recap-h">${r.head}</div>${r.actions}<p class="o3-recap-tip">Touche une carte pour voir sa fiche</p>`;
+    box.hidden = false; $("o3").classList.add("recap");
   }
   function finish() { const o = cur?.o; stop(); if (o) { o.phase = "done"; drawOpening(); } }
 
@@ -8158,7 +8177,12 @@ const Open3D = (() => {
   function onClick(e) {
     if (!cur) return;
     if (cur.kind === "chest" && cur.phase === "idle") { if (hit(e)) openChest(); return; }
-    if (cur.phase === "cards" || cur.phase === "done") { const h = hit(e); if (h?.object.userData.card) flipCard(h.object.userData.card); }
+    if (cur.phase === "cards" || cur.phase === "done") {
+      const h = hit(e), c = h?.object.userData.card; if (!c) return;
+      // carte déjà retournée, une fois tout retourné : sa fiche
+      if (cur.phase === "done" && c.flipped && !c.busy && !cur.o.lab) { const id = c.x.c.id; closeStage(); return nav("carte", id); }
+      flipCard(c);
+    }
   }
 
   // ---------- boucle ----------

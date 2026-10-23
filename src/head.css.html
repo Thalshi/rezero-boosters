@@ -1719,6 +1719,13 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Ouverture 3D : récapitulatif dans la scène ===== */
+.o3-recap { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; pointer-events: auto; }
+.o3-recap-h .eyebrow { margin: 0; } .o3-recap-h h2 { margin: 2px 0 0; font: 800 clamp(22px, 4vw, 34px) var(--disp); text-shadow: 0 2px 18px #000; }
+.o3-recap .row { flex-wrap: wrap; gap: 8px; }
+.o3-recap-tip { margin: 0; font-size: 12px; color: var(--fg2); text-shadow: 0 1px 6px #000; }
+.o3.recap .o3-tools { display: none; }
+
 /* ===== Arène : salon, choix des cartes et choix du perso par-dessus la scène 3D ===== */
 .ar.pre .ar-top, .ar.pre .ar-hand, .ar.pre .ar-side, .ar.pre .ar-tbl, .ar.pre .ar-chip, .ar.pre .ar-react, .ar.pre .ar-hint, .ar.pre #ar-aim { display: none !important; }
 .ar-pre { position: absolute; inset: 0; z-index: 7; pointer-events: none; }

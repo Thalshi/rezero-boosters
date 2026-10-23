@@ -13,7 +13,12 @@ const RUNS = +(process.argv[2] || 8), DAYS = 180;
 const T0 = Date.parse("2026-11-02T07:00:00+01:00");
 
 // les réglages comparés ; « actuel » = ce qui est en production
-const VARIANTS = (process.env.GAINS ? [
+const VARIANTS = process.env.DURE ? [
+  // économie dure : gains de C, boosters plus lents ou plus chers, et probabilités plus dures (D et E)
+  { id: "g-quart", nom: "C · recyclage ÷ 4, missions ÷ 3 (probabilités actuelles)", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 10, victoire: 10, max: 3 } },
+  { id: "d-dure", nom: "D · C + gratuit toutes les 3 h, booster 150 ◆, probabilités dures", FREE_MAX: 3, REGEN_H: 3, PRICE: 150, SUMMON_COST: 150, COS: 1, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 10, victoire: 10, max: 3 }, PROB: { SLOT: "{ c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 }", LAST: "{ r: 86, e: 11, l: 2.5, m: 0.5 }", DAILY_LAST: "{ e: 90, l: 8.5, m: 1.5 }", MYTHIC_PITY: "150", GOLD_CHANCE: "0.01", SUMMON_RATES: "{ c: 42, pc: 30, r: 18, e: 7.5, l: 2.1, m: 0.4 }", SUMMON_PITY_M: "100" } },
+  { id: "e-tres-dure", nom: "E · C + réserve 2, toutes les 4 h, booster 200 ◆, invocation 200 ◆, probabilités dures", FREE_MAX: 2, REGEN_H: 4, PRICE: 200, SUMMON_COST: 200, COS: 1.25, REC: [0, 1, 1, 4, 10, 25], MIS: 0.33, confront: { partie: 8, victoire: 8, max: 2 }, PROB: { SLOT: "{ c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 }", LAST: "{ r: 86, e: 11, l: 2.5, m: 0.5 }", DAILY_LAST: "{ e: 90, l: 8.5, m: 1.5 }", MYTHIC_PITY: "150", GOLD_CHANCE: "0.01", SUMMON_RATES: "{ c: 42, pc: 30, r: 18, e: 7.5, l: 2.1, m: 0.4 }", SUMMON_PITY_M: "100" } },
+] : (process.env.GAINS ? [
   // étape 1 : les gains (recyclage et missions), prix des boosters et des invocations inchangés
   { id: "actuel", nom: "Actuel (en ligne)", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, confront: null },
   { id: "g-moitie", nom: "A · recyclage et missions ÷ 2", FREE_MAX: 3, REGEN_H: 2, PRICE: 100, SUMMON_COST: 150, COS: 1, REC: [1, 1, 3, 8, 20, 50], MIS: 0.5, confront: { partie: 10, victoire: 10, max: 3 } },
@@ -43,6 +48,8 @@ async function engineFor(v) {
   if (v.REC) ["c", "pc", "r", "e", "l", "m"].forEach((r, i) => set(new RegExp(`^(  ${r}:\\s*\\{ label: .*chakra: )\\d+( \\},)$`, "m"), `$1${v.REC[i]}$2`));
   // missions, série et succès : l'essence donnée est multipliée par MIS (les boosters offerts ne changent pas)
   if (v.MIS != null) src = src.replace(/reward: \{ chakra: (\d+) \}/g, (_, n) => `reward: { chakra: ${Math.round(n * v.MIS)} }`).replace(/^const STREAK = .*$/m, (l) => l.replace(/chakra: (\d+)/g, (_, n) => `chakra: ${Math.round(n * v.MIS)}`));
+  // probabilités : remplace les constantes de tirage (boosters, pack du jour, Dorées, invocations, garanties)
+  for (const [k, val] of Object.entries(v.PROB || {})) set(new RegExp(`^const ${k} = .*$`, "m"), `const ${k} = ${val};`);
   const f = join(TMP, `game-${v.id}.mjs`); writeFileSync(f, src);
   return import(f + "?" + Date.now());
 }
@@ -51,9 +58,9 @@ function simulate(G, v, pf, seed) {
   let a = seed; const rng = () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
   const cfg = G.configFrom({ def: 2 }), mixIds = G.poolFor(G.PACKS.find((p) => p.id === "mix"), cfg, null).map((c) => c.id);
   const s = G.freshSave(T0); s.linked = true;
-  const st = { gagne: { recyclage: 0, missions: 0, predictions: 0, defile: 0, confront: 0 }, boosts: 0, boostSpent: 0, cosSpent: 0, summons: 0, cosM: 0, cosL: 0 };
+  const st = { mythB: 0, gagne: { recyclage: 0, missions: 0, predictions: 0, defile: 0, confront: 0 }, boosts: 0, boostSpent: 0, cosSpent: 0, summons: 0, cosM: 0, cosL: 0 };
   const done = () => mixIds.filter((id) => G.hasCard(s, id)).length / mixIds.length;
-  const open = (pack, paid, now) => { const b = s.chakra, r = G.takeAndOpenS(s, pack, paid, cfg, null, rng, now); if (r.error) return false; if (paid) { st.boosts++; st.boostSpent += b - s.chakra; } return true; };
+  const open = (pack, paid, now) => { const b = s.chakra, r = G.takeAndOpenS(s, pack, paid, cfg, null, rng, now); if (r.error) return false; for (const c of r.cards) if (G.CARD_BY_ID[c.id]?.rar === "m") st.mythB++; if (paid) { st.boosts++; st.boostSpent += b - s.chakra; } return true; };
   const summon = (n, now) => { const r = G.summonS(s, n, rng, now); if (r.error) return false; st.summons += n; st.cosSpent += r.cost; for (const x of r.got) { if (x.rar === "m") st.cosM++; if (x.rar === "l") st.cosL++; } return true; };
   // dépense : tant que le Mix n'est pas complet, moitié boosters, moitié invocations (on économise pour un ×5) ; ensuite tout en invocations
   const spend = (now) => {
@@ -88,7 +95,7 @@ function simulate(G, v, pf, seed) {
       }
     }
     if (mixDay == null && done() >= 1) mixDay = d + 1;
-    if (d + 1 === 30 || d + 1 === 90 || d + 1 === 180) at[d + 1] = { mix: done(), summons: st.summons, cosM: st.cosM, cosL: st.cosL, ...Object.fromEntries(Object.entries(st.gagne).map(([k, x]) => [k, x])) };
+    if (d + 1 === 30 || d + 1 === 90 || d + 1 === 180) at[d + 1] = { mythB: st.mythB, mix: done(), summons: st.summons, cosM: st.cosM, cosL: st.cosL, ...Object.fromEntries(Object.entries(st.gagne).map(([k, x]) => [k, x])) };
   }
   return { mixDay, at };
 }
@@ -99,14 +106,14 @@ for (const v of VARIANTS) {
   const G = await engineFor(v);
   res[v.id] = { nom: v.nom, reglage: v, profils: {} };
   console.log(`\n=== ${v.nom} : réserve ${v.FREE_MAX}, +1 toutes les ${v.REGEN_H} h, booster ${v.PRICE} ◆, invocation ${v.SUMMON_COST} ◆ (×5 ${G.summonCost(5)}), cosmétique Mythique ${G.COS_PRICE.m} ◆, Confrontation ${v.confront ? `${v.confront.partie} + ${v.confront.victoire} si victoire, ${v.confront.max} parties/jour` : "rien"}`);
-  console.log("profil | Mix complet | essence gagnée / 30 j (recyclage · missions · prédictions · Défilé · Confrontation) | invocations / 30 j | cosmétiques L / M en 6 mois");
+  console.log("profil | Mix complet (ou % à 6 mois) | Mythiques de boosters en 6 mois | essence gagnée / 30 j (recyclage · missions · prédictions · Défilé · Confrontation) | invocations / 30 j | cosmétiques L / M en 6 mois");
   for (const pf of PROFILES) {
     const runs = Array.from({ length: RUNS }, (_, i) => simulate(G, v, pf, 7000 + i));
     const m = (f) => med(runs.map(f)), per30 = (k) => Math.round(m((r) => r.at[180][k]) / 6);
-    const row = { mixJours: m((r) => r.mixDay ?? 999), recyclage: per30("recyclage"), missions: per30("missions"), predictions: per30("predictions"), defile: per30("defile"), confront: per30("confront"), invocations30: Math.round(m((r) => r.at[180].summons) / 6), cosL: m((r) => r.at[180].cosL), cosM: m((r) => r.at[180].cosM) };
+    const row = { mixJours: m((r) => r.mixDay ?? 999), recyclage: per30("recyclage"), missions: per30("missions"), predictions: per30("predictions"), defile: per30("defile"), confront: per30("confront"), invocations30: Math.round(m((r) => r.at[180].summons) / 6), cosL: m((r) => r.at[180].cosL), cosM: m((r) => r.at[180].cosM), mythB: m((r) => r.at[180].mythB), mix180: Math.round(m((r) => r.at[180].mix) * 100) };
     row.total30 = row.recyclage + row.missions + row.predictions + row.defile + row.confront;
     res[v.id].profils[pf.id] = row;
-    console.log(`${pf.label.padEnd(11)} | ${row.mixJours >= 999 ? "> 180 j" : row.mixJours + " j"} | ${row.total30} ◆ (${row.recyclage} · ${row.missions} · ${row.predictions} · ${row.defile} · ${row.confront}) | ${row.invocations30} | ${row.cosL} / ${row.cosM}`);
+    console.log(`${pf.label.padEnd(11)} | ${row.mixJours >= 999 ? `${row.mix180} % à 6 mois` : row.mixJours + " j"} | ${row.mythB} | ${row.total30} ◆ (${row.recyclage} · ${row.missions} · ${row.predictions} · ${row.defile} · ${row.confront}) | ${row.invocations30} | ${row.cosL} / ${row.cosM}`);
   }
 }
 writeFileSync(join(DIR, "reports", "simulation-economie-globale.json"), JSON.stringify(res, null, 1));

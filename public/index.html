@@ -1715,6 +1715,11 @@ body.ar-on { overflow: hidden; }
 @keyframes o3name { 0%, 20% { opacity: 0; transform: translateX(-30px) skewX(-12deg); } 30% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(20px); } }
 #stage .stage-top { position: relative; z-index: 3; }
 @media (max-width: 600px) { .o3-sub { display: none; } }
+/* Gestion : barre d'onglets commune aux pages admin et dev */
+.gest { padding-top: 24px; } .gest .eyebrow { margin-bottom: 6px; }
+.gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
+.gest-tabs .ic { width: 16px; height: 16px; }
+.gest + .wrap.page { padding-top: 24px; }
 </style>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <header class="hd">
@@ -3904,7 +3909,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
   ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
-  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"], ["createur", "createur", "Créateur"], ["branches", "branches", "Branches"], ["galerie", "galerie", "Galerie"], ["labo", "labo", "Labo"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : []),
+  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -3916,7 +3921,7 @@ function drawNav() {
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>${ico("pred")} Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
-      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
+      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
 }
 let ACCT = null;
 async function loadAccount() {
@@ -4600,7 +4605,6 @@ function viewProfil() {
     <div class="wrap page" style="padding-top:24px">
     <div class="card stat4"><div><b>${st.unique}<small>/${ALL_CARDS.length}</small></b><span>Cartes uniques</span></div><div class="acc"><b>${(st.unique / ALL_CARDS.length * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %</b><span>Complétion</span></div><div class="acc"><b>${st.mythics}</b><span>Mythiques</span></div><div><b>${fmtN(st.opened)}</b><span>Boosters</span></div></div>
     ${p.featured && byId[p.featured] ? `<section class="sec zfeat"><p class="eyebrow mut">Carte vedette</p><div class="zfeat-row">${cardHTML(byId[p.featured], { click: true, design: p.designs?.[p.featured], present: true })}<div><h2>${esc(nameOf(byId[p.featured]))}</h2><p class="note">${isMe ? "Ta carte vedette, avec son design de l'Atelier. Elle s'affiche en premier sur ton profil." : "Sa carte vedette, avec son design de l'Atelier."}</p>${isMe ? `<button class="btn sm" type="button" data-nav="atelier" data-p="${p.featured}">Modifier à l'Atelier</button>` : ""}</div></div></section>` : isMe ? `<section class="sec"><p class="eyebrow mut">Carte vedette</p><p class="note">Choisis une carte vedette depuis l'Atelier Arcanique : elle s'affichera ici avec son design.</p></section>` : ""}
-    ${isMe && SRV && (IS_DEV || IS_ADMIN) ? testZone() : ""}
     ${titlesSection(p, isMe)}
     <section class="sec"><p class="eyebrow mut">Vitrine</p><h2>${isMe ? "Ma vitrine" : "Sa vitrine"}</h2>
       ${show.length ? `<div class="vitrine">${show.map((id, i) => cardHTML(byId[id], { click: true, design: p.designs?.[id], tag: i === 0 ? "★ FAVORITE" : "" })).join("")}</div>` : `<p class="note">${isMe ? "Choisis jusqu'à 4 cartes depuis leur fiche : « Vitrine »." : "Pas encore de vitrine."}</p>`}</section>
@@ -8047,6 +8051,22 @@ const Open3D = (() => {
   }
   return { draw, stop, get state() { return cur && { kind: cur.kind, phase: cur.phase, cards: cur.cards.length, flipped: cur.cards.filter((c) => c.flipped).length }; }, tear: (p) => tearTo(p), open: () => (cur?.kind === "chest" ? openChest() : autoTear()), flipAll, finish };
 })();
+
+// ===== Gestion : tout ce qui sert à l'admin et au dev, dans une seule rubrique à onglets =====
+// Les pages gardent leur adresse (#/admin, #/createur…) : seul le menu change (une entrée « Gestion ») et chaque page
+// reçoit la barre d'onglets en haut.
+ROUTES.push("tests");
+const GEST_TABS = () => [
+  ["admin", "admin", "Admin", IS_ADMIN], ["createur", "createur", "Créateur", IS_ADMIN || IS_DEV], ["branches", "branches", "Branches", IS_ADMIN],
+  ["galerie", "galerie", "Galerie", IS_ADMIN], ["labo", "labo", "Labo", IS_ADMIN], ["tests", "profil", "Compte de test", SRV && (IS_ADMIN || IS_DEV)], ["dev", "dev", "Dev", IS_DEV],
+].filter((x) => x[3]);
+const isGest = (v) => GEST_TABS().some((x) => x[0] === v);
+const gestHome = () => GEST_TABS()[0]?.[0] || "admin";
+function gestBar(cur) {
+  return `<nav class="wrap gest" aria-label="Gestion"><p class="eyebrow">Gestion · admin et dev</p><div class="utabs gest-tabs">${GEST_TABS().map(([v, k, l]) => `<button type="button" data-nav="${v}" aria-pressed="${v === cur}">${ico(k)} ${l}</button>`).join("")}</div></nav>`;
+}
+VIEWS.tests = () => `<div class="wrap page">${head("Gestion", "Compte de test")}${SRV && (IS_ADMIN || IS_DEV) ? testZone() : empty("Réservé à l'admin et au dev, sur le site du QG.")}</div>`;
+for (const v of ["admin", "createur", "branches", "galerie", "labo", "tests", "dev"]) { const f = VIEWS[v]; if (f) VIEWS[v] = () => (isGest(v) ? gestBar(v) : "") + f(); }
 
 // ===== Événements =====
 let toastT;

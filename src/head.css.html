@@ -1707,4 +1707,9 @@ body.ar-on { overflow: hidden; }
 @keyframes o3name { 0%, 20% { opacity: 0; transform: translateX(-30px) skewX(-12deg); } 30% { opacity: 1; transform: none; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(20px); } }
 #stage .stage-top { position: relative; z-index: 3; }
 @media (max-width: 600px) { .o3-sub { display: none; } }
+/* Gestion : barre d'onglets commune aux pages admin et dev */
+.gest { padding-top: 24px; } .gest .eyebrow { margin-bottom: 6px; }
+.gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
+.gest-tabs .ic { width: 16px; height: 16px; }
+.gest + .wrap.page { padding-top: 24px; }
 </style>

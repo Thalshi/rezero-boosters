@@ -96,7 +96,7 @@ let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
   ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
-  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"], ["createur", "createur", "Créateur"], ["branches", "branches", "Branches"], ["galerie", "galerie", "Galerie"], ["labo", "labo", "Labo"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : []),
+  ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
 function drawNav() {
@@ -108,7 +108,7 @@ function drawNav() {
   $("nav").innerHTML = `<a href="#/boosters" ${cur("boosters")}>Boosters</a><a href="#/collection" ${cur("collection")}>Collection</a><a href="#/market" ${cur("market")}>Marché</a>
     <a href="#/pred" class="ev" ${cur("pred")}>${ico("pred")} Prédictions${openPredCount() ? ` · ${openPredCount()}` : ""}</a>
     <div class="dd"><button type="button" id="moreBtn" aria-expanded="false">Plus <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" fill="none" stroke-width="1.6"/></svg></button>
-      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN ? [["admin", "admin", "Admin"]] : []), ...(IS_DEV ? [["dev", "dev", "Dev"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
+      <div class="dd-menu" id="moreMenu" hidden>${[["wiki", "wiki", "Wiki"], ["classement", "classement", "Classement"], ["raretes", "raretes", "Raretés"], ["regles", "regles", "Règles"], ["infos", "infos", "Infos"], ["nouveautes", "nouveautes", "Nouveautés"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : [])].map(([v, k, l]) => `<a href="#/${v}"><i>${ico(k)}</i>${l}</a>`).join("")}</div></div>`;
 }
 let ACCT = null;
 async function loadAccount() {

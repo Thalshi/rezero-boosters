@@ -32,17 +32,19 @@ try {
   const page = await browser.newPage(), errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto(`${srv.base}/auth/dev?id=${IDS.dev}&name=Reichi`); await page.waitForTimeout(2500);
-  await page.goto(`${srv.base}/#/profil`); await page.waitForTimeout(1500);
-  t.check("profil du dev : la zone de test est là", await page.locator(".test-zone").isVisible());
+  await page.goto(`${srv.base}/#/tests`); await page.waitForTimeout(1500);
+  t.check("Gestion → Compte de test : la zone de test est là", await page.locator(".test-zone").isVisible());
   await page.click('[data-act="dev-reset"]'); await page.click('[data-act="dev-reset"]'); await page.waitForTimeout(3500);
   t.check("bouton : compte remis à zéro", Object.keys((await D.api("state")).state.owned).length === 0);
-  await page.goto(`${srv.base}/#/profil`); await page.waitForTimeout(2000);
+  await page.goto(`${srv.base}/#/tests`); await page.waitForTimeout(2000);
   await page.click('[data-act="dev-restore"]'); await page.click('[data-act="dev-restore"]'); await page.waitForTimeout(3500);
   t.check("bouton : vrai compte récupéré", Object.keys((await D.api("state")).state.owned).length === realCards);
   const pp = await browser.newPage();
   await pp.goto(`${srv.base}/auth/dev?id=${IDS.p1}&name=Aiko`); await pp.waitForTimeout(2000);
-  await pp.goto(`${srv.base}/#/profil`); await pp.waitForTimeout(1500);
-  t.check("profil d'un joueur normal : pas de zone de test", (await pp.locator(".test-zone").count()) === 0);
+  await pp.goto(`${srv.base}/#/tests`); await pp.waitForTimeout(1500);
+  t.check("joueur normal : pas de zone de test ni de rubrique Gestion", (await pp.locator(".test-zone").count()) === 0 && (await pp.locator(".gest").count()) === 0);
+  await page.goto(`${srv.base}/#/admin`); await page.waitForTimeout(1500);
+  t.check("Gestion : une seule rubrique, avec les onglets Admin, Créateur, Branches, Galerie, Labo, Compte de test, Dev", (await page.locator(".gest-tabs button").count()) === 7 && (await page.locator('#nav [data-nav="labo"], #nav a[href="#/labo"]').count()) === 0);
   t.check("aucune erreur JavaScript", errors.length === 0, errors);
 } catch (e) { t.check("exécution sans erreur", false, String(e.stack || e)); }
 finally { t.done(); await browser?.close(); await srv.stop(); }

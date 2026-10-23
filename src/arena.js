@@ -508,7 +508,7 @@ const Arena = (() => {
     renderTags(); renderTable(); renderLog();
   }
   const logged = (e) => !["attente", "attente_annulee", "phase", "choix_prive", "propositions", "reserve", "contribution", "choix", "rejoint"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === CF.table?.vue?.moi);
-  const LOG_COL = { degats: "#ff4d5e", elimination: "#ff4d5e", pare: "#2ee6ff", esquive: "#2ee6ff", riposte: "#2ee6ff", sauvetage: "#3fdc8f", survie: "#3fdc8f", presage: "#f5c518", orbe_explose: "#ff7a1a" };
+  const LOG_COL = { degats: "#ff4d5e", elimination: "#ff4d5e", revenant: "#b072ff", pare: "#2ee6ff", esquive: "#2ee6ff", riposte: "#2ee6ff", sauvetage: "#3fdc8f", survie: "#3fdc8f", presage: "#f5c518", orbe_explose: "#ff7a1a" };
   const logLine = (e) => ({ html: cfEvent(e), col: LOG_COL[e.type] || (e.type === "joue" ? famCol(e.carte) : null), tour: e.type === "tour", t: e.tour || e.n });
   function renderLog() {
     if (!st) return;
@@ -843,6 +843,14 @@ const Arena = (() => {
       case "riposte": if (p) { shield(p); pop(p, "Riposte !", "#2ee6ff", true); } await wait(300); await attackFx(p, champ(e.cible)); break;
       case "esquive": if (p) { shield(p, "#5ac8fa"); pop(p, "Esquivé !", "#5ac8fa", true); } await wait(520); break;
       case "kanji_absorbe": if (p) { pop(p, "Garde : aucun dégât", "#e8c77e", true); emit(50, worldOf(p, 1.3), "#e8c77e", { speed: 2.5, life: .8, grav: 0 }); } await wait(500); break;
+      // l'Errant revient des enfers : le champion se relève dans une gerbe violette, son vrai rôle apparaît
+      case "revenant": if (p) {
+        p.alive = true; p.role = "errant";
+        banner(`${p.label || nm(p.id)} revient des enfers : c'était l'Errant !`, "#b072ff");
+        emit(160, worldOf(p, .4), "#b072ff", { speed: 3.4, life: 1.4, grav: -2.5 });
+        tween(.9, (t) => { p.body.rotation.x = -(1 - t) * 1.45; p.body.position.y = -(1 - t) * .1; p.aura.material.opacity = .25 * t; p.ringM.material.color.setScalar(.1 + t * .9); }, easeOut);
+        await wait(1200); renderTags();
+      } break;
       case "elimination": if (p) { p.alive = false; if (e.role) p.role = e.role; await finisher(p, champ(e.par), e); renderTags(); } break;
       case "presage": await omen(p, e); break;
       case "orbe_explose": if (p) { setOrb(p, false); const o = worldOf(p, 1.6); emit(160, o, "#ff7a1a", { speed: 5, life: 1, grav: 2 }); ring(new THREE.Vector3(o.x, .05, o.z), "#ff7a1a", 4, .8); flash("#ff7a1a", .4); R.shake = .3; } await wait(700); break;

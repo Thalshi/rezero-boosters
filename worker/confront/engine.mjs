@@ -545,15 +545,27 @@ function taskAgonie(s, t, now) {
 function eliminate(s, p, srcId, cause) {
   p.vivant = false;
   p.ordreElim = ++s.elimCount;
+  // Double vie (réglage) : à sa première mort, l'Errant part aux enfers et la table voit un faux rôle
+  const rv = s.mode === "classique" && p.role === "errant" && !p.revenu && s.config.errant?.revenant && s.players.length >= (s.config.errant.revenant.des || 4);
+  if (rv) { const t = s.config.roles?.[s.players.length] || ROLES_PAR_TABLE[s.players.length] || {}, choix = ["sentinelle", "briseur"].filter((r) => t[r] > 0); p.faux = shuffle(s, "roles", choix.length ? choix : ["briseur"])[0]; p.enfers = true; }
   p.roleVisible = true;
   p.pv = Math.min(0, p.pv);
   const perdues = [...p.main, ...(p.arme ? [p.arme] : []), ...p.equip];
   p.main = []; p.arme = null; p.equip = [];
   perdues.forEach((u) => discardCard(s, u));
-  emit(s, "elimination", { pid: p.id, role: p.role, par: srcId, cause, defausse: perdues.map((u) => cardPub(s, u)), tourDeTable: s.turn ? s.turn.tour : 0 });
+  emit(s, "elimination", { pid: p.id, role: p.enfers ? p.faux : p.role, par: srcId, cause, defausse: perdues.map((u) => cardPub(s, u)), tourDeTable: s.turn ? s.turn.tour : 0 });
   if (s.prompt && s.prompt.pid === p.id) cancelPrompt(s);
   if (s.turn && s.turn.pid === p.id) s.turn.fini = true;
+  s.dernierTueur = srcId || null;
   if (checkWin(s)) return;
+  revenant(s);
+  // Charognard (réglage) : à chaque élimination d'un autre joueur, l'Errant en vie reprend des PV et pioche
+  const ch = s.mode === "classique" && s.config.errant?.charognard;
+  if (ch) for (const e of s.players) if (e.role === "errant" && e.vivant && e.id !== p.id) {
+    const soin = Math.min(ch.pv || 0, e.pvMax - e.pv); if (soin > 0) e.pv += soin;
+    if (soin > 0 || ch.cartes) emit(s, "errant_charognard", { pid: e.id, soin, n: ch.cartes || 0 });
+    if (ch.cartes) piocher(s, e, ch.cartes, "charognard");
+  }
   // récompenses et pénalités
   const src = srcId && P(s, srcId);
   if (src && src.vivant && src.id !== p.id) {
@@ -578,6 +590,18 @@ function cancelPrompt(s) {
   emit(s, "attente_annulee", { kind: pr.kind, pid: pr.pid });
 }
 
+// L'Errant revient des enfers quand il ne reste que peu de joueurs en vie (ou, forcé, quand la partie
+// allait finir sans lui) : PV et cartes neuves, et cette fois son vrai rôle est montré.
+function revenant(s, force = false) {
+  const r = s.config.errant?.revenant; if (!r || s.phase !== "partie") return false;
+  const e = s.players.find((p) => p.enfers); if (!e) return false;
+  if (!force && vivants(s).length > (r.vivants?.[s.players.length] ?? r.vivants ?? 2)) return false;
+  e.enfers = false; e.revenu = true; e.vivant = true; e.pv = Math.min(e.pvMax, r.pv || 2); e.ordreElim = null;
+  emit(s, "revenant", { pid: e.id, role: "errant", faux: e.faux, pv: e.pv });
+  piocher(s, e, r.cartes ?? 2, "revenant");
+  return true;
+}
+
 function checkWin(s) {
   if (s.phase !== "partie") return true;
   const al = vivants(s);
@@ -587,11 +611,15 @@ function checkWin(s) {
   }
   const g = s.players.find((p) => p.role === "gardien");
   if (!g.vivant) {
-    if (al.length === 1 && al[0].role === "errant") endGame(s, [al[0].id], "errant_seul", "errant");
+    // Coup de grâce (réglage) : l'Errant qui élimine lui-même le Gardien gagne seul
+    const k = s.dernierTueur && P(s, s.dernierTueur);
+    if (s.config.errant?.coupDeGrace && k && k.role === "errant" && k.vivant) endGame(s, [k.id], "errant_coup_de_grace", "errant");
+    else if (al.length === 1 && al[0].role === "errant") endGame(s, [al[0].id], "errant_seul", "errant");
     else endGame(s, s.players.filter((p) => p.role === "briseur").map((p) => p.id), "gardien_tombe", "briseurs");
     return true;
   }
   if (!al.some((p) => p.role === "briseur" || p.role === "errant")) {
+    if (revenant(s, true)) return false;
     endGame(s, s.players.filter((p) => p.role === "gardien" || p.role === "sentinelle").map((p) => p.id), "menaces_eliminees", "gardien");
     return true;
   }
@@ -1148,7 +1176,7 @@ export function viewFor(s, playerId = null, { log = true } = {}) {
       arme: cardPub(s, p.arme), equip: p.equip.map((u) => cardPub(s, u)), enLigne: p.enLigne,
       ordreElim: p.ordreElim, abandon: p.abandon, soumis: p.soumis, aChoisi: !!p.choix,
       perso: started && p.perso ? { instanceId: p.perso.instanceId, cardId: p.perso.cardId, branch: p.perso.branch, pret: p.perso.pret, proprietaire: p.perso.proprietaire, ...(p.perso.cosmetique !== undefined ? { cosmetique: p.perso.cosmetique } : {}) } : null,
-      role: s.mode === "classique" && started && roleShown(p) ? p.role : null,
+      role: s.mode === "classique" && started && roleShown(p) ? (p.enfers && s.phase !== "fin" && !(me && me.id === p.id) ? p.faux : p.role) : null,
     };
     if (started) { o.distance = me && me.vivant && p.vivant && p.id !== me.id ? distance(s, me.id, p.id) : null; o.distancePercue = me && me.vivant && p.vivant && p.id !== me.id ? distancePercue(s, me.id, p.id) : null; }
     return o;
@@ -1172,6 +1200,7 @@ export function viewFor(s, playerId = null, { log = true } = {}) {
     v.propositions = s.phase === "choix" || started ? me.propositions.map((iid) => s.reserve.find((c) => c.instanceId === iid)) : [];
     v.monChoix = me.choix;
     if (s.prompt && s.prompt.pid === me.id && s.prompt.kind === "stratege") v.attente.cartes = s.limbe.map((u) => cardPub(s, u));
+    if (s.config.errant?.coupDeGrace) v.errantCoupDeGrace = true;
     if (started && me.vivant) { v.limiteMain = limiteMain(s, me); v.porteeArme = porteeArme(s, me); v.frappesMax = frappesMax(s, me); }
     v.actions = legalActions(s, me.id);
   }

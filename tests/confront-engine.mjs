@@ -341,11 +341,11 @@ t.section("Corrections d'équilibrage appliquées (valeurs par défaut)");
   t.check("Défense à 5 joueurs : présage Vent, pas d'esquive (Eau seul)", !types(rd7.events).includes("esquive") && rd7.state.prompt.kind === "reaction");
   // PV du Gardien par table, compensation du second joueur en duel
   const pvG = (n) => { const s = mkGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "pvg" + n }); const g = playGame(s, { maxSteps: n }).state; return g.players.find((p) => p.role === "gardien").pvMax; };
-  t.check("PV du Gardien : 4 à 4 joueurs, 4 à 5, 6 à 6, 4 à 7", pvG(4) === 4 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 4, [4, 5, 6, 7].map(pvG));
-  // deux camps, sans Errant : Gardien et Sentinelles contre Briseurs, réglés à environ 50/50 par table
+  t.check("PV du Gardien : 5 à 4 joueurs, 4 à 5, 6 à 6, 5 à 7", pvG(4) === 5 && pvG(5) === 4 && pvG(6) === 6 && pvG(7) === 5, [4, 5, 6, 7].map(pvG));
+  // trois camps : Gardien et Sentinelles, Briseurs, et l'Errant seul
   const comp = (n) => { const s = mkGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "cmp" + n }); const g = playGame(s, { maxSteps: n }).state; const c = {}; for (const p of g.players) c[p.role] = (c[p.role] || 0) + 1; return c; };
-  const want = { 4: [1, 1, 2], 5: [1, 2, 2], 6: [1, 2, 3], 7: [1, 3, 3] };
-  t.check("répartition : 1-1-2, 1-2-2, 1-2-3, 1-3-3 (Gardien, Sentinelles, Briseurs), jamais d'Errant", [4, 5, 6, 7].every((n) => { const c = comp(n); return c.gardien === want[n][0] && (c.sentinelle || 0) === want[n][1] && c.briseur === want[n][2] && !c.errant; }), [4, 5, 6, 7].map(comp));
+  const want = { 4: [1, 0, 2], 5: [1, 1, 2], 6: [1, 1, 3], 7: [1, 2, 3] };
+  t.check("répartition : 1-0-2, 1-1-2, 1-1-3, 1-2-3 (Gardien, Sentinelles, Briseurs) et un Errant", [4, 5, 6, 7].every((n) => { const c = comp(n); return c.gardien === want[n][0] && (c.sentinelle || 0) === want[n][1] && c.briseur === want[n][2] && c.errant === 1; }), [4, 5, 6, 7].map(comp));
   const eq = (n, extra) => mkGame({ players: Array.from({ length: n }, (_, k) => ({ id: "p" + k, contribution: [] })), seed: "eq" + n, config: extra });
   t.check("l'Errant reste possible par réglage (ancienne répartition)", (() => { const g = playGame(eq(5, { roles: { 5: { gardien: 1, sentinelle: 1, briseur: 2, errant: 1 } } }), { maxSteps: 5 }).state; return g.players.some((p) => p.role === "errant"); })());
   const du = playGame(mkGame({ players: [{ id: "p0", contribution: [] }, { id: "p1", contribution: [] }], seed: "second" }), { maxSteps: 2 }).state;
@@ -621,7 +621,7 @@ t.section("Premier joueur, collusion à trois, robustesse sur parties complètes
       onStep: (s, pid, a) => {
         if (!conserved(s)) bad.push(`${seed} : cartes perdues ou dupliquées`);
         if (s.players.some((p) => p.pv > p.pvMax)) bad.push(`${seed} : PV au-dessus du max`);
-        if (a.type === "finir" && P(s, pid).vivant && P(s, pid).main.length > E.limiteMain(s, P(s, pid))) bad.push(`${seed} : main au-dessus de la limite`);
+        if (a.type === "finir" && P(s, pid).vivant && s.turn?.pid !== pid && P(s, pid).main.length > E.limiteMain(s, P(s, pid))) bad.push(`${seed} : main au-dessus de la limite`);
       },
     }).state;
     total++;
@@ -636,6 +636,32 @@ t.section("Premier joueur, collusion à trois, robustesse sur parties complètes
   t.check(`${total} parties complètes (2 à 7 joueurs) : cartes conservées, PV et mains dans les limites, rejouables`, !bad.length, bad.slice(0, 5));
   t.check("aucune partie bloquée jusqu'à la limite de tours (boucle infinie)", capped === 0, { capped });
   t.check(`la pioche contient bien ${TOTAL_CARTES} cartes d'action`, TOTAL_CARTES === 82);
+}
+
+// ===================================================================================
+t.section("Errant : coup de grâce et double vie");
+{
+  const R5 = { p0: "errant", p1: "gardien", p2: "briseur", p3: "briseur", p4: "sentinelle" };
+  // coup de grâce : l'Errant achève lui-même le Gardien
+  let c = setup(4, { seed: "cdg", roles: { p0: "errant", p1: "gardien", p2: "briseur", p3: "briseur" }, seats: ["p0", "p1", "p2", "p3"] });
+  arrange(c, { p0: { main: ["frappe"], arme: "canon" }, p1: { main: [], equip: [] } }); P(c, "p1").pv = 1;
+  forceTurn(c, "p0");
+  c = ok(ok(c, "p0", { type: "jouer", carte: card(c, "p0", "frappe"), cible: "p1" }), "p1", { type: "encaisser" });
+  t.check("Coup de grâce : l'Errant qui élimine le Gardien gagne seul", c.phase === "fin" && deepEq(c.result.gagnants, ["p0"]) && c.result.raison === "errant_coup_de_grace", c.result);
+  // double vie : première mort avec un faux rôle, retour quand il ne reste que 3 joueurs
+  let d = setup(5, { seed: "rev", roles: R5, seats: ["p0", "p1", "p2", "p3", "p4"] });
+  arrange(d, { p2: { main: ["frappe"], arme: "canon" }, p0: { main: [], equip: [] } }); P(d, "p0").pv = 1;
+  forceTurn(d, "p2");
+  d = ok(ok(d, "p2", { type: "jouer", carte: card(d, "p2", "frappe"), cible: "p0" }), "p0", { type: "encaisser" });
+  const vu = E.viewFor(d, "p1").joueurs.find((j) => j.id === "p0");
+  t.check("première mort : la table voit un faux rôle (Sentinelle ou Briseur), pas l'Errant", !P(d, "p0").vivant && P(d, "p0").enfers && ["sentinelle", "briseur"].includes(vu.role), vu.role);
+  t.check("… l'événement d'élimination montre aussi le faux rôle", !JSON.stringify(d.log.filter((e) => e.type === "elimination")).includes("errant"));
+  arrange(d, { p2: { main: ["frappe"] }, p4: { main: [], equip: [] } }); P(d, "p4").pv = 1;
+  forceTurn(d, "p2");
+  d = ok(ok(d, "p2", { type: "jouer", carte: card(d, "p2", "frappe"), cible: "p4" }), "p4", { type: "encaisser" });
+  const e = P(d, "p0"), vu2 = E.viewFor(d, "p1").joueurs.find((j) => j.id === "p0");
+  t.check("plus que 3 joueurs en vie : l'Errant revient des enfers, 2 PV et 3 cartes, son vrai rôle montré", e.vivant && !e.enfers && e.revenu && e.pv === 2 && e.main.length === 3 && vu2.role === "errant", { pv: e.pv, main: e.main.length, role: vu2.role });
+  t.check("… et les cartes sont conservées", conserved(d));
 }
 
 t.done();

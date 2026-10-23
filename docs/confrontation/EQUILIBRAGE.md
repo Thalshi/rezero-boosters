@@ -43,7 +43,25 @@ Toutes sont des réglages de `worker/confront/config.mjs` ; `CONFIG_AVANT_CORREC
 
 Variantes mesurées puis **écartées** (trop fortes), laissées à 0 dans la configuration : Précision pioche quand sa Frappe est parée (duel 66 % contre Chance, trio +11) ; Survie à 1 carte pour sa première Ténacité du tour (duel 66 %) ; Survie +1 PV max à petite table (trio 68 %) ; Voleur seulement sur un joueur plus riche que lui (duel 42 %, trop faible) ; Précision 2 PV sur une cible sans carte (effet presque nul en trio).
 
-## Rôles : deux camps à 50/50 (correction C9, sans Errant)
+## Rôles : trois camps avec l'Errant (correction C10, remplace C9)
+
+Demande de Reichi : remettre l'Errant, mais plus fort, sans bonus visible (des PV ou des cartes en plus pour un rôle secret le trahissent : seul le Gardien, rôle public, reçoit des bonus ; les bonus de cartes des Sentinelles et des Briseurs de C9 sont retirés pour la même raison). Deux pouvoirs invisibles :
+
+- **Coup de grâce** : si l'Errant élimine lui-même le Gardien, il gagne seul.
+- **Double vie** (idée de Reichi, à partir de 5 joueurs) : à sa première mort, la table voit un faux rôle (Sentinelle ou Briseur) et il part aux enfers ; il revient avec 2 PV et 3 cartes quand il ne reste que 3 joueurs en vie, ou quand la partie allait se terminer sans lui ; son vrai rôle est alors révélé.
+
+Pistes mesurées puis écartées (800 parties par table) : PV en plus (visibles), Charognard (+1 PV et 2 cartes à chaque élimination : le soin se voit, et seulement 11 à 19 %), double vie seule (32 / 17 / 11 / 7 %).
+
+| Joueurs | Composition (G / S / B / E) | Réglage (Gardien seulement) | Camp du Gardien | Briseurs | Errant |
+|---|---|---|---|---|---|
+| 4 | 1 / 0 / 2 / 1 | +1 PV, +1 carte ; Errant sans double vie | 34,6 % | 30,9 % | 34,5 % |
+| 5 | 1 / 1 / 2 / 1 | aucun | 35,9 % | 34,1 % | 30,1 % |
+| 6 | 1 / 1 / 3 / 1 | +2 PV | 33,4 % | 40,3 % | 26,3 % |
+| 7 | 1 / 2 / 3 / 1 | +1 PV | 38,1 % | 41,1 % | 20,7 % |
+
+(1 500 parties simulées par table.) Les réglages sont dans `worker/confront/config.mjs` (`errant`, `bonusGardien`, `bonusMainRole`) ; l'ancienne répartition à deux camps reste disponible (`ROLES_DEUX_CAMPS`).
+
+## Rôles : deux camps à 50/50 (correction C9, sans Errant, remplacée par C10)
 
 Demande de Reichi : retirer les rôles trop faibles pour que la victoire vienne de la réflexion, pas du rôle tiré. L'Errant (8 à 23 % de victoires selon la table) est retiré ; chaque table a sa composition et un petit réglage, cherchés par simulation (1 000 à 1 500 parties par essai, puis 2 000 pour confirmer).
 

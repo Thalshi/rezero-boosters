@@ -100,10 +100,9 @@ const World3D = (() => {
       if (bgUrl !== url || !R) return;
       const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.needsUpdate = true; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.anisotropy = 8;
       const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
-      const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#d4cce4", fog: false, transparent: true, opacity: 0, depthWrite: false }));
+      const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#ffffff", fog: false }));
       m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
       // changement net : l'ancien décor disparaît dès que le nouveau est prêt (pas de mélange des deux)
-      m.material.opacity = 1; m.material.transparent = false; m.material.depthWrite = true;
       const old = bgMesh; bgMesh = m;
       if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); }
     }; img.src = url;

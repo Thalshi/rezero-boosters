@@ -35,9 +35,11 @@ def main():
     (ROOT / "public").mkdir(exist_ok=True)
     # décors (panoramas) : sur le site, des fichiers à part chargés à la demande ; la version claude.ai les garde dans la page
     (ROOT / "public/decor").mkdir(exist_ok=True)
+    for old in (ROOT / "public/decor").glob("*.jpg"): old.unlink()
     for f in sorted((ROOT / "assets/illus").glob("decor-*.jpg")):
         data = f.read_bytes(); name = f.stem[len("decor-"):]
-        (ROOT / "public/decor" / f"{name}.jpg").write_bytes(data)
+        full = ROOT / "assets/decor" / f"{name}.jpg"   # pleine taille (2400 px) pour le site, s'il existe
+        (ROOT / "public/decor" / f"{name}.jpg").write_bytes(full.read_bytes() if full.exists() else data)
         site = site.replace("data:image/jpeg;base64," + base64.b64encode(data).decode(), f"/decor/{name}.jpg")
     (ROOT / "public/index.html").write_text(SKELETON + site + "\n</body>\n</html>\n", encoding="utf8")
     print("public/index.html", len(site), "· artifact.html", len(page))

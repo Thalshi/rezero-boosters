@@ -126,14 +126,14 @@ connect();
 // le monde du QG en fond du site (même décor que l'arène 3D)
 // un panorama par rubrique (créations de Reichi) : fond 3D et en-tête des pages
 // couleurs de chaque panorama (accent lumineux, ombre profonde) : toute l'interface s'y accorde
-const DECOR_PAL = { v1: ["#e0566a", "#2c2029"], v2: ["#ea5560", "#2a1822"], v3: ["#e8567c", "#231722"], v4: ["#8fa8ff", "#1f1a34"], v5: ["#ea6e6c", "#38252e"], v6: ["#ec7a6f", "#36262c"], v7: ["#e46aa6", "#362a3d"], v8: ["#9b8cff", "#1a0e2d"] };
-const DECOR_VIEW = { boosters: "v2", collection: "v1", wiki: "v1", carte: "v1", market: "v4", missions: "v5", pred: "v8", classement: "v6", profil: "v6", sanctuaire: "v7", boutique: "v3", atelier: "v3", defile: "v6", confront: "v4", regles: "v5", infos: "v5", raretes: "v1", nouveautes: "v2", avis: "v5" };
+const DECOR_PAL = {"boosters": ["#eb4938", "#1d1218"], "collection": ["#e75e6f", "#2d222c"], "market": ["#98afe7", "#1f121f"], "missions": ["#e77c7d", "#3b2831"], "pred": ["#847be7", "#1b121e"], "classement": ["#6c91e7", "#30262c"], "sanctuaire": ["#418fec", "#121528"], "boutique": ["#e75d7c", "#241823"], "defile": ["#fa9d66", "#291a28"], "confront": ["#8288e7", "#1c1520"], "table": ["#e77cad", "#392c3c"], "wiki": ["#e77695", "#262129"], "carte": ["#e77269", "#21151d"], "profil": ["#e7857e", "#37292f"], "atelier": ["#e77084", "#21141f"], "regles": ["#e7668a", "#32252e"], "infos": ["#e76872", "#1d1720"], "raretes": ["#e76761", "#331b22"], "nouveautes": ["#e75a67", "#2d1923"], "avis": ["#e79688", "#3c2a33"]};
+const DECOR_VIEW = { wiki: "wiki", carte: "carte", profil: "profil" }; // une page = son décor (même nom) ; les autres prennent celui de l'accueil
 function syncDecor() {
   try {
     if (typeof ILLUS_DECOR !== "object") return;
-    const v = location.hash.replace(/^#\/?/, "").split("/")[0] || "boosters", url = ILLUS_DECOR["v" + (DECOR_VIEW[v] || "v2").slice(1)] || ILLUS_DECOR.table;
+    const v = location.hash.replace(/^#\/?/, "").split("/")[0] || "boosters", key = ILLUS_DECOR[v] && v !== "table" ? v : DECOR_VIEW[v] || "boosters", url = ILLUS_DECOR[key];
     if (!url) return;
-    const key = DECOR_VIEW[v] || "v2", pal = DECOR_PAL[key] || DECOR_PAL.v2, st = document.documentElement.style;
+    const pal = DECOR_PAL[key] || DECOR_PAL.boosters, st = document.documentElement.style;
     st.setProperty("--world", `url(${url})`); st.setProperty("--sc", pal[0]); st.setProperty("--sc-deep", pal[1]);
     World3D.setBg?.(url); World3D.setTint?.(pal[0], pal[1]);
   } catch (e) {}

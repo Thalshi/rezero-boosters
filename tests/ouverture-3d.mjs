@@ -62,6 +62,20 @@ try {
     t.check("coffre : récapitulatif de 10 cartes", await until(page, () => document.querySelectorAll(".summary > *").length === 10, 10000));
     await page.click('[data-act="stage-close"]'); await page.waitForTimeout(500);
 
+    // les 30 scénarios du coffre, rejoués en 3D (ordi seulement : c'est long en rendu logiciel)
+    if (label === "ordi") {
+      const ids = await page.evaluate(() => CHEST_SCENARIOS.map((x) => x.id)), bad = [];
+      for (const id of ids) {
+        await page.evaluate((id) => { const cs = ALL_CARDS.filter((c) => c.rar === "m").slice(0, 1).concat(ALL_CARDS.filter((c) => c.rar === "l").slice(0, 2), ALL_CARDS.filter((c) => c.rar === "e").slice(0, 3), ALL_CARDS.filter((c) => c.rar === "c").slice(0, 4));
+          opening = { phase: "pack", cards: cs.map((c, i) => ({ c, gold: i === 3, isNew: i < 5 })), i: 0, flipped: false, paid: false, pk: packOf("mix"), n: 2, scenario: id, lab: true, titles: [] }; drawOpening(); }, id);
+        await until(page, () => Open3D.state?.kind === "chest", 20000);
+        await page.evaluate(() => { window.__speed = 14; Open3D.open(); });
+        if (id === "fk-redemarrage" || id === "tr-eclipse" || id === "fk-cle") await page.waitForTimeout(2500).then(() => page.screenshot({ path: join(OUT, `o3-scenario-${id}.png`) }));
+        if (!(await until(page, () => Open3D.state?.phase === "cards", 90000))) bad.push(id);
+        await page.evaluate(() => { window.__speed = 6; Open3D.stop(); closeStage(); });
+      }
+      t.check(`les ${ids.length} scénarios du coffre vont jusqu'aux cartes`, ids.length === 30 && bad.length === 0, bad);
+    }
     // invocation ×5 : la pochette, puis le dévoilement habituel des cosmétiques
     await page.evaluate(() => zSummon(5));
     t.check("invocation ×5 : la pochette 3D", await until(page, () => Open3D.state?.kind === "pack"));

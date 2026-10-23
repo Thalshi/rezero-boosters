@@ -7557,7 +7557,7 @@ const Open3D = (() => {
   }
   function resetScene() {
     const ch = E.ch, P = E.pk, K = E.key, THREE = E.THREE;
-    E.tweens = []; debris.forEach((d) => E.scene.remove(d.m)); debris = [];
+    E.tweens = []; debris.forEach((d) => E.scene.remove(d.m)); debris = []; clearProps(); cur.keyIn = cur.turned = false; cur.tintCol = null;
     ch.chest.visible = cur.kind === "chest"; ch.chest.position.set(0, 0, 0); ch.chest.rotation.set(0, 0, 0); ch.chest.scale.setScalar(1); ch.body.rotation.set(0, 0, 0); ch.body.position.set(0, 0, 0);
     ch.lidPivot.rotation.x = 0; ch.crackMat.opacity = 0; ch.setCrack(0); ch.orb.material.opacity = 0; ch.orbCore.visible = false; ch.shaftMat.opacity = 0;
     ch.tint("#2ee6ff", .5); ch.holeMat.color.set("#05030a");
@@ -7573,35 +7573,186 @@ const Open3D = (() => {
     cur.hint = cur.kind === "chest" ? "Touche la clé pour briser le coffre" : "Déchire la pochette le long du pointillé (ou touche-la)"; hint(cur.hint);
   }
 
+  // ---------- les temps forts des 30 scénarios, en 3D ----------
+  const V3 = (x, y, z) => new E.THREE.Vector3(x, y, z);
+  const HOLE = () => V3(0, 0.55, D / 2 + 0.1);
+  const banner3 = (text, col = "#e8c77e") => { const tt = $("o3Title"); if (!tt) return; tt.textContent = text; tt.style.setProperty("--rc", col); tt.classList.remove("go"); void tt.offsetWidth; tt.classList.add("go"); };
+  function crackTo(p) { const ch = E.ch, a = ch.crack(); if (p <= a) return; ch.crackMat.opacity = 1; tween(0.35, (t) => ch.setCrack(lerp(a, p, easeOut(t)))); }
+  function tintTo(r, k = 1) { const ch = E.ch, c = r === "gold" ? GOLD : HEX[r] || HEX[cur.best]; ch.tint(c, k); E.inner.color.set(c); ch.crackMat.color.set(c).multiplyScalar(3); cur.tintCol = c; return c; }
+  async function tremble(n = 1, dur = 0.36) { const b = E.ch.body; await tween(dur * n, (t) => { b.rotation.z = Math.sin(t * Math.PI * 6 * n) * 0.012 * (n + 1) * (1 - t * .3); b.position.y = Math.abs(Math.sin(t * Math.PI * 3 * n)) * 0.02 * (n + 1); }); b.rotation.z = 0; b.position.y = 0; }
+  // petits objets lumineux posés dans la scène pour un temps fort, retirés au reset
+  const props = [];
+  const prop = (o) => { E.scene.add(o); props.push(o); return o; };
+  const unprop = (o) => { E.scene.remove(o); const i = props.indexOf(o); if (i >= 0) props.splice(i, 1); };
+  const spriteOf = (col, size = 1, op = .8) => { const m = new E.THREE.Sprite(new E.THREE.SpriteMaterial({ map: E.radial, color: new E.THREE.Color(col), blending: E.THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: op })); m.scale.setScalar(size); return m; };
+  const iconTex = {};
+  const iconSprite = (k, col, size) => { const tex = (iconTex[k + col] ||= canvasTex(256, 256, (g) => drawIcon(g, k, 128, 128, 9, col, 1.6))); const m = new E.THREE.Sprite(new E.THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: E.THREE.AdditiveBlending, opacity: 0 })); m.scale.setScalar(size); return m; };
+  let crystal = null;
+  const B3 = {
+    // la clé file vers la serrure et s'y enfonce
+    async insert() {
+      const K = E.key, hole = HOLE(), k0 = K.g.position.clone(), r0 = K.inner.rotation.clone(), front = hole.clone().add(V3(0, 0, 1.15));
+      K.g.visible = true; K.inner.rotation.z = 0;
+      await tween(0.6, (t) => { K.g.position.lerpVectors(k0, front, t); K.inner.rotation.set(lerp(r0.x, 0, t), lerp(r0.y, 0, t), lerp(r0.z, 0, t)); });
+      const f1 = K.g.position.clone(); await tween(0.3, (t) => K.g.position.lerpVectors(f1, hole.clone().add(V3(0, 0, 0.26)), t), easeIn);
+      E.shake = 0.04; emit(18, hole, "#e8c77e", { speed: 1.4, up: 0.6, life: 0.6, grav: 4 }); cur.keyIn = true; cur.turned = false;
+    },
+    // un quart de tour : clac, la serrure s'allume
+    async turn() {
+      const K = E.key, z0 = K.inner.rotation.z; await tween(0.42, (t) => { K.inner.rotation.z = z0 + t * Math.PI / 2; }, easeBack);
+      E.ch.holeMat.color.set("#2ee6ff").multiplyScalar(2.4); E.shake = 0.05; emit(12, HOLE(), "#2ee6ff", { speed: 1, up: .5, life: .5, grav: 2 }); cur.turned = true; await wait(160);
+    },
+    async tint(r) { const c = tintTo(r || cur.best, r ? 0.9 : 1.3); emit(24, V3(0, H, 0), c, { speed: 1.8, spread: 1.4, up: .4, life: .8, grav: 0 }); await tremble(1, .3); await wait(220); },
+    async ladder() { for (const [j, r] of ladderOf(cur.best).entries()) { tintTo(r, 0.8 + j * 0.15); emit(10 + j * 6, V3(0, H, 0), HEX[r], { speed: 1.6, spread: 1.4, up: .3, life: .7, grav: 0 }); await tremble(1, .3); await wait(100); } },
+    async shake(n = 1) { E.shake = Math.max(E.shake, 0.03 * n); await tremble(n); },
+    // les bandeaux d'icônes s'allument un à un et des icônes montent autour du coffre
+    async runes(n = 8) {
+      const ks = ["logo", "feu", "eau", "vent", "terre", "couronne", "eclair", "sanctuaire"], col = cur.tintCol || "#2ee6ff";
+      for (let i = 0; i < n; i++) {
+        const a = i / n * Math.PI * 2, sp = prop(iconSprite(ks[i % ks.length], col, 0.45)); sp.position.set(Math.cos(a) * 1.9, 0.3, Math.sin(a) * 1.4);
+        tween(1.6, (t) => { sp.material.opacity = Math.sin(Math.min(1, t * 1.4) * Math.PI / 2) * 0.95; sp.position.y = 0.3 + t * 1.1; }, easeOut);
+        E.ch.runeMat.color.set(col).multiplyScalar(0.6 + i / n); await wait(90);
+      }
+      await wait(250); cur.runes = props.filter((p) => p.isSprite && p.material.map && p.scale.x === 0.45);
+    },
+    async runesOut() { const rs = cur.runes || []; E.ch.tint("#000", 0); await tween(0.5, (t) => { rs.forEach((r) => { r.material.opacity = 0.95 * (1 - t); }); E.renderer.toneMappingExposure = lerp(1.05, 0.55, t); }); rs.forEach(unprop); cur.runes = []; await tween(0.4, (t) => { E.renderer.toneMappingExposure = lerp(0.55, 1.05, t); }); },
+    // un cristal flotte au-dessus du coffre et chante
+    async crystal(n = 1) {
+      if (!crystal) { const THREE = E.THREE; crystal = prop(new THREE.Group()); const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.28, 0), new THREE.MeshPhysicalMaterial({ color: "#bff4ff", emissive: "#2ee6ff", emissiveIntensity: .8, roughness: .05, clearcoat: 1, flatShading: true, transparent: true, opacity: .92 })); m.scale.set(1, 1.6, 1); crystal.add(m, spriteOf("#2ee6ff", 1.4, .5)); crystal.position.set(0, 2.1, 0); crystal.scale.setScalar(0.01); crystal.userData.m = m; await tween(0.5, (t) => crystal.scale.setScalar(t), easeBack); }
+      for (let i = 0; i < n; i++) { shock(crystal.position.clone(), "#2ee6ff", 2.2, .6, false); await tween(0.42, (t) => crystal.scale.setScalar(1 + Math.sin(t * Math.PI) * .25)); }
+    },
+    async crack() { if (!crystal) await B3.crystal(1); const m = crystal.userData.m; m.material.emissive.set("#5a6a80"); E.shake = .05; emit(30, crystal.position, "#bff4ff", { speed: 1.4, up: .3, life: .6, grav: 3 }); await tween(0.5, (t) => { crystal.rotation.z = Math.sin(t * Math.PI * 8) * .08; }); },
+    async burstCrystal() {
+      if (!crystal) return; const c = cur.tintCol || HEX[cur.best], p = crystal.position.clone();
+      for (let i = 0; i < 14; i++) { const sh = new E.THREE.Mesh(new E.THREE.TetrahedronGeometry(0.07 + Math.random() * .06), new E.THREE.MeshPhysicalMaterial({ color: "#bff4ff", emissive: c, emissiveIntensity: .7, roughness: .1 })); sh.position.copy(p); E.scene.add(sh); debris.push({ m: sh, v: V3((Math.random() - .5) * 5, 1 + Math.random() * 3, (Math.random() - .5) * 4), w: V3(Math.random() * 10, Math.random() * 10, Math.random() * 10), half: 0.05, t: 0, s0: sh.scale.clone(), gravity: 9.8 }); }
+      unprop(crystal); crystal = null; flash(c, .35); shock(p, c, 2.6, .7, false); emit(80, p, c, { speed: 3, life: 1, grav: 2 }); await wait(500);
+    },
+    // la clé ressort : la serrure résiste
+    async keyPop() { const K = E.key, p0 = K.g.position.clone(); await tween(0.45, (t) => { K.g.position.copy(p0).add(V3(0, Math.sin(t * Math.PI) * .25, t * .9)); K.inner.rotation.x = -t * .5; }, easeOut); hint("…la serrure résiste"); E.shake = .06; cur.keyIn = false; await wait(400); hint(""); },
+    // la clé se brise en deux morceaux qui tombent
+    async keyBreak() {
+      const K = E.key; K.g.updateMatrixWorld(true); E.shake = .1; emit(40, K.g.position, "#e8c77e", { speed: 2.5, life: .8, grav: 4 });
+      for (const side of [-1, 1]) { const piece = K.inner.clone(true); K.inner.matrixWorld.decompose(piece.position, piece.quaternion, piece.scale); piece.position.x += side * .05; E.scene.add(piece); debris.push({ m: piece, v: V3(side * 1.2, 1.5, .8), w: V3(Math.random() * 6, Math.random() * 6, side * 8), half: 0.1, t: 0, s0: piece.scale.clone(), gravity: 9.8 }); }
+      K.g.visible = false; cur.keyIn = false; cur.turned = false; hint("La clé s'est brisée…"); await wait(700); hint("");
+    },
+    // une clé dorée apparaît
+    async goldKey() {
+      const K = E.key; K.g.position.copy(K.home); K.inner.rotation.set(0, 0, 0); K.g.scale.setScalar(.01); K.g.visible = true;
+      const gm = new E.THREE.MeshStandardMaterial({ color: "#ffd86a", metalness: 1, roughness: .18, emissive: "#a8741c", emissiveIntensity: .6 }); K.inner.traverse((m) => { if (m.isMesh && m.material === E.gold) { m.userData.gold0 = m.material; m.material = gm; } });
+      K.glow.material.color.set("#ffd86a"); emit(50, K.home, "#ffd86a", { speed: 1.6, up: .6, life: .9, grav: 0 }); hint("Une clé dorée apparaît");
+      await tween(0.6, (t) => K.g.scale.setScalar(t), easeBack); await wait(250); hint("");
+    },
+    // le couvercle se soulève : la lumière filtre… puis il retombe
+    async lidPeek() { const ch = E.ch; ch.shaftMat.color.set(cur.tintCol || "#fff"); await tween(0.5, (t) => { ch.lidPivot.rotation.x = -t * .32; E.inner.intensity = t * 3; ch.shaftMat.opacity = t * .12; }, easeOut); await wait(300); },
+    async lidFall() { const ch = E.ch; await tween(0.18, (t) => { ch.lidPivot.rotation.x = -.32 * (1 - t); E.inner.intensity = 3 * (1 - t); ch.shaftMat.opacity = .12 * (1 - t); }, easeIn); E.shake = .12; emit(60, V3(0, .05, 0), "#6a5a9a", { speed: 2.4, up: .3, life: 1, grav: 3, jitter: .6 }); await tremble(2, .25); },
+    async blackout() { await tween(0.5, (t) => { E.renderer.toneMappingExposure = lerp(1.05, 0.08, t); E.ringMat.opacity = .9 * (1 - t); }); await wait(500); },
+    // le coffre est soulevé par la lumière et retombe lourdement
+    async redrop() {
+      const c = E.ch.chest; tween(0.4, (t) => { E.renderer.toneMappingExposure = lerp(0.08, 1.05, t); E.ringMat.opacity = .9 * t; });
+      await tween(0.45, (t) => { c.position.y = t * 0.7; c.rotation.y = t * .3; }, easeOut); await tween(0.28, (t) => { c.position.y = .7 * (1 - t); c.rotation.y = .3 * (1 - t); }, easeIn);
+      E.shake = .16; shock(V3(0, .03, 0), cur.tintCol || "#fff", 3.5, .7); emit(80, V3(0, .05, 0), "#6a5a9a", { speed: 3, up: .3, life: 1.1, grav: 3, jitter: .8 }); await wait(250);
+    },
+    async dust() { for (let k = 0; k < 3; k++) { emit(40, V3(0, .1, 0), k % 2 ? "#a99cc8" : (cur.tintCol || "#2ee6ff"), { speed: 2.4, spread: 1.4, up: .5, life: 1.2, grav: -.4, jitter: 1 }); await wait(220); } await wait(300); },
+    // trois sphères violettes se détachent du coffre, tournent, puis s'y fondent
+    async split(r = "e") {
+      const c = HEX[r], orbs = [0, 1, 2].map(() => prop(spriteOf(c, .5, .9)));
+      await tween(1.3, (t) => orbs.forEach((o, i) => { const a = t * Math.PI * 3 + i * Math.PI * 2 / 3, rr = Math.sin(t * Math.PI) * 1.3; o.position.set(Math.cos(a) * rr, 1.2 + Math.sin(t * Math.PI) * .6, Math.sin(a) * rr * .7); }));
+      orbs.forEach(unprop); flash(c, .3); emit(60, V3(0, 1.1, 0), c, { speed: 2, life: .8, grav: 0 });
+    },
+    // deux couronnes d'or montent et s'entrechoquent
+    async crowns() {
+      const THREE = E.THREE, mk = (x) => { const g = prop(new THREE.Group()); g.add(new THREE.Mesh(new THREE.CylinderGeometry(.24, .24, .12, 24, 1, true), E.gold)); for (let i = 0; i < 6; i++) { const sp = new THREE.Mesh(new THREE.ConeGeometry(.05, .16, 8), E.gold); const a = i / 6 * Math.PI * 2; sp.position.set(Math.cos(a) * .24, .13, Math.sin(a) * .24); g.add(sp); } g.position.set(x, .8, .4); return g; };
+      const a = mk(-1.6), b = mk(1.6);
+      await tween(0.9, (t) => { a.position.set(lerp(-1.6, -.2, t), .8 + t * 1.4, .4); b.position.set(lerp(1.6, .2, t), .8 + t * 1.4, .4); a.rotation.y = b.rotation.y = t * 6; }, easeIO);
+      flash(HEX.l, .5); E.shake = .1; emit(90, V3(0, 2.2, .4), HEX.l, { speed: 3, life: 1, grav: 2 }); unprop(a); unprop(b); await wait(300);
+    },
+    // une éclipse passe devant un soleil doré, puis la couronne rouge
+    async eclipse() {
+      const THREE = E.THREE, sun = prop(spriteOf(HEX.l, 2.4, .9)), disk = prop(new THREE.Mesh(new THREE.CircleGeometry(.6, 48), new THREE.MeshBasicMaterial({ color: "#05030a" })));
+      sun.position.set(0, 2.6, -1); disk.position.set(-2.2, 2.6, -.9);
+      await tween(1.2, (t) => { disk.position.x = lerp(-2.2, 0, easeOut(t)); E.renderer.toneMappingExposure = lerp(1.05, .5, t); });
+      sun.material.color.set(HEX.m); flash(HEX.m, .4); await tween(.6, (t) => { sun.scale.setScalar(2.4 + t * 1.2); E.renderer.toneMappingExposure = lerp(.5, 1.05, t); });
+      unprop(sun); unprop(disk);
+    },
+    // un reflet du coffre en sort et y revient
+    async twin() {
+      const g = prop(E.ch.chest.clone(true)); g.traverse((m) => { if (m.isMesh) { m.material = additive({ color: new E.THREE.Color(cur.tintCol || HEX[cur.best]).multiplyScalar(.5), opacity: .45 }); } });
+      await tween(0.6, (t) => { g.position.x = t * 2.4; g.position.z = -t * .6; }, easeOut); await wait(250); await tween(0.5, (t) => { g.position.x = 2.4 * (1 - t); g.position.z = -.6 * (1 - t); }, easeIn);
+      unprop(g); E.shake = .1; flash(cur.tintCol || "#fff", .3);
+    },
+    // une pluie de pièces d'or qui rebondissent sur le sol
+    async coins() {
+      const THREE = E.THREE, geo = new THREE.CylinderGeometry(.09, .09, .02, 20);
+      for (let i = 0; i < 30; i++) { const m = new THREE.Mesh(geo, E.gold); m.castShadow = true; m.position.set((Math.random() - .5) * 3.4, 4 + Math.random() * 2, (Math.random() - .5) * 2.4); E.scene.add(m); debris.push({ m, v: V3(0, -1 - Math.random() * 2, 0), w: V3(Math.random() * 12, Math.random() * 4, Math.random() * 12), half: .02, t: 0, s0: m.scale.clone(), gravity: 9.8 }); if (i % 3 === 0) await wait(40); }
+      await wait(900);
+    },
+    async gild() { const m = E.bodyMat; m.userData.c0 ||= m.color.clone(); const c0 = m.color.clone(), c1 = new E.THREE.Color("#e8c77e"); await tween(.7, (t) => { m.color.lerpColors(c0, c1, t); m.metalness = lerp(.55, .9, t); }); },
+    // un reflet de lumière passe sur le coffre
+    async sheen() { const pl = prop(new E.THREE.Mesh(new E.THREE.PlaneGeometry(.5, 2.2), additive({ color: new E.THREE.Color("#fff4c8").multiplyScalar(.8), opacity: .7 }))); pl.rotation.z = -.5; pl.position.set(-2, .7, D / 2 + .25); await tween(.8, (t) => { pl.position.x = lerp(-2, 2, t); }); unprop(pl); },
+    // des fils de lumière s'enroulent autour du coffre, puis cèdent
+    async chrysalis() {
+      const THREE = E.THREE, c = cur.tintCol || HEX[cur.best], rings = [0, 1, 2, 3].map((i) => { const r = prop(new THREE.Mesh(new THREE.TorusGeometry(1.5, .012, 8, 96), glowMat(c))); r.position.y = .2 + i * .3; r.rotation.x = Math.PI / 2 + (i - 1.5) * .15; r.scale.setScalar(.01); return r; });
+      await tween(1, (t) => rings.forEach((r, i) => { r.scale.setScalar(Math.min(1, t * 1.6 - i * .1)); r.rotation.z = t * (3 + i); }));
+      E.shake = .08; emit(80, V3(0, .8, 0), c, { speed: 2.5, life: .9, grav: 1, jitter: .8 }); rings.forEach(unprop); await wait(200);
+    },
+    // une colonne de lumière tombe du ciel sur le coffre
+    async column() {
+      const c = cur.tintCol || HEX[cur.best], col = prop(new E.THREE.Mesh(new E.THREE.CylinderGeometry(.9, .9, 12, 48, 1, true), additive({ map: E.shaftTex, color: new E.THREE.Color(c), opacity: 0, side: E.THREE.DoubleSide })));
+      col.position.y = 6; col.rotation.x = Math.PI;
+      await tween(.35, (t) => { col.material.opacity = t * .5; col.scale.x = col.scale.z = 1 - t * .5; }, easeIn);
+      flash(c, .45); E.shake = .15; shock(V3(0, .03, 0), c, 5, .9); await wait(500); await tween(.5, (t) => { col.material.opacity = .5 * (1 - t); }); unprop(col);
+    },
+    // la nuit tombe : un ciel d'étoiles s'allume
+    async stars() {
+      const THREE = E.THREE, n = 400, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI, r = 14; pos[i * 3] = Math.cos(a) * r; pos[i * 3 + 1] = 1 + Math.random() * 8; pos[i * 3 + 2] = -Math.sin(a) * r * .8; }
+      const st = prop(new THREE.Points(new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(pos, 3)), new THREE.PointsMaterial({ size: .12, map: E.radial, color: "#ffffff", transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })));
+      await tween(1, (t) => { st.material.opacity = t; E.renderer.toneMappingExposure = lerp(1.05, .7, t); });
+      cur.stars = st; tween(.6, (t) => { E.renderer.toneMappingExposure = lerp(.7, 1.05, t); });
+    },
+    // l'emblème géant se dresse derrière le coffre
+    async kanji() { const sp = prop(iconSprite("logo", cur.tintCol || "#e8c77e", 3)); sp.position.set(0, 2.4, -1.2); await tween(.6, (t) => { sp.material.opacity = t; sp.scale.setScalar(2 + t); }, easeOut); await wait(500); await tween(.5, (t) => { sp.material.opacity = 1 - t; }); unprop(sp); },
+    // des cartes face cachée tournent autour du coffre puis plongent dedans
+    async orbit() {
+      const cs = [0, 1, 2, 3, 4].map(() => { const m = prop(new E.THREE.Mesh(E.faceGeo, E.backMat)); m.scale.setScalar(.45); return m; });
+      await tween(1.4, (t) => cs.forEach((m, i) => { const a = t * Math.PI * 4 + i * Math.PI * 2 / 5, rr = 2 - t * 1.6; m.position.set(Math.cos(a) * rr, 1 + Math.sin(t * Math.PI) * .8, Math.sin(a) * rr * .8); m.rotation.y = -a; }));
+      cs.forEach(unprop); emit(60, V3(0, 1, 0), cur.tintCol || "#fff", { speed: 2, life: .8, grav: 0 });
+    },
+    async quake() { E.shake = .3; shock(V3(0, .03, 0), "#a99cc8", 6, 1); emit(140, V3(0, .05, 0), "#6a5a9a", { speed: 4, spread: 1.6, up: .4, life: 1.3, grav: 4, jitter: 2 }); await tremble(3, .25); },
+    // des voiles d'aurore ondulent derrière le coffre
+    async aurora() {
+      const THREE = E.THREE, cols = ["#3fdc8f", "#2ee6ff", "#b072ff"], vs = cols.map((c, i) => { const m = prop(new THREE.Mesh(new THREE.PlaneGeometry(9, 3, 40, 1), additive({ map: E.shaftTex, color: new THREE.Color(c).multiplyScalar(.7), opacity: 0, side: THREE.DoubleSide }))); m.position.set(0, 3 + i * .4, -3 - i * .5); m.userData.p0 = Float32Array.from(m.geometry.attributes.position.array); return m; });
+      await tween(1.6, (t) => vs.forEach((m, i) => { m.material.opacity = Math.sin(t * Math.PI) * .6; const p = m.geometry.attributes.position, p0 = m.userData.p0; for (let k = 0; k < p.count; k++) p.setZ(k, p0[k * 3 + 2] + Math.sin(p0[k * 3] * .8 + t * 6 + i) * .6); p.needsUpdate = true; }));
+      vs.forEach(unprop);
+    },
+    async banner(text) { banner3(text, cur.tintCol || "#e8c77e"); await wait(1500); },
+    async pause(ms = 400) { await wait(ms); },
+  };
+  function clearProps() {
+    props.splice(0).forEach((o) => E.scene.remove(o)); crystal = null;
+    const m = E.bodyMat; if (m.userData.c0) { m.color.copy(m.userData.c0); m.metalness = .55; }
+    E.key.inner.traverse((x) => { if (x.isMesh && x.userData.gold0) { x.material = x.userData.gold0; delete x.userData.gold0; } }); E.key.glow.material.color.set("#e8c77e");
+    E.ringMat.opacity = .9;
+  }
+
   // ---------- le coffre s'ouvre ----------
   const ladderOf = (top) => LAD.slice(0, RAR[top].rank >= 4 ? 4 : LAD.indexOf(lad(top)) + 1);
   async function openChest() {
     if (!cur || cur.kind !== "chest" || cur.phase !== "idle") return;
     const me = cur.run, THREE = E.THREE, ch = E.ch, K = E.key, top = cur.best, tc = HEX[top], hole3 = new THREE.Vector3(0, 0.55, D / 2 + 0.1);
     cur.phase = "opening"; hint("");
-    const k0 = K.g.position.clone(), r0 = K.inner.rotation.clone(), front = hole3.clone().add(new THREE.Vector3(0, 0, 1.15));
     const c0 = E.cam.pos.clone(), cl0 = E.cam.look.clone(), cTo = E.lay.chestCam.pos.clone().multiplyScalar(0.82).add(new THREE.Vector3(0, -0.2, 0)), clTo = new THREE.Vector3(0, 0.75, 0);
-    await tween(0.75, (t) => { K.g.position.lerpVectors(k0, front, t); K.inner.rotation.set(lerp(r0.x, 0, t), lerp(r0.y, 0, t), lerp(r0.z, 0, t)); E.cam.pos.lerpVectors(c0, cTo, t); E.cam.look.lerpVectors(cl0, clTo, t); });
+    tween(0.75, (t) => { E.cam.pos.lerpVectors(c0, cTo, t); E.cam.look.lerpVectors(cl0, clTo, t); });
+    // le scénario tiré par le serveur (30 possibles) : ses temps forts, rejoués en 3D ; « open » brise le coffre
+    const sc = CHEST_BY_ID[cur.o.scenario] || CHEST_BY_ID["cl-echelle"];
+    cur.beats = sc.beats.filter((b) => b[0] !== "open").length || 1; cur.beatI = 0;
+    for (const [b, ...args] of sc.beats) {
+      if (!alive(me)) return;
+      if (b === "open") break;
+      try { await (B3[b] || B3.pause)(...args); } catch (e) { console.warn(e); }
+      cur.beatI++; if (["tint", "shake", "ladder", "turn", "quake"].includes(b)) crackTo(cur.beatI / cur.beats * 0.75);
+    }
     if (!alive(me)) return;
-    const f1 = K.g.position.clone(), inPos = hole3.clone().add(new THREE.Vector3(0, 0, 0.26));
-    await tween(0.32, (t) => K.g.position.lerpVectors(f1, inPos, t), easeIn);
-    E.shake = 0.04; emit(18, hole3, "#e8c77e", { speed: 1.4, up: 0.6, life: 0.6, grav: 4 });
-    await tween(0.42, (t) => { K.inner.rotation.z = t * Math.PI / 2; }, easeBack);
-    ch.holeMat.color.set("#2ee6ff").multiplyScalar(2.4); E.shake = 0.05;
-    await wait(180); if (!alive(me)) return;
-    const L = ladderOf(top);
-    for (const [j, r] of L.entries()) {
-      ch.tint(HEX[r], 0.8 + j * 0.15); E.inner.color.set(HEX[r]);
-      ch.crackMat.color.set(HEX[r]).multiplyScalar(3); ch.crackMat.opacity = 1; const a = j / L.length * 0.7, b = (j + 1) / L.length * 0.7;
-      emit(10 + j * 6, new THREE.Vector3(0, H, 0), HEX[r], { speed: 1.6, spread: 1.4, up: 0.3, life: 0.7, grav: 0 });
-      await tween(0.34, (t) => { ch.body.rotation.z = Math.sin(t * Math.PI * 6) * 0.012 * (j + 1); ch.body.position.y = Math.abs(Math.sin(t * Math.PI * 3)) * 0.02 * (j + 1); ch.setCrack(lerp(a, b, easeOut(t))); });
-      await wait(120); if (!alive(me)) return;
-    }
-    if (top === "m") {
-      ch.tint("#000", 0); ch.holeMat.color.set("#05030a"); ch.crackMat.opacity = 0; await wait(550);
-      E.shake = 0.12; ch.tint(tc, 1.5); E.inner.color.set(tc); ch.crackMat.color.set(tc).multiplyScalar(2.5); ch.crackMat.opacity = 1;
-      await tween(0.45, (t) => { ch.body.rotation.z = Math.sin(t * Math.PI * 14) * 0.03; ch.setCrack(lerp(0.7, 0.85, t)); });
-    }
+    if (!cur.keyIn) await B3.insert(); if (!cur.turned) await B3.turn();
     if (!alive(me)) return;
     ch.body.rotation.z = 0; ch.body.position.y = 0; ch.tint(tc, 1.4); E.inner.color.set(tc);
     ch.crackMat.color.set(tc).multiplyScalar(3); ch.crackMat.opacity = 1;

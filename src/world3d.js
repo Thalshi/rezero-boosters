@@ -94,18 +94,32 @@ const World3D = (() => {
   addEventListener("visibilitychange", () => { if (!document.hidden && R && !raf) raf = requestAnimationFrame(frame); });
   // change le panorama du fond, en fondu (appelé à chaque changement de rubrique)
   let bgMesh = null, bgUrl = null, wantBg = null;
+  // l'image est décodée hors du fil principal (createImageBitmap) et les derniers décors restent prêts
+  // sur la carte graphique : changer de rubrique ne fige plus l'écran
+  const bgCache = new Map();
+  function bgTexture(url) {
+    if (bgCache.has(url)) { const t = bgCache.get(url); bgCache.delete(url); bgCache.set(url, t); return t; }
+    const p = fetch(url).then((r) => r.blob()).then((b) => createImageBitmap(b, { imageOrientation: "flipY" })).then((img) => {
+      const t = new T.Texture(img); t.flipY = false; t.colorSpace = T.SRGBColorSpace; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.anisotropy = 8; t.needsUpdate = true;
+      try { R.renderer.initTexture(t); } catch {}
+      return t;
+    }).catch(() => new Promise((ok) => { const img = new Image(); img.onload = () => { const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.needsUpdate = true; ok(t); }; img.src = url; }));
+    bgCache.set(url, p);
+    while (bgCache.size > 4) { const [k, v] = bgCache.entries().next().value; bgCache.delete(k); v.then((t) => { if (bgMesh?.material.map !== t) t.dispose(); }); }
+    return p;
+  }
   function setBg(url) {
     wantBg = url; if (!R || !url || url === bgUrl) return; bgUrl = url;
-    const img = new Image(); img.onload = () => {
+    bgTexture(url).then((t) => {
       if (bgUrl !== url || !R) return;
-      const t = new T.Texture(img); t.colorSpace = T.SRGBColorSpace; t.needsUpdate = true; t.wrapS = T.RepeatWrapping; t.repeat.set(-1, 1); t.anisotropy = 8;
-      const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
+      const img = t.image, Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
       const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#ffffff", fog: false }));
       m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
       // changement net : l'ancien décor disparaît dès que le nouveau est prêt (pas de mélange des deux)
       const old = bgMesh; bgMesh = m;
-      if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); }
-    }; img.src = url;
+      if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.dispose(); if (![...bgCache.values()].length || !bgCache.has(old.userData.url)) old.material.map.dispose(); }
+      m.userData.url = url;
+    });
   }
   // teinte du monde selon le décor : brume, ciel, lumières (accent et ombre du panorama)
   let wantTint = null;

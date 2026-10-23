@@ -113,7 +113,7 @@ function zOpenDeco(id) {
     : !has(card.id) ? "" : on ? `<button class="btn big block" type="button" data-zas-ref="" data-slot="deco">Retirer de cette carte</button>`
     : `<button class="btn gold big block" type="button" data-zas-ref="${id}" data-slot="deco">Mettre sur cette carte</button>`;
   $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(d.name)}"><div class="sheet-h"><h2>${esc(d.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="zs-prev" style="--h1:${C.c1};--h2:${C.c2}"><div class="zs-prev-card">${zDecoCard(d, 200, card)}</div></div>
+    <div class="sheet-b"><div class="zd-big" style="--h1:${C.c1};--h2:${C.c2}">${zDecoCard(d, 190, card)}</div>
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[d.rar].color};color:${RAR[d.rar].color}">${RAR[d.rar].label}</span><span class="pill">${C.kanji} ${esc(C.name || "")}</span><span class="pill">Animée</span><span class="pill">Aucun bonus de jeu</span></div>
       ${pick}${act}</div></div>`;
   $("overlay").hidden = false; $("overlay").dataset.zdk = id; $("overlay").dataset.zdp = ""; $("overlay").dataset.zit = "";

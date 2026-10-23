@@ -85,7 +85,7 @@ try {
     await page.screenshot({ path: join(OUT, `cos-atelier-${label}.png`), fullPage: true });
 
     await go(page, "carte/billy");
-    t.check(`${label} · le design s'affiche sur la fiche`, (await page.locator(".wk-card .kc.cz-cadre, .wk-card .kcw.cz-aura, .wk-card .kc-a .cz-holo, .wk-card .cz-part, .wk-card .cz-orn").count()) > 0);
+    t.check(`${label} · le design s'affiche sur la fiche`, (await page.locator(".wk-card .kc.cz-cadre, .wk-card .kcw.cz-aura, .wk-card .kc-a .cz-holo, .wk-card .cz-part, .wk-card .cz-orn, .wk-card .kc-dk").count()) > 0);
     t.check(`${label} · une aura a bien sa couleur sur le cadre (halo visible)`, await page.evaluate(() => { const d = document.createElement("div"); d.innerHTML = cardHTML(byId.billy, { design: { aura: "aura-solaire" } }); document.body.appendChild(d); const w = d.querySelector(".kcw"), ok = getComputedStyle(w, "::before").backgroundImage !== "none"; d.remove(); return ok; }));
     await go(page, "profil/moi");
     t.check(`${label} · la carte vedette est sur le profil`, (await page.locator(".zfeat .kcw").count()) === 1);

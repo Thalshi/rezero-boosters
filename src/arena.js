@@ -49,7 +49,7 @@ const Arena = (() => {
     const d = document.createElement("div"); d.id = "ar-root"; d.className = "ar"; d.hidden = true;
     d.innerHTML = `<canvas id="ar-c"></canvas><div class="ar-vign"></div><div id="ar-tags"></div><div id="ar-pops"></div><div class="ar-flash" id="ar-flash"></div>
       <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm acc" type="button" id="ar-quit">Quitter la partie</button></div>
-      <div class="ar-hint" id="ar-hint"></div>
+      <div class="ar-hint" id="ar-hint"></div><div class="ar-insp" id="ar-insp" hidden></div>
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
       <svg id="ar-aim" aria-hidden="true"><path id="ar-aimPath"/><circle id="ar-aimEnd" r="16"/></svg>
@@ -411,20 +411,25 @@ const Arena = (() => {
   // une carte vole d'un point à un autre de l'écran (vol, Étal, défausse)
   function flyCard(c, from, to) {
     if (reduced) return Promise.resolve();
-    const [x0, y0] = from ? screenOf(worldOf(from, 1.2)) : [innerWidth - 60, innerHeight - 140], [x1, y1] = to ? screenOf(worldOf(to, 1.2)) : [innerWidth / 2, innerHeight + 80];
-    const d = document.createElement("div"); d.className = "ar-fly"; d.style.setProperty("--cc", c ? famCol(c) : "var(--gold)"); d.innerHTML = c && typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cfart-${c.def}"></span>` : ico("carte");
+    const [x0, y0] = Array.isArray(from) ? from : from ? screenOf(worldOf(from, 1.2)) : [innerWidth - 60, innerHeight - 140], [x1, y1] = to ? screenOf(worldOf(to, 1.2)) : [innerWidth / 2, innerHeight + 80];
+    const d = document.createElement("div"); d.className = "ar-fly"; d.style.setProperty("--cc", c && c !== "dos" ? famCol(c) : "var(--gold)"); d.innerHTML = c && typeof ILLUS_CARTE === "object" && ILLUS_CARTE[c.def] ? `<span class="cfart-${c.def}"></span>` : c === "dos" ? `<i class="ar-back">${ico("logo")}</i>` : ico("carte");
     $a("pops").appendChild(d);
     return d.animate([{ transform: `translate(${x0}px, ${y0}px) scale(.5) rotate(-10deg)`, opacity: 0 }, { opacity: 1, offset: .2 }, { transform: `translate(${x1}px, ${y1}px) scale(.8) rotate(8deg)`, opacity: 1 }], { duration: 650 / (window.__arSpeed || 1), easing: "cubic-bezier(.3,.7,.3,1)" }).finished.then(() => d.remove());
   }
+  // présage : la carte du dessus de la pioche vole au centre, se retourne en grand, puis le verdict tombe
   function omen(p, e) {
-    if (!p) return;
-    const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e", [x, y] = screenOf(worldOf(p, 2.4));
-    const d = document.createElement("div"); d.className = "ar-omen"; d.style.cssText = `left:${x}px;top:${y}px;--oc:${c}`;
+    if (!p) return Promise.resolve();
+    const k = (e.cartes || [])[0] || {}, c = SIGNE_COL[k.signe] || "#e8c77e";
     const R = CF.cat?.regles || {}, P = R.presage || {}, petite = (CF.table?.vue?.joueurs.length || 4) <= 3;
     const need = { voile: P.voile, defense: petite && R.defensePetite ? R.defensePetite : P.defense, entrave: P.entrave, reprise: R.reprise }[e.quoi];
-    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `explose sur Terre 1 à ${P.orbe.rangMax}` : need ? `il faut ${need.map((k) => nm2[k]).join(" ou ")}` : "";
-    d.innerHTML = `<small>Présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</small>${needTxt ? `<small class="ar-need">${needTxt}</small>` : ""}<b>${ico(k.signe || "logo")}</b><span>${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span><em class="${e.favorable ? "ok" : "no"}">${e.favorable ? "réussi" : "raté"}</em>`;
-    $a("pops").appendChild(d); setTimeout(() => d.remove(), 2100);
+    const nm2 = { feu: "Feu", eau: "Eau", vent: "Vent", terre: "Terre" }, needTxt = e.quoi === "orbe" && P.orbe ? `Explose sur Terre de 1 à ${P.orbe.rangMax}` : need ? `Il faut ${need.map((x) => nm2[x]).join(" ou ")}` : "";
+    const art = typeof ILLUS_CARTE === "object" && ILLUS_CARTE[k.def] ? `<span class="ar-om-art cfart-${k.def}"></span>` : `<span class="ar-om-art">${ico(CF_ICON[k.def] ? "logo" : "carte")}</span>`;
+    const d = document.createElement("div"); d.className = "ar-om " + (e.favorable ? "ok" : "no"); d.style.setProperty("--oc", c);
+    d.innerHTML = `<p class="ar-om-h"><b>${esc(p.label || nm(p.id))}</b> fait un présage${PRESAGE_POUR[e.quoi] ? ` · ${esc(PRESAGE_POUR[e.quoi])}` : ""}</p>${needTxt ? `<p class="ar-om-need">${needTxt}</p>` : ""}
+      <div class="ar-om-card"><div class="ar-om-in"><div class="ar-om-back">${ico("logo")}</div><div class="ar-om-face">${art}<b class="ar-om-sg">${ico(k.signe || "logo")}<i>${k.rang || ""}</i></b><span class="ar-om-nm">${esc(defOf(k).nom || "")}</span><span class="ar-om-el">${esc(cfSigne(k.signe).nom || "")} ${k.rang || ""}</span></div></div></div>
+      <p class="ar-om-v">${e.favorable ? "Réussi" : "Raté"}</p>`;
+    $a("pops").appendChild(d);
+    return wait(2600).then(() => { d.classList.add("out"); return wait(300); }).then(() => d.remove());
   }
   function banner(t, c = "#e8c77e") { const b = $a("banner"); b.textContent = t; b.style.setProperty("--bc", c); b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); }
   // finish façon TFT : ralenti, bandes cinéma, la caméra plonge sur la victime, le coup final, image figée, bannière
@@ -646,13 +651,29 @@ const Arena = (() => {
     if (!R || !st) return;
     const n = hand.length, cw = Math.min(132, Math.max(92, innerWidth * .13)), spread = Math.min(cw * .78, (innerWidth - (innerWidth > 600 ? 340 : 24) - cw) / Math.max(1, n - 1)), fin = finAct();
     hand.forEach((h, i) => {
-      const o = i - (n - 1) / 2, s = st.sel === h.c.uid, picked = st.discard.includes(h.c.uid), rot = o * (R.portrait ? 5 : 6) * Math.min(1, 6 / n), base = R.portrait ? cw * .32 : cw * .55, lift = s || picked ? cw * .55 : Math.abs(o) * Math.abs(o) * 4 * Math.min(1, 6 / n) + base;
-      h.el.style.transform = `translateX(${o * spread}px) translateY(${s || picked ? -lift : lift}px) rotate(${s ? 0 : rot}deg) scale(${s ? 1.22 : 1})`;
+      // la carte choisie reste dans la main (en surbrillance, à peine levée) : on la lit en grand dans le panneau à droite
+      const o = i - (n - 1) / 2, chosen = st.sel === h.c.uid, s = false, picked = st.discard.includes(h.c.uid), rot = o * (R.portrait ? 5 : 6) * Math.min(1, 6 / n), base = R.portrait ? cw * .1 : cw * .16, lift = chosen || picked ? cw * .3 : Math.abs(o) * Math.abs(o) * 4 * Math.min(1, 6 / n) + base;
+      h.el.style.transform = `translateX(${o * spread}px) translateY(${chosen || picked ? -lift : lift}px) rotate(${s ? 0 : rot}deg) scale(${s ? 1.22 : 1})`;
       h.el.style.zIndex = s ? 50 : 10 + i;
       const ok = plays(h.c.uid).length > 0 && !st.discMode;
       h.el.classList.toggle("off", !ok && !st.discMode && !reactUses(h.c));
-      h.el.classList.toggle("ok", ok); h.el.classList.toggle("picked", picked);
+      h.el.classList.toggle("ok", ok); h.el.classList.toggle("picked", picked); h.el.classList.toggle("chosen", chosen);
     });
+    renderInsp();
+  }
+  // panneau de la carte choisie : en grand, son texte complet, et de quoi la jouer
+  let inspKey = "";
+  function renderInsp() {
+    const box = $a("insp"), v = CF.table?.vue, c = st?.sel && !st.discMode ? v?.main?.find((x) => x.uid === st.sel) : null;
+    if (!box) return; if (!c) { inspKey = ""; box.hidden = true; return; }
+    const ps = plays(c.uid), free = ps.find((a) => !a.cible), tg = [...new Set(ps.filter((a) => a.cible).map((a) => a.cible))], key = c.uid + "|" + ps.length + "|" + tg.join(",");
+    if (key === inspKey && !box.hidden) return; inspKey = key;
+    const d = defOf(c), big = cardEl(c); big.classList.add("ar-insp-card"); big.removeAttribute("data-cu");
+    box.innerHTML = `<button class="ar-insp-x" type="button" aria-label="Fermer">✕</button>${big.outerHTML}<p class="ar-insp-t">${esc(d.texte || CF_SHORT[c.def] || "")}</p>
+      <div class="ar-insp-b">${free ? `<button class="btn gold" type="button" data-ip="free">Jouer cette carte</button>` : ""}${tg.map((id) => `<button class="btn ${free ? "" : "gold"}" type="button" data-ip="${esc(id)}">Viser ${esc(champ(id)?.label || nm(id))}</button>`).join("")}${!free && !tg.length ? `<p class="ar-insp-n">${esc(tipFor(c))}</p>` : ""}</div>`;
+    box.hidden = false;
+    box.querySelector(".ar-insp-x").onclick = () => { cancelTarget(); st.sel = null; hint(""); layoutHand(); };
+    box.querySelectorAll("[data-ip]").forEach((b) => { b.onclick = () => { const id = b.dataset.ip; if (id === "free") { cancelTarget(); st.sel = null; layoutHand(); return act(free); } if (!targeting || targeting.uid !== c.uid) startTarget(c.uid); const p = champ(id); if (p) pickTarget(p); }; });
   }
   // en réaction, la carte qui sert (Parade, Riposte, Élixir, une Frappe à défausser) brille
   const reactUses = (c) => { const v = CF.table?.vue, pr = v?.attente; if (!pr || pr.pid !== v.moi || pr.kind === "tour") return false; return (v.actions || []).some((a) => a.carte === c.uid || (a.type === "parer" && c.def === "parade") || (a.type === "riposter" && c.def === "riposte") || (a.type === "elixir" && c.def === "elixir") || (a.type === "defausser" && c.def === "frappe")); };
@@ -823,7 +844,7 @@ const Arena = (() => {
       case "esquive": if (p) { shield(p, "#5ac8fa"); pop(p, "Esquivé !", "#5ac8fa", true); } await wait(520); break;
       case "kanji_absorbe": if (p) { pop(p, "Garde : aucun dégât", "#e8c77e", true); emit(50, worldOf(p, 1.3), "#e8c77e", { speed: 2.5, life: .8, grav: 0 }); } await wait(500); break;
       case "elimination": if (p) { p.alive = false; if (e.role) p.role = e.role; await finisher(p, champ(e.par), e); renderTags(); } break;
-      case "presage": omen(p, e); await wait(1300); break;
+      case "presage": await omen(p, e); break;
       case "orbe_explose": if (p) { setOrb(p, false); const o = worldOf(p, 1.6); emit(160, o, "#ff7a1a", { speed: 5, life: 1, grav: 2 }); ring(new THREE.Vector3(o.x, .05, o.z), "#ff7a1a", 4, .8); flash("#ff7a1a", .4); R.shake = .3; } await wait(700); break;
       case "orbe_passe": { const a = champ(e.de), b = champ(e.a); if (a) setOrb(a, false); await beam(a, b, "#ff7a1a", .5); if (b) setOrb(b, true); break; }
       case "sauvetage": case "survie": if (p) { healFx(p); pop(p, "Sauvé !", "#3fdc8f", true); p.pv = e.pv ?? p.pv; renderTags(); } await wait(600); break;
@@ -832,7 +853,14 @@ const Arena = (() => {
       case "vol": { await flyCard(e.carte || null, champ(e.cible), p); const v = CF.table.vue; if (e.carte) await spotlight(e.carte, e.pid === v.moi ? `Tu prends cette carte à ${esc(nm(e.cible))}` : `${esc(nm(e.pid))} te prend cette carte`); break; }
       case "vol_public": await flyCard(null, champ(e.cible), p); break;
       case "etal_pris": await flyCard(e.carte, null, p); break;
-      case "pioche_publique": if (p) pop(p, `+${e.n} carte${e.n > 1 ? "s" : ""}`, "#4dd6ff", true); break;
+      // un autre joueur pioche : ses cartes (de dos) volent de la pioche jusqu'à lui
+      case "pioche_publique": {
+        if (!p || p.id === CF.table?.vue?.moi) break;
+        pop(p, `${p.label || nm(p.id)} pioche ${e.n} carte${e.n > 1 ? "s" : ""}`, "#bfe9ff", true);
+        const from = pileScreen(), n = Math.min(e.n || 1, 4);
+        await Promise.all(Array.from({ length: n }, (_, i) => wait(i * 160).then(() => flyCard("dos", from, p))));
+        break;
+      }
       case "defi_perdu": case "effondrement": if (p) hitFx(p, "#ff9b3d"); break;
       case "onde_evitee": case "defi_relance": if (p) pop(p, "Défausse une Frappe", "#f5a524", true); await wait(300); break;
       case "fin": showEnd(); break;
@@ -845,7 +873,7 @@ const Arena = (() => {
       const e = st.queue.shift();
       if (logged(e)) { st.log.push(logLine(e)); renderLog(); }
       if (st.queue.length > 24 && e.type !== "fin") continue;
-      try { await play(e); } catch (err) { console.warn(err); }
+      try { await Promise.race([play(e), wait(6000)]); } catch (err) { console.warn(err); }
     }
     if (!st || st.gid !== gid) return;
     st.running = false;
@@ -943,5 +971,5 @@ const Arena = (() => {
     return true;
   }
   addEventListener("hashchange", () => { if (st && !location.hash.startsWith("#/confront/" + st.gid)) hide(); });
-  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; } };
+  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; }, _play: (e) => { st?.queue.push(e); runQueue(); } };
 })();

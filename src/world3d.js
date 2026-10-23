@@ -48,7 +48,7 @@ const World3D = (() => {
     runes.rotation.x = -Math.PI / 2; runes.position.y = .02; scene.add(runes);
     // lanternes autour du cercle
     for (let i = 0; i < 6; i++) {
-      const a = i / 6 * Math.PI * 2 + Math.PI / 6, x = Math.cos(a) * 9, z = Math.sin(a) * 9 - 2; if (z > 4) continue;
+      const a = i / 6 * Math.PI * 2 + Math.PI / 6, x = Math.cos(a) * 12, z = Math.sin(a) * 6 - 7; if (Math.abs(x) < 7) continue;
       const post = new T.Mesh(new T.CylinderGeometry(.12, .16, 2, 8), new T.MeshStandardMaterial({ color: "#2a2030", roughness: .5, metalness: .4 })); post.position.set(x, 1, z); scene.add(post);
       const lamp = new T.Mesh(new T.BoxGeometry(.5, .6, .5), new T.MeshBasicMaterial({ color: new T.Color("#ffb060").multiplyScalar(1.6), toneMapped: false })); lamp.position.set(x, 2.2, z); scene.add(lamp);
       const roof = new T.Mesh(new T.ConeGeometry(.5, .32, 4), new T.MeshStandardMaterial({ color: "#1d1626" })); roof.position.set(x, 2.66, z); roof.rotation.y = Math.PI / 4; scene.add(roof);
@@ -102,11 +102,10 @@ const World3D = (() => {
       const Rr = 22, th = 2.3, Hd = Rr * th / (img.width / img.height);
       const m = new T.Mesh(new T.CylinderGeometry(Rr, Rr, Hd, 72, 1, true, Math.PI - th / 2, th), new T.MeshBasicMaterial({ map: t, side: T.BackSide, color: "#d4cce4", fog: false, transparent: true, opacity: 0, depthWrite: false }));
       m.position.set(0, Hd / 2 - 2.2, 0); m.renderOrder = -1; R.scene.add(m);
-      // le nouveau décor apparaît par-dessus l'ancien, qui reste entier dessous : pas de creux sombre pendant le fondu
-      const old = bgMesh; bgMesh = m; const t0 = performance.now(); if (old) { old.renderOrder = -2; old.material.transparent = true; old.material.opacity = 1; }
-      const fade = (now) => { const k = Math.min(1, (now - t0) / 600), e = k * k * (3 - 2 * k); m.material.opacity = e;
-        if (k < 1) requestAnimationFrame(fade); else { m.material.transparent = false; m.material.depthWrite = true; if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); } } };
-      requestAnimationFrame(fade);
+      // changement net : l'ancien décor disparaît dès que le nouveau est prêt (pas de mélange des deux)
+      m.material.opacity = 1; m.material.transparent = false; m.material.depthWrite = true;
+      const old = bgMesh; bgMesh = m;
+      if (old) { R.scene.remove(old); old.geometry.dispose(); old.material.map.dispose(); old.material.dispose(); }
     }; img.src = url;
   }
   // teinte du monde selon le décor : brume, ciel, lumières (accent et ombre du panorama)

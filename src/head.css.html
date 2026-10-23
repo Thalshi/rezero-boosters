@@ -1737,6 +1737,9 @@ body.ar-on { overflow: hidden; }
 .ar-pre-body.ph-contributions { top: auto; bottom: 0; width: min(1180px, 100vw); max-height: min(68vh, calc(100% - 70px)); border-radius: 16px 16px 0 0; border-bottom: 0; }
 .ar-pre-body.ph-contributions .cf-draft-go { bottom: 0; background: linear-gradient(transparent, #0b0916 40%); }
 .ar-pre-body.ph-contributions .cf-pool { grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); }
+.ar-pre-body.ph-lobby { left: 14px; top: 64px; transform: none; width: min(400px, calc(100vw - 28px)); }
+.ar-pre-body.ph-lobby .cf-modes { grid-template-columns: 1fr; }
+.ar-pre-body.ph-choix .cf-perso.big .kcw { --w: min(200px, 40vw); }
 .ar-pre-body.ph-choix { background: #0b0916d0; width: min(860px, calc(100vw - 24px)); }
 .ar-pre-body.ph-choix .cf-props { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; perspective: 900px; }
 .ar-pre-body.ph-choix .cf-prop { transition: transform .25s; }
@@ -1744,7 +1747,7 @@ body.ar-on { overflow: hidden; }
 .ar-pre-body.ph-choix .cf-prop:hover { transform: translateY(-6px) scale(1.03); }
 .ar-tag.pre .ar-st { font: 700 10px var(--mono, monospace); letter-spacing: .1em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: #ffffff14; color: var(--fg2); }
 .ar-tag.pre.ok .ar-st { background: #3fbf7f33; color: #7fe0ad; }
-@media (max-width: 600px) { .ar-pre-body { top: 112px; max-height: calc(100% - 180px); padding: 12px; } .ar-pre-body.ph-contributions { max-height: 72vh; } }
+@media (max-width: 600px) { .ar-pre-body { top: 112px; max-height: calc(100% - 180px); padding: 12px; } .ar-pre-body.ph-contributions { max-height: 72vh; } .ar-pre-body.ph-lobby { left: 0; top: auto; bottom: 0; width: 100vw; max-height: 52vh; border-radius: 16px 16px 0 0; } .ar-pre-body.ph-choix .cf-perso.big .kcw { --w: 150px; } }
 
 /* ===== Confrontation : cartes de la table (chacun son deck / partagées), partage du salon ===== */
 .cf-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; }

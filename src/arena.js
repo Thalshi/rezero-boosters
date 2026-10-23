@@ -211,6 +211,8 @@ const Arena = (() => {
       g.fillStyle = fr; g.beginPath(); g.roundRect(0, 0, w, h, 28); g.fill();
       g.save(); g.beginPath(); g.roundRect(12, 12, w - 24, h - 24, 20); g.clip(); g.fillStyle = "#1a1230"; g.fillRect(0, 0, w, h);
       if (img) { const s = Math.max((w - 24) / img.width, (h - 24) / img.height); g.drawImage(img, (w - img.width * s) / 2, 12, img.width * s, img.height * s); }
+      // dos de carte avant le choix du perso : l'emblème du jeu, en or
+      else if (!p.perso) { g.save(); g.translate(w / 2 - 96, h / 2 - 130); g.scale(8, 8); g.strokeStyle = "#e8c77e"; g.lineWidth = .9; g.lineCap = g.lineJoin = "round"; g.shadowColor = "#e8c77e"; g.shadowBlur = 6; for (const d of iconPaths("logo")) g.stroke(new Path2D(d)); g.restore(); }
       const sh = g.createLinearGradient(0, h * .6, 0, h); sh.addColorStop(0, "#0000"); sh.addColorStop(1, "#000d"); g.fillStyle = sh; g.fillRect(0, 0, w, h);
       g.restore();
       g.fillStyle = "#fff"; g.font = "700 36px Cinzel, serif"; g.textAlign = "center"; g.fillText(p.label.slice(0, 18), w / 2, h - 44);

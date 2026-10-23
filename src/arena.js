@@ -22,6 +22,10 @@ const Arena = (() => {
   const webgl = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } };
   const usable = () => !failed && wanted() && webgl();
   const col = (b) => BR_COL[b] || "#e8c77e";
+  // avant la partie (salon, choix des cartes, choix du perso) : même arène, panneaux par-dessus la scène
+  const PRE = ["lobby", "contributions", "choix"], isPre = (v) => PRE.includes(v?.phase);
+  // la scène se reconstruit quand les joueurs changent (salon) ou quand les persos sont connus (début de partie)
+  const keyOf = (v) => (isPre(v) ? "pre:" : "jeu:") + v.joueurs.map((j) => j.id + (j.perso?.cardId || "")).join(",");
   const defOf = (c) => CF.cat?.cartes?.[c?.def] || {};
   const famCol = (c) => cfFam(defOf(c))[0];
   const nm = (id) => (id === ME ? "Toi" : CF.table?.noms?.[id]?.name || "Joueur");
@@ -63,6 +67,7 @@ const Arena = (() => {
       <div class="ar-react" id="ar-react"><p id="ar-reactTxt"></p><div class="ar-bar"><i id="ar-reactBar"></i></div><div class="ar-cards" id="ar-reactCards"></div><div class="ar-row" id="ar-reactBtns"></div></div>
       <div class="ar-modal" id="ar-modal"><div class="ar-sheet" id="ar-sheet"></div></div>
       <div class="ar-endo" id="ar-endo"><div><h1 id="ar-endTxt"></h1><p id="ar-endSub"></p><div class="ar-row"><button class="btn" type="button" id="ar-endSee">Revoir la table</button><button class="btn gold" type="button" id="ar-endBack">Retour aux salons</button></div></div></div>
+      <div class="ar-pre" id="ar-pre"></div>
       <div class="ar-load" id="ar-load">Entrée dans l'arène…</div>`;
     document.body.appendChild(d);
     $a("back").onclick = () => nav("confront");
@@ -398,7 +403,7 @@ const Arena = (() => {
   function setup(T) {
     const v = T.vue, n = v.joueurs.length;
     if (st) for (const p of st.champs) R.scene.remove(p.root);
-    st = { gid: T.gid, champs: [], lastSeq: 0, lastSalon: 0, queue: [], running: false, log: [], bubbles: [], muted: false, unread: 0, sel: null, discard: [], deadline: null, roleShown: false };
+    st = { gid: T.gid, key: keyOf(v), champs: [], lastSeq: 0, lastSalon: 0, queue: [], running: false, log: [], bubbles: [], muted: false, unread: 0, sel: null, discard: [], deadline: null, roleShown: false };
     v.joueurs.forEach((j, i) => { const p = { id: j.id, branch: j.perso?.branch, perso: j.perso, label: nm(j.id) === "Toi" ? ACCT?.name || "Toi" : nm(j.id) }; makeChamp(p, (i - Math.max(0, v.joueurs.findIndex((q) => q.id === v.moi)) + n) % n, n); st.champs.push(p); });
     st.lastSeq = Math.max(0, ...(v.journal || []).map((e) => e.seq || 0));
     st.log = (v.journal || []).filter(logged).map(logLine);
@@ -410,6 +415,7 @@ const Arena = (() => {
     for (const j of v.joueurs) {
       const p = champ(j.id); if (!p) continue;
       p.pv = j.pv; p.pvMax = j.pvMax; p.role = j.role; p.j = j;
+      if (isPre(v)) { p.alive = true; continue; }
       if (p.alive !== false && !j.vivant && !fx) { p.body.rotation.x = -1.45; p.aura.material.opacity = 0; p.ringM.material.color.setScalar(.1); }
       p.alive = j.vivant;
       setWeapon(p, j.arme?.def || "dague", fx); setEquip(p, j.equip || [], fx);
@@ -439,6 +445,12 @@ const Arena = (() => {
   const weaponTxt = (j) => (j?.arme ? `${esc(defOf(j.arme).nom?.split(" ")[0] || j.arme.def)} · portée ${defOf(j.arme).portee || 1}` : "Dague · portée 1");
   function renderTags() {
     const v = CF.table?.vue; if (!v || !st) return;
+    if (isPre(v)) {
+      const T = CF.table, ok = (j) => (v.phase === "lobby" ? j.id === v.hote || /^bot:/.test(j.id) || !!T.prets?.[j.id] : v.phase === "contributions" ? j.soumis : j.aChoisi);
+      const lbl = (j) => (v.phase === "lobby" ? (j.id === v.hote ? "hôte" : ok(j) ? "prêt" : "pas prêt") : v.phase === "contributions" ? (ok(j) ? "cartes posées" : "choisit…") : ok(j) ? "a choisi" : "hésite…");
+      $a("tags").innerHTML = st.champs.map((p) => { const j = p.j || { id: p.id }; return `<div class="ar-tag pre ${ok(j) ? "ok" : ""}" id="ar-tag-${p.id}" data-pid="${esc(p.id)}" style="--bc:${ok(j) ? "#3fbf7f" : "#e8c77e"}"><span class="ar-nm">${esc(nm(p.id))}</span><span class="ar-st">${lbl(j)}</span></div>`; }).join("");
+      return;
+    }
     $a("tags").innerHTML = st.champs.map((p) => {
       const j = p.j || {}, tg = targeting ? targetsFor(p).length : 0;
       return `<div class="ar-tag ${p.alive ? "" : "dead"} ${v.tour?.pid === p.id && v.phase === "partie" ? "turn" : ""} ${targeting ? (tg ? "target" : "far") : ""}" id="ar-tag-${p.id}" data-pid="${esc(p.id)}" style="--bc:${col(p.branch)}">
@@ -803,11 +815,24 @@ const Arena = (() => {
     R.composer.render(dt); requestAnimationFrame(frame);
   }
 
+  // ---------- avant la partie : salon, choix des cartes, choix du perso ----------
+  function renderPre() {
+    const T = CF.table, v = T.vue, { top, body } = cfParts(T);
+    const html = `<div class="ar-pre-top">${top}</div><div class="ar-pre-body ph-${v.phase}">${body}</div>`;
+    if (html === st.preHTML) return;
+    const keep = [...$a("pre").querySelectorAll(".ar-pre-body, .cf-pool")].map((el) => el.scrollTop);
+    st.preHTML = html; $a("pre").innerHTML = html;
+    [...$a("pre").querySelectorAll(".ar-pre-body, .cf-pool")].forEach((el, i) => { if (keep[i]) el.scrollTop = keep[i]; });
+  }
+
   // ---------- entrée publique ----------
   // appelée à chaque rendu de la table (views6) : met l'arène à jour avec la dernière vue du serveur
   function refresh(fx = true) {
     const T = CF.table, v = T.vue;
     if (targeting && !plays(targeting.uid).some((a) => a.cible)) { targeting = null; hover(null); }
+    $a("root").classList.toggle("pre", isPre(v));
+    if (isPre(v)) { applyView(v, false); renderPre(); return; }
+    $a("pre").innerHTML = ""; st.preHTML = "";
     if (!st.running) applyView(v, fx);
     syncHand(v, fx); renderSide(); renderReact(); layoutHand();
   }
@@ -816,7 +841,7 @@ const Arena = (() => {
     mount(); initRenderer();
     const root = $a("root");
     if (root.hidden) { root.hidden = false; document.body.classList.add("ar-on"); R.on = true; R.last = performance.now(); requestAnimationFrame(frame); }
-    if (!st || st.gid !== T.gid) { hand.forEach((h) => h.el.remove()); hand = []; $a("chatList").innerHTML = ""; $a("endo").classList.remove("on"); setup(T); syncHand(T.vue, false); $a("load").hidden = true; if (T.vue.phase === "fin") showEnd(); }
+    if (!st || st.gid !== T.gid || st.key !== keyOf(T.vue)) { hand.forEach((h) => h.el.remove()); hand = []; $a("chatList").innerHTML = ""; $a("endo").classList.remove("on"); setup(T); syncHand(T.vue, false); $a("load").hidden = true; if (T.vue.phase === "fin") showEnd(); }
     const v = T.vue, fresh = (v.journal || []).filter((e) => e.seq > st.lastSeq);
     if (fresh.length) { st.lastSeq = Math.max(...fresh.map((e) => e.seq)); st.queue.push(...fresh); }
     for (const m of (T.salon || []).filter((x) => x.id > st.lastSalon)) { st.lastSalon = m.id; chatAdd(m, true); }
@@ -832,7 +857,7 @@ const Arena = (() => {
   // la table doit-elle s'afficher dans l'arène ? (sinon : vue classique)
   function wants(T) {
     const ph = T?.vue?.phase;
-    if (!T || T.error || (ph !== "partie" && ph !== "fin") || !usable()) return false;
+    if (!T || T.error || T.ferme || ![...PRE, "partie", "fin"].includes(ph) || !usable()) return false;
     if (!THREE) { load().then(() => { if (THREE && CF.table === T && view === "confront") draw(); }); return false; }
     return true;
   }

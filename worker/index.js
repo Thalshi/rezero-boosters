@@ -89,7 +89,8 @@ function redirectUri(req, env) { return env.REDIRECT_URI || origin(req) + "/auth
 async function login(req, env) {
   if (!env.DISCORD_CLIENT_ID) return new Response("Connexion Discord pas encore configurée (DISCORD_CLIENT_ID manquant).", { status: 500 });
   const state = randomToken().slice(0, 24);
-  const q = new URLSearchParams({ client_id: env.DISCORD_CLIENT_ID, response_type: "code", redirect_uri: redirectUri(req, env), scope: "identify guilds", state, prompt: "none" });
+  // « consent » : Discord montre toujours l'écran d'autorisation, la personne choisit elle-même de se connecter avec ce compte
+  const q = new URLSearchParams({ client_id: env.DISCORD_CLIENT_ID, response_type: "code", redirect_uri: redirectUri(req, env), scope: "identify guilds", state, prompt: "consent" });
   return new Response(null, { status: 302, headers: { location: "https://discord.com/oauth2/authorize?" + q, "set-cookie": `rz_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600` } });
 }
 

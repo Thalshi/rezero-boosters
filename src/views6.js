@@ -144,6 +144,19 @@ function cfTableHTML() {
   if (!T) return `<div class="wrap page"><p class="note">Chargement de la table…</p></div>`;
   if (T.ferme && T.vue?.phase === "lobby") return `<div class="wrap page">${empty("Ce salon a été fermé par l'hôte.")}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
   if (T.error) return `<div class="wrap page">${empty(esc(T.error))}<div class="row" style="justify-content:center"><button class="btn" type="button" data-nav="confront">Retour aux salons</button></div></div>`;
+  const v = T.vue;
+  // la table se joue dans l'arène 3D, du salon jusqu'à la fin (la page classique reste en secours sans WebGL)
+  if (Arena.wants(T)) { setTimeout(() => Arena.sync(CF.table), 0); return `<div class="wrap page cf-page"><p class="note">La table est dans l'arène.</p></div>`; }
+  if (Arena.loading()) return `<div class="wrap page cf-page"><p class="note">Entrée dans l'arène…</p></div>`;
+  const { top, body: pre } = cfParts(T);
+  let body = pre;
+  if (!body) body = cfBoard(v);
+  Arena.hide();
+  return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+}
+// en-tête (boutons de la table) et contenu des étapes d'avant-partie : salon, choix des cartes, choix du perso ;
+// partagés par la page classique et l'arène 3D (mêmes boutons, mêmes règles)
+function cfParts(T) {
   const v = T.vue, acts = v.actions || [], has1 = (t) => acts.find((a) => a.type === t);
   const top = `<div class="cf-top"><div><p class="eyebrow">Confrontation · ${esc(PHASE_LABEL[v.phase])}${v.mode ? ` · ${{ duel: "Duel", trio: "Trio", classique: "Classique" }[v.mode]}` : ""}</p><h1 class="cf-h">${esc(T.nom)}</h1>
     <p class="note">Code <b class="mono">${T.gid}</b>${T.spectateur ? " · tu regardes en spectateur" : ""}</p></div>
@@ -172,11 +185,8 @@ function cfTableHTML() {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
       ${v.monChoix ? `<p class="note">Choix enregistré. En attente des autres…</p>` : `<div class="cf-props">${(v.propositions || []).map((c) => c && `<div class="cf-prop">${cfPerso(c, true)}<button class="btn gold" type="button" data-cfa='${JSON.stringify({ type: "choisir", instanceId: c.instanceId })}'>Choisir</button></div>`).join("")}</div>`}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.aChoisi ? "ok" : ""}">${esc(cfName(p.id))} ${p.aChoisi ? "✓" : "…"}</span>`).join("")}</div></section>`;
-  } else if (Arena.wants(T)) { setTimeout(() => Arena.sync(CF.table), 0); return `<div class="wrap page cf-page">${top}<p class="note">La partie se joue dans l'arène.</p></div>`; }
-  else if (Arena.loading()) return `<div class="wrap page cf-page">${top}<p class="note">Entrée dans l'arène…</p></div>`;
-  else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
-  if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
-  return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+  }
+  return { top, body };
 }
 // ===== Choix des cartes façon draft : le deck (une carte par style) en haut, ta collection en vraies cartes =====
 function cfDraft() {

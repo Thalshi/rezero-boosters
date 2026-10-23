@@ -85,7 +85,7 @@ try {
     await page.click('[data-act="cf-create"]'); await page.waitForTimeout(1500);
     await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800); await page.click('[data-act="cf-bot"]'); await page.waitForTimeout(800);
     await page.click(`[data-cfa='{"type":"lancer"}']`); await page.waitForTimeout(1500);
-    await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1500);
+    await page.click('.cf-pick >> nth=0').catch(() => {}); await page.waitForTimeout(300); await page.click('[data-act="cf-contrib"]'); await page.waitForTimeout(1500);
     await page.click(".cf-prop .btn >> nth=0"); await page.waitForTimeout(1500);
     let phase = "", n = 0; const t0 = Date.now();
     while (Date.now() - t0 < 180000) {

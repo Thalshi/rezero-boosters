@@ -45,6 +45,8 @@ try {
   t.check("seul le créateur ajoute un bot", (await B.api("confront/bot", { gid })).status === 400);
   t.check("ajouter un bot (outil de test)", (await A.api("confront/bot", { gid })).vue.joueurs.length === 3);
   t.check("seul l'hôte lance", (await B.api("confront/act", { gid, action: { type: "lancer" } })).status === 400);
+  t.check("lancer avant que tout le monde soit prêt : refusé", (await A.api("confront/act", { gid, action: { type: "lancer" } })).status === 400);
+  t.check("se mettre prêt", (await B.api("confront/pret", { gid, pret: true })).prets?.[B.id] === true);
   const l = await A.api("confront/act", { gid, action: { type: "lancer" } });
   t.check("lancement à 3 : Trio, phase des contributions", l.vue.phase === "contributions");
 
@@ -70,8 +72,10 @@ try {
   const solo = mine.find((id) => stA.owned[id].n + stA.owned[id].gold === 1 && !stA.owned[id].gold);
   if (solo) t.check("verrou : une carte apportée (dernier exemplaire) ne peut pas être vendue", (await A.api("market/sell", { id: solo, price: 10 })).status === 400);
   else t.note("Pas d'exemplaire unique parmi les cartes apportées : verrou de vente non testé.");
-  const cb = await B.api("confront/act", { gid, action: { type: "contribuer", cartes: [] } });
-  t.check("contribution vide : que des cartes de prêt", cb.status === 200 && cb.vue.phase === "choix", cb.vue?.phase);
+  t.check("chacun son deck : venir sans carte quand on en a, refusé", (await B.api("confront/act", { gid, action: { type: "contribuer", cartes: [] } })).status === 400);
+  const oneB = (await B.api("confront/list")).cartes[0].cardId;
+  const cb = await B.api("confront/act", { gid, action: { type: "contribuer", cartes: [oneB] } });
+  t.check("avec une de ses cartes : on passe au choix du perso", cb.status === 200 && cb.vue.phase === "choix", cb.vue?.phase);
 
   t.section("Choix et partie complète par l'API");
   const spect = await S.api("confront/state", { gid });

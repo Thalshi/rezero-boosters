@@ -1719,6 +1719,17 @@ body.ar-on { overflow: hidden; }
 .gest-tabs button { display: inline-flex; align-items: center; gap: 6px; }
 .gest-tabs .ic { width: 16px; height: 16px; }
 .gest + .wrap.page { padding-top: 24px; }
+/* ===== Confrontation : cartes de la table (chacun son deck / partagées), partage du salon ===== */
+.cf-modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; }
+.cf-mode { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line3); background: var(--bg2); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }
+.cf-mode b { font: 700 14px var(--body); } .cf-mode small { font: 500 12px/1.4 var(--body); color: var(--mut); }
+.cf-mode.on, .cf-mode:has(input:checked) { border-color: var(--gold); box-shadow: 0 0 14px #f5c51833; }
+.cf-mode input { position: absolute; opacity: 0; pointer-events: none; }
+label.cf-mode { position: relative; }
+.cf-share .row { flex-wrap: wrap; gap: 8px; margin: 12px 0; } .cf-share input { width: 100%; }
+.cf-defis .cf-row { border-color: var(--gold); }
+.cf-lobby .pill.cf-ready { border-color: #3fbf7f88; color: #7fe0ad; }
+
 /* ===== Confrontation : choix des cartes façon draft ===== */
 .cf-deckbar { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
 @media (max-width: 800px) { .cf-deckbar { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

@@ -15,7 +15,9 @@ const Arena = (() => {
   let R = null; // le moteur 3D, créé une fois
   let st = null; // la table affichée : { gid, champs, lastSeq, lastSalon, queue, … }
   const $a = (id) => document.getElementById("ar-" + id);
-  const wanted = () => { try { return localStorage.getItem(LS) !== "classique"; } catch (e) { return true; } };
+  // seulement l'arène, comme les boosters : la vue classique ne sert plus que de secours (pas de WebGL) ;
+  // les navigateurs pilotés par les tests la gardent, sauf si un test demande l'arène
+  const wanted = () => { let v = null; try { v = localStorage.getItem(LS); } catch (e) {} return !navigator.webdriver || v === "arene"; };
   const setWanted = (on) => { try { localStorage.setItem(LS, on ? "arene" : "classique"); } catch (e) {} };
   const webgl = () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } };
   const usable = () => !failed && wanted() && webgl();
@@ -42,7 +44,7 @@ const Arena = (() => {
     if ($a("root")) return;
     const d = document.createElement("div"); d.id = "ar-root"; d.className = "ar"; d.hidden = true;
     d.innerHTML = `<canvas id="ar-c"></canvas><div class="ar-vign"></div><div id="ar-tags"></div><div id="ar-pops"></div><div class="ar-flash" id="ar-flash"></div>
-      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm" type="button" id="ar-classic">Vue classique</button><button class="btn sm acc" type="button" id="ar-quit">Quitter la partie</button></div>
+      <div class="ar-top"><button class="btn sm" type="button" id="ar-back">${ico("confront")} Salons</button><button class="btn sm acc" type="button" id="ar-quit">Quitter la partie</button></div>
       <div class="ar-hint" id="ar-hint"></div>
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
@@ -64,7 +66,6 @@ const Arena = (() => {
       <div class="ar-load" id="ar-load">Entrée dans l'arène…</div>`;
     document.body.appendChild(d);
     $a("back").onclick = () => nav("confront");
-    $a("classic").onclick = () => { setWanted(false); hide(); draw(); };
     // quitter la partie : en vie, c'est un abandon (confirmé) ; éliminé, spectateur ou partie finie, on sort simplement
     $a("quit").onclick = async (e) => {
       const v = CF.table?.vue, live = v?.phase === "partie" && !!v.joueurs?.find((j) => j.id === v.moi)?.vivant;
@@ -834,5 +835,5 @@ const Arena = (() => {
     return true;
   }
   addEventListener("hashchange", () => { if (st && !location.hash.startsWith("#/confront/" + st.gid)) hide(); });
-  return { wants, sync, hide, usable, setWanted, offer: () => !failed && !wanted() && webgl(), loading: () => !!loading && !THREE && !failed, get st() { return st; } };
+  return { wants, sync, hide, usable, setWanted, offer: () => false, loading: () => !!loading && !THREE && !failed, get st() { return st; } };
 })();

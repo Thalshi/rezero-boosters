@@ -345,7 +345,7 @@ function viewProfil() {
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">

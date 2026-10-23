@@ -59,6 +59,11 @@ export const DEFAULT_CONFIG = {
   // Assaut : Frappes par tour, cartes piochées quand une de ses Frappes fait perdre des PV
   // (corrigé, avant : piocheSiTouche 0)
   assaut: { frappes: 2, piocheSiTouche: 1 },
+  // Cartes retirées de la pioche selon le mode (inutiles à cette table) : en Duel, Lien vital et Festin du QG
+  // ne soignent que l'adversaire ou les deux joueurs à égalité
+  retraitsParMode: { duel: ["lien", "festin"] },
+  // Équipements posés devant soi au plus (l'arme à part ; Sceau et Orbe non comptés) : poser le suivant défausse le plus ancien
+  equipMax: 3,
   // Présages (tests). Un présage retourne la carte du dessus : on regarde son signe et son rang.
   presage: {
     voile: ["eau"],          // Voile de brume : esquive si le signe est Eau (1 chance sur 4)

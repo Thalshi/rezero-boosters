@@ -130,11 +130,10 @@ function cfTableHTML() {
       <div class="row">${has1("rejoindre") ? `<button class="btn gold" type="button" data-cfa='{"type":"rejoindre"}'>Rejoindre</button>` : ""}${has1("lancer") ? `<button class="btn gold" type="button" data-cfa='{"type":"lancer"}'>Lancer la partie</button>` : ""}
       ${!T.spectateur && (T.createur === ME || IS_ADMIN) && v.joueurs.length < 7 ? `<button class="btn" type="button" data-act="cf-bot">Ajouter un bot (test)</button>` : ""}${has1("quitter") ? `<button class="btn" type="button" data-cfa='{"type":"quitter"}'>Quitter</button>` : ""}</div></section>`;
   } else if (v.phase === "contributions") {
-    const me = v.joueurs.find((p) => p.id === v.moi), mine = CF.list?.cartes || [];
+    const me = v.joueurs.find((p) => p.id === v.moi);
     if (!CF.list) cfLoadList();
-    body = `<section class="sec"><h2>Choisis tes cartes</h2><p class="note">Chaque carte de ta collection a une branche (son style de jeu). Prends jusqu'à une carte par branche : à l'étape suivante, <b>tu choisis ton perso parmi elles</b>. Si tu n'en prends aucune, on te prête 2 persos. Tes cartes restent dans ta collection ; pendant la partie, tu ne peux ni les vendre ni les échanger.</p>
-      ${me && !me.soumis && !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : me && !me.soumis && CF.list?.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : me && !me.soumis ? `<div class="cf-contrib cf-keep">${(CF.cat?.branchIds || []).map((b) => { const opts = mine.filter((c) => c.branch === b); return `<label><span>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)}</span><select data-cfb="${b}"><option value="">${opts.length ? "Aucune" : "Aucune carte de ce style"}</option>${opts.map((c) => `<option value="${c.cardId}" ${CF.contrib[b] === c.cardId ? "selected" : ""}>${esc(nameOf(byId[c.cardId]))} · ${esc(byId[c.cardId].title)} (${RAR[byId[c.cardId].rar].label})</option>`).join("")}</select></label>`; }).join("")}</div>
-        <button class="btn gold" type="button" data-act="cf-contrib">Valider mes cartes</button>` : `<p class="note">Cartes enregistrées. En attente des autres…</p>`}
+    body = `<section class="sec cf-draft"><div class="cf-draft-h"><div><h2>Choisis tes cartes</h2><p class="note">Une carte par style au plus. À l'étape suivante, <b>tu joues l'une d'elles</b>. Sans carte, on te prête 2 persos. Tes cartes restent à toi ; pendant la partie, elles ne se vendent ni ne s'échangent.</p></div></div>
+      ${!me || me.soumis ? `<p class="note">Cartes enregistrées. En attente des autres…</p>` : !CF.list ? `<p class="note">Chargement de tes cartes…</p>` : CF.list.error ? `<p class="note">${esc(CF.list.error)} <button class="btn sm" type="button" data-act="cf-reload">Réessayer</button></p>` : cfDraft()}
       <div class="cf-lobby">${v.joueurs.map((p) => `<span class="pill ${p.soumis ? "ok" : ""}">${esc(cfName(p.id))} ${p.soumis ? "✓" : "…"}</span>`).join("")}</div></section>`;
   } else if (v.phase === "choix") {
     body = `<section class="sec"><h2>Choisis ton personnage</h2><p class="note">${(v.propositions || []).some((c) => c?.pret) ? "Tu n'as pas pris de carte : voici 2 persos prêtés." : "Ce sont tes cartes : choisis celle que tu joues."} Ton choix reste secret jusqu'au début.</p>
@@ -145,6 +144,19 @@ function cfTableHTML() {
   else body = (v.phase === "partie" || v.phase === "fin") && Arena.offer() ? `<div class="row cf-3d"><button class="btn sm" type="button" data-act="cf-arene">Jouer dans l'arène 3D</button></div>${cfBoard(v)}` : cfBoard(v);
   if (v.phase !== "partie" && v.phase !== "fin") Arena.hide();
   return `<div class="wrap page cf-page">${top}${body}${v.journal?.length ? `<section class="sec"><h2>Journal</h2><ol class="cf-log">${v.journal.filter((e) => !["attente", "attente_annulee", "phase"].includes(e.type) && !(e.type === "pioche_publique" && e.pid === v.moi)).slice(-14).reverse().map((e) => `<li>${cfEvent(e)}</li>`).join("")}</ol></section>` : ""}</div>`;
+}
+// ===== Choix des cartes façon draft : le deck (une carte par style) en haut, ta collection en vraies cartes =====
+function cfDraft() {
+  const mine = CF.list.cartes || [], ids = CF.cat?.branchIds || [], tab = CF.draftTab || "tous";
+  const picked = ids.filter((b) => CF.contrib[b]), deck = (CF.list.deck || []).filter((id) => mine.some((c) => c.cardId === id));
+  const pool = mine.filter((c) => tab === "tous" || c.branch === tab).sort((a, b) => RAR[byId[b.cardId].rar].rank - RAR[byId[a.cardId].rar].rank || nameOf(byId[a.cardId]).localeCompare(nameOf(byId[b.cardId])));
+  const slot = (b) => { const id = CF.contrib[b], c = id && byId[id]; return `<button type="button" class="cf-slot ${c ? "on" : ""} ${tab === b ? "cur" : ""}" data-cftab="${b}" title="${esc(cfBranch(b).nom)}">${c ? `<span class="cf-slot-art">${thumb(c, "cf-th")}</span>` : cfEmb(b, "big")}<b>${esc(cfBranch(b).nom)}</b><small>${c ? esc(nameOf(c)) : "vide"}</small>${c ? `<i data-cfdrop="${b}" aria-label="Retirer">✕</i>` : ""}</button>`; };
+  return `<div class="cf-deckbar" aria-label="Ton deck">${ids.map(slot).join("")}</div>
+    <div class="row cf-deck-tools">${deck.length ? `<button class="btn sm gold" type="button" data-act="cf-deck-use">Prendre mon deck (${deck.length})</button>` : ""}<button class="btn sm" type="button" data-act="cf-deck-save" ${picked.length ? "" : "disabled"}>Enregistrer comme deck</button>${picked.length ? `<button class="btn sm" type="button" data-act="cf-deck-clear">Tout retirer</button>` : ""}</div>
+    <div class="chips cf-tabs"><button class="chip" type="button" data-cftab="tous" aria-pressed="${tab === "tous"}">Toutes · ${mine.length}</button>${ids.map((b) => { const n = mine.filter((c) => c.branch === b).length; return `<button class="chip" type="button" data-cftab="${b}" aria-pressed="${tab === b}" ${n ? "" : "disabled"}>${cfEmb(b, "sm")} ${esc(cfBranch(b).nom)} · ${n}</button>`; }).join("")}</div>
+    ${tab !== "tous" ? `<p class="note cf-tab-pow">${cfEmb(tab, "sm")} <b>${esc(cfBranch(tab).nom)}</b> : ${esc(cfBranch(tab).pouvoir)}</p>` : ""}
+    ${pool.length ? `<div class="cf-pool">${pool.map((x) => { const c = byId[x.cardId], on = CF.contrib[x.branch] === x.cardId; return `<button type="button" class="cf-pick ${on ? "on" : ""}" data-cfpick="${x.cardId}" data-b="${x.branch}" aria-pressed="${on}">${cardHTML(c, { design: myDesign(c.id) })}<span class="cf-pick-b">${cfEmb(x.branch, "sm")} ${esc(cfBranch(x.branch).nom)}</span>${on ? `<span class="cf-pick-ok">Dans ton deck</span>` : ""}</button>`; }).join("")}</div>` : `<p class="note">Aucune carte de ce style dans ta collection.</p>`}
+    <div class="cf-draft-go"><button class="btn gold big" type="button" data-act="cf-contrib">${picked.length ? `Valider mes cartes (${picked.length}/${ids.length})` : "Jouer avec 2 persos prêtés"}</button></div>`;
 }
 function cfPerso(c, big) {
   if (!c) return "";
@@ -212,7 +224,7 @@ function cfHand(v, me, pr, acts) {
     ${fin?.aDefausser ? `<p class="note">Tu as trop de cartes : touche ${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} à défausser, puis « Finir le tour ».</p>` : ""}</section>`;
 }
 const EVT = {
-  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}.`,
+  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : 3 équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
@@ -228,7 +240,7 @@ const EVT = {
   etal: (e) => `${cfName(e.pid)} ouvre l'Étal du marché.`, etal_pris: (e) => `${cfName(e.pid)} prend une carte de l'Étal.`, etal_fin: () => "L'Étal est vidé.", arme_remplacee: (e) => `${cfName(e.pid)} change d'arme.`,
   choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
-const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr" };
+const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr", reprise: "Œil sûr" };
 const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
@@ -251,12 +263,18 @@ document.addEventListener("click", (e) => {
   const t = e.target;
   const a = t.closest("[data-cfa]"); if (a) return cfAct(JSON.parse(a.dataset.cfa));
   const c = t.closest("[data-cfc]"); if (c) return cfSelect(c.dataset.cfc);
+  const dr = t.closest("[data-cfdrop]"); if (dr) { delete CF.contrib[dr.dataset.cfdrop]; return draw(); }
+  const pk = t.closest("[data-cfpick]"); if (pk) { const b = pk.dataset.b; CF.contrib[b] = CF.contrib[b] === pk.dataset.cfpick ? null : pk.dataset.cfpick; return draw(); }
+  const tb = t.closest("[data-cftab]"); if (tb) { CF.draftTab = CF.draftTab === tb.dataset.cftab && tb.dataset.cftab !== "tous" ? "tous" : tb.dataset.cftab; return draw(); }
   const g = t.closest("[data-cfg]"); if (g) { const n = CF.table.vue.actions.find((x) => x.type === "garder")?.nombre || 0; CF.garder = CF.garder.includes(g.dataset.cfg) ? CF.garder.filter((x) => x !== g.dataset.cfg) : [...CF.garder, g.dataset.cfg].slice(-n); return draw(); }
   const act = t.closest("[data-act]")?.dataset.act; if (!act || !act.startsWith("cf-")) return;
   if (act === "cf-create") return srv("confront/create", { nom: $("cfNom")?.value || "", public: $("cfPub")?.checked }).then((r) => { CF.table = r; CF.gid = r.gid; CF.list = null; nav("confront", r.gid); }).catch((err) => toast(err.message));
   if (act === "cf-code") { const code = ($("cfCode")?.value || "").trim().toUpperCase(); if (code.length === 4) nav("confront", code); return; }
   if (act === "cf-bot") return srv("confront/bot", { gid: CF.gid }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   if (act === "cf-contrib") return cfAct({ type: "contribuer", cartes: Object.values(CF.contrib).filter(Boolean) });
+  if (act === "cf-deck-use") { CF.contrib = {}; for (const id of CF.list?.deck || []) { const c = (CF.list.cartes || []).find((x) => x.cardId === id); if (c) CF.contrib[c.branch] = id; } return draw(); }
+  if (act === "cf-deck-clear") { CF.contrib = {}; return draw(); }
+  if (act === "cf-deck-save") return srv("confront/deck", { cartes: Object.values(CF.contrib).filter(Boolean) }).then((r) => { if (CF.list) CF.list.deck = r.deck; toast("Deck enregistré : tu pourras le reprendre en un toucher."); draw(); }).catch((err) => toast(err.message));
   if (act === "cf-reload") { CF.list = null; cfLoadList(); return draw(); }
   if (act === "cf-arene") { Arena.setWanted(true); return draw(); }
   if (act === "cf-abandon" && sure(t.closest("[data-act]"), "Confirmer l'abandon")) return cfAct({ type: "abandon" });

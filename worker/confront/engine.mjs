@@ -318,7 +318,9 @@ function setupGame(s, now) {
   }
   // pioche d'action
 
-  const deck = buildDeck();
+  // certaines cartes ne servent à rien selon la table (en Duel, Lien vital ne soignerait que l'adversaire) : retirées
+  const retraits = s.config.retraitsParMode?.[s.mode] || [];
+  const deck = buildDeck().filter((c) => !retraits.includes(c.def));
 
   s.deck = shuffle(s, "jeu", deck.map((c) => c.uid));
   // premier joueur : le Gardien en classique, au hasard sinon
@@ -1048,7 +1050,11 @@ function jouer(s, p, a) {
       }
       if (D.type === "equipement") {
         if (hasEquip(s, p, d)) refuse("DEJA_POSE", "Tu as déjà cette carte devant toi (pas de doublon).");
-        pose(); p.equip.push(uid); evt(); return;
+        // au plus N équipements devant soi (l'arme à part, sceaux et orbes non comptés) : poser le suivant défausse le plus ancien
+        const mine = p.equip.filter((u) => CARD_DEFS[defId(s, u)].type === "equipement"), max = s.config.equipMax;
+        let remplace = null;
+        if (max != null && mine.length >= max) { remplace = mine[0]; p.equip.splice(p.equip.indexOf(remplace), 1); discardCard(s, remplace); }
+        pose(); p.equip.push(uid); evt(remplace ? { remplace: cardPub(s, remplace) } : {}); return;
       }
     }
   }

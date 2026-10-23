@@ -264,7 +264,18 @@ function viewSanctuaire() {
       <p class="note">Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte. ×5 et ×10 : 10 % moins cher.</p>
       <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
       <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
-    </div></div>`;
+    </div>${zDrops()}</div>`;
+}
+// tout ce qu'une invocation peut donner, rareté par rareté, avec la chance de chaque objet et ce que tu as déjà
+let zDropR = "";
+function zDrops() {
+  const cos = cosOf(save), got = new Set([...Object.keys(cos.own), ...cos.inst.map((x) => x.c)]);
+  const rows = RANKS.filter((r) => !zDropR || r === zDropR).map((r) => { const list = SUMMON_POOL(r); if (!list.length) return "";
+    const per = SUMMON_RATES[r] / list.length;
+    return `<div class="zdrop-r"><div class="zdrop-h"><b style="color:${RAR[r].color}">${RAR[r].label}</b><span class="note">${String(SUMMON_RATES[r]).replace(".", ",")} % au total · ${list.length} objet${list.length > 1 ? "s" : ""} · ${per.toFixed(per < 1 ? 2 : 1).replace(".", ",")} % chacun</span></div>
+      <div class="zdrop-g">${list.map((c) => `<div class="zdrop ${got.has(c.id) ? "got" : ""}">${zGhost(c)}<b>${esc(c.name)}</b><small>${COS_SLOT_LABEL[c.slot]}${c.only ? " · exclusif" : ""}${got.has(c.id) ? " · ✓ obtenu" : ""}</small></div>`).join("")}</div></div>`; }).join("");
+  return `<section class="sec zdrops"><div class="sec-h"><div><p class="eyebrow">Récompenses possibles</p><h2>Ce que tu peux obtenir</h2></div></div>
+    ${rarChips("zDropR", zDropR)}${rows}</section>`;
 }
 let zSkipAnim = false;
 try { zSkipAnim = localStorage.getItem("rz-skip-summon") === "1"; } catch (e) {}
@@ -282,7 +293,7 @@ async function zSummon(n) {
 VIEWS.boutique = viewBoutique; VIEWS.atelier = viewAtelier; VIEWS.sanctuaire = viewSanctuaire;
 function afterViews() {
 }
-const Z_SEG = { ...ZS_SEG, zBout: (v) => { zBoutTab = v; }, zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
+const Z_SEG = { ...ZS_SEG, zDropR: (v) => { zDropR = v; }, zBout: (v) => { zBoutTab = v; }, zShop: (v) => { zShopSlot = v; }, zAt: (v) => { zAtelierTab = v; }, zInv: (v) => { zInvSlot = v; } };
 document.addEventListener("click", (e) => {
   const t = e.target;
   const b = t.closest("[data-zbuy]"); if (b) { b.disabled = true; return zBuy(b.dataset.zbuy); }

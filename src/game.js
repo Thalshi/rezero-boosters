@@ -244,6 +244,11 @@ const SKINNED = Object.keys(PEOPLE).filter((k) => PEOPLE[k].fac === "irl");
 const SKINS = SKINNED.flatMap((who) => SKIN_LINES.map((l) => ({ id: `${who}-sk-${l.id}`, who, skin: l.id, title: `Skin ${l.name}`, rar: l.rar })));
 const ALL_CARDS = [...CARDS, ...SKINS];
 const CARD_BY_ID = Object.fromEntries(ALL_CARDS.map((c) => [c.id, c]));
+// stats affichées sur les cartes (POW, AURA) : fixes pour chaque carte, partagées avec le serveur (Arène)
+const hashOf = (s) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
+const POW = { c: [52, 9], pc: [64, 9], r: [76, 9], e: [86, 7], l: [93, 5], m: [97, 3] };
+const AURA = { c: [38, 6], pc: [44, 6], r: [51, 6], e: [58, 7], l: [66, 7], m: [80, 7] };
+const statsOf = (c) => { const h = hashOf(c.id); return [POW[c.rar][0] + (h % POW[c.rar][1]), AURA[c.rar][0] + ((h >> 5) % AURA[c.rar][1])]; };
 const CATALOG_NO = Object.fromEntries([...ALL_CARDS].sort((a, b) => RANKS.indexOf(b.rar) - RANKS.indexOf(a.rar) || a.id.localeCompare(b.id)).map((c, i) => [c.id, i + 1]));
 
 // ===== Règles de l'économie (mêmes règles dans le navigateur et sur le serveur) =====
@@ -1327,3 +1332,167 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 // Absent = activé. Permet de déployer le code puis d'ouvrir chaque nouveauté quand ses valeurs sont validées.
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re : LOL · Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
+
+// ===== Arène : combats 3 contre 3 avec les persos de sa collection =====
+// Chaque carte devient un combattant : stats tirées de sa rareté et de ses POW / AURA, un profil (Assassin, Mage,
+// Gardien, Soutien), une affinité (cycle Feu > Vent > Terre > Eau > Feu, Ombre <> Lumière) et une technique spéciale.
+// Profil, affinité et nom de technique sont donnés automatiquement ; Billy peut les retoucher par perso (Créateur).
+const BT_PROFILS = {
+  assassin: { label: "Assassin", pv: 0.85, atk: 1.16, def: 0.8,  vit: 1.25, tech: { kind: "burst",  nom: "Frappe fatale",  mult: 1.9, cd: 2, desc: "Énormes dégâts sur l'adversaire." } },
+  mage:     { label: "Mage",     pv: 0.9,  atk: 1.08, def: 0.85, vit: 1.05, tech: { kind: "poison", nom: "Sort maudit",    mult: 1.4, cd: 2, dot: 0.07, turns: 3, desc: "Dégâts, puis l'adversaire perd des PV pendant 3 tours." } },
+  gardien:  { label: "Gardien",  pv: 1.3,  atk: 0.85, def: 1.35, vit: 0.75, tech: { kind: "shield", nom: "Rempart",        mult: 0.9, cd: 3, shield: 0.3, desc: "Frappe et se protège avec un bouclier (30 % de ses PV)." } },
+  soutien:  { label: "Soutien",  pv: 1.05, atk: 0.98, def: 1.05, vit: 0.95, tech: { kind: "heal",   nom: "Souffle de vie", mult: 0.9, cd: 2, heal: 0.35, desc: "Frappe, soigne 35 % de ses PV et 15 % à ses alliés en réserve." } },
+};
+const BT_PROFIL_IDS = ["assassin", "mage", "gardien", "soutien"];
+const BT_AFFINITES = { feu: { label: "Feu", bat: "vent" }, vent: { label: "Vent", bat: "terre" }, terre: { label: "Terre", bat: "eau" }, eau: { label: "Eau", bat: "feu" }, ombre: { label: "Ombre", bat: "lumiere" }, lumiere: { label: "Lumière", bat: "ombre" } };
+const BT_AFF_IDS = Object.keys(BT_AFFINITES);
+const BT_AFF_BONUS = 1.25;             // affinité favorable : +25 % de dégâts
+const BT_LVL_MAX = 10;
+const BT_PER_LVL = 0.05;               // +5 % de stats par niveau
+const BT_XP = { win: 30, lose: 12, feed: 60 };   // expérience par combat (par perso) et par doublon donné
+const btXpNext = (lvl) => 40 + 20 * lvl;         // expérience pour passer au niveau suivant
+const BT_REWARD = { facile: 10, normal: 20, difficile: 35, ami: 25 };  // essence à la victoire
+const BT_DAILY_WINS = 5;               // victoires récompensées par jour (contre l'IA et les amis confondus)
+const BT_TEAM = 3;
+// profil / affinité / technique d'un perso : réglage de Billy (PEOPLE[who].bt) sinon tiré de son nom
+function btKitOf(who) {
+  const p = PEOPLE[who] || {}, o = p.bt || {}, h = hashOf(who);
+  const profil = BT_PROFILS[o.profil] ? o.profil : BT_PROFIL_IDS[h % 4];
+  const aff = BT_AFFINITES[o.affinite] ? o.affinite : BT_AFF_IDS[(h >> 4) % BT_AFF_IDS.length];
+  const base = BT_PROFILS[profil].tech;
+  return { profil, aff, tech: { ...base, nom: (o.tech && String(o.tech).slice(0, 40)) || base.nom } };
+}
+const btLvlOf = (s, id) => Math.max(1, Math.min(BT_LVL_MAX, s?.btLvl?.[id]?.lvl || 1));
+// un combattant prêt pour le combat
+function btFighter(id, lvl = 1) {
+  const c = CARD_BY_ID[id]; if (!c) return null;
+  const [pw, au] = statsOf(c), kit = btKitOf(c.who), P = BT_PROFILS[kit.profil], k = 1 + BT_PER_LVL * (lvl - 1), h = hashOf(id);
+  const pvMax = Math.round((40 + au * 1.1) * P.pv * k);
+  return { id, who: c.who, nom: PEOPLE[c.who]?.name || c.who, titre: c.title, rar: c.rar, lvl, profil: kit.profil, aff: kit.aff, tech: kit.tech,
+    pvMax, pv: pvMax, atk: Math.round(pw * 0.42 * P.atk * k), def: Math.round(au * 0.14 * P.def * k), vit: Math.round((30 + (h % 15) + pw * 0.25) * P.vit),
+    cd: 0, bouclier: 0, poison: null, garde: false, ko: false };
+}
+function btCreate(sides, now = Date.now()) {
+  return { round: 1, t: now, sides: sides.map((x) => ({ uid: x.uid, nom: x.nom, ia: x.ia || null, team: x.team.map((t) => btFighter(t.id, t.lvl)).filter(Boolean), active: 0, choix: null })),
+    winner: null, log: [{ round: 0, ev: [{ t: "debut" }] }] };
+}
+const btActive = (st, i) => st.sides[i].team[st.sides[i].active];
+// actions possibles du joueur i pour ce tour
+function btActions(st, i) {
+  if (st.winner != null) return [];
+  const sd = st.sides[i], a = btActive(st, i), out = [{ type: "attaque" }, { type: "defense" }];
+  if (a.cd <= 0) out.push({ type: "tech" });
+  sd.team.forEach((f, j) => { if (j !== sd.active && !f.ko) out.push({ type: "changer", to: j }); });
+  return out;
+}
+const btValid = (st, i, a) => btActions(st, i).some((x) => x.type === a?.type && (x.type !== "changer" || x.to === a.to));
+// dégâts d'un coup
+function btDamage(att, def, mult, rng) {
+  const adv = BT_AFFINITES[att.aff]?.bat === def.aff ? BT_AFF_BONUS : BT_AFFINITES[def.aff]?.bat === att.aff ? 1 / BT_AFF_BONUS : 1;
+  let d = (att.atk * mult * adv * (0.9 + rng() * 0.2)) - def.def * 0.5;
+  if (def.garde) d *= 0.5;
+  return { d: Math.max(1, Math.round(d)), adv };
+}
+// résout un tour : les deux choix sont connus ; renvoie les événements (pour les animations)
+function btResolve(st, rng) {
+  const ev = [], next = (i) => st.sides[i].team.findIndex((f) => !f.ko);
+  const ch = st.sides.map((s) => s.choix || { type: "attaque" });
+  // 1) changements, puis garde
+  ch.forEach((c, i) => { if (c.type === "changer") { st.sides[i].active = c.to; ev.push({ t: "entre", side: i, id: btActive(st, i).id }); } });
+  ch.forEach((c, i) => { const a = btActive(st, i); a.garde = c.type === "defense"; if (a.garde) ev.push({ t: "garde", side: i, id: a.id }); });
+  // 2) attaques et techniques, le plus rapide d'abord
+  const order = [0, 1].filter((i) => ch[i].type === "attaque" || ch[i].type === "tech").sort((x, y) => btActive(st, y).vit - btActive(st, x).vit || (rng() < 0.5 ? -1 : 1));
+  for (const i of order) {
+    const a = btActive(st, i), j = 1 - i, d = btActive(st, j);
+    if (a.ko || d.ko) continue;
+    const tech = ch[i].type === "tech", T = a.tech, r = btDamage(a, d, tech ? T.mult : 1, rng);
+    let dmg = r.d;
+    if (d.bouclier > 0) { const ab = Math.min(d.bouclier, dmg); d.bouclier -= ab; dmg -= ab; if (ab) ev.push({ t: "bouclier_absorbe", side: j, n: ab }); }
+    d.pv = Math.max(0, d.pv - dmg);
+    ev.push({ t: tech ? "tech" : "attaque", side: i, id: a.id, nom: tech ? T.nom : "Attaque", kind: tech ? T.kind : null, cible: d.id, n: dmg, adv: r.adv > 1 ? "fort" : r.adv < 1 ? "faible" : null });
+    if (tech) {
+      a.cd = T.cd + 1;
+      if (T.kind === "poison" && d.pv > 0) { d.poison = { n: Math.max(1, Math.round(d.pvMax * T.dot)), tours: T.turns }; ev.push({ t: "poison_pose", side: j, id: d.id }); }
+      if (T.kind === "shield") { a.bouclier = Math.round(a.pvMax * T.shield); ev.push({ t: "bouclier", side: i, id: a.id, n: a.bouclier }); }
+      if (T.kind === "heal") { const h0 = a.pv; a.pv = Math.min(a.pvMax, a.pv + Math.round(a.pvMax * T.heal)); ev.push({ t: "soin", side: i, id: a.id, n: a.pv - h0 });
+        for (const f of st.sides[i].team) if (f !== a && !f.ko) f.pv = Math.min(f.pvMax, f.pv + Math.round(f.pvMax * 0.15)); }
+    }
+    if (d.pv <= 0) { d.ko = true; d.poison = null; ev.push({ t: "ko", side: j, id: d.id }); }
+  }
+  // 3) fin du tour : poison, recharges, garde
+  for (let i = 0; i < 2; i++) {
+    const a = btActive(st, i);
+    if (!a.ko && a.poison) { a.pv = Math.max(0, a.pv - a.poison.n); ev.push({ t: "poison", side: i, id: a.id, n: a.poison.n }); if (--a.poison.tours <= 0) a.poison = null; if (a.pv <= 0) { a.ko = true; ev.push({ t: "ko", side: i, id: a.id }); } }
+    for (const f of st.sides[i].team) { if (f.cd > 0) f.cd--; f.garde = false; }
+  }
+  // 4) perso K.O. : le suivant entre ; plus personne = défaite
+  const alive = [0, 1].map((i) => next(i) >= 0);
+  if (!alive[0] || !alive[1]) st.winner = alive[0] ? 0 : alive[1] ? 1 : -1;
+  else for (let i = 0; i < 2; i++) if (btActive(st, i).ko) { st.sides[i].active = next(i); ev.push({ t: "entre", side: i, id: btActive(st, i).id }); }
+  st.log.push({ round: st.round, ev }); st.log = st.log.slice(-30);
+  st.round++; st.sides.forEach((s) => (s.choix = null));
+  if (st.round > 60 && st.winner == null) { const hp = st.sides.map((s) => s.team.reduce((x, f) => x + f.pv / f.pvMax, 0)); st.winner = hp[0] === hp[1] ? -1 : hp[0] > hp[1] ? 0 : 1; }
+  return ev;
+}
+// IA : facile joue au hasard, normal attaque et place sa technique, difficile change de perso quand l'affinité est mauvaise
+function btIaChoice(st, i, niveau = "normal", rng = Math.random) {
+  const acts = btActions(st, i), a = btActive(st, i), d = btActive(st, 1 - i);
+  if (niveau === "facile") return acts[Math.floor(rng() * acts.length)].type === "changer" ? { type: "attaque" } : acts.filter((x) => x.type !== "changer")[Math.floor(rng() * 3)] || { type: "attaque" };
+  const tech = acts.find((x) => x.type === "tech");
+  if (niveau === "difficile") {
+    const bad = BT_AFFINITES[d.aff]?.bat === a.aff, sw = acts.filter((x) => x.type === "changer").find((x) => BT_AFFINITES[st.sides[i].team[x.to].aff]?.bat === d.aff);
+    if ((bad || a.pv < a.pvMax * 0.25) && sw && rng() < 0.7) return sw;
+  }
+  if (tech && (a.tech.kind !== "heal" || a.pv < a.pvMax * 0.6)) return tech;
+  if (a.pv < a.pvMax * 0.3 && rng() < 0.3) return { type: "defense" };
+  return { type: "attaque" };
+}
+// équipe de l'IA : 3 cartes sorties, de rareté et de niveau proches de l'équipe du joueur
+function btIaTeam(pool, myTeam, niveau, rng) {
+  const rk = Math.round(myTeam.reduce((x, t) => x + RANKS.indexOf(CARD_BY_ID[t.id]?.rar || "c"), 0) / myTeam.length) + (niveau === "facile" ? -1 : niveau === "difficile" ? 1 : 0);
+  const lv = Math.max(1, Math.round(myTeam.reduce((x, t) => x + t.lvl, 0) / myTeam.length) + (niveau === "facile" ? -1 : niveau === "difficile" ? 1 : 0));
+  const out = [];
+  for (let k = 0; k < BT_TEAM; k++) {
+    const want = Math.max(0, Math.min(5, rk + (rng() < 0.3 ? (rng() < 0.5 ? -1 : 1) : 0)));
+    let list = pool.filter((c) => !c.skin && RANKS.indexOf(c.rar) === want && !out.some((o) => CARD_BY_ID[o.id].who === c.who));
+    if (!list.length) list = pool.filter((c) => !c.skin && !out.some((o) => CARD_BY_ID[o.id].who === c.who));
+    const c = list[Math.floor(rng() * list.length)]; if (c) out.push({ id: c.id, lvl: Math.min(BT_LVL_MAX, lv) });
+  }
+  return out;
+}
+// équipe enregistrée du joueur : 3 cartes à lui, persos différents
+function btSetTeamS(s, ids) {
+  ids = (Array.isArray(ids) ? ids : []).map(String).slice(0, BT_TEAM);
+  if (ids.length !== BT_TEAM) return { error: `Choisis ${BT_TEAM} persos.` };
+  if (ids.some((id) => !CARD_BY_ID[id] || !hasCard(s, id))) return { error: "Tu ne peux prendre que tes propres cartes." };
+  if (new Set(ids.map((id) => CARD_BY_ID[id].who)).size !== BT_TEAM) return { error: "Prends trois persos différents." };
+  s.btTeam = ids; return {};
+}
+const btTeamOf = (s) => (s.btTeam || []).filter((id) => CARD_BY_ID[id] && hasCard(s, id)).map((id) => ({ id, lvl: btLvlOf(s, id) }));
+// expérience : un niveau gagné relève un peu les stats du perso
+function btGainXpS(s, id, xp) {
+  s.btLvl = s.btLvl || {}; const o = s.btLvl[id] || { lvl: 1, xp: 0 };
+  if (o.lvl >= BT_LVL_MAX) { s.btLvl[id] = o; return 0; }
+  o.xp += xp; let up = 0;
+  while (o.lvl < BT_LVL_MAX && o.xp >= btXpNext(o.lvl)) { o.xp -= btXpNext(o.lvl); o.lvl++; up++; }
+  if (o.lvl >= BT_LVL_MAX) o.xp = 0;
+  s.btLvl[id] = o; return up;
+}
+// donner un doublon pour faire monter le niveau d'une carte
+function btFeedS(s, id) {
+  const o = ownOf(s, id);
+  if (!CARD_BY_ID[id] || o.n < 2) return { error: "Il faut un doublon de cette carte (tu en gardes toujours une)." };
+  if (btLvlOf(s, id) >= BT_LVL_MAX) return { error: "Ce perso est déjà au niveau maximum." };
+  removeCardS(s, id, false, 1);
+  const up = btGainXpS(s, id, BT_XP.feed); return { up, lvl: btLvlOf(s, id) };
+}
+// fin de combat : essence (victoires du jour plafonnées) et expérience pour l'équipe
+function btRewardS(s, won, kind, teamIds, now = Date.now()) {
+  const day = dayKey(now); s.btDay = s.btDay?.day === day ? s.btDay : { day, wins: 0 };
+  let chakra = 0;
+  if (won && s.btDay.wins < BT_DAILY_WINS) { chakra = BT_REWARD[kind] || 0; s.chakra += chakra; s.btDay.wins++; }
+  const ups = teamIds.map((id) => ({ id, up: btGainXpS(s, id, won ? BT_XP.win : BT_XP.lose), lvl: btLvlOf(s, id) }));
+  s.btStats = s.btStats || { win: 0, lose: 0 }; s.btStats[won ? "win" : "lose"]++;
+  trackS(s, "arene", 1, now); if (won) trackS(s, "arene_win", 1, now);
+  return { chakra, ups, left: Math.max(0, BT_DAILY_WINS - s.btDay.wins) };
+}

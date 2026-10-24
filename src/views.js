@@ -22,10 +22,7 @@ addEventListener("hashchange", route);
 const fmtN = (n) => (+n || 0).toLocaleString("fr-FR");
 const LETTER = { c: "C", pc: "U", r: "R", e: "E", l: "L", m: "M" };
 const noOf = (id) => `#${String(CATALOG_NO[id] || 0).padStart(4, "0")}/${String(ALL_CARDS.length).padStart(4, "0")}`;
-const hashOf = (s) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
 const hueOf = (who) => hashOf(who) % 360;
-const POW = { c: [52, 9], pc: [64, 9], r: [76, 9], e: [86, 7], l: [93, 5], m: [97, 3] }, AURA = { c: [38, 6], pc: [44, 6], r: [51, 6], e: [58, 7], l: [66, 7], m: [80, 7] };
-const statsOf = (c) => { const h = hashOf(c.id); return [POW[c.rar][0] + (h % POW[c.rar][1]), AURA[c.rar][0] + ((h >> 5) % AURA[c.rar][1])]; };
 const imgKey = (c) => (c.img && (ART[c.img] || PHOTO[c.img]) ? c.img : ART[c.who] ? c.who : PHOTO[c.who] ? c.who : null);
 function artIn(c) {
   const k = imgKey(c);

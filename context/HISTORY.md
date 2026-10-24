@@ -5,6 +5,9 @@
 
 ---
 
+## 2026-10-24 — Cartes manquantes nettes partout (23e mise en ligne)
+- Collection, envies, wiki : une carte pas encore obtenue montre son portrait net en noir et blanc, cadre de sa rareté et « ? » (comme dans « Voir les persos »). Les persos pas encore sortis restent floutés « ??? ».
+
 ## 2026-10-24 — « Voir les persos » façon Kyara (22e mise en ligne)
 - Fenêtre des persos d'un booster refaite : compteur « possédés », recherche, filtre Tous / Manquants, rangées par rareté avec compte (ex. 0/10).
 - Cartes manquantes en portrait net noir et blanc avec un « ? » (plus de flou), grille propre (fini les cartes qui se chevauchent). Les persos pas encore sortis restent cachés.

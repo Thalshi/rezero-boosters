@@ -261,6 +261,23 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 @media (min-width: 560px) { .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 900px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; } }
 @media (min-width: 1200px) { .cgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+/* liste des persos d'un booster, façon Kyara */
+.pool-sh { max-width: 1120px !important; width: min(1120px, 96vw); }
+.pool-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 0 22px 14px; border-bottom: 1px solid var(--line); }
+.pool-n { font: 700 22px var(--mono); color: var(--fg); } .pool-n span { color: var(--fg2); font-weight: 500; font-size: 18px; }
+.pool-bar .pool-s { flex: 1 1 220px; max-width: 420px; margin: 0 0 0 auto; }
+.pool-f button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.pool-r { margin: 6px 0 22px; }
+.pool-r h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font: 800 20px var(--disp); color: var(--pc); }
+.pool-r h3 i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--pc); color: #111; font: 800 13px var(--mono); font-style: normal; }
+.pool-r h3 span { margin-left: auto; font: 600 14px var(--mono); color: var(--fg2); }
+.pool-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.pool-g .kcw { container-type: inline-size; width: 100%; min-width: 0; }
+.pool-g .kc.locked:not(.soon) { --rc: color-mix(in srgb, var(--pc) 75%, #000); }
+.pool-g .kc.locked:not(.soon) .kc-a .layer, .pool-g .kc.locked:not(.soon) .kc-a .photo, .pool-g .kc.locked:not(.soon) .kc-a .ph { filter: grayscale(1) brightness(.7) contrast(1.05); transform: none; }
+.pool-g .kc.locked:not(.soon) .kc-a::after { font-size: 22cqw; color: color-mix(in srgb, var(--rc) 80%, #fff); text-shadow: 0 2px 10px #000c; }
+.pool-g .kc.locked:not(.soon) .kc-h b, .pool-g .kc.locked:not(.soon) .kc-s { color: var(--fg2); }
+@media (max-width: 560px) { .pool-g { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .pool-bar .pool-s { max-width: none; margin-left: 0; } }
 .cgrid .cell { display: flex; flex-direction: column; gap: 6px; }
 .cgrid .cap { font: 500 12px var(--mono); color: var(--mut); display: flex; justify-content: space-between; }
 

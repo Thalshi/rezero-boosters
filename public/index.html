@@ -269,6 +269,23 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 @media (min-width: 560px) { .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 900px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; } }
 @media (min-width: 1200px) { .cgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+/* liste des persos d'un booster, façon Kyara */
+.pool-sh { max-width: 1120px !important; width: min(1120px, 96vw); }
+.pool-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 0 22px 14px; border-bottom: 1px solid var(--line); }
+.pool-n { font: 700 22px var(--mono); color: var(--fg); } .pool-n span { color: var(--fg2); font-weight: 500; font-size: 18px; }
+.pool-bar .pool-s { flex: 1 1 220px; max-width: 420px; margin: 0 0 0 auto; }
+.pool-f button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.pool-r { margin: 6px 0 22px; }
+.pool-r h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; font: 800 20px var(--disp); color: var(--pc); }
+.pool-r h3 i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--pc); color: #111; font: 800 13px var(--mono); font-style: normal; }
+.pool-r h3 span { margin-left: auto; font: 600 14px var(--mono); color: var(--fg2); }
+.pool-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+.pool-g .kcw { container-type: inline-size; width: 100%; min-width: 0; }
+.pool-g .kc.locked:not(.soon) { --rc: color-mix(in srgb, var(--pc) 75%, #000); }
+.pool-g .kc.locked:not(.soon) .kc-a .layer, .pool-g .kc.locked:not(.soon) .kc-a .photo, .pool-g .kc.locked:not(.soon) .kc-a .ph { filter: grayscale(1) brightness(.7) contrast(1.05); transform: none; }
+.pool-g .kc.locked:not(.soon) .kc-a::after { font-size: 22cqw; color: color-mix(in srgb, var(--rc) 80%, #fff); text-shadow: 0 2px 10px #000c; }
+.pool-g .kc.locked:not(.soon) .kc-h b, .pool-g .kc.locked:not(.soon) .kc-s { color: var(--fg2); }
+@media (max-width: 560px) { .pool-g { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .pool-bar .pool-s { max-width: none; margin-left: 0; } }
 .cgrid .cell { display: flex; flex-direction: column; gap: 6px; }
 .cgrid .cap { font: 500 12px var(--mono); color: var(--mut); display: flex; justify-content: space-between; }
 
@@ -5835,10 +5852,22 @@ function openBonus(uid) {
 
 // ===== Liste des persos d'un booster =====
 function openPool(id) {
-  const pk = id === "jour" ? dailyPack() : packOf(id), pool = poolOf(pk);
-  $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Persos du booster" style="max-width:760px"><div class="sheet-h"><h2>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name} · ${pool.length} cartes</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="cgrid">${pool.sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank).map((c) => cardFor(c, { click: true })).join("")}</div></div></div>`;
-  $("overlay").hidden = false;
+  const pk = id === "jour" ? dailyPack() : packOf(id), pool = poolOf(pk), PF = { q: "", miss: false };
+  const own = pool.filter((c) => has(c.id)).length;
+  $("overlay").innerHTML = `<div class="sheet pool-sh" role="dialog" aria-modal="true" aria-label="Persos du booster"><div class="sheet-h"><h2>${esc(pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name)} : les persos</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="pool-bar"><b class="pool-n">${own} <span>/ ${pool.length} possédés</span></b><div class="search pool-s">${icon.search}<input class="in" type="search" id="pool-q" placeholder="Chercher un perso" autocomplete="off"></div>
+      <div class="seg pool-f"><button type="button" data-pf="0" aria-pressed="true">Tous</button><button type="button" data-pf="1" aria-pressed="false">Manquants</button></div></div>
+    <div class="sheet-b" id="pool-b"></div></div>`;
+  // portraits nets en noir et blanc pour ce qui manque (les persos pas encore sortis restent cachés)
+  const draw = () => {
+    const q = PF.q.trim().toLowerCase(), list = pool.filter((c) => (!PF.miss || !has(c.id)) && (!q || `${PEOPLE[c.who]?.name || ""} ${c.title || ""}`.toLowerCase().includes(q)));
+    const rars = Object.keys(RAR).sort((a, b) => RAR[b].rank - RAR[a].rank);
+    $("pool-b").innerHTML = rars.map((r) => { const all = pool.filter((c) => c.rar === r), l = list.filter((c) => c.rar === r); return l.length ? `<section class="pool-r" style="--pc:var(--r-${r})"><h3><i>${LETTER[r]}</i>${RAR[r].label}<span>${all.filter((c) => has(c.id)).length}/${all.length}</span></h3>
+      <div class="pool-g">${l.map((c) => cardFor(c, { click: true })).join("")}</div></section>` : ""; }).join("") || `<p class="note">Aucun perso ne correspond.</p>`;
+  };
+  draw(); $("overlay").hidden = false;
+  $("pool-q").addEventListener("input", (e) => { PF.q = e.target.value; draw(); });
+  $("overlay").querySelectorAll("[data-pf]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); PF.miss = b.dataset.pf === "1"; $("overlay").querySelectorAll("[data-pf]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); }));
 }
 
 // ===== Ouverture d'un booster (plein écran) =====

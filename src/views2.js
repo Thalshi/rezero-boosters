@@ -539,10 +539,22 @@ function openBonus(uid) {
 
 // ===== Liste des persos d'un booster =====
 function openPool(id) {
-  const pk = id === "jour" ? dailyPack() : packOf(id), pool = poolOf(pk);
-  $("overlay").innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Persos du booster" style="max-width:760px"><div class="sheet-h"><h2>${pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name} · ${pool.length} cartes</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="cgrid">${pool.sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank).map((c) => cardFor(c, { click: true })).join("")}</div></div></div>`;
-  $("overlay").hidden = false;
+  const pk = id === "jour" ? dailyPack() : packOf(id), pool = poolOf(pk), PF = { q: "", miss: false };
+  const own = pool.filter((c) => has(c.id)).length;
+  $("overlay").innerHTML = `<div class="sheet pool-sh" role="dialog" aria-modal="true" aria-label="Persos du booster"><div class="sheet-h"><h2>${esc(pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name)} : les persos</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="pool-bar"><b class="pool-n">${own} <span>/ ${pool.length} possédés</span></b><div class="search pool-s">${icon.search}<input class="in" type="search" id="pool-q" placeholder="Chercher un perso" autocomplete="off"></div>
+      <div class="seg pool-f"><button type="button" data-pf="0" aria-pressed="true">Tous</button><button type="button" data-pf="1" aria-pressed="false">Manquants</button></div></div>
+    <div class="sheet-b" id="pool-b"></div></div>`;
+  // portraits nets en noir et blanc pour ce qui manque (les persos pas encore sortis restent cachés)
+  const draw = () => {
+    const q = PF.q.trim().toLowerCase(), list = pool.filter((c) => (!PF.miss || !has(c.id)) && (!q || `${PEOPLE[c.who]?.name || ""} ${c.title || ""}`.toLowerCase().includes(q)));
+    const rars = Object.keys(RAR).sort((a, b) => RAR[b].rank - RAR[a].rank);
+    $("pool-b").innerHTML = rars.map((r) => { const all = pool.filter((c) => c.rar === r), l = list.filter((c) => c.rar === r); return l.length ? `<section class="pool-r" style="--pc:var(--r-${r})"><h3><i>${LETTER[r]}</i>${RAR[r].label}<span>${all.filter((c) => has(c.id)).length}/${all.length}</span></h3>
+      <div class="pool-g">${l.map((c) => cardFor(c, { click: true })).join("")}</div></section>` : ""; }).join("") || `<p class="note">Aucun perso ne correspond.</p>`;
+  };
+  draw(); $("overlay").hidden = false;
+  $("pool-q").addEventListener("input", (e) => { PF.q = e.target.value; draw(); });
+  $("overlay").querySelectorAll("[data-pf]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); PF.miss = b.dataset.pf === "1"; $("overlay").querySelectorAll("[data-pf]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); }));
 }
 
 // ===== Ouverture d'un booster (plein écran) =====

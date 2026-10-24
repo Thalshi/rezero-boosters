@@ -5,6 +5,9 @@
 
 ---
 
+## 2026-10-24 — Créateur : compteur de raretés par perso (27e mise en ligne)
+- Persos et cartes : sous chaque tête, le nombre de cartes par rareté (M, L, E, R, U, C) et les skins à part ; en titre de chaque épisode, le total par rareté. Pour repérer les persos à étaler.
+
 ## 2026-10-24 — Sultran'Zahar étalé sur trois raretés (26e mise en ligne)
 - « Veilleur du rempart » et « Main du néant » passent Légendaires, « Le Vide s'ouvre » Épique ; « Néant » et « Trône du Vide » restent Mythiques. Le Monde a enfin ses propres Épiques et Légendaires.
 

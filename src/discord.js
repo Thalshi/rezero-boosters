@@ -2,7 +2,13 @@
 // de l'app (connexion Discord + base D1). Même interface, pour que le jeu n'ait rien à changer.
 (() => {
   if (window.claude?.use) return;
-  const POLL = 6000;
+  const POLL = 20000;
+  // économie d'appels : onglet caché ou personne n'a touché la page depuis 10 min → on ne vérifie plus que toutes les 5 min
+  let lastAct = Date.now();
+  const asleep = () => document.hidden || Date.now() - lastAct > 10 * 60e3;
+  window.__asleep = asleep;
+  for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) addEventListener(ev, () => { const was = asleep(); lastAct = Date.now(); if (was) dispatchEvent(new Event("rz-wake")); }, { passive: true, capture: true });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { lastAct = Date.now(); dispatchEvent(new Event("rz-wake")); } });
   let mePromise = null;
   const me = () => (mePromise ||= fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null));
   const api = async (method, url, body) => {
@@ -17,7 +23,7 @@
   // Synchro (étape 2) : un seul appel régulier, /api/sync, renvoie les compteurs de version de chaque section
   // (market, players, feed…). On ne recharge que les abonnements dont la section a changé, plus une resynchro
   // complète de secours toutes les minutes. Si /api/sync ne répond pas, chaque abonnement se recharge comme avant.
-  const FULL = 60000, subs = new Set();
+  const FULL = 10 * 60000, subs = new Set();
   let timer = null, running = false, syncOk = true;
   const sectionOf = (path) => String(path || "").split("/")[0];
   async function reload(sub, rev) {
@@ -39,8 +45,8 @@
     running = false;
     schedule();
   }
-  function schedule() { if (!timer && subs.size) timer = setTimeout(tick, document.hidden ? POLL * 3 : POLL); }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  function schedule() { if (!timer && subs.size) timer = setTimeout(tick, asleep() ? 5 * 60e3 : POLL); }
+  addEventListener("rz-wake", () => tick());
   function poll(load, next, error, path) {
     const sub = { load, next, error, section: sectionOf(path), last: null, rev: undefined, at: 0, stop: () => subs.delete(sub) };
     subs.add(sub);

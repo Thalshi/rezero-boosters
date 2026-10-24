@@ -2530,7 +2530,13 @@ html.w3d-on body::before { background:
 // de l'app (connexion Discord + base D1). Même interface, pour que le jeu n'ait rien à changer.
 (() => {
   if (window.claude?.use) return;
-  const POLL = 6000;
+  const POLL = 20000;
+  // économie d'appels : onglet caché ou personne n'a touché la page depuis 10 min → on ne vérifie plus que toutes les 5 min
+  let lastAct = Date.now();
+  const asleep = () => document.hidden || Date.now() - lastAct > 10 * 60e3;
+  window.__asleep = asleep;
+  for (const ev of ["pointerdown", "keydown", "wheel", "touchstart"]) addEventListener(ev, () => { const was = asleep(); lastAct = Date.now(); if (was) dispatchEvent(new Event("rz-wake")); }, { passive: true, capture: true });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) { lastAct = Date.now(); dispatchEvent(new Event("rz-wake")); } });
   let mePromise = null;
   const me = () => (mePromise ||= fetch("/api/me", { credentials: "same-origin" }).then((r) => (r.ok ? r.json() : null)).catch(() => null));
   const api = async (method, url, body) => {
@@ -2545,7 +2551,7 @@ html.w3d-on body::before { background:
   // Synchro (étape 2) : un seul appel régulier, /api/sync, renvoie les compteurs de version de chaque section
   // (market, players, feed…). On ne recharge que les abonnements dont la section a changé, plus une resynchro
   // complète de secours toutes les minutes. Si /api/sync ne répond pas, chaque abonnement se recharge comme avant.
-  const FULL = 60000, subs = new Set();
+  const FULL = 10 * 60000, subs = new Set();
   let timer = null, running = false, syncOk = true;
   const sectionOf = (path) => String(path || "").split("/")[0];
   async function reload(sub, rev) {
@@ -2567,8 +2573,8 @@ html.w3d-on body::before { background:
     running = false;
     schedule();
   }
-  function schedule() { if (!timer && subs.size) timer = setTimeout(tick, document.hidden ? POLL * 3 : POLL); }
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) tick(); });
+  function schedule() { if (!timer && subs.size) timer = setTimeout(tick, asleep() ? 5 * 60e3 : POLL); }
+  addEventListener("rz-wake", () => tick());
   function poll(load, next, error, path) {
     const sub = { load, next, error, section: sectionOf(path), last: null, rev: undefined, at: 0, stop: () => subs.delete(sub) };
     subs.add(sub);
@@ -4795,7 +4801,8 @@ function goTo(go) {
 
 // --- appel régulier au serveur ---
 let pulseT = null, pulsing = false;
-function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open ? 3000 : document.hidden ? 60000 : 15000); }
+function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open && !document.hidden ? 3000 : window.__asleep?.() || document.hidden ? 5 * 60e3 : 30000); }
+addEventListener("rz-wake", () => { if (SRV && !pulsing) { clearTimeout(pulseT); pulse(); } });
 async function pulse() {
   if (!SRV || pulsing) return;
   pulsing = true;
@@ -7476,7 +7483,7 @@ async function cfLoadTable(gid) {
     return;
   }
   CF.fails = 0;
-  if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 8000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
+  if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 30000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
 }
 async function cfAct(action) {
   if (CF.busy) return; CF.busy = true;
@@ -8129,7 +8136,7 @@ function creaStyle() {
   if (!st) { st = document.createElement("style"); st.id = "crea-art"; document.head.appendChild(st); }
   st.textContent = Object.entries(CREA.uris).map(([k, u]) => `.who-${k} .layer{background-image:url(${u})}`).join("");
 }
-setInterval(() => { if (SRV && !document.hidden) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
+setInterval(() => { if (SRV && !document.hidden && !window.__asleep?.()) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
 
 // --- la page ---
 const CR = { tab: "persos", q: "", who: "", edit: null, busy: false };
@@ -11102,7 +11109,7 @@ setInterval(() => { const full = save.free >= FREE_MAX; if (full && !wasFull) pu
 setInterval(() => { if (regen()) persist(); if (!opening && $("overlay").hidden && !menuOpen && view === "boosters" && !document.activeElement?.closest?.("input,select,textarea")) draw(); else header(); }, 30000);
 setInterval(() => { if (view === "boosters" && !opening && $("overlay").hidden && Date.now() - heroPause > 15000 && !document.hidden) { heroIdx++; refreshHero(); } }, 7000);
 // en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
-setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => header()).catch(() => {}); }, 45000);
+setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden && !window.__asleep?.()) srv("state").then(() => header()).catch(() => {}); }, 120000);
 connect();
 
 // le monde du QG en fond du site (même décor que l'arène 3D)

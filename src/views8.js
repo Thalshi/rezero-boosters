@@ -31,7 +31,7 @@ function creaStyle() {
   if (!st) { st = document.createElement("style"); st.id = "crea-art"; document.head.appendChild(st); }
   st.textContent = Object.entries(CREA.uris).map(([k, u]) => `.who-${k} .layer{background-image:url(${u})}`).join("");
 }
-setInterval(() => { if (SRV && !document.hidden) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
+setInterval(() => { if (SRV && !document.hidden && !window.__asleep?.()) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
 
 // --- la page ---
 const CR = { tab: "persos", q: "", who: "", edit: null, busy: false };

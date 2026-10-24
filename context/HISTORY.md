@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-24 — Moins d'appels au serveur (31e mise en ligne)
+- Constat : un seul onglet ouvert faisait ~1 500 appels par heure (20 000 dans la journée pour Reichi seul, quota gratuit Cloudflare : 100 000).
+- Synchro toutes les 20 s (avant 6 s), resynchro complète toutes les 10 min (avant 1 min), pouls 30 s (avant 15 s), état 2 min (avant 45 s).
+- Onglet caché ou page pas touchée depuis 10 min : une vérification toutes les 5 min, tout repart au premier geste. Mesuré : ~560 appels par heure en usage, presque rien au repos.
+
 ## 2026-10-24 — Pastilles des boosters lisibles (30e mise en ligne)
 - Textes raccourcis pour ne plus être coupés : « à récupérer », « série », « avant le doré », « avant Légendaire ».
 

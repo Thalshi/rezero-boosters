@@ -19,7 +19,7 @@ async function cfLoadTable(gid) {
     return;
   }
   CF.fails = 0;
-  if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 8000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
+  if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 30000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
 }
 async function cfAct(action) {
   if (CF.busy) return; CF.busy = true;

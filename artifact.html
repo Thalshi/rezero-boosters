@@ -4678,7 +4678,8 @@ function goTo(go) {
 
 // --- appel régulier au serveur ---
 let pulseT = null, pulsing = false;
-function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open ? 3000 : document.hidden ? 60000 : 15000); }
+function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open && !document.hidden ? 3000 : window.__asleep?.() || document.hidden ? 5 * 60e3 : 30000); }
+addEventListener("rz-wake", () => { if (SRV && !pulsing) { clearTimeout(pulseT); pulse(); } });
 async function pulse() {
   if (!SRV || pulsing) return;
   pulsing = true;
@@ -7359,7 +7360,7 @@ async function cfLoadTable(gid) {
     return;
   }
   CF.fails = 0;
-  if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 8000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
+  if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 30000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
 }
 async function cfAct(action) {
   if (CF.busy) return; CF.busy = true;
@@ -8012,7 +8013,7 @@ function creaStyle() {
   if (!st) { st = document.createElement("style"); st.id = "crea-art"; document.head.appendChild(st); }
   st.textContent = Object.entries(CREA.uris).map(([k, u]) => `.who-${k} .layer{background-image:url(${u})}`).join("");
 }
-setInterval(() => { if (SRV && !document.hidden) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
+setInterval(() => { if (SRV && !document.hidden && !window.__asleep?.()) creaLoad().then((changed) => { if (changed && !opening && $("overlay").hidden && view !== "createur") draw(); }); }, 90000);
 
 // --- la page ---
 const CR = { tab: "persos", q: "", who: "", edit: null, busy: false };
@@ -10985,7 +10986,7 @@ setInterval(() => { const full = save.free >= FREE_MAX; if (full && !wasFull) pu
 setInterval(() => { if (regen()) persist(); if (!opening && $("overlay").hidden && !menuOpen && view === "boosters" && !document.activeElement?.closest?.("input,select,textarea")) draw(); else header(); }, 30000);
 setInterval(() => { if (view === "boosters" && !opening && $("overlay").hidden && Date.now() - heroPause > 15000 && !document.hidden) { heroIdx++; refreshHero(); } }, 7000);
 // en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
-setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => header()).catch(() => {}); }, 45000);
+setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden && !window.__asleep?.()) srv("state").then(() => header()).catch(() => {}); }, 120000);
 connect();
 
 // le monde du QG en fond du site (même décor que l'arène 3D)

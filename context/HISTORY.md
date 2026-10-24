@@ -5,6 +5,12 @@
 
 ---
 
+## 2026-10-24 — Raretés plus dures, plus de boosters, carte vœu du mois (24e mise en ligne)
+- Mythique ÷3 (0,05 % par carte, 0,17 % en 5e carte, 0,5 % au pack du jour), Légendaire ÷2, garantie Légendaire au 60e booster (avant 40).
+- Plus de boosters : réserve de 5 (avant 3), un gratuit toutes les 2 h (avant 3 h).
+- Bonus « cartes qui te manquent » (40 %) retiré par défaut, débloqué quand le joueur a une carte de chaque membre du QG (affiché « QG réuni x/14 »).
+- Carte vœu du mois : chacun choisit une carte (déjà sortie), elle a 1 chance sur 2 de sortir quand sa rareté tombe ; un choix par mois.
+
 ## 2026-10-24 — Cartes manquantes nettes partout (23e mise en ligne)
 - Collection, envies, wiki : une carte pas encore obtenue montre son portrait net en noir et blanc, cadre de sa rareté et « ? » (comme dans « Voir les persos »). Les persos pas encore sortis restent floutés « ??? ».
 

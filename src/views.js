@@ -280,6 +280,7 @@ function boosterZone() {
         <div class="mini4"><div><b>${PACK}</b><span>cartes par booster</span></div><div><b style="color:var(--r-${pk.daily ? "e" : "r"})">${pk.daily ? "Épique" : "Rare"}</b><span>ou mieux, garantie</span></div>
           <div><b style="color:var(--r-l)">${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div><div><b style="color:var(--gold)">${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div></div>
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
+        ${voeuBox()}
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
         <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
         ${fill.length ? `<p class="note">Pas encore de carte ${fill.map((r) => RAR[r].label).join(" ni ")} dans ce booster : ${fill.length > 1 ? "ces raretés viennent" : "cette rareté vient"} du Mix, avec les mêmes chances.</p>` : ""}

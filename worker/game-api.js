@@ -376,6 +376,11 @@ export async function gameRoute(req, env, user, path) {
       if (r.error) return fail(400, r.error);
       return json(r);
     }
+    if (path === "/api/game/voeu") {
+      const r = await mutate(env, user.id, (s) => { const o = G.setVoeuS(s, String(body.id || ""), cfg, user.id); return o.error ? { abort: true, error: o.error } : o; });
+      if (r.error) return fail(400, r.error);
+      return json(r);
+    }
     if (path === "/api/game/avorn/equip") {
       const id = body.id ? String(body.id) : null;
       const r = await mutate(env, user.id, (s) => { const o = G.equipAvOrnS(s, id); return o.error ? { abort: true, error: o.error } : o; });

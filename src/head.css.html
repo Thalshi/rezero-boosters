@@ -266,6 +266,19 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 @media (min-width: 560px) { .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 900px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; } }
 @media (min-width: 1200px) { .cgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+/* carte vœu du mois */
+.voeu { display: grid; gap: 6px; }
+.voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
+.voeu-c:hover { border-color: #b072ffaa; }
+.voeu-ph { flex: none; position: relative; width: 44px; height: 58px; border-radius: 8px; overflow: hidden; background: var(--bg2); display: grid; place-items: center; }
+.voeu-ph.none { color: #c9a0ff; font-size: 22px; }
+.voeu-ph .layer, .voeu-ph .photo, .voeu-ph .ph { position: absolute; inset: 0; background-size: cover; background-position: var(--pos, 50% 22%); }
+.voeu-c > span:nth-child(2) { display: grid; gap: 1px; min-width: 0; flex: 1; } .voeu-c small { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #c9a0ff; } .voeu-c b { font-size: 15px; } .voeu-c em { font-style: normal; font-size: 12px; color: var(--fg2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.voeu-c i { flex: none; font: 700 12px var(--body); font-style: normal; color: #c9a0ff; }
+.voeu-qg { margin: 0; font-size: 12px; line-height: 1.4; color: var(--fg3); } .voeu-qg.on { color: #4fd18b; }
+.voeu-pick { padding: 0; border: 0; background: none; border-radius: 10px; cursor: pointer; outline: 3px solid transparent; outline-offset: 3px; transition: outline-color .15s; }
+.voeu-pick.on { outline-color: #c9a0ff; } .voeu-pick:disabled { cursor: default; }
+.voeu-ok { position: sticky; bottom: 0; padding: 12px 22px; border-top: 1px solid var(--line); background: var(--panel); display: flex; justify-content: flex-end; }
 /* liste des persos d'un booster, façon Kyara */
 .pool-sh { max-width: 1120px !important; width: min(1120px, 96vw); }
 .pool-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 0 22px 14px; border-bottom: 1px solid var(--line); }

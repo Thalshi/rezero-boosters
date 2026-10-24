@@ -221,8 +221,13 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 /* carte pas encore obtenue : floutée en gris avec un « ? », comme sur Kyara */
 .kc.locked { --rc: var(--line3); background: var(--panel2); box-shadow: none; }
 .kc.locked::after { display: none; }
-.kc.locked .kc-a .layer, .kc.locked .kc-a .photo, .kc.locked .kc-a .ph { filter: grayscale(1) blur(5px) brightness(.45); transform: scale(1.1); }
+.kc.soon .kc-a .layer, .kc.soon .kc-a .photo, .kc.soon .kc-a .ph { filter: grayscale(1) blur(5px) brightness(.45); transform: scale(1.1); }
+/* carte pas encore obtenue : portrait net en noir et blanc, cadre de sa rareté (façon Kyara) ; les persos pas encore sortis restent flous */
+.kc.locked:not(.soon) .kc-a .layer, .kc.locked:not(.soon) .kc-a .photo, .kc.locked:not(.soon) .kc-a .ph { filter: grayscale(1) brightness(.7) contrast(1.05); }
+.kc.locked.r-c:not(.soon) { --rc: color-mix(in srgb, var(--r-c) 75%, #000); } .kc.locked.r-pc:not(.soon) { --rc: color-mix(in srgb, var(--r-pc) 75%, #000); } .kc.locked.r-r:not(.soon) { --rc: color-mix(in srgb, var(--r-r) 75%, #000); } .kc.locked.r-e:not(.soon) { --rc: color-mix(in srgb, var(--r-e) 75%, #000); } .kc.locked.r-l:not(.soon) { --rc: color-mix(in srgb, var(--r-l) 75%, #000); } .kc.locked.r-m:not(.soon) { --rc: color-mix(in srgb, var(--r-m) 75%, #000); }
 .kc.locked .kc-a::after { content: "?"; position: absolute; inset: 0; display: grid; place-items: center; font: 900 30cqw var(--disp); color: rgba(255,255,255,.75); }
+.kc.locked:not(.soon) .kc-a::after { font-size: 22cqw; color: color-mix(in srgb, var(--rc) 80%, #fff); text-shadow: 0 2px 10px #000c; }
+.kc.locked:not(.soon) .kc-h b, .kc.locked:not(.soon) .kc-s { color: var(--fg2); }
 .kc.locked .kc-h i { background: var(--line3); color: var(--fg2); }
 .kc.locked .kc-h b, .kc.locked .kc-s, .kc.locked .kc-p { color: var(--mut); }
 .kc.soon .kc-a { background: radial-gradient(circle at 50% 40%, #24222c, #0e0d12); }
@@ -281,10 +286,6 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .pool-r h3 span { margin-left: auto; font: 600 14px var(--mono); color: var(--fg2); }
 .pool-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
 .pool-g .kcw { container-type: inline-size; width: 100%; min-width: 0; }
-.pool-g .kc.locked:not(.soon) { --rc: color-mix(in srgb, var(--pc) 75%, #000); }
-.pool-g .kc.locked:not(.soon) .kc-a .layer, .pool-g .kc.locked:not(.soon) .kc-a .photo, .pool-g .kc.locked:not(.soon) .kc-a .ph { filter: grayscale(1) brightness(.7) contrast(1.05); transform: none; }
-.pool-g .kc.locked:not(.soon) .kc-a::after { font-size: 22cqw; color: color-mix(in srgb, var(--rc) 80%, #fff); text-shadow: 0 2px 10px #000c; }
-.pool-g .kc.locked:not(.soon) .kc-h b, .pool-g .kc.locked:not(.soon) .kc-s { color: var(--fg2); }
 @media (max-width: 560px) { .pool-g { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .pool-bar .pool-s { max-width: none; margin-left: 0; } }
 .cgrid .cell { display: flex; flex-direction: column; gap: 6px; }
 .cgrid .cap { font: 500 12px var(--mono); color: var(--mut); display: flex; justify-content: space-between; }

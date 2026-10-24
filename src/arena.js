@@ -53,7 +53,7 @@ const Arena = (() => {
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
       <svg id="ar-aim" aria-hidden="true"><path id="ar-aimPath"/><circle id="ar-aimEnd" r="16"/></svg>
-      <button class="ar-chip" id="ar-chip" type="button" hidden></button>
+      <button class="ar-chip" id="ar-chip" type="button" hidden></button><div class="ar-turn" id="ar-turn" hidden></div>
       <div class="ar-tbl" id="ar-tbl"><button type="button" id="ar-tblBtn"><span>La table · rôles et styles</span><span id="ar-tblArr">▾</span></button><div class="ar-bd" id="ar-tblBd"></div></div>
       <div class="ar-log" id="ar-log" data-tab="log"><div class="ar-tabs"><button type="button" id="ar-tabLog" class="on">Historique</button><button type="button" id="ar-tabChat">Salon <i id="ar-chatN"></i></button><button type="button" id="ar-logArr" aria-label="Ouvrir">▾</button></div>
         <div class="ar-last" id="ar-logLast"></div><div class="ar-bd" id="ar-logBd"></div>
@@ -777,6 +777,8 @@ const Arena = (() => {
   function renderSide() {
     const v = CF.table.vue, fin = finAct(), btn = $a("end");
     $a("deckN").textContent = v.pioche; setPile(v.pioche);
+    // numéro du tour (un tour = chacun a joué une fois)
+    const tn = v.tour?.tour; $a("turn").hidden = !(tn && v.phase === "partie"); if (tn) $a("turn").innerHTML = `Tour <b>${tn}</b>${v.tour?.pid ? ` · ${v.tour.pid === v.moi ? "à toi" : esc(nm(v.tour.pid))}` : ""}`;
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }

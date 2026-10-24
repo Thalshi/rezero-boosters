@@ -101,6 +101,8 @@ try {
       const v3 = (await A.api("confront/state", { gid })).vue;
       t.check("fin du tour depuis l'arène", !(v3.attente?.pid === v3.moi && v3.attente.kind === "tour") || v3.phase === "fin");
     }
+    // noms de cartes touchables dans l'historique
+    if (await page.locator("#ar-logBd .cf-cn").count()) { await page.locator("#ar-logBd .cf-cn").first().dispatchEvent("click"); await page.waitForTimeout(500); t.check("historique : toucher une carte ouvre son effet", await page.locator(".cf-info").count() === 1); await page.locator('.cf-info [data-act="close"]').dispatchEvent("click"); await page.waitForTimeout(300); }
     // historique
     if (label === "mobile") await page.click("#ar-logArr"); else await page.click("#ar-tabLog");
     if (label !== "mobile") await page.click("#ar-tabLog");

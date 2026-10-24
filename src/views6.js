@@ -279,7 +279,7 @@ function cfHand(v, me, pr, acts) {
     ${fin?.aDefausser ? `<p class="note">Tu as trop de cartes : touche ${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} à défausser, puis « Finir le tour ».</p>` : ""}</section>`;
 }
 const EVT = {
-  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
+  debut: () => "La partie commence.", tour: (e) => `Tour ${e.tour || e.n || ""} · ${cfName(e.pid)}`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, revenant: (e) => `${cfName(e.pid)} revient des enfers : c'était l'Errant !`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
@@ -296,7 +296,25 @@ const EVT = {
   choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
 const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr", reprise: "Œil sûr" };
-const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
+// noms de cartes dans l'historique : touchables, ils ouvrent la carte et son effet
+let CF_NAME_RE = null, CF_NAME_DEF = {};
+function cfLinkNames(html) {
+  const cartes = CF.cat?.cartes || {};
+  if (!CF_NAME_RE && Object.keys(cartes).length) {
+    CF_NAME_DEF = {}; for (const [k, d] of Object.entries(cartes)) if (d.nom) CF_NAME_DEF[esc(d.nom)] = k;
+    const names = Object.keys(CF_NAME_DEF).sort((x, y) => y.length - x.length).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    CF_NAME_RE = names.length ? new RegExp(names.join("|"), "g") : null;
+  }
+  return CF_NAME_RE ? html.replace(CF_NAME_RE, (n) => `<button type="button" class="cf-cn" data-cfdef="${CF_NAME_DEF[n]}">${n}</button>`) : html;
+}
+const cfEvent = (e) => cfLinkNames(esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e)));
+function cfCardInfo(def) {
+  const d = CF.cat?.cartes?.[def]; if (!d) return;
+  $("overlay").innerHTML = `<div class="sheet cf-info" role="dialog" aria-modal="true" aria-label="${esc(d.nom)}" style="max-width:360px"><div class="sheet-h"><h2>${esc(d.nom)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><div class="cf-info-card">${cfFace({ def, signe: "", rang: "" })}</div><p>${esc(d.texte || "")}</p>${d.portee ? `<p class="note">Portée ${d.portee}</p>` : ""}</div></div>`;
+  $("overlay").hidden = false;
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-cfdef]"); if (b) { e.stopPropagation(); cfCardInfo(b.dataset.cfdef); } }, true);
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
   const fin = v.actions.find((a) => a.type === "finir");

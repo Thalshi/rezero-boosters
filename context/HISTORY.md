@@ -8,6 +8,7 @@
 ## 2026-10-24 — Confrontation : « Rejoindre » par lien (37e mise en ligne)
 - « Partager le salon » › « Envoyer au comptoir… » : le comptoir s'ouvre avec le message prêt, on l'envoie au QG ou à un ami en privé (onglet Amis), ou on annule. Plus d'envoi direct au QG.
 - « Quitter le salon » ramène à la liste des salons (avant, on restait dessus en spectateur) ; « Fermer » aussi directement dans la liste pour les salons qu'on a créés (deuxième toucher pour confirmer).
+- Confrontation : dans l'historique, toucher le nom d'une carte ouvre la carte et son effet ; numéro du tour affiché (« Tour 3 · à toi ») et dans l'historique (« Tour 3 · Sunishi »).
 - Confrontation : en revenant sur l'onglet, la table se met à jour tout de suite (avant, jusqu'à 30 s d'attente : l'hôte ne voyait pas arriver les joueurs).
 - Comptoir : les liens dans les messages (QG et privé) sont cliquables ; un lien du site (salon, profil) s'ouvre directement dans l'app.
 - Vue 3D : le comptoir passait derrière la scène (partage d'un salon invisible) ; il passe devant.

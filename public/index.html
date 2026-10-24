@@ -333,6 +333,8 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .np-del:hover { opacity: 1; color: var(--fg); background: #ffffff14; } .np-acts { display: flex; gap: 12px; }
 .ref-expl { margin: 8px 0 14px; padding-left: 18px; display: grid; gap: 6px; color: var(--fg2); font-size: 14px; line-height: 1.5; } .ref-expl b { color: var(--fg); }
 .cm-link { color: #7ec8ff; text-decoration: underline; text-underline-offset: 2px; word-break: break-all; } .cm-link:hover { color: #b5e0ff; }
+.cf-cn { display: inline; padding: 0; border: 0; background: none; font: inherit; color: #ffd98a; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
+.cf-cn:hover { color: #fff3d0; } .cf-info-card { width: 180px; margin: 0 auto 12px; } .cf-info p { line-height: 1.5; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -1725,6 +1727,7 @@ body.ar-on { overflow: hidden; }
 @keyframes ar-low { to { transform: scale(1.06); box-shadow: 0 0 18px #ff4d5e; } }
 /* rôle */
 .ar-chip { position: absolute; left: 14px; top: calc(56px + env(safe-area-inset-top)); z-index: 6; display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 12px; background: #0b0916e6; border: 1px solid var(--rc, var(--ac)); color: var(--af); box-shadow: 0 0 16px color-mix(in srgb, var(--rc, var(--ac)) 35%, transparent); cursor: pointer; text-align: left; font: inherit; }
+.ar-turn { position: absolute; left: 14px; top: calc(160px + env(safe-area-inset-top)); z-index: 6; padding: 4px 14px; border-radius: 999px; background: #0e0a1ecc; border: 1px solid #e8c77e66; font: 600 12px var(--mono); letter-spacing: .06em; color: var(--fg2); pointer-events: none; } .ar-turn b { color: #ffe9a8; font-size: 14px; }
 .ar-chip i { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; color: var(--rc); border: 1px solid var(--rc); }
 .ar-chip i .ic { width: 22px; height: 22px; }
 .ar-chip b { display: block; font: 700 14px var(--disp); color: var(--rc); } .ar-chip small { font: 600 10px var(--body); color: var(--am); }
@@ -7964,7 +7967,7 @@ function cfHand(v, me, pr, acts) {
     ${fin?.aDefausser ? `<p class="note">Tu as trop de cartes : touche ${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} à défausser, puis « Finir le tour ».</p>` : ""}</section>`;
 }
 const EVT = {
-  debut: () => "La partie commence.", tour: (e) => `Tour de ${cfName(e.pid)}.`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
+  debut: () => "La partie commence.", tour: (e) => `Tour ${e.tour || e.n || ""} · ${cfName(e.pid)}`, joue: (e) => `${cfName(e.pid)} joue ${cfCardDef(e.carte || { def: e.def }).nom}${e.cible ? ` sur ${cfName(e.cible)}` : ""}${e.prise ? ` et prend ${cfCardDef(e.prise).nom}` : ""}${e.defaussee ? ` : ${cfCardDef(e.defaussee).nom} est détruite` : ""}${e.remplace ? ` (${cfCardDef(e.remplace).nom} défaussé : ${CF.cat?.regles?.equipMax || 2} équipements au plus)` : ""}.`,
   degats: (e) => `${cfName(e.pid)} perd ${e.n || 1} PV.`, pare: (e) => `${cfName(e.pid)} pare.`, riposte: (e) => `${cfName(e.pid)} riposte.`,
   elimination: (e) => `${cfName(e.pid)} est éliminé${e.role ? ` (${ROLE_LABEL[e.role]})` : ""}.`, revenant: (e) => `${cfName(e.pid)} revient des enfers : c'était l'Errant !`, fin: () => "Fin de la partie.", abandon: (e) => `${cfName(e.pid)} abandonne.`,
   presage: (e) => `Présage de ${cfName(e.pid)}${PRESAGE_POUR[e.quoi] ? ` (${PRESAGE_POUR[e.quoi]})` : ""} : ${(e.cartes || []).map((c) => `${cfSigne(c.signe).nom} ${c.rang}`).join(", ") || "?"}, ${e.favorable ? "réussi" : "raté"}.`, vol: (e) => `${cfName(e.pid)} vole une carte${e.cible ? ` à ${cfName(e.cible)}` : ""}.`, vol_public: (e) => `${cfName(e.pid)} prend une carte à ${cfName(e.cible)}.`,
@@ -7981,7 +7984,25 @@ const EVT = {
   choix_prive: () => "Ton personnage est choisi.", defausse_fin: (e) => `${cfName(e.pid)} défausse en fin de tour.`, esquive: (e) => `${cfName(e.pid)} esquive${e.par === "voile" ? " (Voile de brume)" : e.par === "defense" ? " (Garde)" : ""}.`, survie: (e) => `${cfName(e.pid)} tient bon (Ténacité).`, fin_tour: (e) => `${cfName(e.pid)} finit son tour.`, role: (e) => `Rôle révélé : ${cfName(e.pid)} est ${ROLE_LABEL[e.role] || e.role}.`,
 };
 const PRESAGE_POUR = { voile: "Voile de brume", defense: "Garde", entrave: "Sceau d'entrave", orbe: "Orbe instable", precision: "Œil sûr", reprise: "Œil sûr" };
-const cfEvent = (e) => esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e));
+// noms de cartes dans l'historique : touchables, ils ouvrent la carte et son effet
+let CF_NAME_RE = null, CF_NAME_DEF = {};
+function cfLinkNames(html) {
+  const cartes = CF.cat?.cartes || {};
+  if (!CF_NAME_RE && Object.keys(cartes).length) {
+    CF_NAME_DEF = {}; for (const [k, d] of Object.entries(cartes)) if (d.nom) CF_NAME_DEF[esc(d.nom)] = k;
+    const names = Object.keys(CF_NAME_DEF).sort((x, y) => y.length - x.length).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    CF_NAME_RE = names.length ? new RegExp(names.join("|"), "g") : null;
+  }
+  return CF_NAME_RE ? html.replace(CF_NAME_RE, (n) => `<button type="button" class="cf-cn" data-cfdef="${CF_NAME_DEF[n]}">${n}</button>`) : html;
+}
+const cfEvent = (e) => cfLinkNames(esc((EVT[e.type] || (() => `${e.type.replace(/_/g, " ")}${e.pid ? ` · ${cfName(e.pid)}` : ""}`))(e)));
+function cfCardInfo(def) {
+  const d = CF.cat?.cartes?.[def]; if (!d) return;
+  $("overlay").innerHTML = `<div class="sheet cf-info" role="dialog" aria-modal="true" aria-label="${esc(d.nom)}" style="max-width:360px"><div class="sheet-h"><h2>${esc(d.nom)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><div class="cf-info-card">${cfFace({ def, signe: "", rang: "" })}</div><p>${esc(d.texte || "")}</p>${d.portee ? `<p class="note">Portée ${d.portee}</p>` : ""}</div></div>`;
+  $("overlay").hidden = false;
+}
+document.addEventListener("click", (e) => { const b = e.target.closest("[data-cfdef]"); if (b) { e.stopPropagation(); cfCardInfo(b.dataset.cfdef); } }, true);
 function cfSelect(uid) {
   const v = CF.table?.vue; if (!v) return;
   const fin = v.actions.find((a) => a.type === "finir");
@@ -9121,7 +9142,7 @@ const Arena = (() => {
       <div class="ar-banner"><b id="ar-banner"></b></div>
       <div class="ar-hand" id="ar-hand"></div>
       <svg id="ar-aim" aria-hidden="true"><path id="ar-aimPath"/><circle id="ar-aimEnd" r="16"/></svg>
-      <button class="ar-chip" id="ar-chip" type="button" hidden></button>
+      <button class="ar-chip" id="ar-chip" type="button" hidden></button><div class="ar-turn" id="ar-turn" hidden></div>
       <div class="ar-tbl" id="ar-tbl"><button type="button" id="ar-tblBtn"><span>La table · rôles et styles</span><span id="ar-tblArr">▾</span></button><div class="ar-bd" id="ar-tblBd"></div></div>
       <div class="ar-log" id="ar-log" data-tab="log"><div class="ar-tabs"><button type="button" id="ar-tabLog" class="on">Historique</button><button type="button" id="ar-tabChat">Salon <i id="ar-chatN"></i></button><button type="button" id="ar-logArr" aria-label="Ouvrir">▾</button></div>
         <div class="ar-last" id="ar-logLast"></div><div class="ar-bd" id="ar-logBd"></div>
@@ -9845,6 +9866,8 @@ const Arena = (() => {
   function renderSide() {
     const v = CF.table.vue, fin = finAct(), btn = $a("end");
     $a("deckN").textContent = v.pioche; setPile(v.pioche);
+    // numéro du tour (un tour = chacun a joué une fois)
+    const tn = v.tour?.tour; $a("turn").hidden = !(tn && v.phase === "partie"); if (tn) $a("turn").innerHTML = `Tour <b>${tn}</b>${v.tour?.pid ? ` · ${v.tour.pid === v.moi ? "à toi" : esc(nm(v.tour.pid))}` : ""}`;
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }

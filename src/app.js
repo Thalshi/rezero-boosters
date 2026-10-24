@@ -670,6 +670,15 @@ function dismissNotif(el) {
   if (el.dataset.nid) o.ids = [...o.ids, +el.dataset.nid].slice(-300);
   lsSet("rzlol-notif-off", JSON.stringify(o)); badges();
 }
+// supprimer une notification (la croix) ou toutes : retirées de la cloche sur cet appareil
+document.addEventListener("click", (e) => {
+  const d = e.target.closest("[data-ndel]"), c = e.target.closest("[data-nclear]");
+  if (!d && !c) return;
+  e.stopPropagation(); e.preventDefault();
+  const o = notifOff(), ids = d ? [+d.dataset.ndel] : shownNotifs().map((n) => n.id);
+  o.ids = [...o.ids, ...ids].slice(-300); lsSet("rzlol-notif-off", JSON.stringify(o));
+  markRead(); badges(); drawNotifs();
+}, true);
 const shownNotifs = () => { const ids = new Set(notifOff().ids); return notif.items.filter((n) => !ids.has(n.id)); };
 function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;

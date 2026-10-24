@@ -329,6 +329,9 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .mr-go { margin-left: 8px; font: 700 11px var(--body); font-style: normal; color: var(--acc); opacity: .8; }
 .cm-av { flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; align-self: flex-start; transition: transform .15s; } .cm-av:hover { transform: scale(1.08); }
 .chat-draft { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin: 0 14px 8px; padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--gold); background: #f5c51812; font-size: 12.5px; color: var(--fg2); }
+.np-item { position: relative; } .np-del { margin-left: auto; align-self: center; flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: var(--fg3); opacity: .55; cursor: pointer; }
+.np-del:hover { opacity: 1; color: var(--fg); background: #ffffff14; } .np-acts { display: flex; gap: 12px; }
+.ref-expl { margin: 8px 0 14px; padding-left: 18px; display: grid; gap: 6px; color: var(--fg2); font-size: 14px; line-height: 1.5; } .ref-expl b { color: var(--fg); }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -4851,6 +4854,15 @@ function dismissNotif(el) {
   if (el.dataset.nid) o.ids = [...o.ids, +el.dataset.nid].slice(-300);
   lsSet("rzlol-notif-off", JSON.stringify(o)); badges();
 }
+// supprimer une notification (la croix) ou toutes : retirées de la cloche sur cet appareil
+document.addEventListener("click", (e) => {
+  const d = e.target.closest("[data-ndel]"), c = e.target.closest("[data-nclear]");
+  if (!d && !c) return;
+  e.stopPropagation(); e.preventDefault();
+  const o = notifOff(), ids = d ? [+d.dataset.ndel] : shownNotifs().map((n) => n.id);
+  o.ids = [...o.ids, ...ids].slice(-300); lsSet("rzlol-notif-off", JSON.stringify(o));
+  markRead(); badges(); drawNotifs();
+}, true);
 const shownNotifs = () => { const ids = new Set(notifOff().ids); return notif.items.filter((n) => !ids.has(n.id)); };
 function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
@@ -5196,10 +5208,10 @@ function drawNotifs() {
   const box = $("notifPanel"); if (!box) return;
   const td = todos();
   const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
-  box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
+  box.innerHTML = `<div class="np-head"><b>Notifications</b><span class="np-acts">${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}${SRV && shownNotifs().length ? `<button class="linkbtn" type="button" data-nclear>Tout effacer</button>` : ""}</span></div>
     ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}" data-ntodo="${esc(x.text)}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
     <div class="np-sec">Récent</div>
-    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span><span class="np-del" role="button" tabindex="0" data-ndel="${n.id}" title="Supprimer" aria-label="Supprimer cette notification">✕</span></button>`).join("")
       : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
       : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
     ${"Notification" in window ? `<button class="btn sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;
@@ -11251,9 +11263,20 @@ document.addEventListener("click", async (e) => {
   }
 });
 // onglet Dev : lancer le parrainage, et la remise à zéro complète (avant la présentation au QG)
-{ const f = VIEWS.dev; VIEWS.dev = () => (SRV && IS_DEV ? `<div class="wrap page" style="padding-bottom:0"><section class="card sec ref-danger"><h2>Lancement public</h2>
-    <p class="note">Avant de montrer le jeu au QG : remets tout à zéro (tous les joueurs repartent de rien, même vous), puis lance le parrainage pour 2 semaines. Les comptes, les épisodes, les créations et les prédictions sont gardés.</p>
-    <div class="row"><button class="btn" type="button" data-reflaunch>Lancer le parrainage (2 semaines)</button><button class="btn danger" type="button" data-resetall>Tout remettre à zéro…</button></div></section></div>` : "") + f(); }
+// bloc « Lancement public » : expliqué pour Billy (onglet Admin) et pour le dev (onglet Dev, avec la remise à zéro)
+const refAdminBlock = (dev) => `<div class="wrap page" style="padding-bottom:0"><section class="card sec ${dev ? "ref-danger" : ""}"><h2>Parrainage · événement de 2 semaines</h2>
+    <p class="note">Chaque joueur a un lien perso (menu « Parrainage »). Quelqu'un qui arrive par ce lien voit d'abord la vidéo de l'épisode, se connecte avec Discord et devient son filleul.</p>
+    <ul class="ref-expl">
+      <li><b>Filleul validé</b> : un compte tout neuf (moins de 48 h) qui ouvre ${REF_MIN_OPENED} boosters. Les faux comptes vides ne comptent pas, on ne peut pas se parrainer soi-même ni l'un l'autre.</li>
+      <li><b>À chaque filleul validé</b> : +${REF_GAIN.boosters} boosters pour le parrain et +${REF_GAIN.boosters} pour le filleul.</li>
+      <li><b>Paliers du parrain</b> : ${REF_TIERS.map((t) => `${t.n} amis → ${t.label}`).join(" · ")}.</li>
+      <li><b>Classement à la fin</b> : ${REF_PRIZES.map((p) => `${p.from}${p.from === 1 ? "er" : "e"}${p.from === p.to ? "" : ` à ${p.to}e`} → ${p.label}`).join(" · ")}. Les prix sont donnés tout seuls à la fin, avec une notification.</li>
+      <li><b>Durée</b> : 2 semaines à partir du clic sur « Lancer ». Tout le QG reçoit une notification au lancement. Seuls les filleuls validés pendant ces 2 semaines comptent.</li>
+    </ul>
+    ${dev ? `<p class="note"><b>Avant de montrer le jeu au QG</b> : « Tout remettre à zéro » efface les collections, l'essence, le marché, les échanges, le chat, les amis, le Défilé, la Confrontation et le parrainage de tout le monde (vous compris). Les comptes, épisodes, créations, prédictions, avis et bugs restent. Une fois la remise à zéro faite, le jeu propose de lancer le parrainage.</p>` : ""}
+    <div class="row"><button class="btn gold" type="button" data-reflaunch>Lancer le parrainage (2 semaines)</button><button class="btn" type="button" data-nav="parrainage">Voir la page Parrainage</button>${dev ? `<button class="btn danger" type="button" data-resetall>Tout remettre à zéro…</button>` : ""}</div></section></div>`;
+{ const f = VIEWS.dev; VIEWS.dev = () => (SRV && IS_DEV ? refAdminBlock(true) : "") + f(); }
+{ const f = VIEWS.admin; VIEWS.admin = () => (SRV && IS_ADMIN && !IS_DEV ? refAdminBlock(false) : "") + f(); }
 
 // ===== Gestion : tout ce qui sert à l'admin et au dev, dans une seule rubrique à onglets =====
 // Les pages gardent leur adresse (#/admin, #/createur…) : seul le menu change (une entrée « Gestion ») et chaque page

@@ -76,6 +76,17 @@ document.addEventListener("click", async (e) => {
   }
 });
 // onglet Dev : lancer le parrainage, et la remise à zéro complète (avant la présentation au QG)
-{ const f = VIEWS.dev; VIEWS.dev = () => (SRV && IS_DEV ? `<div class="wrap page" style="padding-bottom:0"><section class="card sec ref-danger"><h2>Lancement public</h2>
-    <p class="note">Avant de montrer le jeu au QG : remets tout à zéro (tous les joueurs repartent de rien, même vous), puis lance le parrainage pour 2 semaines. Les comptes, les épisodes, les créations et les prédictions sont gardés.</p>
-    <div class="row"><button class="btn" type="button" data-reflaunch>Lancer le parrainage (2 semaines)</button><button class="btn danger" type="button" data-resetall>Tout remettre à zéro…</button></div></section></div>` : "") + f(); }
+// bloc « Lancement public » : expliqué pour Billy (onglet Admin) et pour le dev (onglet Dev, avec la remise à zéro)
+const refAdminBlock = (dev) => `<div class="wrap page" style="padding-bottom:0"><section class="card sec ${dev ? "ref-danger" : ""}"><h2>Parrainage · événement de 2 semaines</h2>
+    <p class="note">Chaque joueur a un lien perso (menu « Parrainage »). Quelqu'un qui arrive par ce lien voit d'abord la vidéo de l'épisode, se connecte avec Discord et devient son filleul.</p>
+    <ul class="ref-expl">
+      <li><b>Filleul validé</b> : un compte tout neuf (moins de 48 h) qui ouvre ${REF_MIN_OPENED} boosters. Les faux comptes vides ne comptent pas, on ne peut pas se parrainer soi-même ni l'un l'autre.</li>
+      <li><b>À chaque filleul validé</b> : +${REF_GAIN.boosters} boosters pour le parrain et +${REF_GAIN.boosters} pour le filleul.</li>
+      <li><b>Paliers du parrain</b> : ${REF_TIERS.map((t) => `${t.n} amis → ${t.label}`).join(" · ")}.</li>
+      <li><b>Classement à la fin</b> : ${REF_PRIZES.map((p) => `${p.from}${p.from === 1 ? "er" : "e"}${p.from === p.to ? "" : ` à ${p.to}e`} → ${p.label}`).join(" · ")}. Les prix sont donnés tout seuls à la fin, avec une notification.</li>
+      <li><b>Durée</b> : 2 semaines à partir du clic sur « Lancer ». Tout le QG reçoit une notification au lancement. Seuls les filleuls validés pendant ces 2 semaines comptent.</li>
+    </ul>
+    ${dev ? `<p class="note"><b>Avant de montrer le jeu au QG</b> : « Tout remettre à zéro » efface les collections, l'essence, le marché, les échanges, le chat, les amis, le Défilé, la Confrontation et le parrainage de tout le monde (vous compris). Les comptes, épisodes, créations, prédictions, avis et bugs restent. Une fois la remise à zéro faite, le jeu propose de lancer le parrainage.</p>` : ""}
+    <div class="row"><button class="btn gold" type="button" data-reflaunch>Lancer le parrainage (2 semaines)</button><button class="btn" type="button" data-nav="parrainage">Voir la page Parrainage</button>${dev ? `<button class="btn danger" type="button" data-resetall>Tout remettre à zéro…</button>` : ""}</div></section></div>`;
+{ const f = VIEWS.dev; VIEWS.dev = () => (SRV && IS_DEV ? refAdminBlock(true) : "") + f(); }
+{ const f = VIEWS.admin; VIEWS.admin = () => (SRV && IS_ADMIN && !IS_DEV ? refAdminBlock(false) : "") + f(); }

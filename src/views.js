@@ -194,10 +194,10 @@ function drawNotifs() {
   const box = $("notifPanel"); if (!box) return;
   const td = todos();
   const login = window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour être prévenu` : "Sur le site du QG (connexion Discord), tu es prévenu";
-  box.innerHTML = `<div class="np-head"><b>Notifications</b>${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}</div>
+  box.innerHTML = `<div class="np-head"><b>Notifications</b><span class="np-acts">${notif.unread ? `<button class="linkbtn" type="button" data-act="notif-read">Tout marquer lu</button>` : ""}${SRV && shownNotifs().length ? `<button class="linkbtn" type="button" data-nclear>Tout effacer</button>` : ""}</span></div>
     ${td.length ? `<div class="np-sec">À faire</div>${td.map((x) => `<button class="np-item" type="button" data-ngo="${x.go}" data-ntodo="${esc(x.text)}"><i class="np-ic todo">!</i><span>${esc(x.text)}</span></button>`).join("")}` : ""}
     <div class="np-sec">Récent</div>
-    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span></button>`).join("")
+    ${SRV ? (shownNotifs().length ? shownNotifs().map((n) => `<button class="np-item ${n.id > notif.read ? "unread" : ""}" type="button" data-nid="${n.id}" data-ngo="${n.data?.go || (n.data?.chat ? "chat" : "")}"><i class="np-ic k-${n.kind}">${NICON[n.kind] || "•"}</i><span>${esc(n.text)}<small>${ago(n.ts)}</small></span><span class="np-del" role="button" tabindex="0" data-ndel="${n.id}" title="Supprimer" aria-label="Supprimer cette notification">✕</span></button>`).join("")
       : `<p class="note">Rien pour l'instant. Tes ventes, échanges, mentions et les nouveaux épisodes arriveront ici.</p>`)
       : `<p class="note">${login} de tes ventes, échanges, mentions et des nouveaux épisodes.</p>`}
     ${"Notification" in window ? `<button class="btn sm" type="button" data-act="notif-push">${pushOn() ? "Notifications de l'appareil : activées" : "Activer les notifications sur cet appareil"}</button>` : ""}`;

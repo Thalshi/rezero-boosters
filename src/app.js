@@ -674,7 +674,7 @@ function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
 function badges() {
   const b = $("bellN"), c = $("chatN"); if (!b) return;
-  const n = bellCount(), u = chat.open ? 0 : chatUnread();
+  const n = bellCount(), u = (chat.open ? 0 : chatUnread()) + (chat.req || 0) + (chat.dmUn || 0);
   b.hidden = !n; b.textContent = n > 9 ? "9+" : n;
   c.hidden = !u; c.textContent = u > 9 ? "9+" : u;
   document.title = (n + u ? `(${n + u}) ` : "") + "Re : LOL";
@@ -708,6 +708,7 @@ function markRead() {
 function goTo(go) {
   toggleNotifs(false);
   if (go === "chat") return openChat(true);
+  if (go === "friends") return openFriends();
   if (!go) return;
   if (go === "trades" || go === "market") { marketTab = go === "trades" ? "trades" : "mine"; nav("market"); } else nav(go);
 }
@@ -743,7 +744,9 @@ async function pulse() {
       notif.loaded = true;
       if (notif.open) { drawNotifs(); markRead(); }
     }
-    if (chat.open) drawChatList();
+    if (r.social) { const ch = r.social.req !== chat.req; chat.req = r.social.req; chat.dmUn = r.social.dm; if (chat.open && chat.tab === "amis" && !FR.peer && ch) openFriends(); }
+    if (chat.open && chat.tab === "amis" && FR.peer) await pollDM();
+    else if (chat.open) drawChatList();
     badges();
   } catch (e) {}
   pulsing = false;

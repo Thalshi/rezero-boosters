@@ -282,6 +282,18 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .z-free b { color: var(--fg); } .z-free.on { color: #4fd18b; } .z-free.on b { color: #4fd18b; }
 .qg-tag { display: inline-flex; align-items: center; margin-right: 4px; padding: 1px 6px; border-radius: 6px; font: 800 10px var(--mono); letter-spacing: .08em; color: #0b1a2a; background: linear-gradient(180deg, #8fd0ff, #3d8fe0); box-shadow: 0 0 8px #5ab0ff66; vertical-align: middle; }
 .qg-tag.lg { font-size: 12px; padding: 3px 9px; }
+/* comptoir : onglets QG / Amis */
+.chat-tabs { display: flex; gap: 6px; padding: 0 14px 8px; }
+.chat-tabs button { flex: 1; position: relative; padding: 8px; border-radius: 10px; border: 1px solid var(--line2); background: var(--bg2); color: var(--fg3); font: 700 13px var(--body); cursor: pointer; }
+.chat-tabs button[aria-pressed="true"] { background: var(--raise); color: var(--fg); border-color: var(--acc); }
+.chat-tabs .badge { position: absolute; top: -6px; right: -4px; }
+.fr-list { display: flex; flex-direction: column; gap: 6px; }
+.fr-h { margin: 10px 0 2px; font: 700 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--fg3); }
+.fr-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); text-align: left; }
+.fr-row .av { width: 32px; height: 32px; border-radius: 50%; flex: none; background: var(--raise); }
+.fr-row b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.fr-go { cursor: pointer; } .fr-go:hover { border-color: var(--acc); }
+.fr-open { font: 600 12px var(--body); color: var(--acc); } .fr-act { display: flex; gap: 6px; align-items: center; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -2740,6 +2752,7 @@ const MISSIONS = [
   { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 15 } },
   { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { chakra: 15 } },
   { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 10 } },
+  { id: "dm1",    label: "Écris un message privé à un ami",          key: "dm",      goal: 1, reward: { chakra: 10 } },
   { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 15 } },
   { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 10 } },
   { id: "cf1",    label: "Joue une partie de Confrontation",        key: "cfPlay",  goal: 1, reward: { chakra: 15 } },
@@ -2846,6 +2859,7 @@ const WEEKLY = [
   { id: "w-predok", label: "Réussis 2 prédictions",            key: "predwin", goal: 2,  reward: { chakra: 120 } },
   { id: "w-cfwin3", label: "Gagne 3 parties de Confrontation", key: "cfWin",   goal: 3,  reward: { chakra: 120 } },
   { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
+  { id: "w-friend", label: "Fais-toi un nouvel ami",           key: "friend",  goal: 1,  reward: { chakra: 80 } },
 ];
 const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
 const WEEKLY_BONUS = { boosters: 3, summons: 1 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
@@ -2860,6 +2874,7 @@ const FIRST_STEPS = [
   { id: "f-show",   label: "Mets une carte en vitrine",    test: (s) => (s.showcase || []).length >= 1,          reward: { chakra: 20 } },
   { id: "f-pred",   label: "Fais une prédiction",          test: (s) => (s.counts?.predict || 0) >= 1,           reward: { chakra: 30 } },
   { id: "f-chat",   label: "Dis bonjour dans le chat du QG", test: (s) => (s.counts?.chat || 0) >= 1,            reward: { chakra: 20 } },
+  { id: "f-friend", label: "Ajoute ton premier ami",        test: (s) => (s.counts?.friend || 0) >= 1,          reward: { chakra: 30 } },
   { id: "f-sheet",  label: "Ouvre une fiche de perso",     test: (s) => (s.counts?.sheet || 0) >= 1,             reward: { chakra: 20 } },
   { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
 ];
@@ -2888,6 +2903,7 @@ const ACHIEVEMENTS = [
   { id: "a-pred10",   label: "Prophète",            desc: "Réussir 10 prédictions",             val: (s) => s.counts?.predwin || 0, goal: 10, reward: { chakra: 300 } },
   { id: "a-vote25",   label: "Visionnaire",         desc: "Voter pour 25 prédictions",          val: (s) => s.counts?.predict || 0, goal: 25, reward: { chakra: 150 } },
   { id: "a-chat50",   label: "Pilier du QG",        desc: "Écrire 50 messages dans le chat",    val: (s) => s.counts?.chat || 0, goal: 50, reward: { chakra: 100 } },
+  { id: "a-friend10", label: "Bande de potes",      desc: "Avoir fait 10 amis",                 val: (s) => s.counts?.friend || 0, goal: 10, reward: { chakra: 150 } },
 ];
 // une faction est complète quand on a toutes ses cartes de base (hors skins)
 const factionsDoneS = (s) => Object.keys(FACTIONS).filter((f) => { const cs = CARDS.filter((c) => PEOPLE[c.who].fac === f); return cs.length && cs.every((c) => hasCard(s, c.id)); }).length;
@@ -4657,7 +4673,7 @@ function bellCount() { return notif.unread + todos().length; }
 const chatUnread = () => chat.msgs.filter((m) => m.ts > chat.seen && m.uid !== ME).length;
 function badges() {
   const b = $("bellN"), c = $("chatN"); if (!b) return;
-  const n = bellCount(), u = chat.open ? 0 : chatUnread();
+  const n = bellCount(), u = (chat.open ? 0 : chatUnread()) + (chat.req || 0) + (chat.dmUn || 0);
   b.hidden = !n; b.textContent = n > 9 ? "9+" : n;
   c.hidden = !u; c.textContent = u > 9 ? "9+" : u;
   document.title = (n + u ? `(${n + u}) ` : "") + "Re : LOL";
@@ -4691,6 +4707,7 @@ function markRead() {
 function goTo(go) {
   toggleNotifs(false);
   if (go === "chat") return openChat(true);
+  if (go === "friends") return openFriends();
   if (!go) return;
   if (go === "trades" || go === "market") { marketTab = go === "trades" ? "trades" : "mine"; nav("market"); } else nav(go);
 }
@@ -4726,7 +4743,9 @@ async function pulse() {
       notif.loaded = true;
       if (notif.open) { drawNotifs(); markRead(); }
     }
-    if (chat.open) drawChatList();
+    if (r.social) { const ch = r.social.req !== chat.req; chat.req = r.social.req; chat.dmUn = r.social.dm; if (chat.open && chat.tab === "amis" && !FR.peer && ch) openFriends(); }
+    if (chat.open && chat.tab === "amis" && FR.peer) await pollDM();
+    else if (chat.open) drawChatList();
     badges();
   } catch (e) {}
   pulsing = false;
@@ -5639,7 +5658,7 @@ function viewProfil() {
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] || isQG(p.uid) ? `<div class="pf-ttl">${qgTag(p.uid, "lg")}${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Équiper mon avatar</button>` : ""}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Équiper mon avatar</button>` : friendBtn(uid)}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
@@ -6026,10 +6045,82 @@ function drawChat() {
        <form class="chat-form" id="chatForm" autocomplete="off"><input id="chatIn" maxlength="300" placeholder="Écris au QG… (@Nom pour mentionner)" aria-label="Message">
        <button class="btn sm" type="button" data-act="chat-card" title="Montrer une de tes cartes">Carte</button><button class="btn acc sm" type="submit">Envoyer</button></form>`
     : `<p class="note">${window.DISCORD_LOGIN ? `<a href="/auth/login">Connecte-toi avec Discord</a> pour discuter avec le QG.` : "Le comptoir s'active quand tu es connecté à l'app."}</p>`;
+  const n = (chat.req || 0) + (chat.dmUn || 0);
+  const tabs = SRV ? `<div class="chat-tabs"><button type="button" data-ctab="qg" aria-pressed="${chat.tab !== "amis"}">Le QG</button><button type="button" data-ctab="amis" aria-pressed="${chat.tab === "amis"}">Amis${n ? `<i class="badge">${n > 9 ? "9+" : n}</i>` : ""}</button></div>` : "";
+  if (SRV && chat.tab === "amis") return drawFriends(tabs);
   $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir</small>Le QG en direct</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>
-    <div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
+    ${tabs}<div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
   drawChatList();
 }
+// ===== Amis : demandes, liste, comptoir privé =====
+const FR = { list: null, peer: null, msgs: [], last: 0, busy: false };
+async function loadFriends() { try { FR.list = await srv("friends"); } catch (e) { FR.list = FR.list || { friends: [], incoming: [], outgoing: [] }; } return FR.list; }
+const frAv = (f) => `<img class="av" src="${esc(f.avatar || "")}" alt="" onerror="this.style.visibility='hidden'">`;
+function drawFriends(tabs) {
+  const L = FR.list;
+  if (FR.peer) return drawDM(tabs);
+  const body = !L ? `<p class="chat-empty">Chargement…</p>` : `
+    ${L.incoming.length ? `<p class="fr-h">Demandes reçues</p>${L.incoming.map((f) => `<div class="fr-row">${frAv(f)}<b data-nav="profil" data-p="${f.uid}">${esc(f.name)}</b><span class="fr-act"><button class="btn acc sm" type="button" data-fracc="${f.uid}">Accepter</button><button class="btn sm" type="button" data-frdel="${f.uid}">Refuser</button></span></div>`).join("")}` : ""}
+    <p class="fr-h">Mes amis · ${L.friends.length}</p>
+    ${L.friends.length ? L.friends.map((f) => `<button class="fr-row fr-go" type="button" data-frdm="${f.uid}">${frAv(f)}<b>${esc(f.name)}</b>${qgTag(f.uid)}${f.unread ? `<i class="badge">${f.unread}</i>` : ""}<span class="fr-open">Écrire ›</span></button>`).join("") : `<p class="chat-empty">Pas encore d'ami. Ouvre le profil d'un joueur (classement, chat, marché) et touche « Ajouter en ami ».</p>`}
+    ${L.outgoing.length ? `<p class="fr-h">Demandes envoyées</p>${L.outgoing.map((f) => `<div class="fr-row">${frAv(f)}<b data-nav="profil" data-p="${f.uid}">${esc(f.name)}</b><span class="fr-act"><span class="note">en attente</span><button class="btn sm" type="button" data-frdel="${f.uid}">Annuler</button></span></div>`).join("")}` : ""}`;
+  $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir</small>Mes amis</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>${tabs}<div class="chat-list fr-list">${body}</div>`;
+}
+function drawDM(tabs) {
+  const f = FR.list?.friends.find((x) => x.uid === FR.peer) || { uid: FR.peer, name: "Ami" };
+  $("chatPanel").innerHTML = `<div class="chat-head"><h2><small><button class="linkbtn" type="button" data-frback>‹ Mes amis</button></small>${esc(f.name)}</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>${tabs}
+    <div class="chat-list" id="dmList" aria-live="polite"></div>
+    <div class="chat-foot"><form class="chat-form" id="dmForm" autocomplete="off"><input id="dmIn" maxlength="300" placeholder="Écris à ${esc(f.name)}…" aria-label="Message privé"><button class="btn acc sm" type="submit">Envoyer</button></form></div>`;
+  drawDMList();
+}
+function drawDMList() {
+  const list = $("dmList"); if (!list) return;
+  list.innerHTML = FR.msgs.length ? FR.msgs.map((m) => `<div class="cm ${m.uid === ME ? "me" : ""}"><div class="cm-b"><div class="cm-h"><time>${hhmm(m.ts)}</time></div><p>${esc(m.text)}</p></div></div>`).join("") : `<p class="chat-empty">Écris le premier message, il n'y a que vous deux ici.</p>`;
+  list.scrollTop = list.scrollHeight;
+}
+async function pollDM() {
+  if (!FR.peer || FR.busy) return;
+  FR.busy = true;
+  try { const r = await srv("dm", { uid: FR.peer, after: FR.last }); if (r.msgs?.length) { FR.msgs = [...FR.msgs, ...r.msgs].slice(-200); FR.last = FR.msgs[FR.msgs.length - 1].id; drawDMList(); } } catch (e) {}
+  FR.busy = false;
+}
+async function openFriends(peer = null) {
+  chat.tab = "amis"; FR.peer = peer; FR.msgs = []; FR.last = 0;
+  if (!chat.open) openChat(true); else drawChat();
+  await loadFriends(); if (chat.tab === "amis") drawChat();
+  if (peer) { await pollDM(); const f = FR.list?.friends.find((x) => x.uid === peer); if (f) f.unread = 0; chat.dmUn = Math.max(0, (chat.dmUn || 0) - 0); }
+}
+async function friendAct(kind, uid) {
+  try {
+    const r = await srv("friends/" + kind, { uid });
+    toast(kind === "add" ? (r.status === "ok" ? "Vous êtes amis !" : "Demande d'ami envoyée.") : kind === "accept" ? "Vous êtes amis !" : "C'est fait.");
+    await loadFriends(); if (chat.open && chat.tab === "amis") drawChat(); if (view === "profil") draw();
+  } catch (e) { toast(e.message); }
+}
+// bouton du profil d'un autre joueur
+function friendBtn(uid) {
+  if (!SRV || !uid || uid === ME) return "";
+  const L = FR.list; if (!L) { loadFriends().then(() => { if (view === "profil") draw(); }); return ""; }
+  if (L.friends.some((f) => f.uid === uid)) return `<button class="btn acc" type="button" data-frdm="${uid}">✓ Ami · Écrire</button>`;
+  if (L.incoming.some((f) => f.uid === uid)) return `<button class="btn acc" type="button" data-fracc="${uid}">Accepter en ami</button>`;
+  if (L.outgoing.some((f) => f.uid === uid)) return `<button class="btn" type="button" disabled>Demande envoyée</button>`;
+  return `<button class="btn" type="button" data-fradd="${uid}">+ Ajouter en ami</button>`;
+}
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const ct = t.closest("[data-ctab]"); if (ct) { chat.tab = ct.dataset.ctab; FR.peer = null; if (chat.tab === "amis") return openFriends(); return drawChat(); }
+  const a = t.closest("[data-fradd]"); if (a) return friendAct("add", a.dataset.fradd);
+  const c = t.closest("[data-fracc]"); if (c) return friendAct("accept", c.dataset.fracc);
+  const d = t.closest("[data-frdel]"); if (d) return friendAct("remove", d.dataset.frdel);
+  const m = t.closest("[data-frdm]"); if (m) return openFriends(m.dataset.frdm);
+  if (t.closest("[data-frback]")) { FR.peer = null; return openFriends(); }
+});
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "dmForm") return;
+  e.preventDefault(); const inp = $("dmIn"), text = inp.value.trim(); if (!text || !FR.peer) return;
+  inp.value = "";
+  try { await srv("dm/send", { uid: FR.peer, text }); await pollDM(); } catch (err) { inp.value = text; toast(err.message); }
+});
 function pickChatCard() {
   const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
   if (!mine.length) return toast("Ouvre d'abord un booster pour avoir des cartes à montrer.");

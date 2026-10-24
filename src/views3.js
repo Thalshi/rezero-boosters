@@ -47,6 +47,7 @@ const Z_COLLECTIONS = [
   { id: "braise", name: "Feu et sang", kanji: "火", tag: "Braises, cuivre et cornes d'ombre : la collection des cartes qui frappent.", c1: "#ff4d2e", c2: "#3a0d14", items: ["cadre-sang", "cadre-cuivre", "aura-braise", "part-braises", "fond-forge", "orn-cornes", "cadre-obsidienne"] },
   { id: "givre", name: "Givre et nuit", kanji: "夜", tag: "Le calme d'une nuit à Shinjuku, du givre jusqu'au néant.", c1: "#4dd6ff", c2: "#101a3a", items: ["aura-givre", "part-flocons", "fond-nuit", "fond-abysse", "aura-neant", "cadre-argent"] },
   { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
+  { id: "samourai", name: "Voie du samouraï", kanji: "侍", tag: "Kabuto, chapeaux de paille, masques de kitsune et hachimaki.", c1: "#d8202e", c2: "#1a0a0a", items: ["orn-kabuto", "orn-kasa", "orn-ronin", "orn-kitsune", "orn-kanzashi", "orn-hachimaki"] },
   { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
 ];
 // un objet créé depuis l'app rejoint la collection choisie (champ « coll ») ; tout objet de boutique

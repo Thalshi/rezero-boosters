@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — 3 missions du jour (29e mise en ligne)
+- Missions du jour : 3 au lieu de 2 (conseil validé par Reichi), bonus de 1 booster quand les 3 sont réclamées.
+- Le tirage du jour est refait sans perdre la progression ni les missions déjà réclamées (pas de double récompense).
+
 ## 2026-10-24 — Menu : crayon sur l'avatar (28e mise en ligne)
 - Un crayon doré sur l'avatar du menu ouvre ton profil avec « Équiper mon avatar » ; toucher ton nom ouvre ton profil public.
 - « Mon profil public » retiré du bloc du bas, « Se déconnecter » reste en bas (choix de Reichi).

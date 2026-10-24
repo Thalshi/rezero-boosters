@@ -46,6 +46,7 @@ document.addEventListener("click", (e) => {
   if (act === "summon-again") { const n = opening?.n || 1; closeStage(); return zSummon(n); }
   if (act === "see-pack") { packTab = ab.dataset.p === "jour" || ab.dataset.p === "saison1" ? "day" : "free"; if (packTab === "day") save.packDay = ab.dataset.p; draw(); return $("boosters")?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" }); }
   if (act === "pool") return openPool(ab.dataset.p);
+  if (act === "voeu") return openVoeu();
   const tb = t.closest("[data-title]"); if (tb) return setShownTitle(tb.dataset.title || null);
   if (act === "titles-all") { titlesAll = !titlesAll; return draw(); }
   if (act === "dev-grant") return srv("dev/grant").then((r) => { if (r.state) { Object.assign(save, r.state); persist?.(); } toast("+50 000 ◆ et 60 boosters gratuits (local)."); draw(); }).catch((e) => toast(e.message));

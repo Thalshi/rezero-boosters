@@ -557,6 +557,38 @@ function openPool(id) {
   $("overlay").querySelectorAll("[data-pf]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); PF.miss = b.dataset.pf === "1"; $("overlay").querySelectorAll("[data-pf]").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); draw(); }));
 }
 
+// ===== Carte vœu du mois + bonus du QG =====
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+function voeuBox() {
+  const v = save.voeu && byId[save.voeu.id], again = !save.voeu || save.voeu.m !== monthKey(), qg = qgDoneS(save, CONFIG, ME);
+  const next = MOIS[(+monthKey().slice(5, 7)) % 12];
+  return `<div class="voeu">
+    <button class="voeu-c" type="button" data-act="voeu">${v ? `<span class="voeu-ph">${artIn(v)}</span><span><small>Ta carte vœu</small><b>${esc(PEOPLE[v.who].name)}</b><em style="color:${RAR[v.rar].color}">${RAR[v.rar].label} · ${esc(v.title)}</em></span>` : `<span class="voeu-ph none">✦</span><span><small>Carte vœu du mois</small><b>Choisis une carte</b><em>1 chance sur 2 qu'elle sorte quand sa rareté tombe</em></span>`}
+      <i>${again ? (v ? "Changer" : "Choisir") : `Changer en ${next}`}</i></button>
+    <p class="voeu-qg ${qg.ok ? "on" : ""}">${qg.ok ? "✓ QG réuni : bonus « cartes qui te manquent » actif (40 % des tirages vont vers une carte que tu n'as pas)." : `QG réuni ${qg.got}/${qg.total} : obtiens une carte de chaque membre du QG pour débloquer le bonus « cartes qui te manquent ».`}</p></div>`;
+}
+function openVoeu() {
+  const again = !save.voeu || save.voeu.m !== monthKey(), list = [...CARDS, ...SKINS].filter((c) => canPackFor(CONFIG, c, ME)), F = { q: "", sel: save.voeu?.id || null };
+  $("overlay").innerHTML = `<div class="sheet pool-sh" role="dialog" aria-modal="true" aria-label="Carte vœu"><div class="sheet-h"><h2>Ta carte vœu du mois</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="pool-bar"><p class="note" style="margin:0;flex:1 1 300px">Quand une carte de sa rareté tombe, elle a 1 chance sur 2 d'être ta carte vœu (au lieu d'être tirée au hasard parmi toutes). ${again ? "Un seul choix par mois." : `Tu pourras la changer en ${MOIS[(+monthKey().slice(5, 7)) % 12]}.`}</p>
+      <div class="search pool-s">${icon.search}<input class="in" type="search" id="voeu-q" placeholder="Chercher un perso" autocomplete="off"></div></div>
+    <div class="sheet-b" id="voeu-b"></div>
+    ${again ? `<div class="voeu-ok"><button class="btn gold" type="button" id="voeu-go" disabled>Choisir cette carte</button></div>` : ""}</div>`;
+  const paint = () => {
+    const q = F.q.trim().toLowerCase(), l = list.filter((c) => !q || `${PEOPLE[c.who].name} ${c.title}`.toLowerCase().includes(q));
+    $("voeu-b").innerHTML = RANKS.slice().reverse().map((r) => { const x = l.filter((c) => c.rar === r); return x.length ? `<section class="pool-r" style="--pc:var(--r-${r})"><h3><i>${LETTER[r]}</i>${RAR[r].label}<span>${x.length}</span></h3>
+      <div class="pool-g">${x.map((c) => `<button class="voeu-pick ${F.sel === c.id ? "on" : ""}" type="button" data-vp="${c.id}" ${again ? "" : "disabled"}>${cardFor(c)}</button>`).join("")}</div></section>` : ""; }).join("") || `<p class="note">Aucune carte ne correspond.</p>`;
+    $("voeu-b").querySelectorAll("[data-vp]").forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); F.sel = b.dataset.vp; const go = $("voeu-go"); if (go) { go.disabled = false; go.textContent = `Choisir ${PEOPLE[byId[F.sel].who].name} · ${byId[F.sel].title}`; } $("voeu-b").querySelectorAll("[data-vp]").forEach((x) => x.classList.toggle("on", x === b)); }));
+  };
+  paint(); $("overlay").hidden = false;
+  $("voeu-q").addEventListener("input", (e) => { F.q = e.target.value; paint(); });
+  $("voeu-go")?.addEventListener("click", async (e) => {
+    e.stopPropagation(); const id = F.sel; if (!id) return;
+    try { const r = await zCall("voeu", { id }, () => setVoeuS(save, id, CONFIG, ME)); if (r?.state) Object.assign(save, r.state); $("overlay").hidden = true; toast(`Carte vœu : ${PEOPLE[byId[id].who].name}, jusqu'au mois prochain.`); draw(); }
+    catch (err) { toast(err.message); }
+  });
+}
+
 // ===== Ouverture d'un booster (plein écran) =====
 const glowOf = (o) => { const best = o.cards.reduce((a, x) => (RAR[x.c.rar].rank > RAR[a.c.rar].rank ? x : a), o.cards[0]); return o.divine ? "#ff4d9e" : best.gold ? "#f0c860" : RAR[best.c.rar].rank >= 3 ? `var(--r-${best.c.rar})` : "#f5c518"; };
 function drawOpening() {

@@ -5,6 +5,9 @@
 
 ---
 
+## 2026-10-24 — Vente ouverte aux non-membres côté navigateur (35e mise en ligne)
+- Le navigateur demandait encore « Connecte-toi avec Discord pour vendre » aux joueurs connectés non membres du QG (reste de l'ancienne règle) : tout est ouvert dès qu'on est connecté, le serveur vérifie lui-même.
+
 ## 2026-10-24 — Amis et comptoir privé (34e mise en ligne)
 - « + Ajouter en ami » sur le profil d'un joueur ; demande notifiée, « Accepter » / « Refuser » ; « ✓ Ami · Écrire » une fois amis.
 - Comptoir avec deux onglets : « Le QG » (chat public) et « Amis » (demandes reçues, liste d'amis avec messages non lus, demandes envoyées, conversation privée). Pastille du comptoir : messages privés et demandes.

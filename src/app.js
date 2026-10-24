@@ -270,6 +270,7 @@ async function connect() {
     if (window.DISCORD_LOGIN) {
       const guest = save.opened ? save : null;
       SRV = true;
+      canShare = true; // connecté avec Discord : tout est ouvert (le serveur vérifie lui-même), membre du QG ou pas
       const r = await srv("state", { guest });
       if (r.imported === "invité") toast("Tes cartes communes jouées en invité ont été reprises sur ton compte Discord.");
       await creaLoad(true); // persos, cartes et cosmétiques créés depuis l'app

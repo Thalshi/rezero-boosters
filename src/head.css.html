@@ -294,6 +294,32 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .fr-row b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
 .fr-go { cursor: pointer; } .fr-go:hover { border-color: var(--acc); }
 .fr-open { font: 600 12px var(--body); color: var(--acc); } .fr-act { display: flex; gap: 6px; align-items: center; }
+/* parrainage */
+.ref-hero { padding: 28px; border-radius: 20px; border: 1px solid #ff4d2e44; background: linear-gradient(135deg, #3a120c, #1a0e14 60%, #120c18); margin-bottom: 18px; }
+.ref-hero .eyebrow { color: #ff7a52; } .ref-hero h1 { font: 800 clamp(36px, 6vw, 64px)/1 var(--disp); margin: 6px 0 10px; }
+.ref-hero p { color: var(--fg2); max-width: 760px; } .ref-hero .mono b { color: var(--gold); }
+.ref-link { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 10px; } .ref-link .in { flex: 1 1 320px; font: 600 13px var(--mono); }
+.ref-share { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .ref-share .chip { text-decoration: none; }
+.ref-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+.ref-tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+.ref-tier { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 14px 8px; border-radius: 14px; border: 1px solid var(--line2); background: var(--bg2); opacity: .7; }
+.ref-tier b { font: 800 26px var(--disp); } .ref-tier small { font: 600 10px var(--mono); text-transform: uppercase; color: var(--fg3); } .ref-tier span { font-size: 12.5px; line-height: 1.3; } .ref-tier em { font: 600 11px var(--mono); font-style: normal; color: var(--fg3); }
+.ref-tier.next { opacity: 1; border-color: #b072ff; box-shadow: 0 0 20px #b072ff44; } .ref-tier.next em { color: #ff7a52; }
+.ref-tier.on { opacity: 1; border-color: #4fd18b; } .ref-tier.on em { color: #4fd18b; }
+.ref-count { color: var(--fg3); font-size: 12px; }
+.ref-prizes { display: grid; gap: 6px; } .ref-prizes div { display: flex; gap: 14px; padding: 10px 12px; border-radius: 10px; background: var(--bg2); } .ref-prizes b { color: var(--gold); min-width: 70px; font-family: var(--mono); }
+.ref-board { display: grid; gap: 4px; max-height: 520px; overflow: auto; }
+.ref-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 0; background: none; color: var(--fg); text-align: left; cursor: pointer; }
+.ref-row:hover, .ref-row.me { background: var(--bg2); } .ref-row i { width: 26px; font: 700 13px var(--mono); font-style: normal; color: var(--fg3); text-align: center; }
+.ref-row .av { width: 30px; height: 30px; border-radius: 50%; background: var(--raise); } .ref-row b { flex: 1; } .ref-row span { font: 700 15px var(--mono); }
+.ref-vids { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 12px 0; }
+.ref-vid { display: grid; gap: 6px; } .ref-vid iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #000; } .ref-vid span { font: 600 12px var(--mono); color: var(--fg3); }
+.ref-sheet { max-width: 760px !important; }
+.ref-danger { border-color: #ff4d5e66 !important; } .btn.danger { background: #3a0c12; border-color: #ff4d5e; color: #ffb3bb; }
+@media (max-width: 560px) { .ref-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ref-hero { padding: 20px; } }
+.mr.go { cursor: pointer; transition: border-color .15s, background .15s; } .mr.go:hover { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 6%, transparent); }
+.mr-go { margin-left: 8px; font: 700 11px var(--body); font-style: normal; color: var(--acc); opacity: .8; }
+.cm-av { flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; align-self: flex-start; transition: transform .15s; } .cm-av:hover { transform: scale(1.08); }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }

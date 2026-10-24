@@ -1,4 +1,4 @@
-# Parrainage (à faire, semaine prochaine)
+# Parrainage (fait le 24/10)
 
 Décidé avec Reichi le 24/10 : on le fait à la remise à zéro du budget hebdomadaire, en un seul lot testé.
 

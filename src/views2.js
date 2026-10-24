@@ -150,9 +150,24 @@ function openTradeBuilder(uid) {
 // ===== Missions =====
 let achF = "all";
 const KDAY = ["1", "2", "3", "4", "5", "6", "★"];
+// toucher une mission : on t'emmène là où elle se fait
+const MISSION_GO = { open: "boosters", epic: "boosters", new: "boosters", rare: "boosters", legend: "boosters", day: "boosters", "f-open": "boosters", "f-coffre": "boosters",
+  recycle: "collection", "f-recyc": "collection", craft: "collection", sell: "collection", sold: "market", trade: "trades", chat: "chat", "f-chat": "chat", dm: "friends",
+  friend: "classement", "f-friend": "classement", predict: "pred", predwin: "pred", "f-pred": "pred", sheet: "wiki", "f-sheet": "wiki", "f-wish": "wish", "f-show": "vitrine", "f-disc": "discord" };
+function missionGo(go) {
+  if (go === "chat") return openChat(true);
+  if (go === "friends") return openFriends();
+  if (go === "trades") { marketTab = "trades"; return nav("market"); }
+  if (go === "wish") { nav("collection"); return setTimeout(wishSheet, 200); }
+  if (go === "vitrine") return nav("profil", SRV || ME ? ME : "moi");
+  if (go === "discord") { if (window.DISCORD_LOGIN) location.href = "/auth/login"; return; }
+  nav(go);
+}
+document.addEventListener("click", (e) => { const g = e.target.closest("[data-mgo]"); if (g && !e.target.closest("[data-claim]")) missionGo(g.dataset.mgo); });
 function mrHTML(m, kind, id) {
   const ok = kind === "first" ? m.done : m.prog >= m.goal, goal = kind === "first" ? 1 : m.goal, prog = kind === "first" ? (m.done ? 1 : 0) : m.prog;
-  return `<div class="mr ${m.claimed ? "claimed" : ""}"><div class="t">${esc(m.label)}<span>${fmtN(prog)}/${fmtN(goal)}</span></div>
+  const go = !m.claimed && !ok ? MISSION_GO[m.key] || MISSION_GO[m.id] : null;
+  return `<div class="mr ${m.claimed ? "claimed" : ""} ${go ? "go" : ""}" ${go ? `data-mgo="${go}" role="button" tabindex="0" title="Y aller"` : ""}><div class="t">${esc(m.label)}${go ? '<em class="mr-go">Y aller ›</em>' : ""}<span>${fmtN(prog)}/${fmtN(goal)}</span></div>
     <div class="bar"><i style="width:${Math.min(1, prog / goal) * 100}%"></i></div>
     <div class="rw">${rewardShort(m.reward)}</div>
     <div class="s">${m.claimed ? "Fait ✓" : ok ? `<button class="btn gold sm" type="button" data-claim="${kind}" data-id="${id}">Réclamer</button>` : "En cours"}</div></div>`;
@@ -740,12 +755,12 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avd0 = decoOfUid(m.uid) || ornOfUid(m.uid), L0 = avLayers(decoOfUid(m.uid), ornOfUid(m.uid), true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`;
+  const avd0 = decoOfUid(m.uid) || ornOfUid(m.uid), L0 = avLayers(decoOfUid(m.uid), ornOfUid(m.uid), true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`, avb = `<button class="cm-av" type="button" data-nav="profil" data-p="${esc(m.uid)}" title="Voir le profil" aria-label="Voir le profil">${avi}</button>`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
   const text = esc(m.text).replace(/@([^\s@&<,.!?;:]{2,32})/g, "<mark>@$1</mark>");
-  return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${avi}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">✕</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
+  return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${avb}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">✕</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
 }
 function drawChatList() {
   const list = $("chatList"); if (!list) return;

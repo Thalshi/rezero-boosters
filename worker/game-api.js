@@ -25,8 +25,53 @@ export async function ensureGameSchema(db) {
     // messages privés entre amis : p = la paire triée « uid1|uid2 »
     db.prepare("CREATE TABLE IF NOT EXISTS dm (id INTEGER PRIMARY KEY AUTOINCREMENT, p TEXT NOT NULL, uid TEXT NOT NULL, text TEXT NOT NULL, ts INTEGER NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS dm_p ON dm (p, id)"),
+    // parrainage : un filleul (uid) par parrain (ref) ; done = validé (assez de boosters ouverts)
+    db.prepare("CREATE TABLE IF NOT EXISTS referrals (uid TEXT PRIMARY KEY, ref TEXT NOT NULL, ts INTEGER NOT NULL, done INTEGER NOT NULL DEFAULT 0, done_ts INTEGER)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS referrals_ref ON referrals (ref, done)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS ref_paid (k TEXT PRIMARY KEY, ts INTEGER NOT NULL)"),
     db.prepare("CREATE TABLE IF NOT EXISTS dm_read (uid TEXT NOT NULL, peer TEXT NOT NULL, last INTEGER NOT NULL, PRIMARY KEY (uid, peer))"),
   ]);
+}
+
+// ---------- parrainage ----------
+async function refWindow(env) {
+  const d = await readDoc(env, "refcfg/window").catch(() => null);
+  return { start: d?.data?.start ?? G.REF_START, end: d?.data?.end ?? G.REF_END };
+}
+async function refBoard(env, limit, w) {
+  return (await env.DB.prepare("SELECT r.ref AS uid, COUNT(*) AS n, MIN(r.done_ts) AS first, u.name, u.avatar FROM referrals r LEFT JOIN users u ON u.id = r.ref WHERE r.done = 1 AND r.done_ts BETWEEN ? AND ? GROUP BY r.ref ORDER BY n DESC, first ASC LIMIT ?").bind(w.start, w.end, limit).all()).results;
+}
+const refLegends = (cfg, uid) => G.mixPoolFor({}, cfg, uid).filter((c) => c.rar === "l");
+// le filleul a ouvert assez de boosters : +2 boosters chacun, paliers du parrain, notifications
+async function refValidate(env, user, cfg) {
+  const now = Date.now(), w = await refWindow(env);
+  if (!w.start || now < w.start || now > w.end) return;
+  const row = await env.DB.prepare("SELECT ref FROM referrals WHERE uid = ? AND done = 0").bind(user.id).first();
+  if (!row) return;
+  const upd = await env.DB.prepare("UPDATE referrals SET done = 1, done_ts = ? WHERE uid = ? AND done = 0").bind(now, user.id).run();
+  if (!upd.meta?.changes) return; // déjà validé par une autre requête
+  await mutate(env, user.id, (s) => { G.giveRewardS(s, G.REF_GAIN); return {}; });
+  const n = (await env.DB.prepare("SELECT COUNT(*) AS n FROM referrals WHERE ref = ? AND done = 1 AND done_ts BETWEEN ? AND ?").bind(row.ref, w.start, w.end).first()).n;
+  const tier = G.REF_TIERS.find((t) => t.n === n);
+  let extra = [];
+  const r = await mutate(env, row.ref, (s, t) => { G.giveRewardS(s, G.REF_GAIN); G.trackS(s, "recruit", 1, t); if (tier) extra = G.refRewardS(s, tier.reward, rng, t, refLegends(cfg, row.ref)); G.grantTitlesS(s, null, t); return {}; });
+  if (r.state) await publishStats(env, row.ref, r.state).catch(() => {});
+  await notify(env, user.id, "ref", `Parrainage validé : +${G.REF_GAIN.boosters} boosters pour toi et ton parrain !`, { go: "parrainage" });
+  await notify(env, row.ref, "ref", `${user.name || "Ton filleul"} a validé ton parrainage : +${G.REF_GAIN.boosters} boosters !${tier ? ` Palier ${tier.n} atteint : ${tier.label}${extra.length ? ` (${extra.join(", ")})` : ""}.` : ""}`, { go: "parrainage" });
+}
+// fin de l'événement : prix du classement, une seule fois
+async function refPayPrizes(env, cfg) {
+  const w = await refWindow(env);
+  if (!w.end || Date.now() <= w.end) return;
+  const k = "prizes-" + w.end, ins = await env.DB.prepare("INSERT OR IGNORE INTO ref_paid (k, ts) VALUES (?, ?)").bind(k, Date.now()).run();
+  if (!ins.meta?.changes) return;
+  const board = await refBoard(env, 10, w);
+  for (const [i, b] of board.entries()) {
+    const prize = G.REF_PRIZES.find((p) => i + 1 >= p.from && i + 1 <= p.to); if (!prize) continue;
+    let got = [];
+    await mutate(env, b.uid, (s, t) => { got = G.refRewardS(s, prize.reward, rng, t, refLegends(cfg, b.uid)); return {}; }).catch(() => {});
+    await notify(env, b.uid, "ref", `Parrainage terminé : tu finis ${i + 1}${i ? "e" : "er"} du classement ! Prix : ${prize.label}${got.length ? ` (${got.join(", ")})` : ""}.`, { go: "parrainage" });
+  }
 }
 
 // ---------- état des joueurs ----------
@@ -309,7 +354,9 @@ const isAdminId = (env, uid) => String(env.ADMIN_IDS || "").split(/[\s,]+/).filt
 async function ensurePlayer(env, user, guest) {
   if (await loadRow(env, user.id)) return null;
   let s = G.freshSave(), imported = null;
-  const legacy = await readDoc(env, `data/users/${user.id}/rzlol`);
+  // après une remise à zéro complète, plus aucune reprise : tout le monde repart de zéro
+  if (await readDoc(env, "refcfg/reset").catch(() => null)) { guest = null; }
+  const legacy = guest === null && (await readDoc(env, "refcfg/reset").catch(() => null)) ? null : await readDoc(env, `data/users/${user.id}/rzlol`);
   for (const [src, cand] of [["compte", legacy?.data], ["invité", guest]]) {
     if (!cand) continue;
     const n = G.importSaveS(cand);
@@ -412,7 +459,56 @@ export async function gameRoute(req, env, user, path) {
       });
       if (r.error) return fail(400, r.error);
       await postFeed(env, user.id, r.cards);
+      if (r.state?.opened >= G.REF_MIN_OPENED) await refValidate(env, user, cfg).catch(() => {});
       return json(r);
+    }
+    // ---------- remise à zéro complète (dev seulement) et lancement du parrainage ----------
+    if (path === "/api/game/admin/ref-launch") {
+      if (!user.dev && !user.admin) return fail(403, "Réservé à l'équipe.");
+      const days = Math.max(1, Math.min(60, +body.days || 14)), start = Date.now();
+      await writeDoc(env, "refcfg", "window", { start, end: start + days * 86400e3 });
+      await notify(env, "*", "ref", `L'événement de parrainage commence : invite tes amis, +${G.REF_GAIN.boosters} boosters pour vous deux à chaque filleul !`, { go: "parrainage" });
+      return json({ start, end: start + days * 86400e3 });
+    }
+    if (path === "/api/game/admin/reset-all") {
+      if (!user.dev) return fail(403, "Réservé au développeur.");
+      if (body.confirm !== "TOUT EFFACER") return fail(400, "Écris TOUT EFFACER pour confirmer.");
+      // on garde : comptes et connexions, réglages, épisodes, créations, prédictions (questions), avis et bugs
+      const wipeColl = ["players", "market", "trades", "feed", "votes", "confront", "defile", "predwin", "data", "devbackup", "lab"];
+      await env.DB.batch([
+        ...["players", "chat", "notifs", "notif_read", "friends", "dm", "dm_read", "referrals", "ref_paid"].map((t) => env.DB.prepare(`DELETE FROM ${t}`)),
+        env.DB.prepare(`DELETE FROM docs WHERE coll IN (${wipeColl.map(() => "?").join(",")})`).bind(...wipeColl),
+        env.DB.prepare("DELETE FROM docs WHERE path = 'refcfg/window'"),
+      ]);
+      await writeDoc(env, "refcfg", "reset", { t: Date.now(), by: user.id });
+      for (const c of [...wipeColl, "chat", "notifs"]) await bumpRev(env, c).catch(() => {});
+      if (body.launchRef) { const start = Date.now(); await writeDoc(env, "refcfg", "window", { start, end: start + 14 * 86400e3 }); }
+      return json({ ok: true });
+    }
+    // ---------- parrainage ----------
+    if (path === "/api/game/ref/claim") {
+      const ref = String(body.ref || "");
+      const w = await refWindow(env), t0 = Date.now();
+      if (!w.start || t0 < w.start || t0 > w.end) return json({ ok: false, why: "L'événement de parrainage n'est pas en cours." });
+      if (!ref || ref === user.id || !(await env.DB.prepare("SELECT 1 FROM users WHERE id = ?").bind(ref).first())) return json({ ok: false, why: "Lien de parrainage inconnu." });
+      if (await env.DB.prepare("SELECT 1 FROM referrals WHERE uid = ?").bind(user.id).first()) return json({ ok: false, why: "Tu as déjà un parrain." });
+      const row = await loadRow(env, user.id), st = row ? G.normalizeSave(JSON.parse(row.data)) : null;
+      if (st && Date.now() - (st.created || 0) > G.REF_NEW_MS) return json({ ok: false, why: "Le parrainage est réservé aux nouveaux joueurs." });
+      // pas de parrainage croisé (A parraine B qui parraine A)
+      if (await env.DB.prepare("SELECT 1 FROM referrals WHERE uid = ? AND ref = ?").bind(ref, user.id).first()) return json({ ok: false, why: "Vous ne pouvez pas vous parrainer l'un l'autre." });
+      await env.DB.prepare("INSERT OR IGNORE INTO referrals (uid, ref, ts) VALUES (?, ?, ?)").bind(user.id, ref, Date.now()).run();
+      const who = await env.DB.prepare("SELECT name FROM users WHERE id = ?").bind(ref).first();
+      if (st?.opened >= G.REF_MIN_OPENED) await refValidate(env, user, cfg).catch(() => {});
+      return json({ ok: true, parrain: who?.name || "un joueur" });
+    }
+    if (path === "/api/game/ref") {
+      await refPayPrizes(env, cfg).catch(() => {});
+      const w = await refWindow(env), board = await refBoard(env, 50, w);
+      const mine = await env.DB.prepare("SELECT COUNT(*) AS n FROM referrals WHERE ref = ? AND done = 1 AND done_ts BETWEEN ? AND ?").bind(user.id, w.start, w.end).first();
+      const waiting = await env.DB.prepare("SELECT COUNT(*) AS n FROM referrals WHERE ref = ? AND done = 0").bind(user.id).first();
+      const myRef = await env.DB.prepare("SELECT r.ref, r.done, u.name FROM referrals r LEFT JOIN users u ON u.id = r.ref WHERE r.uid = ?").bind(user.id).first();
+      const rank = board.findIndex((b) => b.uid === user.id) + 1;
+      return json({ start: w.start, end: w.end, now: Date.now(), n: mine.n, waiting: waiting.n, rank, board, parrain: myRef ? { name: myRef.name, done: !!myRef.done } : null });
     }
     if (path === "/api/game/seen") {
       const r = await mutate(env, user.id, (s, now) => {

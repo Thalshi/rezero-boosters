@@ -294,6 +294,32 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .fr-row b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
 .fr-go { cursor: pointer; } .fr-go:hover { border-color: var(--acc); }
 .fr-open { font: 600 12px var(--body); color: var(--acc); } .fr-act { display: flex; gap: 6px; align-items: center; }
+/* parrainage */
+.ref-hero { padding: 28px; border-radius: 20px; border: 1px solid #ff4d2e44; background: linear-gradient(135deg, #3a120c, #1a0e14 60%, #120c18); margin-bottom: 18px; }
+.ref-hero .eyebrow { color: #ff7a52; } .ref-hero h1 { font: 800 clamp(36px, 6vw, 64px)/1 var(--disp); margin: 6px 0 10px; }
+.ref-hero p { color: var(--fg2); max-width: 760px; } .ref-hero .mono b { color: var(--gold); }
+.ref-link { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 10px; } .ref-link .in { flex: 1 1 320px; font: 600 13px var(--mono); }
+.ref-share { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .ref-share .chip { text-decoration: none; }
+.ref-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+.ref-tiers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+.ref-tier { display: grid; gap: 4px; justify-items: center; text-align: center; padding: 14px 8px; border-radius: 14px; border: 1px solid var(--line2); background: var(--bg2); opacity: .7; }
+.ref-tier b { font: 800 26px var(--disp); } .ref-tier small { font: 600 10px var(--mono); text-transform: uppercase; color: var(--fg3); } .ref-tier span { font-size: 12.5px; line-height: 1.3; } .ref-tier em { font: 600 11px var(--mono); font-style: normal; color: var(--fg3); }
+.ref-tier.next { opacity: 1; border-color: #b072ff; box-shadow: 0 0 20px #b072ff44; } .ref-tier.next em { color: #ff7a52; }
+.ref-tier.on { opacity: 1; border-color: #4fd18b; } .ref-tier.on em { color: #4fd18b; }
+.ref-count { color: var(--fg3); font-size: 12px; }
+.ref-prizes { display: grid; gap: 6px; } .ref-prizes div { display: flex; gap: 14px; padding: 10px 12px; border-radius: 10px; background: var(--bg2); } .ref-prizes b { color: var(--gold); min-width: 70px; font-family: var(--mono); }
+.ref-board { display: grid; gap: 4px; max-height: 520px; overflow: auto; }
+.ref-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 0; background: none; color: var(--fg); text-align: left; cursor: pointer; }
+.ref-row:hover, .ref-row.me { background: var(--bg2); } .ref-row i { width: 26px; font: 700 13px var(--mono); font-style: normal; color: var(--fg3); text-align: center; }
+.ref-row .av { width: 30px; height: 30px; border-radius: 50%; background: var(--raise); } .ref-row b { flex: 1; } .ref-row span { font: 700 15px var(--mono); }
+.ref-vids { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 12px 0; }
+.ref-vid { display: grid; gap: 6px; } .ref-vid iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #000; } .ref-vid span { font: 600 12px var(--mono); color: var(--fg3); }
+.ref-sheet { max-width: 760px !important; }
+.ref-danger { border-color: #ff4d5e66 !important; } .btn.danger { background: #3a0c12; border-color: #ff4d5e; color: #ffb3bb; }
+@media (max-width: 560px) { .ref-tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ref-hero { padding: 20px; } }
+.mr.go { cursor: pointer; transition: border-color .15s, background .15s; } .mr.go:hover { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 6%, transparent); }
+.mr-go { margin-left: 8px; font: 700 11px var(--body); font-style: normal; color: var(--acc); opacity: .8; }
+.cm-av { flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; align-self: flex-start; transition: transform .15s; } .cm-av:hover { transform: scale(1.08); }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -3194,6 +3220,37 @@ function qgDoneS(s, cfg, uid) {
   const got = who.filter((w) => [...CARDS, ...SKINS].some((c) => c.who === w && hasCard(s, c.id))).length;
   return { ok: who.length > 0 && got === who.length, got, total: who.length };
 }
+// ===== Parrainage (événement, décidé avec Reichi le 24/10) =====
+// un filleul = un nouveau compte arrivé par ton lien, validé quand il a ouvert REF_MIN_OPENED boosters
+const REF_START = 0;                   // pas lancé : le dev le lance (Gestion › Dev) le jour de la présentation au QG
+const REF_END = 0;
+const REF_MIN_OPENED = 5;
+const REF_NEW_MS = 48 * 3600e3;          // le lien ne compte que pour un compte créé il y a moins de 48 h
+const REF_GAIN = { boosters: 2 };        // pour le parrain et pour le filleul, à chaque filleul validé
+const REF_TIERS = [
+  { n: 3,  label: "Un coffre (2 boosters)",                     reward: { boosters: 2 } },
+  { n: 6,  label: "3 invocations gratuites",                    reward: { summons: 3 } },
+  { n: 10, label: "Aura écarlate (Mythique) et titre Recruteur", reward: { cos: "aura-ecarlate" } },
+  { n: 20, label: "Une carte Légendaire garantie",              reward: { legend: 1 } },
+];
+const REF_PRIZES = [
+  { from: 1, to: 3,  label: "Une carte Légendaire garantie", reward: { legend: 1 } },
+  { from: 4, to: 10, label: "Un coffre (2 boosters)",        reward: { boosters: 2 } },
+];
+const REF_VIDEOS = [{ ep: 1, url: "https://www.youtube.com/watch?v=mFQ4USNq0k8" }];
+const refOpenAt = (now = Date.now()) => now >= REF_START && now <= REF_END;
+// donne une récompense de parrainage : boosters, invocations, objet exclusif, Légendaire au hasard (parmi les persos sortis)
+function refRewardS(s, r, rng, now, legends = []) {
+  giveRewardS(s, r);
+  const out = [];
+  if (r.cos) {
+    const cos = cosOf(s);
+    if (ownsCosS(s, r.cos)) { s.freeSum = (s.freeSum || 0) + 5; out.push("5 invocations gratuites (objet déjà possédé)"); }
+    else { let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: r.cos, t: now }); out.push(COS_BY_ID[r.cos]?.name || r.cos); }
+  }
+  if (r.legend && legends.length) for (let k = 0; k < r.legend; k++) { const c = legends[Math.floor(rng() * legends.length)]; addCardS(s, c.id, false, now); out.push(`${PEOPLE[c.who].name} · ${c.title}`); }
+  return out;
+}
 // carte vœu : une par mois, choisie parmi les cartes déjà sorties
 const monthKey = (ts = Date.now()) => dayKey(ts).slice(0, 7);
 function setVoeuS(s, id, cfg, uid, now = Date.now()) {
@@ -3748,6 +3805,7 @@ const defileCanVote = (s, member, now = Date.now()) => !!member && s.opened >= D
 const TITLE_CATS = { ouverture: "Ouvertures", invocation: "Invocations", confrontation: "Confrontation", defile: "Défilé", collection: "Collection", oracle: "Prédictions" };
 const rarCount = (list, test) => list.filter((x) => test(RANKS.indexOf(x.rar))).length;
 const TITLES = [
+  { id: "c-recruteur", name: "Recruteur", kanji: "招", cat: "collection", rar: "l", desc: "Parrainer 10 joueurs pendant un événement", val: (s) => s.counts?.recruit || 0, goal: 10 },
   { id: "o-2l", name: "Double couronne", kanji: "冠", cat: "ouverture", rar: "l", desc: "Deux Légendaires dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 4) >= 2 },
   { id: "o-2m", name: "Cœurs jumeaux", kanji: "双", cat: "ouverture", rar: "m", desc: "Deux Mythiques dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 5) >= 2 },
   { id: "o-lm", name: "Alignement des astres", kanji: "星", cat: "ouverture", rar: "m", desc: "Une Légendaire et une Mythique dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 4) >= 1 && rarCount(o.open, (r) => r === 5) >= 1 },
@@ -4715,7 +4773,7 @@ function goTo(go) {
 
 // --- appel régulier au serveur ---
 let pulseT = null, pulsing = false;
-function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open && !document.hidden ? 3000 : window.__asleep?.() || document.hidden ? 5 * 60e3 : 30000); }
+function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open && !document.hidden ? 3000 : window.__asleep?.() || document.hidden ? 5 * 60e3 : 10000); }
 addEventListener("rz-wake", () => { if (SRV && !pulsing) { clearTimeout(pulseT); pulse(); } });
 async function pulse() {
   if (!SRV || pulsing) return;
@@ -4925,7 +4983,7 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légend
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
-  ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
+  ["missions", "missions", "Missions", toClaim()], ["parrainage", "coffre", "Parrainage"], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
   ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
@@ -5433,9 +5491,24 @@ function openTradeBuilder(uid) {
 // ===== Missions =====
 let achF = "all";
 const KDAY = ["1", "2", "3", "4", "5", "6", "★"];
+// toucher une mission : on t'emmène là où elle se fait
+const MISSION_GO = { open: "boosters", epic: "boosters", new: "boosters", rare: "boosters", legend: "boosters", day: "boosters", "f-open": "boosters", "f-coffre": "boosters",
+  recycle: "collection", "f-recyc": "collection", craft: "collection", sell: "collection", sold: "market", trade: "trades", chat: "chat", "f-chat": "chat", dm: "friends",
+  friend: "classement", "f-friend": "classement", predict: "pred", predwin: "pred", "f-pred": "pred", sheet: "wiki", "f-sheet": "wiki", "f-wish": "wish", "f-show": "vitrine", "f-disc": "discord" };
+function missionGo(go) {
+  if (go === "chat") return openChat(true);
+  if (go === "friends") return openFriends();
+  if (go === "trades") { marketTab = "trades"; return nav("market"); }
+  if (go === "wish") { nav("collection"); return setTimeout(wishSheet, 200); }
+  if (go === "vitrine") return nav("profil", SRV || ME ? ME : "moi");
+  if (go === "discord") { if (window.DISCORD_LOGIN) location.href = "/auth/login"; return; }
+  nav(go);
+}
+document.addEventListener("click", (e) => { const g = e.target.closest("[data-mgo]"); if (g && !e.target.closest("[data-claim]")) missionGo(g.dataset.mgo); });
 function mrHTML(m, kind, id) {
   const ok = kind === "first" ? m.done : m.prog >= m.goal, goal = kind === "first" ? 1 : m.goal, prog = kind === "first" ? (m.done ? 1 : 0) : m.prog;
-  return `<div class="mr ${m.claimed ? "claimed" : ""}"><div class="t">${esc(m.label)}<span>${fmtN(prog)}/${fmtN(goal)}</span></div>
+  const go = !m.claimed && !ok ? MISSION_GO[m.key] || MISSION_GO[m.id] : null;
+  return `<div class="mr ${m.claimed ? "claimed" : ""} ${go ? "go" : ""}" ${go ? `data-mgo="${go}" role="button" tabindex="0" title="Y aller"` : ""}><div class="t">${esc(m.label)}${go ? '<em class="mr-go">Y aller ›</em>' : ""}<span>${fmtN(prog)}/${fmtN(goal)}</span></div>
     <div class="bar"><i style="width:${Math.min(1, prog / goal) * 100}%"></i></div>
     <div class="rw">${rewardShort(m.reward)}</div>
     <div class="s">${m.claimed ? "Fait ✓" : ok ? `<button class="btn gold sm" type="button" data-claim="${kind}" data-id="${id}">Réclamer</button>` : "En cours"}</div></div>`;
@@ -6023,12 +6096,12 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avd0 = decoOfUid(m.uid) || ornOfUid(m.uid), L0 = avLayers(decoOfUid(m.uid), ornOfUid(m.uid), true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`;
+  const avd0 = decoOfUid(m.uid) || ornOfUid(m.uid), L0 = avLayers(decoOfUid(m.uid), ornOfUid(m.uid), true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`, avb = `<button class="cm-av" type="button" data-nav="profil" data-p="${esc(m.uid)}" title="Voir le profil" aria-label="Voir le profil">${avi}</button>`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
   const text = esc(m.text).replace(/@([^\s@&<,.!?;:]{2,32})/g, "<mark>@$1</mark>");
-  return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${avi}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">✕</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
+  return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${avb}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">✕</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
 }
 function drawChatList() {
   const list = $("chatList"); if (!list) return;
@@ -10961,6 +11034,88 @@ const World3D = (() => {
   }
   return { start, setBg, setTint, get on() { return !!R; } };
 })();
+
+// ===== Parrainage : lien perso, vidéos de Billy, paliers et classement (événement de 2 semaines) =====
+ROUTES.push("parrainage");
+const REFP = { data: null, loading: false, copied: false };
+// arrivée par un lien de parrain : on garde le parrain jusqu'à la connexion, et on montre les vidéos de Billy
+(() => {
+  try {
+    const ref = new URLSearchParams(location.search).get("ref");
+    if (ref && /^[a-z0-9]{3,40}$/i.test(ref)) { lsSet("rz-ref", ref); history.replaceState(null, "", location.pathname + location.hash); setTimeout(refWelcome, 1200); }
+  } catch (e) {}
+})();
+const ytId = (url) => (String(url).match(/[?&]v=([\w-]{6,})/) || String(url).match(/youtu\.be\/([\w-]{6,})/) || [])[1];
+const refVideos = () => REF_VIDEOS.map((v) => `<div class="ref-vid"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(v.url)}" title="Re : LOL, épisode ${v.ep}" loading="lazy" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe><span>Épisode ${v.ep}</span></div>`).join("");
+function refWelcome() {
+  if (!$("overlay").hidden) return;
+  $("overlay").innerHTML = `<div class="sheet ref-sheet" role="dialog" aria-modal="true" aria-label="Bienvenue"><div class="sheet-h"><h2>Bienvenue sur Re : LOL</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">Un ami t'invite. Re : LOL, c'est le jeu de cartes de l'anime de Billy : regarde l'épisode, puis ouvre tes premiers boosters. Après ${REF_MIN_OPENED} boosters ouverts, vous gagnez tous les deux +${REF_GAIN.boosters} boosters.</p>
+      <div class="ref-vids">${refVideos()}</div>
+      ${SRV ? `<button class="btn gold big block" type="button" data-act="close">Jouer</button>` : window.DISCORD_LOGIN ? `<a class="btn gold big block" href="/auth/login">Jouer avec Discord</a>` : `<button class="btn gold big block" type="button" data-act="close">Jouer</button>`}</div></div>`;
+  $("overlay").hidden = false;
+}
+// une fois connecté : on déclare le parrain au serveur (une seule fois)
+(function refClaimLoop(tries = 0) {
+  const ref = lsGet("rz-ref"); if (!ref) return;
+  if (!(SRV && ME)) { if (tries < 60) setTimeout(() => refClaimLoop(tries + 1), 1000); return; }
+  if (ref === ME) { lsSet("rz-ref", ""); return; }
+  srv("ref/claim", { ref }).then((r) => { lsSet("rz-ref", ""); if (r.ok) toast(`Parrainé par ${r.parrain} : ouvre ${REF_MIN_OPENED} boosters et vous gagnez +${REF_GAIN.boosters} boosters chacun !`); }).catch(() => {});
+})();
+async function refLoad() {
+  if (!SRV || REFP.loading) return; REFP.loading = true;
+  try { REFP.data = await srv("ref"); } catch (e) { REFP.data = { error: e.message }; }
+  REFP.loading = false; if (view === "parrainage") draw();
+}
+const refLink = () => `${location.origin}/?ref=${encodeURIComponent(ME || "")}`;
+const refLeft = (ms) => { if (ms <= 0) return "terminé"; const d = Math.floor(ms / 86400e3), h = Math.floor((ms % 86400e3) / 3600e3); return d ? `${d} j ${h} h` : `${h} h ${Math.floor((ms % 3600e3) / 60000)} min`; };
+const refDate = (t) => new Date(t).toLocaleString("fr-FR", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+VIEWS.parrainage = () => {
+  if (!SRV) return `<div class="wrap page">${head("Événement", "Parrainage", "Le parrainage se joue sur le site du QG, connecté avec Discord.")}<div class="ref-vids">${refVideos()}</div></div>`;
+  const D = REFP.data; if (!D) { refLoad(); return `<div class="wrap page">${empty("Chargement de l'événement…")}</div>`; }
+  if (D.error) return `<div class="wrap page">${empty(esc(D.error))}</div>`;
+  if (!D.start) return `<div class="wrap page">${head("Événement", "Parrainage", "L'événement de parrainage arrive bientôt : invite tes amis, des boosters pour vous deux à chaque filleul.")}<div class="ref-vids">${refVideos()}</div></div>`;
+  const now = Date.now(), live = now >= D.start && now <= D.end, ended = now > D.end, n = D.n || 0;
+  const next = REF_TIERS.find((t) => n < t.n);
+  const share = encodeURIComponent(`Viens jouer à Re : LOL, le jeu de cartes de l'anime de Billy : ${refLink()}`);
+  return `<div class="wrap page ref">
+    <section class="ref-hero"><p class="eyebrow">Parrainage · événement · ${refDate(D.start)} → ${refDate(D.end)}</p>
+      <h1>Invite tes amis</h1>
+      <p>Des boosters pour vous deux, une récompense à chaque palier et un classement. Ton ami regarde l'épisode de Billy, se connecte avec Discord et ouvre ${REF_MIN_OPENED} boosters : c'est validé.</p>
+      <p class="mono">${live ? `Fin dans <b>${refLeft(D.end - now)}</b>` : ended ? "Événement terminé" : `Commence dans <b>${refLeft(D.start - now)}</b>`} · +${REF_GAIN.boosters} boosters pour toi et ton ami à chaque filleul</p>
+      <div class="ref-link"><input class="in" readonly value="${esc(refLink())}" aria-label="Ton lien"><button class="btn gold" type="button" data-refcopy>${REFP.copied ? "✓ Copié" : "Copier mon lien"}</button></div>
+      <div class="ref-share">${navigator.share ? `<button class="chip" type="button" data-refshare>Partager…</button>` : ""}
+        <a class="chip" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=${share}">X</a><a class="chip" target="_blank" rel="noopener" href="https://wa.me/?text=${share}">WhatsApp</a>
+        <a class="chip" target="_blank" rel="noopener" href="https://t.me/share/url?url=${encodeURIComponent(refLink())}">Telegram</a><a class="chip" target="_blank" rel="noopener" href="https://www.reddit.com/submit?url=${encodeURIComponent(refLink())}">Reddit</a>
+        <span class="note">Sur Discord : colle ton lien.</span></div>
+      ${D.parrain ? `<p class="note">Ton parrain : <b>${esc(D.parrain.name || "un joueur")}</b> · ${D.parrain.done ? "✓ validé" : `ouvre ${REF_MIN_OPENED} boosters pour valider`}</p>` : ""}
+    </section>
+    <div class="ref-cols">
+      <section class="card sec"><h2>Tes paliers</h2><p class="note">Comptent les amis arrivés et validés pendant l'événement. Les récompenses arrivent toutes seules, avec une notification.</p>
+        <div class="ref-tiers">${REF_TIERS.map((t) => `<div class="ref-tier ${n >= t.n ? "on" : next === t ? "next" : ""}"><b>${t.n}</b><small>ami${t.n > 1 ? "s" : ""}</small><span>${esc(t.label)}</span><em>${n >= t.n ? "✓ Gagné" : next === t ? `Encore ${t.n - n}` : "Verrouillé"}</em></div>`).join("")}</div>
+        <p class="mono ref-count">${n} filleul${n > 1 ? "s" : ""} validé${n > 1 ? "s" : ""}${D.waiting ? ` · ${D.waiting} en cours` : ""}${next ? ` · encore ${next.n - n} pour « ${esc(next.label)} »` : ""}</p>
+        <h3>À gagner au classement</h3><div class="ref-prizes">${REF_PRIZES.map((p) => `<div><b>${p.from === p.to ? `${p.from}${p.from === 1 ? "er" : "e"}` : `${p.from}${p.from === 1 ? "er" : "e"} à ${p.to}e`}</b><span>${esc(p.label)}</span></div>`).join("")}</div></section>
+      <section class="card sec"><h2>Classement des parrains</h2>${D.rank ? `<p class="note">Tu es ${D.rank}${D.rank === 1 ? "er" : "e"}.</p>` : ""}
+        <div class="ref-board">${(D.board || []).length ? D.board.map((b, i) => `<button class="ref-row ${b.uid === ME ? "me" : ""}" type="button" data-nav="profil" data-p="${b.uid}"><i>${i + 1}</i><img class="av" src="${esc(b.avatar || "")}" alt="" onerror="this.style.visibility='hidden'"><b>${esc(b.name || "Joueur")}</b>${qgTag(b.uid)}<span>${b.n}</span></button>`).join("") : `<p class="note">Personne encore : sois le premier !</p>`}</div></section>
+    </div>
+    <section class="sec"><div class="sec-h"><h2>Les épisodes de Billy</h2></div><div class="ref-vids">${refVideos()}</div></section>
+  </div>`;
+};
+document.addEventListener("click", async (e) => {
+  if (e.target.closest("[data-refcopy]")) { try { await navigator.clipboard.writeText(refLink()); REFP.copied = true; toast("Lien copié : envoie-le à tes amis !"); draw(); } catch (err) { toast("Copie impossible : sélectionne le lien à la main."); } return; }
+  if (e.target.closest("[data-refshare]")) { try { await navigator.share({ title: "Re : LOL", text: "Viens jouer à Re : LOL avec moi", url: refLink() }); } catch (err) {} return; }
+  const rl = e.target.closest("[data-reflaunch]"); if (rl) { if (!confirm("Lancer le parrainage maintenant pour 2 semaines ? Tout le monde sera prévenu.")) return; try { await srv("admin/ref-launch", { days: 14 }); REFP.data = null; toast("Parrainage lancé pour 2 semaines."); draw(); } catch (err) { toast(err.message); } return; }
+  if (e.target.closest("[data-resetall]")) {
+    const t = prompt("Remise à zéro COMPLÈTE : collections, essence, marché, échanges, chat, amis, Défilé, Confrontation, parrainage… de TOUS les joueurs. Les comptes, épisodes, créations et prédictions restent.\n\nÉcris TOUT EFFACER pour confirmer :");
+    if (t !== "TOUT EFFACER") return toast("Annulé : rien n'a été effacé.");
+    const launch = confirm("Lancer aussi le parrainage (2 semaines) dans la foulée ?");
+    try { await srv("admin/reset-all", { confirm: t, launchRef: launch }); toast("Tout est remis à zéro. Rechargement…"); setTimeout(() => location.reload(), 1500); } catch (err) { toast(err.message); }
+  }
+});
+// onglet Dev : lancer le parrainage, et la remise à zéro complète (avant la présentation au QG)
+{ const f = VIEWS.dev; VIEWS.dev = () => (SRV && IS_DEV ? `<div class="wrap page" style="padding-bottom:0"><section class="card sec ref-danger"><h2>Lancement public</h2>
+    <p class="note">Avant de montrer le jeu au QG : remets tout à zéro (tous les joueurs repartent de rien, même vous), puis lance le parrainage pour 2 semaines. Les comptes, les épisodes, les créations et les prédictions sont gardés.</p>
+    <div class="row"><button class="btn" type="button" data-reflaunch>Lancer le parrainage (2 semaines)</button><button class="btn danger" type="button" data-resetall>Tout remettre à zéro…</button></div></section></div>` : "") + f(); }
 
 // ===== Gestion : tout ce qui sert à l'admin et au dev, dans une seule rubrique à onglets =====
 // Les pages gardent leur adresse (#/admin, #/createur…) : seul le menu change (une entrée « Gestion ») et chaque page

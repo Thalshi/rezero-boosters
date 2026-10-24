@@ -218,6 +218,7 @@ const MISSIONS = [
   { id: "rare3",  label: "Obtiens 3 cartes Rares ou mieux",        key: "rare",    goal: 3, reward: { chakra: 15 } },
   { id: "pred1",  label: "Vote pour une prédiction",              key: "predict", goal: 1, reward: { chakra: 15 } },
   { id: "chat1",  label: "Écris un message dans le chat du QG",     key: "chat",    goal: 1, reward: { chakra: 10 } },
+  { id: "dm1",    label: "Écris un message privé à un ami",          key: "dm",      goal: 1, reward: { chakra: 10 } },
   { id: "day1",   label: "Ouvre le pack du jour",                   key: "day",     goal: 1, reward: { chakra: 15 } },
   { id: "sheet3", label: "Consulte 3 fiches de persos",             key: "sheet",   goal: 3, reward: { chakra: 10 } },
   { id: "cf1",    label: "Joue une partie de Confrontation",        key: "cfPlay",  goal: 1, reward: { chakra: 15 } },
@@ -324,6 +325,7 @@ const WEEKLY = [
   { id: "w-predok", label: "Réussis 2 prédictions",            key: "predwin", goal: 2,  reward: { chakra: 120 } },
   { id: "w-cfwin3", label: "Gagne 3 parties de Confrontation", key: "cfWin",   goal: 3,  reward: { chakra: 120 } },
   { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
+  { id: "w-friend", label: "Fais-toi un nouvel ami",           key: "friend",  goal: 1,  reward: { chakra: 80 } },
 ];
 const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
 const WEEKLY_BONUS = { boosters: 3, summons: 1 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
@@ -338,6 +340,7 @@ const FIRST_STEPS = [
   { id: "f-show",   label: "Mets une carte en vitrine",    test: (s) => (s.showcase || []).length >= 1,          reward: { chakra: 20 } },
   { id: "f-pred",   label: "Fais une prédiction",          test: (s) => (s.counts?.predict || 0) >= 1,           reward: { chakra: 30 } },
   { id: "f-chat",   label: "Dis bonjour dans le chat du QG", test: (s) => (s.counts?.chat || 0) >= 1,            reward: { chakra: 20 } },
+  { id: "f-friend", label: "Ajoute ton premier ami",        test: (s) => (s.counts?.friend || 0) >= 1,          reward: { chakra: 30 } },
   { id: "f-sheet",  label: "Ouvre une fiche de perso",     test: (s) => (s.counts?.sheet || 0) >= 1,             reward: { chakra: 20 } },
   { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
 ];
@@ -366,6 +369,7 @@ const ACHIEVEMENTS = [
   { id: "a-pred10",   label: "Prophète",            desc: "Réussir 10 prédictions",             val: (s) => s.counts?.predwin || 0, goal: 10, reward: { chakra: 300 } },
   { id: "a-vote25",   label: "Visionnaire",         desc: "Voter pour 25 prédictions",          val: (s) => s.counts?.predict || 0, goal: 25, reward: { chakra: 150 } },
   { id: "a-chat50",   label: "Pilier du QG",        desc: "Écrire 50 messages dans le chat",    val: (s) => s.counts?.chat || 0, goal: 50, reward: { chakra: 100 } },
+  { id: "a-friend10", label: "Bande de potes",      desc: "Avoir fait 10 amis",                 val: (s) => s.counts?.friend || 0, goal: 10, reward: { chakra: 150 } },
 ];
 // une faction est complète quand on a toutes ses cartes de base (hors skins)
 const factionsDoneS = (s) => Object.keys(FACTIONS).filter((f) => { const cs = CARDS.filter((c) => PEOPLE[c.who].fac === f); return cs.length && cs.every((c) => hasCard(s, c.id)); }).length;

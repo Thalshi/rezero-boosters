@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-24 — Amis et comptoir privé (34e mise en ligne)
+- « + Ajouter en ami » sur le profil d'un joueur ; demande notifiée, « Accepter » / « Refuser » ; « ✓ Ami · Écrire » une fois amis.
+- Comptoir avec deux onglets : « Le QG » (chat public) et « Amis » (demandes reçues, liste d'amis avec messages non lus, demandes envoyées, conversation privée). Pastille du comptoir : messages privés et demandes.
+- Missions : « Écris un message privé à un ami » (jour), « Fais-toi un nouvel ami » (semaine), premiers pas « Ajoute ton premier ami », succès « Bande de potes » (10 amis).
+
 ## 2026-10-24 — Jeu ouvert à tous, badge QG pour les membres (33e mise en ligne)
 - Plus besoin d'être membre du serveur Discord QG pour : marché et échanges, chat, votes (prédictions, Défilé), inscription au Défilé, avis et bugs, Confrontation (créer et rejoindre un salon).
 - Les membres du serveur gardent un badge « QG » bleu à côté de leur nom (profil, classement, chat).

@@ -19,6 +19,13 @@ export async function ensureGameSchema(db) {
     db.prepare("CREATE TABLE IF NOT EXISTS notifs (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, kind TEXT NOT NULL, text TEXT NOT NULL, data TEXT, ts INTEGER NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS notifs_uid ON notifs (uid, id)"),
     db.prepare("CREATE TABLE IF NOT EXISTS notif_read (uid TEXT PRIMARY KEY, last INTEGER NOT NULL)"),
+    // amis : une ligne par sens ; « pending » = demande de a vers b, « ok » = amis (les deux lignes)
+    db.prepare("CREATE TABLE IF NOT EXISTS friends (a TEXT NOT NULL, b TEXT NOT NULL, status TEXT NOT NULL, ts INTEGER NOT NULL, PRIMARY KEY (a, b))"),
+    db.prepare("CREATE INDEX IF NOT EXISTS friends_b ON friends (b, status)"),
+    // messages privés entre amis : p = la paire triée « uid1|uid2 »
+    db.prepare("CREATE TABLE IF NOT EXISTS dm (id INTEGER PRIMARY KEY AUTOINCREMENT, p TEXT NOT NULL, uid TEXT NOT NULL, text TEXT NOT NULL, ts INTEGER NOT NULL)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS dm_p ON dm (p, id)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS dm_read (uid TEXT NOT NULL, peer TEXT NOT NULL, last INTEGER NOT NULL, PRIMARY KEY (uid, peer))"),
   ]);
 }
 
@@ -178,7 +185,78 @@ async function chatRoute(env, user, path, body) {
     const items = (await env.DB.prepare("SELECT id, kind, text, data, ts FROM notifs WHERE uid IN (?, '*') ORDER BY id DESC LIMIT 30").bind(user.id).all()).results
       .map((n) => ({ ...n, data: n.data ? JSON.parse(n.data) : null }));
     const read = (await env.DB.prepare("SELECT last FROM notif_read WHERE uid = ?").bind(user.id).first())?.last ?? 0;
-    return json({ chat: chat.map((m) => ({ ...m, gold: !!m.gold, admin: isAdminId(env, m.uid) })), gone, notifs: { items, read, unread: items.filter((n) => n.id > read).length } });
+    // amis : demandes reçues et messages privés non lus (pour la pastille du comptoir)
+    const req = (await env.DB.prepare("SELECT COUNT(*) AS n FROM friends WHERE b = ? AND status = 'pending'").bind(user.id).first()).n;
+    const dmUn = (await env.DB.prepare("SELECT COUNT(*) AS n FROM dm d WHERE d.uid != ? AND (d.p LIKE ? OR d.p LIKE ?) AND d.id > COALESCE((SELECT last FROM dm_read r WHERE r.uid = ? AND r.peer = d.uid), 0)").bind(user.id, user.id + "|%", "%|" + user.id, user.id).first()).n;
+    return json({ chat: chat.map((m) => ({ ...m, gold: !!m.gold, admin: isAdminId(env, m.uid) })), gone, notifs: { items, read, unread: items.filter((n) => n.id > read).length }, social: { req, dm: dmUn } });
+  }
+  // ---------- amis et messages privés ----------
+  const pairOf = (x, y) => (x < y ? x + "|" + y : y + "|" + x);
+  const areFriends = async (x, y) => !!(await env.DB.prepare("SELECT 1 FROM friends WHERE a = ? AND b = ? AND status = 'ok'").bind(x, y).first());
+  if (path === "/api/game/friends") {
+    const rows = (await env.DB.prepare("SELECT f.a, f.b, f.status, f.ts, u.name, u.avatar FROM friends f LEFT JOIN users u ON u.id = (CASE WHEN f.a = ? THEN f.b ELSE f.a END) WHERE f.a = ? OR (f.b = ? AND f.status = 'pending')").bind(user.id, user.id, user.id).all()).results;
+    const unread = (await env.DB.prepare("SELECT d.uid AS peer, COUNT(*) AS n FROM dm d WHERE d.uid != ? AND (d.p LIKE ? OR d.p LIKE ?) AND d.id > COALESCE((SELECT last FROM dm_read r WHERE r.uid = ? AND r.peer = d.uid), 0) GROUP BY d.uid").bind(user.id, user.id + "|%", "%|" + user.id, user.id).all()).results;
+    const un = Object.fromEntries(unread.map((r) => [r.peer, r.n]));
+    const me = (r) => ({ uid: r.a === user.id ? r.b : r.a, name: r.name || "Joueur", avatar: r.avatar || null, ts: r.ts });
+    return json({
+      friends: rows.filter((r) => r.a === user.id && r.status === "ok").map((r) => ({ ...me(r), unread: un[r.b] || 0 })),
+      incoming: rows.filter((r) => r.b === user.id && r.status === "pending").map(me),
+      outgoing: rows.filter((r) => r.a === user.id && r.status === "pending").map(me),
+    });
+  }
+  if (path === "/api/game/friends/add") {
+    const to = String(body.uid || "");
+    if (!to || to === user.id) return fail(400, "Choisis un autre joueur.");
+    const target = await env.DB.prepare("SELECT name FROM users WHERE id = ?").bind(to).first();
+    if (!target) return fail(404, "Ce joueur n'existe pas.");
+    if (await areFriends(user.id, to)) return json({ status: "ok" });
+    const back = await env.DB.prepare("SELECT 1 FROM friends WHERE a = ? AND b = ? AND status = 'pending'").bind(to, user.id).first();
+    if (!back) {
+      const n = (await env.DB.prepare("SELECT COUNT(*) AS n FROM friends WHERE a = ? AND status = 'pending'").bind(user.id).first()).n;
+      if (n >= 30) return fail(429, "Trop de demandes en attente : attends qu'on te réponde.");
+      await env.DB.prepare("INSERT INTO friends (a, b, status, ts) VALUES (?, ?, 'pending', ?) ON CONFLICT(a, b) DO NOTHING").bind(user.id, to, Date.now()).run();
+      await notify(env, to, "friend", `${user.name || "Un joueur"} veut t'ajouter en ami.`, { go: "friends" });
+      return json({ status: "pending" });
+    }
+    body.uid = to; path = "/api/game/friends/accept"; // il m'avait déjà demandé : on accepte
+  }
+  if (path === "/api/game/friends/accept") {
+    const from = String(body.uid || "");
+    const req = await env.DB.prepare("SELECT 1 FROM friends WHERE a = ? AND b = ? AND status = 'pending'").bind(from, user.id).first();
+    if (!req) return fail(404, "Plus de demande de ce joueur.");
+    const now = Date.now();
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO friends (a, b, status, ts) VALUES (?, ?, 'ok', ?) ON CONFLICT(a, b) DO UPDATE SET status = 'ok', ts = excluded.ts").bind(from, user.id, now),
+      env.DB.prepare("INSERT INTO friends (a, b, status, ts) VALUES (?, ?, 'ok', ?) ON CONFLICT(a, b) DO UPDATE SET status = 'ok', ts = excluded.ts").bind(user.id, from, now),
+    ]);
+    for (const u of [user.id, from]) await mutate(env, u, (s, t) => { G.trackS(s, "friend", 1, t); return {}; }).catch(() => {});
+    await notify(env, from, "friend", `${user.name || "Un joueur"} a accepté ta demande d'ami.`, { go: "friends" });
+    return json({ status: "ok" });
+  }
+  if (path === "/api/game/friends/remove") {
+    const o = String(body.uid || "");
+    await env.DB.prepare("DELETE FROM friends WHERE (a = ? AND b = ?) OR (a = ? AND b = ?)").bind(user.id, o, o, user.id).run();
+    return json({ ok: true });
+  }
+  if (path === "/api/game/dm") {
+    const peer = String(body.uid || "");
+    if (!(await areFriends(user.id, peer))) return fail(403, "Vous n'êtes pas amis.");
+    const after = Math.max(0, +body.after || 0);
+    const msgs = (await env.DB.prepare(after ? "SELECT id, uid, text, ts FROM dm WHERE p = ? AND id > ? ORDER BY id ASC LIMIT 100" : "SELECT id, uid, text, ts FROM dm WHERE p = ? AND id > ? ORDER BY id DESC LIMIT 60").bind(pairOf(user.id, peer), after).all()).results;
+    if (!after) msgs.reverse();
+    const last = msgs.length ? msgs[msgs.length - 1].id : 0;
+    if (last) await env.DB.prepare("INSERT INTO dm_read (uid, peer, last) VALUES (?, ?, ?) ON CONFLICT(uid, peer) DO UPDATE SET last = MAX(last, excluded.last)").bind(user.id, peer, last).run();
+    return json({ msgs });
+  }
+  if (path === "/api/game/dm/send") {
+    const peer = String(body.uid || ""), text = String(body.text || "").replace(/\s+/g, " ").trim().slice(0, CHAT_MAX);
+    if (!text) return fail(400, "Écris un message.");
+    if (!(await areFriends(user.id, peer))) return fail(403, "Vous n'êtes pas amis.");
+    const p = pairOf(user.id, peer), prev = await env.DB.prepare("SELECT ts FROM dm WHERE p = ? AND uid = ? ORDER BY id DESC LIMIT 1").bind(p, user.id).first();
+    if (prev && Date.now() - prev.ts < 800) return fail(429, "Doucement, un message à la fois.");
+    await env.DB.prepare("INSERT INTO dm (p, uid, text, ts) VALUES (?, ?, ?, ?)").bind(p, user.id, text, Date.now()).run();
+    await mutate(env, user.id, (s, t) => { G.trackS(s, "dm", 1, t); return {}; }).catch(() => {});
+    return json({ ok: true });
   }
   if (path === "/api/game/notifs/read") {
     const last = Math.max(0, Math.round(+body.last || 0));

@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-24 — Boutique sans doublons, ornements dans Décorations (19e mise en ligne)
+- Retirées des décorations car en double avec un objet : Aura d'ombre, Mains des abysses, Éclipse noire (auras), Cornes d'ombre, Auréole, Ailes de lumière, Couronne (ornements), Pluie de pétales, Neige (particules).
+- Les ornements quittent « Objets pour tes cartes » : nouvelle rangée « Couvre-chefs et ornements » dans l'onglet Décorations (aperçu sur l'avatar, fiche avec carte + avatar).
+- Exclusifs du Sanctuaire (affichés « Sanctuaire », sans prix) : Masque de kitsune, Couronne d'or, Ailes de lumière, en plus d'Ailes d'ombre et Kabuto d'ombre.
+
 ## 2026-10-24 — Ornements : aperçu avatar en Boutique ; Créateur : « Créer » (18e mise en ligne)
 - Boutique, fiche d'un ornement : aperçu sur la carte et sur ton avatar côte à côte, bouton « Porter sur mon avatar » / « Retirer ».
 - Créateur : « Créer » et « Enregistrer les changements » au lieu de « Publier » ; seule l'équipe (admin et dev) est notifiée, jamais les joueurs (c'était déjà le cas côté serveur, le texte disait le contraire).

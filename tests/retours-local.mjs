@@ -54,7 +54,7 @@ try {
   const db = await P.api("deco/buy", { id: "deco-flammes" });
   t.check("acheter une décoration : payée et portée", db.state?.cos?.deco === "deco-flammes" && db.state.chakra === sd0 - G.COS_PRICE.r, db.error);
   t.check("la racheter est refusé", (await P.api("deco/buy", { id: "deco-flammes" })).status === 400);
-  t.check("porter une décoration pas achetée est refusé", (await P.api("deco/equip", { id: "deco-ailes" })).status === 400);
+  t.check("porter une décoration pas achetée est refusé", (await P.api("deco/equip", { id: "deco-sakura" })).status === 400);
   t.check("les autres la voient sur le profil", (await Q.api("profile", { uid: P.id })).deco === "deco-flammes");
   t.check("la retirer", (await P.api("deco/equip", { id: null })).state?.cos?.deco === null);
   await P.api("deco/equip", { id: "deco-flammes" });
@@ -98,7 +98,7 @@ try {
   await page.screenshot({ path: "/tmp/claude-0/-home-user-rezero-boosters/1145acdc-bf55-528c-b0d2-aec63051172b/scratchpad/shots/x10.png" });
   t.check("toutes les décorations se dessinent (avatar et carte)", (await page.evaluate(() => DECOS.flatMap((d) => ["round", "rect"].map((sh) => { try { return decoSVG(d, sh).includes("<svg") ? "" : d.id; } catch (e) { return d.id + " " + e.message; } })).filter(Boolean))).length === 0);
   await page.goto(`${srv.base}/#/boutique`); await page.waitForTimeout(1500);
-  t.check("la Boutique s'affiche", (await page.locator(".zd-tile").count()) === await page.evaluate(() => DECOS.length));
+  t.check("la Boutique s'affiche", (await page.locator("[data-zdeco].zd-tile").count()) === await page.evaluate(() => DECOS.length));
   await page.goto(`${srv.base}/#/boosters`); await page.waitForTimeout(1500);
   t.check("Boosters : bouton ×10 · 5 coffres", await page.locator('[data-act="open-pack"][data-n="10"]').first().isVisible());
   await page.locator('[data-act="open-pack"][data-n="10"]').first().click(); await page.waitForTimeout(1500);

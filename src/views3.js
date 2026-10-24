@@ -48,7 +48,6 @@ const Z_COLLECTIONS = [
   { id: "givre", name: "Givre et nuit", kanji: "夜", tag: "Le calme d'une nuit à Shinjuku, du givre jusqu'au néant.", c1: "#4dd6ff", c2: "#101a3a", items: ["aura-givre", "part-flocons", "fond-nuit", "fond-abysse", "aura-neant", "cadre-argent"] },
   { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
   { id: "ombres", name: "Royaume des ombres", kanji: "影", tag: "Flammes noires, mains des abysses et éclipse.", c1: "#b072ff", c2: "#05020a", items: ["aura-ombre", "aura-ombre-sang", "aura-abysse"] },
-  { id: "samourai", name: "Voie du samouraï", kanji: "侍", tag: "Kabuto, chapeaux de paille, masques de kitsune et hachimaki.", c1: "#d8202e", c2: "#1a0a0a", items: ["orn-kabuto", "orn-kasa", "orn-ronin", "orn-kitsune", "orn-kanzashi", "orn-hachimaki"] },
   { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
 ];
 // un objet créé depuis l'app rejoint la collection choisie (champ « coll ») ; tout objet de boutique
@@ -94,6 +93,13 @@ function zDecoTile(d) {
     <span class="zd-meta"><b>${esc(d.name)}</b><small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>
       <span class="zs-price ${own ? "own" : ""}">${worn || n ? `✓ ${[worn ? "Avatar" : "", n ? `${n} carte${n > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ")}` : own ? "Possédée" : `${fmtN(COS_PRICE[d.rar])} ◆`}</span></span></button>`;
 }
+function zOrnTile(c) {
+  const own = ownsCosS(save, c.id), worn = save.cos?.avOrn === c.id;
+  return `<button type="button" class="zd-tile r-${c.rar} ${worn ? "on" : ""}" data-zitem="${c.id}" style="--h1:${c.c1 || "#d8202e"};--h2:#1a0a0a;--rc:${RAR[c.rar].color}" aria-label="${esc(c.name)}, ${RAR[c.rar].label}">
+    <span class="zd-stage zd-ostage">${zMeAv(null, 78, c)}</span>
+    <span class="zd-meta"><b>${esc(c.name)}</b><small style="color:${RAR[c.rar].color}">${RAR[c.rar].label}</small>
+      <span class="zs-price ${own ? "own" : ""} ${c.only ? "only" : ""}">${worn ? "✓ Avatar" : own ? "Possédé" : c.only ? "Sanctuaire" : `${fmtN(COS_PRICE[c.rar])} ◆`}</span></span></button>`;
+}
 function viewDecos() {
   const F = zDecoColl(), fd = DECOS.filter((d) => d.coll === F.id), n = Object.keys(decosOf(save)).length;
   const hero = `<section class="zd-hero" style="--h1:${F.c1};--h2:${F.c2}">
@@ -105,9 +111,13 @@ function viewDecos() {
   const mine = `<div class="zd-mine">${zMeAv(cur, 56)}<div><b>${cur ? `Sur ton avatar : ${esc(cur.name)}` : "Une décoration, deux usages"}</b><small>Achète-la une fois : porte-la autour de ton avatar (en-tête, profil, classement, comptoir) et pose-la sur autant de cartes que tu veux (collection, carte vedette, Défilé).${n ? ` · ${n} possédée${n > 1 ? "s" : ""}` : ""}</small></div>${cur ? `<button class="btn sm" type="button" data-zdequip="">Retirer de l'avatar</button>` : ""}</div>`;
   const rows = DECO_COLLS.map((C) => `<section class="sec zs-row" id="zdcoll-${C.id}"><div class="zs-row-h" style="--h1:${C.c1}"><span class="zs-k zd-k">${C.kanji}</span><div><h2>${esc(C.name)}</h2><p class="note">${esc(C.tag)}</p></div></div>
       <div class="zd-grid">${DECOS.filter((d) => d.coll === C.id).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zDecoTile).join("")}</div></section>`).join("");
+  // ornements : chapeaux, kabuto, couronnes… sur l'avatar et sur les cartes (objets de compte, ou exclusifs du Sanctuaire)
+  const orns = COSMETICS.filter((c) => c.slot === "orn" && !c.id.startsWith("__")).sort((a, b) => !!a.only - !!b.only || RAR[a.rar].rank - RAR[b.rar].rank);
+  const ornRow = `<section class="sec zs-row" id="zdcoll-orn"><div class="zs-row-h" style="--h1:#d8202e"><span class="zs-k zd-k">冠</span><div><h2>Couvre-chefs et ornements</h2><p class="note">Kabuto, chapeaux, masques, couronnes : sur ton avatar et sur tes cartes.</p></div></div>
+      <div class="zd-grid">${orns.map(zOrnTile).join("")}</div></section>`;
   return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des décorations animées pour ton avatar et tes cartes, et des objets pour les personnaliser. Aucun bonus de jeu : juste du style.")}
     ${zbTabs()}<div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span></div>
-    ${mine}${hero}${rows}</div>`;
+    ${mine}${hero}${ornRow}${rows}</div>`;
 }
 // fiche d'une décoration : aperçu sur la carte de ton choix, achat, puis pose sur cette carte
 function zOpenDeco(id) {
@@ -154,19 +164,21 @@ function viewBoutique() {
   if (!featureOn(CONFIG, "boutique")) return closedHTML("Boutique Arcanique");
   if (param === "cartes" || param === "deco") { zBoutTab = param; param = null; }
   if (zBoutTab === "deco") return viewDecos();
-  const F = zFeatured(), fItems = F.items.map((id) => COS_BY_ID[id]).filter(Boolean);
+  const F = zFeatured(), fItems = F.items.map((id) => COS_BY_ID[id]).filter((c) => c && c.slot !== "orn");
   const hero = `<section class="zs-hero" style="--h1:${F.c1};--h2:${F.c2}">
       <div class="zs-hero-t"><p class="eyebrow">Collection à la une</p><h2>${esc(F.name)}</h2><p>${esc(F.tag)}</p>
         <button class="btn gold" type="button" data-zcoll="${F.id}">Voir la collection</button></div>
       <div class="zs-hero-cards">${fItems.slice(0, 3).map((c) => `<div class="zs-hero-card">${cardHTML(zSample(), { design: { [c.slot]: c.id }, present: true })}</div>`).join("")}</div>
       <span class="zs-hero-k" aria-hidden="true">${ico(COLL_ICON[F.id] || "logo")}</span></section>`;
-  const filters = seg("zShopF", [["", "Tout"], ...COS_SLOTS.map((sl) => [sl.id, sl.label])], zShopFilter);
+  // les ornements se portent aussi sur l'avatar : ils sont dans l'onglet Décorations
+  if (zShopFilter === "orn") zShopFilter = "";
+  const filters = seg("zShopF", [["", "Tout"], ...COS_SLOTS.filter((sl) => sl.id !== "orn").map((sl) => [sl.id, sl.label])], zShopFilter);
   const rows = zShopFilter
     ? `<section class="sec"><h2>${COS_SLOT_LABEL[zShopFilter]}</h2><div class="zs-grid">${COSMETICS.filter((c) => c.slot === zShopFilter).map(zShopTile).join("")}</div></section>`
     : [...Z_COLLECTIONS.map((col) => `<section class="sec zs-row" id="zcoll-${col.id}"><div class="zs-row-h" style="--h1:${col.c1}"><span class="zs-k">${ico(COLL_ICON[col.id] || "logo")}</span><div><h2>${esc(col.name)}</h2><p class="note">${esc(col.tag)}</p></div></div>
-        <div class="zs-grid">${col.items.map((id) => COS_BY_ID[id]).filter(Boolean).sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zShopTile).join("")}</div></section>`),
+        <div class="zs-grid">${col.items.map((id) => COS_BY_ID[id]).filter((c) => c && c.slot !== "orn").sort((a, b) => RAR[a.rar].rank - RAR[b.rar].rank).map(zShopTile).join("")}</div></section>`),
       `<section class="sec zs-row"><div class="zs-row-h" style="--h1:#ff4d2e"><span class="zs-k">${ico("sanctuaire")}</span><div><h2>Exclusifs du Sanctuaire</h2><p class="note">Ils ne s'achètent pas : on les obtient seulement en invoquant au Sanctuaire.</p></div></div>
-        <div class="zs-grid">${COSMETICS.filter((c) => c.only).map(zShopTile).join("")}</div></section>`].join("");
+        <div class="zs-grid">${COSMETICS.filter((c) => c.only && c.slot !== "orn").map(zShopTile).join("")}</div></section>`].join("");
   return `<div class="wrap page">${head("Boutique Arcanique", "Boutique Arcanique", "Des cosmétiques pour tes cartes, sans aucun bonus de jeu. Achetés ici, ils sont à toi pour toujours et s'utilisent sur toutes tes cartes depuis l'Atelier.")}
     ${zbTabs()}
     <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="note">Prix provisoires, en attente de validation.</span><button class="btn sm" type="button" data-nav="atelier">Ouvrir l'Atelier</button></div>

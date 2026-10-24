@@ -267,7 +267,7 @@ function zInventory() {
       <div class="zt-t"><b>${esc(it.name)}</b><span style="color:${RAR[it.rar].color}">${RAR[it.rar].label}</span><small>${x.kind}${on.length && !x.ref.startsWith("i:") ? ` · sur ${on.length} carte${on.length > 1 ? "s" : ""}` : ""}</small></div>
       ${mine.length ? `<div class="zt-as"><select class="in" aria-label="Carte à décorer" id="zas-${esc(x.ref)}">${mine.map((c) => `<option value="${c.id}" ${on.includes(c.id) ? "selected" : ""}>${esc(nameOf(c))} · ${esc(c.title)}${on.includes(c.id) ? " ✓" : ""}</option>`).join("")}</select>
         <button class="btn sm gold" type="button" data-zas="${esc(x.ref)}" data-slot="${x.slot}">Mettre sur cette carte</button></div>` : `<p class="note">Ouvre un booster pour avoir une carte à décorer.</p>`}</div>`; };
-  return `${seg("zInv", [["", "Tout"], ["deco", "Décoration"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
+  return `${zRecBtn()}${seg("zInv", [["", "Tout"], ["deco", "Décoration"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
     ${items.length ? `<div class="zgrid">${items.map(tile).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
 }
 // poser un objet de l'inventaire sur une carte : il rejoint son design (le reste du design ne bouge pas)
@@ -298,6 +298,7 @@ function viewSanctuaire() {
       <p class="note">Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte. ×5 et ×10 : 10 % moins cher.</p>
       <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
       <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
+      ${zRecBtn()}
     </div>${zDrops()}</div>`;
 }
 // aperçu d'un objet du Sanctuaire sur une de tes cartes (au choix) ; s'il est à toi, on peut le poser
@@ -389,5 +390,39 @@ document.addEventListener("click", async (e) => {
     if (r?.state) Object.assign(save, r.state);
     toast(id ? `${DECO_BY_ID[id].name} : portée.` : "Décoration retirée.");
     header(); draw(); pfDecoSheet();
+  } catch (err) { toast(err.message); }
+});
+
+// ===== Recycler les objets du Sanctuaire en double =====
+const ZR = { pick: {} };
+function zRecBtn() {
+  const dl = cosDupesS(save), n = dl.reduce((a, d) => a + d.n, 0);
+  return n ? `<button class="btn" type="button" data-zrec-open>♻ Recycler mes objets en double · ${n}</button>` : `<p class="note">Aucun objet en double : un exemplaire invoqué de trop (ni posé sur une carte, ni le seul que tu as) pourra être recyclé en essence.</p>`;
+}
+function zRecSheet() {
+  const dl = cosDupesS(save); for (const k of Object.keys(ZR.pick)) if (!dl.some((d) => d.id === k)) delete ZR.pick[k];
+  const total = dl.reduce((a, d) => a + (ZR.pick[d.id] || 0) * d.value, 0), nb = Object.values(ZR.pick).reduce((a, b) => a + b, 0);
+  const row = (d) => { const c = COS_BY_ID[d.id], k = ZR.pick[d.id] || 0;
+    return `<div class="dup-it ${k ? "on" : ""}"><div class="zrec-g">${zGhost(c)}</div><b style="font-size:13px;text-align:center">${esc(c.name)}</b>
+      <div class="dup-ct"><button class="btn sm" type="button" data-zrec="${d.id}" data-d="-1" ${k ? "" : "disabled"}>−</button><b>${k}/${d.n}</b><button class="btn sm" type="button" data-zrec="${d.id}" data-d="1" ${k < d.n ? "" : "disabled"}>+</button></div>
+      <span class="dup-v">${fmtN(d.value)} ◆ l'un</span></div>`; };
+  $("overlay").innerHTML = `<div class="sheet dup-sheet" role="dialog" aria-modal="true" aria-label="Recycler mes objets en double"><div class="sheet-h"><h2>Recycler mes objets en double</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">Seuls les exemplaires en trop sont proposés : jamais ceux posés sur une carte, et tu gardes toujours au moins un exemplaire de chaque objet. Valeur : ${RANKS.map((r) => `${RAR[r].label} ${COS_RECYCLE[r]} ◆`).join(" · ")}.</p>
+      ${dl.length ? `<div class="row"><button class="btn sm" type="button" data-zrec-all>Tout cocher</button><button class="btn sm" type="button" data-zrec-none>Tout décocher</button></div><div class="dup-grid">${dl.map(row).join("")}</div>
+      <button class="btn gold big block" type="button" data-zrec-go ${nb ? "" : "disabled"}>${nb ? `Recycler ${nb} objet${nb > 1 ? "s" : ""} · +${fmtN(total)} ◆` : "Choisis les objets à recycler"}</button>` : `<p class="note">Aucun objet en double.</p>`}</div></div>`;
+  $("overlay").hidden = false;
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-zrec-open]")) { ZR.pick = {}; return zRecSheet(); }
+  const b = t.closest("[data-zrec]"); if (b) { const id = b.dataset.zrec, d = cosDupesS(save).find((x) => x.id === id); ZR.pick[id] = Math.max(0, Math.min(d?.n || 0, (ZR.pick[id] || 0) + +b.dataset.d)); return zRecSheet(); }
+  if (t.closest("[data-zrec-all]")) { for (const d of cosDupesS(save)) ZR.pick[d.id] = d.n; return zRecSheet(); }
+  if (t.closest("[data-zrec-none]")) { ZR.pick = {}; return zRecSheet(); }
+  const go = t.closest("[data-zrec-go]"); if (!go || !sure(go, "Toucher encore pour recycler")) return;
+  const pick = Object.entries(ZR.pick).filter(([, n]) => n > 0).map(([id, n]) => ({ id, n }));
+  try {
+    const r = await zCall("cos/recycle", { pick }, () => recycleCosS(save, pick));
+    if (r?.state) Object.assign(save, r.state);
+    toast(`Recyclés : +${fmtN(r.value)} ◆`); ZR.pick = {}; header(); draw(); $("overlay").hidden = true;
   } catch (err) { toast(err.message); }
 });

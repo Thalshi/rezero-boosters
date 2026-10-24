@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-24 — Ornements sur l'avatar, auras d'ombre, dragon/phénix/oni redessinés (17e mise en ligne)
+- Profil : « Équiper mon avatar » choisit la décoration et un ornement (chapeau, kabuto, couronne…) parmi ceux possédés ; visible partout autour de l'avatar.
+- Auras d'ombre (Atelier) : Aura d'ombre, Ombre sanglante, Mains des abysses, Éclipse noire (Sanctuaire) ; aussi en décorations (avatar et cartes). Collection « Royaume des ombres ».
+- Redessinés : dragon (tête sculptée avec cornes, crinière de feu, mâchoire qui s'ouvre, écailles, crête, pattes griffues), phénix (ailes à plumes étagées, tête à crête de flammes, traîne de plumes), masque d'oni (laque sculptée, yeux de braise, crocs, cornes annelées, crinière).
+
 ## 2026-10-24 — Couvre-chefs de samouraï (16e mise en ligne)
 - 7 nouveaux ornements, collection « Voie du samouraï » en Boutique : hachimaki, chapeau de paille, jingasa du rōnin, masque de kitsune, kanzashi en fleurs, kabuto du shōgun, kabuto d'ombre (Sanctuaire).
 

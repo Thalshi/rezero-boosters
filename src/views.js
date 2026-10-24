@@ -52,13 +52,15 @@ function cosDeco(design, present) {
   const base = fo ? FOND_BG[fo.k](fo) : "linear-gradient(170deg, color-mix(in srgb, var(--rc) 26%, #17161d), color-mix(in srgb, var(--rc) 10%, #0e0d12) 70%)";
   if (f) { kc.push("cz-cadre", "cz-cadre-" + f.k); style.push(`--zf1:${f.c1};--zf2:${f.c2}`, `background:${base} padding-box, ${f.k === "prisme" ? `conic-gradient(from var(--zang, 0deg), ${f.c1}, #ffd24d, ${f.c2}, #8a4dff, ${f.c1})` : `linear-gradient(135deg, ${f.c1}, ${f.c2} 45%, ${f.c1} 70%, ${f.c2})`} border-box`); }
   else if (fo) style.push(`background:${base}`);
-  if (a) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
+  // les auras d'ombre sont dessinées (fx.js) ; les autres restent un halo en CSS
+  const A = a && typeof fxBuild === "function" ? fxBuild("a-" + a.k, a.c1, a.c2 || a.c1) : null;
+  if (a && !A) { wrap.push("cz-aura", "cz-aura-" + a.k); style.push(`--za:${a.c1}`); }
   if (pr && present) wrap.push("cz-pres", "cz-pres-" + pr.k);
   // décoration, ornement et particules : calques SVG derrière et devant la carte (src/fx.js)
   const dk = design.deco && typeof DECO_BY_ID === "object" && DECO_BY_ID[design.deco], L = dk ? decoLayers(dk) : { back: "", front: "" };
   const O = o ? fxBuild("o-" + o.k, o.c1, o.c1) || { back: "", front: "" } : { back: "", front: "" }, P = pa ? fxBuild("p-" + pa.k, pa.c1, pa.c1) || { back: "", front: "" } : { back: "", front: "" };
   // la couleur de l'aura va sur le cadre extérieur (.kcw), qui dessine le halo
-  return { deco: L.back + O.back + L.front + O.front + P.front, za: a ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: "", orn: "" };
+  return { deco: (A ? A.back : "") + L.back + O.back + (A ? A.front : "") + L.front + O.front + P.front, za: a && !A ? a.c1 : null, kc: kc.join(" "), wrap: wrap.join(" "), style: style.join(";"), holo: h ? `<span class="cz-holo cz-holo-${h.k}" aria-hidden="true"></span>` : "", part: "", orn: "" };
 }
 // carte au format Kyara : nom + lettre de rareté, image numérotée, sous-titre, POW / AURA
 function cardHTML(c, o = {}) {
@@ -157,10 +159,10 @@ function toggleMenu(force) {
 const closeMenu = () => { if (menuOpen) toggleMenu(false); };
 // décoration autour de l'avatar de l'en-tête (remplacée seulement quand elle change, pour ne pas relancer l'animation)
 function syncAvDeco() {
-  const b = $("avBtn"); if (!b) return; const id = save.cos?.deco || "";
+  const b = $("avBtn"); if (!b) return; const id = (save.cos?.deco || "") + "|" + (save.cos?.avOrn || "");
   if (b.dataset.deco === id) return; b.dataset.deco = id;
   b.querySelectorAll("svg.dk").forEach((x) => x.remove());
-  if (id && DECO_BY_ID[id]) { const L = avDecoHTML(DECO_BY_ID[id], false); b.insertAdjacentHTML("afterbegin", L.back); b.insertAdjacentHTML("beforeend", L.front); }
+  if (id !== "|") { const L = avLayers(DECO_BY_ID[save.cos?.deco] || null, ornOfUid(ME), false); b.insertAdjacentHTML("afterbegin", L.back); b.insertAdjacentHTML("beforeend", L.front); }
 }
 function header() {
   syncAvDeco();

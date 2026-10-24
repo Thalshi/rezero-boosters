@@ -794,6 +794,10 @@ const COSMETICS = [
   { id: "aura-solaire", slot: "aura", name: "Aura solaire", rar: "e", k: "flow", c1: "#ffd24d" },
   { id: "aura-spectre", slot: "aura", name: "Aura spectrale", rar: "l", k: "flow", c1: "#e8f4ff" },
   { id: "aura-ecarlate", slot: "aura", name: "Aura écarlate", rar: "m", k: "flow", c1: "#ff2e4d", only: "sanctuaire" },
+  { id: "aura-ombre", slot: "aura", name: "Aura d'ombre", rar: "e", k: "ombre", c1: "#b072ff", c2: "#2a0a4a" },
+  { id: "aura-ombre-sang", slot: "aura", name: "Ombre sanglante", rar: "l", k: "ombre", c1: "#ff2e4d", c2: "#3a0410" },
+  { id: "aura-abysse", slot: "aura", name: "Mains des abysses", rar: "l", k: "abysse", c1: "#b072ff", c2: "#1a0a3a" },
+  { id: "aura-eclipse", slot: "aura", name: "Éclipse noire", rar: "m", k: "eclipse", c1: "#ff7a2e", c2: "#3a0a04", only: "sanctuaire" },
   { id: "orn-etoile", slot: "orn", name: "Étoile du QG", rar: "c", k: "etoile", c1: "#f5c518" },
   { id: "orn-kanji", slot: "orn", name: "Emblème flottant", rar: "pc", k: "kanji", c1: "#ff4d2e" },
   { id: "orn-aureole", slot: "orn", name: "Auréole", rar: "r", k: "aureole", c1: "#fff3b0" },
@@ -930,6 +934,9 @@ const DECOS = [
   { id: "deco-lunesang", coll: "cosmos", name: "Lune de sang", k: "lunesang", c1: "#ff3a3a", c2: "#4a0410", rar: "l" },
   { id: "deco-glace", coll: "elements", name: "Couronne de givre", k: "glace", c1: "#8fe3ff", c2: "#2a6fff", rar: "l" },
   { id: "deco-maree", coll: "elements", name: "Marée", k: "maree", c1: "#4dd6ff", c2: "#0a3a6a", rar: "e" },
+  { id: "deco-aura-ombre", coll: "elements", name: "Aura d'ombre", k: "a-ombre", c1: "#b072ff", c2: "#2a0a4a", rar: "e" },
+  { id: "deco-abysse", coll: "elements", name: "Mains des abysses", k: "a-abysse", c1: "#b072ff", c2: "#1a0a3a", rar: "l" },
+  { id: "deco-eclipse", coll: "cosmos", name: "Éclipse noire", k: "a-eclipse", c1: "#ff7a2e", c2: "#3a0a04", rar: "m" },
   { id: "deco-ombre", coll: "elements", name: "Ombres vivantes", k: "ombre", c1: "#b072ff", c2: "#2a0a4a", rar: "l" },
   { id: "deco-ombre-sang", coll: "elements", name: "Ombres de sang", k: "ombre", c1: "#ff3a4d", c2: "#3a0410", rar: "m" },
   { id: "deco-chaines", coll: "elements", name: "Chaînes spectrales", k: "chaines", c1: "#c8c8f0", c2: "#4a2a7a", rar: "e" },
@@ -989,6 +996,13 @@ function buyDecoS(s, id) {
 function equipDecoS(s, id) {
   if (id && !decosOf(s)[id]) return { error: "Achète d'abord cette décoration." };
   cosOf(s).deco = id || null; return {};
+}
+// ornement porté sur l'avatar (en plus de la décoration) : un ornement possédé, en objet de compte ou invoqué
+const ownsCosS = (s, id) => { const c = cosOf(s); return !!(c.own[id] || c.inst.some((x) => x.c === id)); };
+function equipAvOrnS(s, id) {
+  if (id && (!COS_BY_ID[id] || COS_BY_ID[id].slot !== "orn")) return { error: "Ce n'est pas un ornement." };
+  if (id && !ownsCosS(s, id)) return { error: "Tu n'as pas cet ornement." };
+  cosOf(s).avOrn = id || null; return {};
 }
 function buyCosmeticS(s, id) {
   const c = COS_BY_ID[id], cos = cosOf(s);
@@ -1228,4 +1242,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re : LOL · Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, ownsCosS, equipAvOrnS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

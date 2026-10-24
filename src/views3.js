@@ -47,6 +47,7 @@ const Z_COLLECTIONS = [
   { id: "braise", name: "Feu et sang", kanji: "火", tag: "Braises, cuivre et cornes d'ombre : la collection des cartes qui frappent.", c1: "#ff4d2e", c2: "#3a0d14", items: ["cadre-sang", "cadre-cuivre", "aura-braise", "part-braises", "fond-forge", "orn-cornes", "cadre-obsidienne"] },
   { id: "givre", name: "Givre et nuit", kanji: "夜", tag: "Le calme d'une nuit à Shinjuku, du givre jusqu'au néant.", c1: "#4dd6ff", c2: "#101a3a", items: ["aura-givre", "part-flocons", "fond-nuit", "fond-abysse", "aura-neant", "cadre-argent"] },
   { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
+  { id: "ombres", name: "Royaume des ombres", kanji: "影", tag: "Flammes noires, mains des abysses et éclipse.", c1: "#b072ff", c2: "#05020a", items: ["aura-ombre", "aura-ombre-sang", "aura-abysse"] },
   { id: "samourai", name: "Voie du samouraï", kanji: "侍", tag: "Kabuto, chapeaux de paille, masques de kitsune et hachimaki.", c1: "#d8202e", c2: "#1a0a0a", items: ["orn-kabuto", "orn-kasa", "orn-ronin", "orn-kitsune", "orn-kanzashi", "orn-hachimaki"] },
   { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
 ];
@@ -81,8 +82,8 @@ function zDecoCard(d, w, card) {
   return cardHTML(c, { design: { ...cur, deco: d ? d.id : null }, present: true, w });
 }
 // ton avatar (photo Discord, sinon ton initiale) entouré d'une décoration
-function zMeAv(d, size = 84) {
-  const name = ACCT?.name || "Toi", img = ACCT?.avatar ? `<img src="${esc(ACCT.avatar)}" alt="">` : `<span class="zd-ini">${esc(name[0].toUpperCase())}</span>`, L = avDecoHTML(d, false);
+function zMeAv(d, size = 84, o = undefined) {
+  const name = ACCT?.name || "Toi", img = ACCT?.avatar ? `<img src="${esc(ACCT.avatar)}" alt="">` : `<span class="zd-ini">${esc(name[0].toUpperCase())}</span>`, L = avLayers(d, o === undefined ? null : o, false);
   return `<span class="avd zd-av" style="--s:${size}px">${L.back}${img}${L.front}</span>`;
 }
 const zDecoUses = (id) => Object.values(cosOf(save).designs || {}).filter((x) => x?.deco === id).length;
@@ -355,14 +356,19 @@ document.addEventListener("change", (e) => {
 // ===== Profil : changer la décoration de son avatar parmi celles qu'on possède =====
 function pfDecoSheet() {
   const own = DECOS.filter((d) => decosOf(save)[d.id]).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank), cur = save.cos?.deco || "";
-  const tile = (d) => `<button type="button" class="pfd-t ${(d?.id || "") === cur ? "on" : ""}" data-pfd="${d?.id || ""}">${zMeAv(d, 74)}<b>${d ? esc(d.name) : "Aucune"}</b>${d ? `<small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>` : "<small>Avatar simple</small>"}</button>`;
-  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="Décoration de l'avatar"><div class="sheet-h"><h2>Décoration de l'avatar</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+  const ornCur = save.cos?.avOrn || "", orns = COSMETICS.filter((c) => c.slot === "orn" && ownsCosS(save, c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
+  const otile = (o) => `<button type="button" class="pfd-t ${(o?.id || "") === ornCur ? "on" : ""}" data-pfo="${o?.id || ""}">${zMeAv(DECO_BY_ID[cur] || null, 74, o)}<b>${o ? esc(o.name) : "Aucun"}</b>${o ? `<small style="color:${RAR[o.rar].color}">${RAR[o.rar].label}</small>` : "<small>Sans ornement</small>"}</button>`;
+  const tile = (d) => `<button type="button" class="pfd-t ${(d?.id || "") === cur ? "on" : ""}" data-pfd="${d?.id || ""}">${zMeAv(d, 74, ornOfUid(ME))}<b>${d ? esc(d.name) : "Aucune"}</b>${d ? `<small style="color:${RAR[d.rar].color}">${RAR[d.rar].label}</small>` : "<small>Avatar simple</small>"}</button>`;
+  $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="Équiper mon avatar"><div class="sheet-h"><h2>Équiper mon avatar</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
     <div class="sheet-b">${own.length ? `<p class="note">Touche une décoration pour la porter. Elle se voit partout autour de ton avatar : en-tête, profil, classement, comptoir.</p><div class="pfd-grid">${tile(null)}${own.map(tile).join("")}</div>` : `<p class="note">Tu n'as encore aucune décoration.</p>`}
+      <h3 style="margin:6px 0 0">Ornement</h3>${orns.length ? `<p class="note">Un chapeau, une couronne, un masque… posé sur ton avatar, en plus de la décoration. Tes ornements restent utilisables sur tes cartes.</p><div class="pfd-grid">${otile(null)}${orns.map(otile).join("")}</div>` : `<p class="note">Tu n'as encore aucun ornement : ils s'achètent dans l'onglet « Objets pour tes cartes » de la Boutique, ou s'invoquent au Sanctuaire.</p>`}
       <button class="btn block" type="button" data-nav="boutique">${own.length ? "En voir d'autres à la Boutique" : "Voir les décorations à la Boutique"}</button></div></div>`;
   $("overlay").hidden = false;
 }
 document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-pf-deco]")) return pfDecoSheet();
+  const o = e.target.closest("[data-pfo]");
+  if (o) { const id = o.dataset.pfo || null; try { const r = await zCall("avorn/equip", { id }, () => equipAvOrnS(save, id)); if (r?.state) Object.assign(save, r.state); toast(id ? `${COS_BY_ID[id].name} : sur ton avatar.` : "Ornement retiré."); header(); draw(); pfDecoSheet(); } catch (err) { toast(err.message); } return; }
   const t = e.target.closest("[data-pfd]"); if (!t) return;
   const id = t.dataset.pfd || null;
   try {

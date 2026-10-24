@@ -82,6 +82,12 @@ img { max-width: 100%; }
 .ring-av img, .ring-av span { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: grid; place-items: center; background: var(--raise); font: 700 18px var(--disp); color: var(--cyan); }
 .acc-top b { display: block; font: 700 17px var(--disp); }
 .acc-top small { font: 500 12px var(--mono); color: var(--mut); }
+.acc-av .ring-av { display: block; }
+.acc-av { position: relative; flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.acc-pen { position: absolute; right: -4px; bottom: -4px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(180deg, #f0d38c, #b8892e); color: #1a1405; border: 2px solid #0e0a1e; box-shadow: 0 2px 6px #000a; transition: transform .15s; }
+.acc-pen svg { width: 13px; height: 13px; }
+.acc-av:hover .acc-pen { transform: scale(1.12) rotate(-8deg); }
+.acc-who { flex: 1; min-width: 0; } .acc-name { display: block; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; } .acc-name:hover b { text-decoration: underline; text-underline-offset: 3px; }
 .disc-box { background: #5865f21a; border: 1px solid #5865f255; border-radius: var(--r-lg); padding: 14px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; color: var(--fg2); }
 .btn-disc { display: flex; align-items: center; justify-content: center; gap: 10px; height: 44px; border-radius: var(--r-md); background: #5865f2; color: #fff; font: 700 15px var(--body); text-decoration: none; border: 0; cursor: pointer; }
 .btn-disc svg { width: 20px; height: 20px; }
@@ -99,7 +105,7 @@ img { max-width: 100%; }
 .mgrid .gold i { color: var(--gold); }
 .m-foot { margin-top: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 6px 16px; }
 .m-foot a, .m-foot button { display: block; width: 100%; text-align: left; padding: 12px 0; background: none; border: 0; text-decoration: none; font-size: 14px; color: var(--fg2); cursor: pointer; }
-.m-foot a:first-child, .m-foot button:first-child { color: var(--acc); font-weight: 700; border-bottom: 1px solid var(--line2); }
+.m-foot a:first-child, .m-foot button:first-child { color: var(--fg2); }
 
 /* ---------- typo et blocs communs ---------- */
 main { min-height: 60vh; }
@@ -1418,7 +1424,7 @@ h2, h3 { font-weight: 700; letter-spacing: .01em; }
 .mgrid button { border-radius: 0; }
 .mgrid button[aria-current="page"] { border-color: var(--acc); box-shadow: var(--glow-acc); }
 .mgrid button[aria-current="page"] i { color: var(--acc); }
-.m-foot a:first-child, .m-foot button:first-child { color: var(--acc); }
+
 .toast { background: var(--gold2); color: #1a1206; }
 /* barre du bas (téléphone) : arrondie, onglet actif rose */
 .tabbar { display: none; }
@@ -4913,15 +4919,14 @@ function drawMenu() {
   const a = ACCT, st = stats();
   const guest = !a, nameTxt = a?.name || "Invité";
   $("menu").innerHTML = `<div class="acc-card">
-    <div class="acc-top"><span class="ring-av">${a?.avatar ? `<img src="${esc(a.avatar)}" alt="">` : `<span>${esc(nameTxt[0].toUpperCase())}</span>`}</span>
-      <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
+    <div class="acc-top"><button type="button" class="acc-av" data-acc-edit aria-label="Modifier mon profil" title="Modifier mon profil"><span class="ring-av">${a?.avatar ? `<img src="${esc(a.avatar)}" alt="">` : `<span>${esc(nameTxt[0].toUpperCase())}</span>`}</span><i class="acc-pen">${ico("atelier")}</i></button>
+      <div class="acc-who"><button type="button" class="acc-name" data-nav="profil" data-p="${SRV || ME ? ME : "moi"}" title="Voir mon profil public"><b>${esc(nameTxt)}</b></button><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
     ${guest && window.DISCORD_LOGIN ? `<div class="disc-box">Lie ton compte Discord pour ne pas perdre ta collection et jouer avec le QG.<a class="btn-disc" href="/auth/login">${icon.discord}Se connecter avec Discord</a></div>` : ""}
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
     <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié L</small><b>${save.sinceLegend || 0}/${LEGEND_PITY}</b></div></div>
   </div>
   <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${ico(k)}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
-  <div class="m-foot">${SRV || ME ? `<button type="button" data-nav="profil" data-p="${ME}">Mon profil public</button>` : `<button type="button" data-nav="profil" data-p="moi">Mon profil</button>`}
-    ${window.DISCORD_LOGIN && a ? `<a href="/auth/logout">Se déconnecter</a>` : `<button type="button" data-nav="infos">Infos sur le jeu</button>`}</div>`;
+  <div class="m-foot">${window.DISCORD_LOGIN && a ? `<a href="/auth/logout">Se déconnecter</a>` : `<button type="button" data-nav="infos">Infos sur le jeu</button>`}</div>`;
 }
 function toggleMenu(force) {
   menuOpen = force ?? !menuOpen;
@@ -7042,6 +7047,8 @@ function pfDecoSheet() {
 }
 document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-pf-deco]")) return pfDecoSheet();
+  // crayon sur l'avatar du menu : mon profil, avec la fenêtre d'équipement ouverte
+  if (e.target.closest("[data-acc-edit]")) { toggleMenu(false); nav("profil", SRV || ME ? ME : "moi"); return setTimeout(pfDecoSheet, 250); }
   const o = e.target.closest("[data-pfo]");
   if (o) { const id = o.dataset.pfo || null; try { const r = await zCall("avorn/equip", { id }, () => equipAvOrnS(save, id)); if (r?.state) Object.assign(save, r.state); toast(id ? `${COS_BY_ID[id].name} : sur ton avatar.` : "Ornement retiré."); header(); draw(); if ($("overlay").dataset.zit) zOpenItem($("overlay").dataset.zit); else pfDecoSheet(); } catch (err) { toast(err.message); } return; }
   const t = e.target.closest("[data-pfd]"); if (!t) return;

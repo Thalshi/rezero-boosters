@@ -139,15 +139,14 @@ function drawMenu() {
   const a = ACCT, st = stats();
   const guest = !a, nameTxt = a?.name || "Invité";
   $("menu").innerHTML = `<div class="acc-card">
-    <div class="acc-top"><span class="ring-av">${a?.avatar ? `<img src="${esc(a.avatar)}" alt="">` : `<span>${esc(nameTxt[0].toUpperCase())}</span>`}</span>
-      <div><b>${esc(nameTxt)}</b><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
+    <div class="acc-top"><button type="button" class="acc-av" data-acc-edit aria-label="Modifier mon profil" title="Modifier mon profil"><span class="ring-av">${a?.avatar ? `<img src="${esc(a.avatar)}" alt="">` : `<span>${esc(nameTxt[0].toUpperCase())}</span>`}</span><i class="acc-pen">${ico("atelier")}</i></button>
+      <div class="acc-who"><button type="button" class="acc-name" data-nav="profil" data-p="${SRV || ME ? ME : "moi"}" title="Voir mon profil public"><b>${esc(nameTxt)}</b></button><small>${guest ? "Compte invité" : a.dev ? "Dev · développeur du jeu" : a.admin ? "Admin · créateur de l'anime" : a.member ? "Membre du QG de Shinjuku" : "Pas membre du serveur"}</small></div></div>
     ${guest && window.DISCORD_LOGIN ? `<div class="disc-box">Lie ton compte Discord pour ne pas perdre ta collection et jouer avec le QG.<a class="btn-disc" href="/auth/login">${icon.discord}Se connecter avec Discord</a></div>` : ""}
     ${guest && !window.DISCORD_LOGIN ? `<div class="disc-box">Ta collection est gardée dans ce navigateur. Pour jouer avec le QG, ouvre la version en ligne avec ton compte Discord.</div>` : ""}
     <div class="acc-stats"><div><small>Essence</small><b>${fmtN(save.chakra)}</b></div><div><small>Cartes</small><b>${st.unique}</b></div><div><small>Pitié L</small><b>${save.sinceLegend || 0}/${LEGEND_PITY}</b></div></div>
   </div>
   <div class="mgrid">${MENU().map(([v, k, l, n, cls]) => `<button type="button" class="${cls || ""}" data-nav="${v}" ${view === v ? 'aria-current="page"' : ""}><i>${ico(k)}</i>${l}${n ? `<i class="badge">${n}</i>` : ""}</button>`).join("")}</div>
-  <div class="m-foot">${SRV || ME ? `<button type="button" data-nav="profil" data-p="${ME}">Mon profil public</button>` : `<button type="button" data-nav="profil" data-p="moi">Mon profil</button>`}
-    ${window.DISCORD_LOGIN && a ? `<a href="/auth/logout">Se déconnecter</a>` : `<button type="button" data-nav="infos">Infos sur le jeu</button>`}</div>`;
+  <div class="m-foot">${window.DISCORD_LOGIN && a ? `<a href="/auth/logout">Se déconnecter</a>` : `<button type="button" data-nav="infos">Infos sur le jeu</button>`}</div>`;
 }
 function toggleMenu(force) {
   menuOpen = force ?? !menuOpen;

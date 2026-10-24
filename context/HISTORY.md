@@ -8,6 +8,8 @@
 ## 2026-10-24 — Confrontation : « Rejoindre » par lien (37e mise en ligne)
 - « Partager le salon » › « Envoyer au comptoir… » : le comptoir s'ouvre avec le message prêt, on l'envoie au QG ou à un ami en privé (onglet Amis), ou on annule. Plus d'envoi direct au QG.
 - « Quitter le salon » ramène à la liste des salons (avant, on restait dessus en spectateur) ; « Fermer » aussi directement dans la liste pour les salons qu'on a créés (deuxième toucher pour confirmer).
+- Vue 3D : le comptoir passait derrière la scène (partage d'un salon invisible) ; il passe devant.
+- Chat du QG : le dev peut aussi effacer les messages des autres (avant, seul l'admin) ; un joueur n'efface que les siens.
 - Notifications : une croix pour en supprimer une, « Tout effacer » pour vider la cloche.
 - Gestion › Admin (Billy) et › Dev : bloc « Parrainage · événement de 2 semaines » qui explique tout (validation, gains, paliers, classement, durée) avec « Lancer » ; la remise à zéro reste dans Dev seulement.
 - Arrivé dans un salon par un lien partagé, on était spectateur sans bouton « Rejoindre » (le serveur ne calculait les actions que pour les joueurs déjà assis). Corrigé.

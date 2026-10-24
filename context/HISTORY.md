@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — Ornements : aperçu avatar en Boutique ; Créateur : « Créer » (18e mise en ligne)
+- Boutique, fiche d'un ornement : aperçu sur la carte et sur ton avatar côte à côte, bouton « Porter sur mon avatar » / « Retirer ».
+- Créateur : « Créer » et « Enregistrer les changements » au lieu de « Publier » ; seule l'équipe (admin et dev) est notifiée, jamais les joueurs (c'était déjà le cas côté serveur, le texte disait le contraire).
+
 ## 2026-10-24 — Ornements sur l'avatar, auras d'ombre, dragon/phénix/oni redessinés (17e mise en ligne)
 - Profil : « Équiper mon avatar » choisit la décoration et un ornement (chapeau, kabuto, couronne…) parmi ceux possédés ; visible partout autour de l'avatar.
 - Auras d'ombre (Atelier) : Aura d'ombre, Ombre sanglante, Mains des abysses, Éclipse noire (Sanctuaire) ; aussi en décorations (avatar et cartes). Collection « Royaume des ombres ».

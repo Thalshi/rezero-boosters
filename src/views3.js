@@ -181,13 +181,14 @@ function zOpenItem(id) {
   const pick = mineC.length ? `<label class="zpick">Voir sur la carte <select class="in" id="zPrevCard">${mineC.map((x) => `<option value="${x.id}" ${x.id === card.id ? "selected" : ""}>${esc(nameOf(x))} · ${esc(x.title)}</option>`).join("")}</select></label>` : "";
   const owned = !!cosOf(save).own[c.id], price = COS_PRICE[c.rar], col = zCollOf(c.id), name = ACCT?.name || "Toi";
   const act = c.only ? `<button class="btn gold big block" type="button" data-nav="sanctuaire">Invoquer au Sanctuaire</button><p class="note">Objet exclusif : il ne s'achète pas, il s'obtient seulement par invocation.</p>`
-    : owned ? `<button class="btn gold big block" type="button" data-nav="atelier" data-p="${card.id}">Équiper à l'Atelier</button><p class="note">Tu l'as déjà : il s'utilise sur autant de cartes que tu veux.</p>`
+    : owned ? `<button class="btn gold big block" type="button" data-nav="atelier" data-p="${card.id}">Équiper à l'Atelier</button>${c.slot === "orn" ? (save.cos?.avOrn === c.id ? `<button class="btn big block" type="button" data-pfo="">Retirer de mon avatar</button>` : `<button class="btn gold big block" type="button" data-pfo="${c.id}">Porter sur mon avatar</button>`) : ""}<p class="note">Tu l'as déjà : il s'utilise sur autant de cartes que tu veux${c.slot === "orn" ? ", et sur ton avatar" : ""}.</p>`
     : `<button class="btn gold big block" type="button" data-zbuy="${c.id}" ${save.chakra < price ? "disabled" : ""}>Acheter · ${fmtN(price)} ◆</button>
        <p class="note">${save.chakra < price ? `Il te manque ${fmtN(price - save.chakra)} ◆.` : `Il te restera ${fmtN(save.chakra - price)} ◆.`} Objet de compte : il reste à toi, ne se vend pas et s'utilise sur toutes tes cartes.</p>`;
   $("overlay").innerHTML = `<div class="sheet zs-sheet" role="dialog" aria-modal="true" aria-label="${esc(c.name)}"><div class="sheet-h"><h2>${esc(c.name)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
-    <div class="sheet-b"><div class="zs-prev" style="--h1:${col?.c1 || RAR[c.rar].color};--h2:${col?.c2 || "#15141a"}">
+    <div class="sheet-b"><div class="zs-prev ${c.slot === "orn" ? "orn" : ""}" style="--h1:${col?.c1 || RAR[c.rar].color};--h2:${col?.c2 || "#15141a"}">
         <div class="zs-prof"><span class="zs-av">${esc(name[0].toUpperCase())}</span><div><b>${esc(name)}</b><small>Aperçu sur ton profil</small></div></div>
-        <div class="zs-prev-card">${cardHTML(card, { design, present: true, gold: has(card.id) && !own(card.id).n && own(card.id).gold > 0 })}</div></div>
+        <div class="zs-prev-card">${cardHTML(card, { design, present: true, gold: has(card.id) && !own(card.id).n && own(card.id).gold > 0 })}</div>
+        ${c.slot === "orn" ? `<div class="zs-prev-av"><p class="eyebrow">Sur ton avatar</p>${zMeAv(DECO_BY_ID[save.cos?.deco] || null, 110, c)}</div>` : ""}</div>
       <div class="row" style="flex-wrap:wrap;gap:8px"><span class="pill out" style="border-color:${RAR[c.rar].color};color:${RAR[c.rar].color}">${RAR[c.rar].label}</span><span class="pill">${COS_SLOT_LABEL[c.slot]}</span>${col ? `<span class="pill">${ico(COLL_ICON[col.id] || "logo")} ${esc(col.name)}</span>` : ""}<span class="pill">Aucun bonus de jeu</span></div>
       ${pick}${act}</div></div>`;
   $("overlay").hidden = false; $("overlay").dataset.zdp = ""; $("overlay").dataset.zit = id; $("overlay").dataset.zdk = "";
@@ -363,12 +364,12 @@ function pfDecoSheet() {
     <div class="sheet-b">${own.length ? `<p class="note">Touche une décoration pour la porter. Elle se voit partout autour de ton avatar : en-tête, profil, classement, comptoir.</p><div class="pfd-grid">${tile(null)}${own.map(tile).join("")}</div>` : `<p class="note">Tu n'as encore aucune décoration.</p>`}
       <h3 style="margin:6px 0 0">Ornement</h3>${orns.length ? `<p class="note">Un chapeau, une couronne, un masque… posé sur ton avatar, en plus de la décoration. Tes ornements restent utilisables sur tes cartes.</p><div class="pfd-grid">${otile(null)}${orns.map(otile).join("")}</div>` : `<p class="note">Tu n'as encore aucun ornement : ils s'achètent dans l'onglet « Objets pour tes cartes » de la Boutique, ou s'invoquent au Sanctuaire.</p>`}
       <button class="btn block" type="button" data-nav="boutique">${own.length ? "En voir d'autres à la Boutique" : "Voir les décorations à la Boutique"}</button></div></div>`;
-  $("overlay").hidden = false;
+  $("overlay").hidden = false; $("overlay").dataset.zit = ""; $("overlay").dataset.zdk = ""; $("overlay").dataset.zdp = "";
 }
 document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-pf-deco]")) return pfDecoSheet();
   const o = e.target.closest("[data-pfo]");
-  if (o) { const id = o.dataset.pfo || null; try { const r = await zCall("avorn/equip", { id }, () => equipAvOrnS(save, id)); if (r?.state) Object.assign(save, r.state); toast(id ? `${COS_BY_ID[id].name} : sur ton avatar.` : "Ornement retiré."); header(); draw(); pfDecoSheet(); } catch (err) { toast(err.message); } return; }
+  if (o) { const id = o.dataset.pfo || null; try { const r = await zCall("avorn/equip", { id }, () => equipAvOrnS(save, id)); if (r?.state) Object.assign(save, r.state); toast(id ? `${COS_BY_ID[id].name} : sur ton avatar.` : "Ornement retiré."); header(); draw(); if ($("overlay").dataset.zit) zOpenItem($("overlay").dataset.zit); else pfDecoSheet(); } catch (err) { toast(err.message); } return; }
   const t = e.target.closest("[data-pfd]"); if (!t) return;
   const id = t.dataset.pfd || null;
   try {

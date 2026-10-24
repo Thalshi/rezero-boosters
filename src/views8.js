@@ -64,7 +64,7 @@ function viewCreateur() {
   } else {
     body = CREA.log.length ? `<ol class="cr-log">${CREA.log.map((l) => `<li><b>${esc(l.name || "")}</b> ${esc(l.text)}<small>${new Date(l.t).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</small></li>`).join("")}</ol>` : `<p class="note">Rien n'a encore été créé ni retouché.</p>`;
   }
-  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Dev", "Créateur", "Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou dessine des cosmétiques. C'est publié tout de suite pour tout le monde ; un perso d'un épisode pas encore atteint reste caché aux joueurs. Chaque publication prévient l'autre membre de l'équipe.")}
+  return `<div class="wrap page" style="max-width:1100px">${head("Admin · Dev", "Créateur", "Ajoute des persos au fil des épisodes, de nouvelles cartes, retouche l'existant ou dessine des cosmétiques. C'est ajouté au jeu tout de suite ; un perso d'un épisode pas encore atteint reste caché aux joueurs. Seule l'équipe (admin et dev) est prévenue, pas les joueurs.")}
     ${tabs}<div class="cr-body">${body}</div></div>`;
 }
 
@@ -113,9 +113,9 @@ function crEditor() {
   const canReset = !isNew && crBadge(E.kind, E.id).includes("Retouché");
   return `<div class="wrap page" style="max-width:1100px">${head("Créateur", esc(title))}
     <div class="cr-ed"><div class="cr-form">${form}
-      <div class="row cr-act"><button class="btn gold big" type="button" data-cr-save ${changed && !CR.busy ? "" : "disabled"}>${isNew ? "Publier" : "Publier les changements"}</button>
+      <div class="row cr-act"><button class="btn gold big" type="button" data-cr-save ${changed && !CR.busy ? "" : "disabled"}>${isNew ? "Créer" : "Enregistrer les changements"}</button>
         <button class="btn" type="button" data-cr-cancel>Annuler</button>${canReset ? `<button class="btn" type="button" data-cr-reset>Remettre d'origine</button>` : ""}</div>
-      <p class="note">Publié tout de suite pour tout le monde. L'autre membre de l'équipe reçoit une notification.</p></div>
+      <p class="note">Ajouté au jeu tout de suite. Seule l'équipe (admin et dev) reçoit une notification, pas les joueurs.</p></div>
     <div class="cr-prev"><p class="eyebrow mut">Aperçu</p><div id="crPrev">${crPreview()}</div></div></div></div>`;
 }
 // aperçu : la vraie carte, avec les valeurs du formulaire (objets temporaires retirés aussitôt)
@@ -156,7 +156,7 @@ async function crSave(reset) {
     const r = await srv(reset ? "creations/reset" : "creations/save", reset ? { kind: E.kind, id: E.id } : { kind: E.kind, id: E.id, data, image: E.image || undefined });
     await creaApply(r);
     if (E.kind === "perso" && E.id && E.f.ep !== E.start.ep) await crSetEp(E.id, E.f.ep);
-    toast(reset ? "Remis d'origine." : E.id ? "Changements publiés." : "Publié pour tout le monde !");
+    toast(reset ? "Remis d'origine." : E.id ? "Changements enregistrés." : "Créé !");
     if (E.kind === "carte") CR.who = r.cards?.[r.id]?.who || byId[r.id]?.who || CR.who;
     CR.edit = null;
   } catch (e) { toast(e.message); }
@@ -165,6 +165,7 @@ async function crSave(reset) {
 // épisode d'un perso déjà dans le jeu : même réglage que la page Admin (config du jeu)
 async function crSetEp(who, ep) { CONFIG.ep[who] = +ep; await saveConfig(); }
 
+const E_CONFIRM = () => (CR.edit && !CR.edit.id ? "Toucher encore pour créer" : "Toucher encore pour enregistrer");
 VIEWS.createur = viewCreateur;
 ADMIN_SEG.crTab = (v) => { CR.tab = v; };
 document.addEventListener("click", (e) => {
@@ -172,7 +173,7 @@ document.addEventListener("click", (e) => {
   const n = t.closest("[data-cr-new]"); if (n) return crOpen(n.dataset.crNew, null);
   const ed = t.closest("[data-cr-edit]"); if (ed) return crOpen(ed.dataset.crEdit, ed.dataset.id);
   if (t.closest("[data-cr-cancel]")) { CR.edit = null; return draw(); }
-  const sv = t.closest("[data-cr-save]"); if (sv) return sure(sv, "Toucher encore pour publier") && crSave(false);
+  const sv = t.closest("[data-cr-save]"); if (sv) return sure(sv, E_CONFIRM()) && crSave(false);
   const rs = t.closest("[data-cr-reset]"); if (rs) return sure(rs, "Toucher encore pour remettre d'origine") && crSave(true);
 });
 document.addEventListener("input", (e) => {

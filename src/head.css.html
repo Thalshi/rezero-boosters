@@ -2320,6 +2320,10 @@ svg.dk .fx-scan { transform-box: view-box; animation: fx-scan 2.6s linear infini
 svg.dk .fx-tendril { transform-box: view-box; animation: fx-tendril 3.2s ease-in-out infinite alternate; }
 svg.dk .fx-wind { animation: fx-wind 3.3s linear infinite; }
 svg.dk .fx-sway2 { animation: fx-sway2 1.8s ease-in-out infinite alternate; }
+svg.dk .fx-flag { transform-box: view-box; transform-origin: 0 0; animation: fx-flagw 1.4s ease-in-out infinite alternate; }
+svg.dk .fx-swing2 { transform-box: view-box; transform-origin: 0 0; animation: fx-swing2 2.2s ease-in-out infinite alternate; }
+@keyframes fx-flagw { from { transform: rotate(-6deg) scaleX(.94); } to { transform: rotate(8deg) scaleX(1.04); } }
+@keyframes fx-swing2 { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 @keyframes fx-ripple { 0% { transform: scale(.96); opacity: .9; } 100% { transform: scale(1.3); opacity: 0; } }
 @keyframes fx-flapx { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
 @keyframes fx-smoke { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(var(--dx, 0), -40px) scale(1.6); opacity: 0; } }

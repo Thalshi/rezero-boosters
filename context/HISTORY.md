@@ -5,6 +5,9 @@
 
 ---
 
+## 2026-10-24 — Couvre-chefs de samouraï (16e mise en ligne)
+- 7 nouveaux ornements, collection « Voie du samouraï » en Boutique : hachimaki, chapeau de paille, jingasa du rōnin, masque de kitsune, kanzashi en fleurs, kabuto du shōgun, kabuto d'ombre (Sanctuaire).
+
 ## 2026-10-24 — Nom « Re : LOL », Branches en têtes, décoration depuis le profil (15e mise en ligne)
 - Le jeu s'appelle maintenant « Re : LOL » partout (logo, titre de l'onglet, boosters, infos, Confrontation « Re : LOL · Confrontation »).
 - Branches des cartes : même système que le Créateur (têtes par épisode avec les emblèmes de leurs branches, fiche du perso avec toutes ses cartes et skins, une branche par carte, glisser pour changer de perso).

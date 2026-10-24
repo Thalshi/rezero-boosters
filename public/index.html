@@ -2328,6 +2328,10 @@ svg.dk .fx-scan { transform-box: view-box; animation: fx-scan 2.6s linear infini
 svg.dk .fx-tendril { transform-box: view-box; animation: fx-tendril 3.2s ease-in-out infinite alternate; }
 svg.dk .fx-wind { animation: fx-wind 3.3s linear infinite; }
 svg.dk .fx-sway2 { animation: fx-sway2 1.8s ease-in-out infinite alternate; }
+svg.dk .fx-flag { transform-box: view-box; transform-origin: 0 0; animation: fx-flagw 1.4s ease-in-out infinite alternate; }
+svg.dk .fx-swing2 { transform-box: view-box; transform-origin: 0 0; animation: fx-swing2 2.2s ease-in-out infinite alternate; }
+@keyframes fx-flagw { from { transform: rotate(-6deg) scaleX(.94); } to { transform: rotate(8deg) scaleX(1.04); } }
+@keyframes fx-swing2 { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
 @keyframes fx-ripple { 0% { transform: scale(.96); opacity: .9; } 100% { transform: scale(1.3); opacity: 0; } }
 @keyframes fx-flapx { from { transform: scaleX(1); } to { transform: scaleX(.18); } }
 @keyframes fx-smoke { 0% { transform: translate(0, 0) scale(.6); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(var(--dx, 0), -40px) scale(1.6); opacity: 0; } }
@@ -3369,6 +3373,13 @@ const COSMETICS = [
   { id: "orn-couronne", slot: "orn", name: "Couronne d'or", rar: "e", k: "couronne", c1: "#f5c518" },
   { id: "orn-ailes-lumiere", slot: "orn", name: "Ailes de lumière", rar: "l", k: "ailes", c1: "#fff8e0" },
   { id: "orn-ailes-ombre", slot: "orn", name: "Ailes d'ombre", rar: "l", k: "ailes", c1: "#2a1a3a", only: "sanctuaire" },
+  { id: "orn-hachimaki", slot: "orn", name: "Hachimaki du vainqueur", rar: "c", k: "hachimaki", c1: "#d8202e" },
+  { id: "orn-kasa", slot: "orn", name: "Chapeau de paille", rar: "pc", k: "kasa", c1: "#d8b878", c2: "#a8101e" },
+  { id: "orn-ronin", slot: "orn", name: "Jingasa du rōnin", rar: "r", k: "ronin", c1: "#ff6a8a" },
+  { id: "orn-kitsune", slot: "orn", name: "Masque de kitsune", rar: "e", k: "kitsune", c1: "#d8202e", c2: "#3a1a10" },
+  { id: "orn-kanzashi", slot: "orn", name: "Kanzashi en fleurs", rar: "e", k: "kanzashi", c1: "#ff9ec4", c2: "#b072ff" },
+  { id: "orn-kabuto", slot: "orn", name: "Kabuto du shōgun", rar: "l", k: "kabuto", c1: "#7a1a20", c2: "#f5c518" },
+  { id: "orn-kabuto-noir", slot: "orn", name: "Kabuto d'ombre", rar: "m", k: "kabuto", c1: "#1a1a24", c2: "#c8102e", only: "sanctuaire" },
   { id: "holo-nacre", slot: "holo", name: "Nacre", rar: "pc", k: "nacre" },
   { id: "holo-arcenciel", slot: "holo", name: "Arc-en-ciel", rar: "r", k: "arcenciel" },
   { id: "holo-scintille", slot: "holo", name: "Scintillement", rar: "e", k: "scintille" },
@@ -6410,6 +6421,61 @@ function fxBuild(k, c1, c2, shape = "rect", lite = false) {
       const wing = (sx) => `<g transform="translate(${sx * (HW - 6)} ${-HH + 22}) scale(${sx} 1)"><g class="fx-wing">${[[50, -50, 6], [56, -34, 7], [58, -18, 7], [52, -3, 7], [44, 12, 6], [34, 26, 5]].map(([l, r, w]) => feather(l, r, w)).join("")}${[[30, -40, 4.5], [34, -22, 4.5], [30, -6, 4]].map(([l, r, w]) => feather(l, r, w)).join("")}</g></g>`;
       back = `<g filter="url(#${u}b)" opacity=".5">${wing(-1)}${wing(1)}</g>${wing(-1)}${wing(1)}`; } break;
 
+    // ===== Couvre-chefs japonais (ornements) : posés sur le haut de la carte =====
+    case "o-kabuto": defs += `<linearGradient id="${u}k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a6a"/><stop offset=".45" stop-color="${c1}"/><stop offset="1" stop-color="#0a0a10"/></linearGradient>
+        <linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c8"/><stop offset=".5" stop-color="${c2}"/><stop offset="1" stop-color="#6a400a"/></linearGradient>`;
+      front = `<g transform="translate(0 ${-HH - 9}) scale(${SC})"><g class="fx-bob">
+        ${[-1, 1].map((sx) => `<path d="M${sx * 15} -4C${sx * 22} -6 ${sx * 30} -4 ${sx * 33} 2L${sx * 30} 8C${sx * 26} 4 ${sx * 20} 3 ${sx * 15} 4Z" fill="url(#${u}k)" stroke="${c2}" stroke-width=".7"/>`).join("")}
+        ${[0, 1, 2].map((i) => `<path d="M${-22 + i} ${2 + i * 3.4}Q0 ${8 + i * 3.4} ${22 - i} ${2 + i * 3.4}" stroke="${c2}" stroke-width="2.6" fill="none" opacity="${.9 - i * .15}"/>`).join("")}
+        <path d="M-18 4C-18 -12 -9 -19 0 -19C9 -19 18 -12 18 4Z" fill="url(#${u}k)" stroke="#000" stroke-width=".6"/>
+        ${[-12, -6, 0, 6, 12].map((x) => `<path d="M${x} -17.5Q${x * 1.2} -6 ${x * 1.25} 4" stroke="#ffffff26" stroke-width=".6" fill="none"/>`).join("")}
+        <path d="M-20 4H20" stroke="${c2}" stroke-width="1.6"/>
+        <g filter="url(#${u}b)" opacity=".7"><path d="M-3 -16C-10 -24 -20 -34 -26 -44C-18 -36 -9 -30 0 -22C9 -30 18 -36 26 -44C20 -34 10 -24 3 -16Z" fill="${c2}"/></g>
+        <path d="M-3 -16C-10 -24 -20 -34 -26 -44C-18 -36 -9 -30 0 -22C9 -30 18 -36 26 -44C20 -34 10 -24 3 -16Z" fill="url(#${u}g)" stroke="#5a3a08" stroke-width=".6"/>
+        <circle cy="-17" r="3.6" fill="url(#${u}g)" stroke="#5a3a08" stroke-width=".6"/><circle cy="-17" r="1.6" fill="#a8101e"/>
+        <g transform="translate(-20 -40)"><g class="fx-tw">${FX_SPARK("#fff", 2.6)}</g></g></g></g>`; break;
+    case "o-kasa": defs += `<linearGradient id="${u}s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a6a3a"/><stop offset=".45" stop-color="${c1}"/><stop offset="1" stop-color="#6a4a22"/></linearGradient>`;
+      front = `<g transform="translate(${-HW * .25} ${-HH - 4}) rotate(-9) scale(${SC})"><g class="fx-bob">
+        <ellipse cy="5" rx="34" ry="4" fill="#000" opacity=".35" filter="url(#${u}b)"/>
+        <path d="M-36 4L0 -15L36 4Q0 9 -36 4Z" fill="url(#${u}s)" stroke="#4a3418" stroke-width=".7"/>
+        ${Array.from({ length: 11 }, (_, i) => { const x = -32 + i * 6.4; return `<path d="M0 -15L${f1x(x)} ${f1x(4.6 - Math.abs(x) * .03)}" stroke="#4a3418" stroke-width=".45" opacity=".55"/>`; }).join("")}
+        ${[0, 1, 2, 3].map((i) => `<path d="M${-30 + i * 7.5} ${f1x(1 - i * 3.9)}L${30 - i * 7.5} ${f1x(1 - i * 3.9)}" stroke="#4a3418" stroke-width=".35" opacity=".45" transform="scale(1 1)"/>`).join("")}
+        <circle cy="-15" r="1.8" fill="#4a3418"/>
+        <g class="fx-sway"><path d="M-8 6Q-10 18 -4 26M8 6Q10 18 4 26" stroke="${c2}" stroke-width="1" fill="none"/><circle cx="-4" cy="27" r="1.6" fill="${c2}"/><circle cx="4" cy="27" r="1.6" fill="${c2}"/></g></g></g>`; break;
+    case "o-hachimaki": {
+      const y = -HH - 3, tail = (dl, s2) => `<g transform="translate(${HW + 1} ${y})"><g class="fx-flag" style="animation-delay:${dl}s"><path d="M0 -3C8 -6 16 ${-2 + s2} 26 ${-6 + s2}L28 ${-1 + s2}C18 ${3 + s2} 9 1 0 3Z" fill="#f4f0e8" stroke="#c8c0b0" stroke-width=".4"/><path d="M14 ${-3 + s2 / 2}L24 ${-4 + s2}" stroke="${c1}" stroke-width=".8"/></g></g>`;
+      back = tail(0, 0) + tail(-.4, 10);
+      front = `<path d="M${-HW - 2} ${y - 4}Q0 ${y - 7} ${HW + 2} ${y - 4}L${HW + 2} ${y + 4}Q0 ${y + 1} ${-HW - 2} ${y + 4}Z" fill="#f4f0e8" stroke="#c8c0b0" stroke-width=".5"/>
+        <path d="M${-HW - 2} ${y - 1}Q0 ${y - 4} ${HW + 2} ${y - 1}" stroke="#d8d0c0" stroke-width=".5" fill="none"/>
+        <circle cy="${y - 1.6}" r="5.6" fill="${c1}" opacity=".5" filter="url(#${u}b)" class="fx-pulse"/><circle cy="${y - 1.6}" r="4.6" fill="${c1}"/>
+        <text x="-15" y="${y + 1.6}" font-size="5.6" font-weight="900" fill="#1a1a1a" text-anchor="middle">必</text><text x="15" y="${y + 1.6}" font-size="5.6" font-weight="900" fill="#1a1a1a" text-anchor="middle">勝</text>`;
+      break; }
+    case "o-kitsune": defs += `<linearGradient id="${u}m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e8e0e8"/></linearGradient>`;
+      front = `<g transform="translate(${HW - 6} ${-HH - 2}) rotate(14) scale(${SC})"><g class="fx-bob">
+        <circle r="17" fill="${c1}" opacity=".3" filter="url(#${u}b)" class="fx-pulse"/>
+        <path d="M-12 -6L-15 -22L-4 -12ZM12 -6L15 -22L4 -12Z" fill="url(#${u}m)" stroke="#2a2030" stroke-width=".6"/><path d="M-11.5 -9L-13 -18L-7 -12ZM11.5 -9L13 -18L7 -12Z" fill="${c1}"/>
+        <path d="M-13 -8C-13 -14 -7 -15 0 -15C7 -15 13 -14 13 -8C13 2 6 12 0 16C-6 12 -13 2 -13 -8Z" fill="url(#${u}m)" stroke="#2a2030" stroke-width=".7"/>
+        <path d="M-10 -3Q-6 -6 -3 -3M10 -3Q6 -6 3 -3" stroke="${c1}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path d="M-8.5 -1L-4 -.5M8.5 -1L4 -.5" stroke="#1a1018" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M0 -12V-6" stroke="${c1}" stroke-width="1.4"/><circle cy="-13.5" r="1.4" fill="${c1}"/>
+        <path d="M-2 11L0 13.5L2 11Z" fill="#1a1018"/><path d="M-6 6Q-9 9 -11 8M6 6Q9 9 11 8" stroke="${c1}" stroke-width=".9" fill="none"/>
+        <g class="fx-sway"><path d="M12 -4Q20 4 18 18" stroke="${c2}" stroke-width="1" fill="none"/><path d="M15 16L21 16L18 26Z" fill="${c2}"/><circle cx="18" cy="16" r="2" fill="#ffd24d"/></g></g></g>`; break;
+    case "o-kanzashi": {
+      const fl = (x, y, r, c) => `<g transform="translate(${x} ${y})">${[0, 72, 144, 216, 288].map((a) => `<ellipse cy="${-r * .55}" rx="${f1x(r * .42)}" ry="${f1x(r * .6)}" fill="${c}" stroke="#fff6" stroke-width=".3" transform="rotate(${a})"/>`).join("")}<circle r="${f1x(r * .28)}" fill="#ffd24d"/></g>`;
+      front = `<g transform="translate(${-HW + 8} ${-HH - 2}) rotate(-28) scale(${SC})">
+        <path d="M0 0L34 0" stroke="#c9a23a" stroke-width="1.6" stroke-linecap="round"/><path d="M28 -1.4L36 0L28 1.4" fill="#c9a23a"/>
+        ${fl(-2, -2, 9, c1)}${fl(-11, 5, 6.5, c2)}${fl(6, 6, 5.5, "#fff0f6")}
+        ${[-10, -4, 2].map((x, i) => `<g transform="translate(${x} 9)"><g class="fx-swing2" style="animation-delay:${-i * .3}s"><path d="M0 0V${10 + i * 4}" stroke="#d8b04a" stroke-width=".5"/>${[3, 6, 9].map((yy) => `<circle cy="${yy + i * 1.3}" r=".8" fill="#ffe08a"/>`).join("")}<path d="M-2 ${11 + i * 4}L0 ${14.5 + i * 4}L2 ${11 + i * 4}Z" fill="${c1}"/></g></g>`).join("")}
+        <g transform="translate(-8 -12)"><g class="fx-tw">${FX_SPARK("#fff", 2.2)}</g></g></g>`;
+      break; }
+    case "o-ronin": defs += `<linearGradient id="${u}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a46"/><stop offset="1" stop-color="#0e0e14"/></linearGradient>`;
+      front = `<g transform="translate(0 ${-HH + 3}) scale(${SC})"><g class="fx-bob">
+        <path d="M-30 6Q0 -22 30 6Q0 1 -30 6Z" fill="url(#${u}r)" stroke="${c1}" stroke-width=".7"/>
+        ${[-20, -10, 0, 10, 20].map((x) => `<path d="M0 -12Q${x * .6} -3 ${x * 1.3} ${4 + Math.abs(x) * .02}" stroke="${c1}" stroke-width=".4" fill="none" opacity=".45"/>`).join("")}
+        <path d="M-26 4Q0 -2 26 4" stroke="${c1}" stroke-width="1.6" fill="none"/>
+        <g filter="url(#${u}b)" opacity=".8"><ellipse cy="9" rx="20" ry="2" fill="${c1}"/></g></g></g>
+        ${Array.from({ length: Q(6) }, () => fxP("fx-fall", (R() - .5) * 2 * HW, -HH, 4 + R() * 3, -R() * 7, FX_PETAL(c1, "#fff6"), (R() - .5) * 30, .6)).join("")}`; break;
+
     // ===== Particules (Atelier) : légères, pour ne jamais cacher le visage =====
     case "p-etincelles": front = Array.from({ length: 12 }, () => fxP("fx-rise", (R() - .5) * 2 * HW, HH - 4, 2 + R() * 2, -R() * 4, `<g class="fx-tw">${FX_SPARK(c1, 1.6 + R() * 1.4)}</g>`, (R() - .5) * 18)).join(""); break;
     case "p-flocons": front = Array.from({ length: 11 }, (_, i) => fxP("fx-fall", (R() - .5) * 2 * HW, -HH - 6, 5 + R() * 4, -R() * 9, `<g class="fx-spin">${FX_FLAKE(i % 3 ? c1 : "#fff")}</g>`, (R() - .5) * 20, .6 + R() * .6)).join(""); break;
@@ -6484,6 +6550,7 @@ const Z_COLLECTIONS = [
   { id: "braise", name: "Feu et sang", kanji: "火", tag: "Braises, cuivre et cornes d'ombre : la collection des cartes qui frappent.", c1: "#ff4d2e", c2: "#3a0d14", items: ["cadre-sang", "cadre-cuivre", "aura-braise", "part-braises", "fond-forge", "orn-cornes", "cadre-obsidienne"] },
   { id: "givre", name: "Givre et nuit", kanji: "夜", tag: "Le calme d'une nuit à Shinjuku, du givre jusqu'au néant.", c1: "#4dd6ff", c2: "#101a3a", items: ["aura-givre", "part-flocons", "fond-nuit", "fond-abysse", "aura-neant", "cadre-argent"] },
   { id: "jardin", name: "Jardin du QG", kanji: "花", tag: "Pétales, lucioles et papier washi.", c1: "#3fbf7f", c2: "#2a1a3a", items: ["aura-sylve", "part-petales", "part-lucioles", "cadre-emeraude", "fond-washi", "fond-crepuscule"] },
+  { id: "samourai", name: "Voie du samouraï", kanji: "侍", tag: "Kabuto, chapeaux de paille, masques de kitsune et hachimaki.", c1: "#d8202e", c2: "#1a0a0a", items: ["orn-kabuto", "orn-kasa", "orn-ronin", "orn-kitsune", "orn-kanzashi", "orn-hachimaki"] },
   { id: "neon", name: "Néon du QG", kanji: "電", tag: "Holographies, néons et mises en scène pour les cartes de vitrine.", c1: "#b072ff", c2: "#0e2a4a", items: [] },
 ];
 // un objet créé depuis l'app rejoint la collection choisie (champ « coll ») ; tout objet de boutique

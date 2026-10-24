@@ -2125,6 +2125,16 @@ html.w3d-on body::after { display: none; }
 .bk-page :is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) :is(p, span, li, .note, small) { color: #ddd3e6 !important; }
 .bk-page :is(.rg-box, .rg-modes > div, .rg-steps li, .tbl-wrap):not(:is(.rl-grid, .rg-flow, .rg-cards, .rg-arms, .rg-fam, .rg-dist, .cf-branches) *) { background: #fffaf0aa !important; border-color: #c8a46a !important; color: #2e2214; }
 .bk-page :is(.rg-box, .rg-modes > div, .rg-steps li) :is(span, p) { color: #4a3a24 !important; }
+/* livre : ce qui est posé à même le parchemin repasse en encre foncée */
+.bk-page.bk-page .rg-card > p { color: #2e2214 !important; font-size: 12.5px; line-height: 1.45; }
+.bk-page h3.rg-fam { color: color-mix(in srgb, var(--fc) 45%, #2a1608) !important; border-bottom: 1px solid #c8a46a88; padding-bottom: 4px; }
+.bk-page .rg-arms { margin-top: 22px; clear: both; }
+.bk-page.bk-page .rg-arms span { background: linear-gradient(180deg, #3a2614, #24170b); border: 1px solid #c8a46a; box-shadow: 0 3px 8px #5a3a1a44; color: #e8d9b8 !important; }
+.bk-page.bk-page .rg-arms b { color: #ffe9a8 !important; }
+.bk-page.bk-page .rg-q { background: #3a2614; color: #ffe9a8 !important; border: 1px solid #c8a46a; top: -10px; right: -10px; }
+.bk-page h3.rg-fam { margin-top: 26px; }
+.bk-page .rg-dist > text { fill: #5a3a1a; font-weight: 700; }
+.bk-page .rg-dist > ellipse { fill: #5a3a1a14; stroke: #8a6a3a88; }
 .bk-page .rg-tbl th, .bk-page .rg-tbl td { color: #2e2214; border-color: #c8a46a66; }
 .bk-page a { color: #8a3a10; }
 .bk-nav { grid-column: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }

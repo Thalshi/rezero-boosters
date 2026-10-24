@@ -95,7 +95,7 @@ try {
       for (let k = 0; k < 6; k++) {
         const v2 = (await A.api("confront/state", { gid })).vue, fin = v2.actions.find((a) => a.type === "finir");
         if (!fin) break;
-        if (fin.aDefausser) { await page.click("#ar-end", { force: true }); for (const c of v2.main.slice(0, fin.aDefausser)) { await tap(page, c.uid); await page.waitForTimeout(250); } await page.screenshot({ path: join(OUT, `arene-${label}-3b-defausse.png`) }); }
+        if (fin.aDefausser) { await page.click("#ar-end", { force: true }); for (const c of v2.main.slice(0, fin.aDefausser)) { await tap(page, c.uid); await page.waitForTimeout(250); if (await page.locator("#ar-insp:not([hidden]) [data-idisc]").count()) { await page.locator("#ar-insp:not([hidden]) [data-idisc]").dispatchEvent("click"); await page.waitForTimeout(250); } } await page.screenshot({ path: join(OUT, `arene-${label}-3b-defausse.png`) }); }
         await page.click("#ar-end", { force: true }); await page.waitForTimeout(1500);
       }
       const v3 = (await A.api("confront/state", { gid })).vue;

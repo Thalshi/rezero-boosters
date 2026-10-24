@@ -655,7 +655,7 @@ const Arena = (() => {
       const o = i - (n - 1) / 2, chosen = st.sel === h.c.uid, s = false, picked = st.discard.includes(h.c.uid), rot = o * (R.portrait ? 5 : 6) * Math.min(1, 6 / n), base = R.portrait ? cw * .1 : cw * .16, lift = chosen || picked ? cw * .3 : Math.abs(o) * Math.abs(o) * 4 * Math.min(1, 6 / n) + base;
       h.el.style.transform = `translateX(${o * spread}px) translateY(${chosen || picked ? -lift : lift}px) rotate(${s ? 0 : rot}deg) scale(${s ? 1.22 : 1})`;
       h.el.style.zIndex = s ? 50 : 10 + i;
-      const ok = plays(h.c.uid).length > 0 && !st.discMode;
+      const ok = plays(h.c.uid).length > 0;
       h.el.classList.toggle("off", !ok && !st.discMode && !reactUses(h.c));
       h.el.classList.toggle("ok", ok); h.el.classList.toggle("picked", picked); h.el.classList.toggle("chosen", chosen);
     });
@@ -664,15 +664,16 @@ const Arena = (() => {
   // panneau de la carte choisie : en grand, son texte complet, et de quoi la jouer
   let inspKey = "";
   function renderInsp() {
-    const box = $a("insp"), v = CF.table?.vue, c = st?.sel && !st.discMode ? v?.main?.find((x) => x.uid === st.sel) : null;
-    if (!box) return; if (!c) { inspKey = ""; box.hidden = true; return; }
-    const ps = plays(c.uid), free = ps.find((a) => !a.cible), tg = [...new Set(ps.filter((a) => a.cible).map((a) => a.cible))], key = c.uid + "|" + ps.length + "|" + tg.join(",");
+    const box = $a("insp"), v = CF.table?.vue, c = st?.sel ? v?.main?.find((x) => x.uid === st.sel) : null;
+    if (!box) return; if (!c) { inspKey = ""; box.hidden = true; box.innerHTML = ""; return; }
+    const ps = plays(c.uid), free = ps.find((a) => !a.cible), tg = [...new Set(ps.filter((a) => a.cible).map((a) => a.cible))], fin = finAct(), dm = st.discMode && fin?.aDefausser > 0, key = c.uid + "|" + ps.length + "|" + tg.join(",") + "|" + dm;
     if (key === inspKey && !box.hidden) return; inspKey = key;
     const d = defOf(c), big = cardEl(c); big.classList.add("ar-insp-card"); big.removeAttribute("data-cu");
     box.innerHTML = `<button class="ar-insp-x" type="button" aria-label="Fermer">✕</button>${big.outerHTML}<p class="ar-insp-t">${esc(d.texte || CF_SHORT[c.def] || "")}</p>
-      <div class="ar-insp-b">${free ? `<button class="btn gold" type="button" data-ip="free">Jouer cette carte</button>` : ""}${tg.map((id) => `<button class="btn ${free ? "" : "gold"}" type="button" data-ip="${esc(id)}">Viser ${esc(champ(id)?.label || nm(id))}</button>`).join("")}${!free && !tg.length ? `<p class="ar-insp-n">${esc(tipFor(c))}</p>` : ""}</div>`;
+      <div class="ar-insp-b">${free ? `<button class="btn gold" type="button" data-ip="free">Jouer cette carte</button>` : ""}${tg.map((id) => `<button class="btn ${free ? "" : "gold"}" type="button" data-ip="${esc(id)}">Viser ${esc(champ(id)?.label || nm(id))}</button>`).join("")}${!free && !tg.length ? `<p class="ar-insp-n">${esc(tipFor(c))}</p>` : ""}${dm ? `<button class="btn" type="button" data-idisc="1">Défausser cette carte</button>` : ""}</div>`;
     box.hidden = false;
     box.querySelector(".ar-insp-x").onclick = () => { cancelTarget(); st.sel = null; hint(""); layoutHand(); };
+    const db = box.querySelector("[data-idisc]"); if (db) db.onclick = () => { cancelTarget(); st.sel = null; toggleDisc(c.uid); };
     box.querySelectorAll("[data-ip]").forEach((b) => { b.onclick = () => { const id = b.dataset.ip; if (id === "free") { cancelTarget(); st.sel = null; layoutHand(); return act(free); } if (!targeting || targeting.uid !== c.uid) startTarget(c.uid); const p = champ(id); if (p) pickTarget(p); }; });
   }
   // en réaction, la carte qui sert (Parade, Riposte, Élixir, une Frappe à défausser) brille
@@ -709,11 +710,16 @@ const Arena = (() => {
     if (st.running) return hint("Un instant : l'action en cours se termine.");
     if (reactTap(c)) return;
     const ps = plays(uid);
-    if (fin?.aDefausser > 0 && st.discMode) { st.discard = st.discard.includes(uid) ? st.discard.filter((x) => x !== uid) : [...st.discard, uid].slice(-fin.aDefausser); layoutHand(); return renderSide(); }
+    // fin du tour avec trop de cartes : on peut encore jouer une carte jouable (oubli), les autres se défaussent d'un toucher
+    if (fin?.aDefausser > 0 && st.discMode && (st.discard.includes(uid) || !ps.length)) { cancelTarget(); st.sel = null; return toggleDisc(uid); }
     if (targeting && targeting.uid !== uid) cancelTarget();
     if (st.sel === uid) { st.sel = null; const free = ps.find((a) => !a.cible); cancelTarget(); layoutHand(); if (free) act(free); return; }
     st.sel = uid; layoutHand(); hint(tipFor(c));
     if (ps.some((a) => a.cible)) startTarget(uid);
+  }
+  function toggleDisc(uid) {
+    const fin = finAct(); if (!fin?.aDefausser) return;
+    st.discard = st.discard.includes(uid) ? st.discard.filter((x) => x !== uid) : [...st.discard, uid].slice(-fin.aDefausser); layoutHand(); renderSide();
   }
   // toucher sa Parade (ou sa Riposte…) pendant une réaction : la joue
   function reactTap(c) {
@@ -759,10 +765,12 @@ const Arena = (() => {
   }
   function onEnd() {
     const fin = finAct(); if (!fin) return;
-    if (fin.aDefausser > 0 && st.discard.length < fin.aDefausser) { st.discMode = true; st.sel = null; cancelTarget(); layoutHand(); hint(`Touche ${fin.aDefausser - st.discard.length} carte(s) à défausser, puis « Défausser et finir ».`); return; }
+    if (fin.aDefausser > 0 && st.discard.length < fin.aDefausser) { st.discMode = true; st.sel = null; cancelTarget(); layoutHand(); hint(discTip(fin)); return; }
     st.discMode = false;
     act({ type: "finir", defausse: st.discard.slice(0, fin.aDefausser), promptId: fin.promptId });
   }
+
+  const discTip = (fin) => `${fin.aDefausser} carte(s) de trop : joue encore une carte si tu peux, sinon touche ${Math.max(0, fin.aDefausser - st.discard.length)} carte(s) à défausser, puis « Défausser et finir ».`;
 
   // ---------- côté droit, réactions, chrono ----------
   const LBL = { parer: "Parer", riposter: "Riposter", encaisser: "Encaisser (−1 PV)", defausser: "Défausser une Frappe", elixir: "Boire un Élixir (+1 PV)", survie: "Ténacité : défausser 2 cartes (+1 PV)" };
@@ -772,12 +780,14 @@ const Arena = (() => {
     btn.disabled = !fin || st.running;
     btn.textContent = fin?.aDefausser ? (st.discMode ? `Défausser ${st.discard.length}/${fin.aDefausser} et finir` : `Fin du tour (${fin.aDefausser} carte${fin.aDefausser > 1 ? "s" : ""} de trop)`) : "Fin du tour";
     if (!fin) { btn.classList.remove("low"); st.discMode = false; }
+    // après avoir joué, la main tient dans la limite : plus rien à défausser
+    else if (st.discMode && !fin.aDefausser) { st.discMode = false; st.discard = []; layoutHand(); }
     if (!$a("quit").dataset.sure) $a("quit").textContent = v.phase === "partie" && v.joueurs?.find((j) => j.id === v.moi)?.vivant ? "Quitter la partie" : "Quitter";
     const me = v.joueurs.find((j) => j.id === v.moi), pr = v.attente;
     $a("chatForm").hidden = $a("qp").hidden = $a("emoBtn").hidden = !me;
     if (!me) hint("Tu regardes la partie en spectateur.");
     else if (!me.vivant && v.phase === "partie") hint("Tu es éliminé. Tu peux regarder la fin de la partie.");
-    else if (pr && pr.pid === v.moi && pr.kind === "tour" && !st.sel) hint(v.tour?.entrave ? "Tu es entravé : finis ton tour." : fin?.aDefausser && st.discMode ? `Touche ${Math.max(0, fin.aDefausser - st.discard.length)} carte(s) à défausser, puis « Défausser et finir ».` : fin?.aDefausser ? `Joue tes cartes, puis « Défausser et finir » : tu gardes au plus ${CF.table.vue.limiteMain} cartes.` : "C'est ton tour : glisse une carte sur un champion, ou vers le haut.");
+    else if (pr && pr.pid === v.moi && pr.kind === "tour" && !st.sel) hint(v.tour?.entrave ? "Tu es entravé : finis ton tour." : fin?.aDefausser && st.discMode ? discTip(fin) : fin?.aDefausser ? `Joue tes cartes, puis « Défausser et finir » : tu gardes au plus ${CF.table.vue.limiteMain} cartes.` : "C'est ton tour : glisse une carte sur un champion, ou vers le haut.");
     else if (pr && pr.pid !== v.moi && v.phase === "partie") hint(`${nm(pr.pid)} ${pr.kind === "tour" ? "joue" : "réfléchit"}…`);
     // rôle
     const chip = $a("chip");

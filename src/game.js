@@ -205,7 +205,7 @@ const THEME_MIN = 5;                   // persos débloqués avant qu'un booster
 const THEME_RARITIES = ["c", "pc", "r"];  // raretés que le thème doit avoir lui-même : l'essentiel de ses cartes vient de lui
 const DAILY_LAST = { e: 95.25, l: 4.25, m: 0.5 }; // 5e carte du pack du jour : Épique ou mieux
 const STREAK = [{ boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 1 }, { boosters: 2, chakra: 100 }];
-const DAILY_N = 2;                     // missions du jour tirées chaque jour
+const DAILY_N = 3;                     // missions du jour tirées chaque jour
 const WEEKLY_N = 5;                    // missions de la semaine tirées chaque semaine
 const MISSIONS = [
   { id: "open3",  label: "Ouvre 3 boosters",                     key: "open",    goal: 3, reward: { chakra: 15 } },
@@ -289,7 +289,7 @@ function ensureDailyS(s, now = Date.now()) {
     let h = 0; for (const ch of today) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     const pool = [...MISSIONS], picks = [];
     while (picks.length < DAILY_N) { h = (h * 1103515245 + 12345) >>> 0; picks.push(pool.splice(h % pool.length, 1)[0].id); }
-    s.daily = { day: today, ids: picks, prog: stale ? s.daily.prog : {}, claimed: {}, ...(stale && s.daily.bonus ? { bonus: true } : {}) };
+    s.daily = { day: today, ids: picks, prog: stale ? s.daily.prog : {}, claimed: stale ? Object.fromEntries(Object.entries(s.daily.claimed || {}).filter(([id]) => picks.includes(id))) : {}, ...(stale && s.daily.bonus ? { bonus: true } : {}) };
   }
   return s.daily;
 }

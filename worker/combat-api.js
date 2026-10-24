@@ -27,7 +27,8 @@ function viewOf(c, uid) {
   const me = sideOf(c, uid), st = c.state;
   const out = { id: c.id, kind: c.kind, status: c.status, me, a: c.a, b: c.b };
   if (!st) return out;
-  out.state = { ...st, sides: st.sides.map((s, i) => ({ ...s, choix: i === me ? s.choix : null, aChoisi: !!s.choix })) };
+  // « bt » et pas « state » : côté navigateur, « state » est la sauvegarde du joueur
+  out.bt = { ...st, sides: st.sides.map((s, i) => ({ ...s, choix: i === me ? s.choix : null, aChoisi: !!s.choix })) };
   out.actions = me >= 0 && st.winner == null && !st.sides[me].choix ? G.btActions(st, me) : [];
   out.deadline = c.kind === "ami" && st.winner == null ? (st.roundAt || c.t) + ROUND_MS : null;
   return out;
@@ -67,7 +68,7 @@ export async function combatRoute(env, user, path, body, h) {
 
   if (path === "/api/game/combat/team") {
     const r = await mutate(env, user.id, (s) => { const o = G.btSetTeamS(s, body.ids); return o.error ? { abort: true, error: o.error } : o; });
-    return r.error ? fail(400, r.error) : json({ ok: true, team: r.state.btTeam });
+    return r.error ? fail(400, r.error) : json({ ok: true, team: r.state.btTeam, state: r.state });
   }
   if (path === "/api/game/combat/feed") {
     const r = await mutate(env, user.id, (s) => { const o = G.btFeedS(s, String(body.id || "")); return o.error ? { abort: true, error: o.error } : o; });

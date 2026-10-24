@@ -16,7 +16,7 @@ def main():
     head = (ROOT / "src/head.css.html").read_text(encoding="utf8").rstrip()
     # la page : structure (shell.html) puis un seul script = règles + images + logique + pages + démarrage
     shell = (ROOT / "src/shell.html").read_text(encoding="utf8")
-    js = "\n".join((ROOT / f"src/{n}.js").read_text(encoding="utf8") for n in ("illus", "icons", "app", "views", "views2", "decos", "fx", "views3", "views4", "views5", "views6", "views7", "views8", "coffre", "reveal", "arena", "open3d", "world3d", "parrainage", "gestion", "boot"))
+    js = "\n".join((ROOT / f"src/{n}.js").read_text(encoding="utf8") for n in ("illus", "icons", "app", "views", "views2", "decos", "fx", "views3", "views4", "views5", "views6", "views7", "views8", "coffre", "reveal", "arena", "open3d", "world3d", "combat", "parrainage", "gestion", "boot"))
     body = "</style>\n" + shell + "\n<script>\n/*ART*/\n" + js + "\n</script>\n"
     head = head[: -len("</style>")]
     art = (ROOT / "src/art.js").read_text(encoding="utf8").replace(

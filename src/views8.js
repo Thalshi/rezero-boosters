@@ -73,7 +73,7 @@ function crOpen(kind, id) {
   let f;
   if (kind === "perso") {
     const p = id ? PEOPLE[id] : null, c = id ? byId[id] : null;
-    f = p ? { name: p.name, fac: p.fac, kanji: p.kanji || "", color: p.color || "#5ab0ff", tag: p.tag || c?.title || "", power: p.power || "", look: p.look || "", ep: epOfCfg(CONFIG, id), branche: p.branche || "" }
+    f = p ? { name: p.name, fac: p.fac, kanji: p.kanji || "", color: p.color || "#5ab0ff", tag: p.tag || c?.title || "", power: p.power || "", look: p.look || "", ep: epOfCfg(CONFIG, id), branche: p.branche || "", btProfil: p.bt?.profil || "", btAff: p.bt?.affinite || "", btTech: p.bt?.tech || "" }
       : { name: "", fac: "irl", kanji: "", color: "#5ab0ff", tag: "", power: "", look: "", ep: Math.min(EP_MAX, (CONFIG.def || 1) + 1), branche: "", rar: "c" };
   } else if (kind === "carte") {
     const c = id ? byId[id] : null;
@@ -100,7 +100,9 @@ function crEditor() {
       ${isNew ? fld("Rareté de sa carte", sel("rar", crRar())) : ""}${fld("Titre de sa carte", txt("tag", 40, "Ex. Vent du QG"))}
       <div class="cr-2">${fld("Couleur", col("color"))}</div>
       ${fld("Épisode d'arrivée", sel("ep", Array.from({ length: EP_MAX }, (_, i) => [i + 1, epLabel(i + 1)])), "Caché aux joueurs tant que Billy n'a pas débloqué cet épisode.")}
-      ${fld("Branche en Confrontation", sel("branche", CR_BRANCHES))}${fld("Pouvoir", area("power", 220))}${fld("Apparence", area("look", 220))}${img}`;
+      ${fld("Branche en Confrontation", sel("branche", CR_BRANCHES))}${fld("Pouvoir", area("power", 220))}${fld("Apparence", area("look", 220))}${img}
+      ${E.id ? `<fieldset class="cr-bt"><legend>Arène (combats 3 contre 3)</legend>${(() => { const auto = btKitOf(E.id); return `<div class="cr-2">${fld("Profil", sel("btProfil", [["", `Automatique (${BT_PROFILS[auto.profil].label})`], ...BT_PROFIL_IDS.map((k) => [k, BT_PROFILS[k].label])]), "Assassin frappe fort, Mage empoisonne, Gardien encaisse, Soutien soigne.")}${fld("Affinité", sel("btAff", [["", `Automatique (${BT_AFFINITES[auto.aff].label})`], ...BT_AFF_IDS.map((k) => [k, BT_AFFINITES[k].label])]), "Feu > Vent > Terre > Eau > Feu ; Ombre et Lumière l'une contre l'autre.")}</div>
+        ${fld("Nom de sa technique spéciale", txt("btTech", 40, BT_PROFILS[f.btProfil || auto.profil].tech.nom), "Vide = nom par défaut du profil. L'effet dépend du profil.")}`; })()}</fieldset>` : ""}`;
   else if (E.kind === "carte") form = `${fld("Titre", txt("title", 40, "Ex. Tempête"))}${fld("Rareté", sel("rar", crRar()), isNew ? "" : "Changer la rareté change la valeur de la carte pour ceux qui l'ont déjà.")}
       ${img}<div class="cr-2">${fld(`Cadrage horizontal <b>${parseInt(f.pos)}%</b>`, `<input type="range" min="0" max="100" data-crpos="0" value="${parseInt(f.pos)}">`)}${fld(`Cadrage vertical <b>${parseInt(f.pos.split(" ")[1])}%</b>`, `<input type="range" min="0" max="100" data-crpos="1" value="${parseInt(f.pos.split(" ")[1])}">`)}</div>
       ${fld(`Zoom <b>×${(+f.zoom).toFixed(1)}</b>`, `<input type="range" min="1" max="3" step="0.1" data-crf="zoom" value="${f.zoom}">`)}${fld("Branche en Confrontation", sel("branche", CR_BRANCHES), "Vide : branche du perso (ou sa variante en Épique et plus).")}`;
@@ -150,7 +152,9 @@ async function crSave(reset) {
   const E = CR.edit; if (!E || CR.busy) return;
   const data = {};
   for (const [k, v] of Object.entries(E.f)) if (!E.id || JSON.stringify(v) !== JSON.stringify(E.start[k])) data[k] = k === "only" ? (v ? "sanctuaire" : "") : v;
-  if (E.kind === "perso" && E.id && "ep" in data) delete data.ep; // l'épisode d'un perso existant se règle dans Admin (il reste modifiable ici pour un nouveau)
+  if (E.kind === "perso" && E.id && "ep" in data) delete data.ep;
+  // Arène : les trois réglages partent ensemble
+  if (E.kind === "perso") { const ch = ["btProfil", "btAff", "btTech"].some((k) => k in data); for (const k of ["btProfil", "btAff", "btTech"]) delete data[k]; if (ch && E.id) data.bt = { profil: E.f.btProfil, affinite: E.f.btAff, tech: E.f.btTech }; } // l'épisode d'un perso existant se règle dans Admin (il reste modifiable ici pour un nouveau)
   CR.busy = true; draw();
   try {
     const r = await srv(reset ? "creations/reset" : "creations/save", reset ? { kind: E.kind, id: E.id } : { kind: E.kind, id: E.id, data, image: E.image || undefined });

@@ -1358,7 +1358,7 @@ const BT_TEAM = 3;
 function btKitOf(who) {
   const p = PEOPLE[who] || {}, o = p.bt || {}, h = hashOf(who);
   const profil = BT_PROFILS[o.profil] ? o.profil : BT_PROFIL_IDS[h % 4];
-  const aff = BT_AFFINITES[o.affinite] ? o.affinite : BT_AFF_IDS[(h >> 4) % BT_AFF_IDS.length];
+  const aff = BT_AFFINITES[o.affinite] ? o.affinite : BT_AFF_IDS[(h >>> 4) % BT_AFF_IDS.length];
   const base = BT_PROFILS[profil].tech;
   return { profil, aff, tech: { ...base, nom: (o.tech && String(o.tech).slice(0, 40)) || base.nom } };
 }

@@ -48,6 +48,14 @@ function cleanPerso(b, isNew) {
   for (const [k, n] of [["tag", 40], ["power", 220], ["look", 220], ["mood", 120], ["quote", 160]]) if (b[k] != null) out[k] = str(b[k], n) ?? "";
   if (b.ep != null) { const e = Math.round(+b.ep); if (!(e >= 1 && e <= G.EP_MAX)) return err(`Épisode entre 1 et ${G.EP_MAX}.`); out.ep = e; }
   if (b.branche != null && b.branche !== "") { if (!BRANCH_IDS.includes(b.branche)) return err("Branche inconnue."); out.branche = b.branche; }
+  // Arène : profil, affinité et nom de la technique (vide = automatique)
+  if (b.bt != null) {
+    const x = b.bt || {}, bt = {};
+    if (x.profil) { if (!G.BT_PROFILS[x.profil]) return err("Profil d'Arène inconnu."); bt.profil = x.profil; }
+    if (x.affinite) { if (!G.BT_AFFINITES[x.affinite]) return err("Affinité inconnue."); bt.affinite = x.affinite; }
+    if (x.tech) bt.tech = str(x.tech, 40) || undefined;
+    out.bt = bt;
+  }
   return { out };
 }
 function cleanCarte(b, isNew) {
@@ -58,6 +66,14 @@ function cleanCarte(b, isNew) {
   if (b.pos != null) { if (!/^\d{1,3}% \d{1,3}%$/.test(String(b.pos))) return err("Cadrage invalide."); out.pos = String(b.pos); }
   if (b.zoom != null) { const z = Math.round(+b.zoom * 100) / 100; if (!(z >= 1 && z <= 3)) return err("Zoom entre 1 et 3."); out.zoom = z; }
   if (b.branche != null && b.branche !== "") { if (!BRANCH_IDS.includes(b.branche)) return err("Branche inconnue."); out.branche = b.branche; }
+  // Arène : profil, affinité et nom de la technique (vide = automatique)
+  if (b.bt != null) {
+    const x = b.bt || {}, bt = {};
+    if (x.profil) { if (!G.BT_PROFILS[x.profil]) return err("Profil d'Arène inconnu."); bt.profil = x.profil; }
+    if (x.affinite) { if (!G.BT_AFFINITES[x.affinite]) return err("Affinité inconnue."); bt.affinite = x.affinite; }
+    if (x.tech) bt.tech = str(x.tech, 40) || undefined;
+    out.bt = bt;
+  }
   return { out };
 }
 function cleanCos(b, isNew, base) {

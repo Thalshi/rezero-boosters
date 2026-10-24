@@ -335,6 +335,89 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .cm-link { color: #7ec8ff; text-decoration: underline; text-underline-offset: 2px; word-break: break-all; } .cm-link:hover { color: #b5e0ff; }
 .cf-cn { display: inline; padding: 0; border: 0; background: none; font: inherit; color: #ffd98a; text-decoration: underline dotted; text-underline-offset: 3px; cursor: pointer; }
 .cf-cn:hover { color: #fff3d0; } .cf-info-card { width: 180px; margin: 0 auto 12px; } .cf-info p { line-height: 1.5; }
+/* ===== Arène (combats 3 contre 3) ===== */
+.bt-art { position: relative; display: block; overflow: hidden; background: var(--raise); }
+.bt-art .layer, .bt-art .photo, .bt-art .ph { position: absolute; inset: 0; background-size: cover; background-position: var(--pos, 50% 22%); }
+.bt-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.bt-tag { --ac: #c9a0ff; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px 2px 3px; border-radius: 999px; font: 600 11px var(--body); color: var(--fg2); background: #ffffff0d; border: 1px solid color-mix(in srgb, var(--ac) 45%, transparent); }
+.bt-tag i { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 11px; background: color-mix(in srgb, var(--ac) 28%, #000); color: var(--ac); }
+.bt-tag.p-assassin { --ac: #ff4d7a; } .bt-tag.p-mage { --ac: #b072ff; } .bt-tag.p-gardien { --ac: #e8c77e; } .bt-tag.p-soutien { --ac: #4fd18b; }
+.bt-team-box { padding: 20px; border-radius: 18px; border: 1px solid var(--line2); background: linear-gradient(135deg, #1e1438, #120c1e); margin-bottom: 18px; }
+.bt-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; } .bt-h h2 { margin: 0; }
+.bt-team { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.bt-tc { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 14px; border: 1px solid var(--line2); background: var(--bg2); color: var(--fg); text-align: left; cursor: pointer; }
+.bt-tc .bt-art { width: 64px; height: 84px; border-radius: 10px; flex: none; border: 2px solid var(--rc, var(--line3)); }
+.bt-tc.r-c { --rc: var(--r-c); } .bt-tc.r-pc { --rc: var(--r-pc); } .bt-tc.r-r { --rc: var(--r-r); } .bt-tc.r-e { --rc: var(--r-e); } .bt-tc.r-l { --rc: var(--r-l); } .bt-tc.r-m { --rc: var(--r-m); }
+.bt-tc-b { display: grid; gap: 4px; min-width: 0; } .bt-tc-b b { font-size: 15px; } .bt-tc-b small { font: 600 11px var(--mono); color: var(--fg3); }
+.bt-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 12px 0 18px; }
+.bt-mode { display: grid; gap: 4px; padding: 18px; border-radius: 16px; border: 1px solid var(--line2); background: linear-gradient(160deg, #2a1a40, #140e22); color: var(--fg); text-align: left; cursor: pointer; transition: transform .15s, border-color .15s; }
+.bt-mode:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--acc); } .bt-mode:disabled { opacity: .45; cursor: default; }
+.bt-mode b { font: 800 20px var(--disp); } .bt-mode small { color: var(--fg3); } .bt-mode em { font: 700 13px var(--mono); font-style: normal; color: var(--gold); }
+.bt-mode.m-difficile { background: linear-gradient(160deg, #401a24, #160c12); }
+.bt-friends { display: flex; flex-wrap: wrap; gap: 8px; } .bt-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line2); background: var(--bg2); margin-bottom: 8px; } .bt-row .row { margin-left: auto; }
+.bt-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; color: var(--fg2); font-size: 14px; } .bt-how p { margin: 6px 0 12px; line-height: 1.5; }
+.bt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.bt-pc { position: relative; display: grid; gap: 4px; padding: 8px; border-radius: 14px; border: 2px solid var(--line2); background: var(--bg2); color: var(--fg); text-align: left; cursor: pointer; }
+.bt-pc .bt-art { aspect-ratio: 3 / 4; border-radius: 10px; } .bt-pc b { font-size: 14px; } .bt-pc small { font: 600 11px var(--mono); color: var(--fg3); }
+.bt-pc.on { border-color: var(--gold); box-shadow: 0 0 18px #f5c51855; } .bt-n { position: absolute; top: 6px; left: 6px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--gold); color: #1a1405; font: 800 13px var(--mono); font-style: normal; }
+.bt-fiche-b { display: grid; grid-template-columns: 160px 1fr; gap: 16px; align-items: start; } .bt-fiche-b .bt-art.big { aspect-ratio: 3 / 4; border-radius: 14px; }
+.bt-stats { width: 100%; margin: 10px 0; border-collapse: collapse; } .bt-stats td { padding: 4px 0; border-bottom: 1px solid var(--line); } .bt-stats td:last-child { text-align: right; font: 700 14px var(--mono); }
+/* le combat */
+.bt-fight { position: relative; min-height: calc(100vh - 70px); padding: 16px; display: grid; grid-template-rows: auto 1fr auto auto; gap: 12px; background: radial-gradient(ellipse at 50% 30%, #3a1d52, #120a1c 70%); overflow: hidden; }
+.bt-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bt-vs { font: 900 28px var(--disp); background: linear-gradient(180deg, #ffe9a8, #ff4d7a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-ban { display: grid; gap: 6px; } .bt-ban.op { text-align: right; justify-items: end; } .bt-ban b { font: 800 16px var(--disp); }
+.bt-ban span { display: flex; gap: 6px; } .bt-ban i { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; border: 2px solid #ffffff33; } .bt-ban i.on { border-color: var(--gold); } .bt-ban i.ko { filter: grayscale(1) brightness(.4); }
+.bt-ban i .bt-art { width: 100%; height: 100%; }
+.bt-stage { position: relative; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 20px; min-height: 340px; }
+.bt-f { position: relative; display: grid; gap: 10px; justify-items: center; transition: transform .25s; }
+.bt-f.op { order: 2; } .bt-f.me { order: 1; }
+.bt-f-art { width: min(240px, 34vw); aspect-ratio: 3 / 4; padding: 0; border-radius: 18px; border: 3px solid var(--rc, #fff3); overflow: hidden; cursor: pointer; background: none; box-shadow: 0 20px 40px #000a, 0 0 30px color-mix(in srgb, var(--rc, #fff) 30%, transparent); }
+.bt-f-art .bt-art { width: 100%; height: 100%; }
+.bt-f-art.r-c { --rc: var(--r-c); } .bt-f-art.r-pc { --rc: var(--r-pc); } .bt-f-art.r-r { --rc: var(--r-r); } .bt-f-art.r-e { --rc: var(--r-e); } .bt-f-art.r-l { --rc: var(--r-l); } .bt-f-art.r-m { --rc: var(--r-m); }
+.bt-f.op .bt-f-art { transform: scaleX(-1); }
+.bt-f-info { width: min(280px, 40vw); padding: 10px 12px; border-radius: 12px; background: #0e0a1ecc; border: 1px solid #ffffff1f; display: grid; gap: 6px; }
+.bt-f-h { display: flex; justify-content: space-between; align-items: baseline; } .bt-f-h b { font: 800 17px var(--disp); } .bt-f-h small { font: 600 12px var(--mono); color: var(--fg3); }
+.bt-hp { position: relative; height: 10px; border-radius: 999px; background: #ffffff14; overflow: hidden; } .bt-hp i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; transition: width .6s ease; } .bt-hp em { position: absolute; right: 0; top: 0; bottom: 0; background: #7ec8ffaa; border-radius: inherit; }
+.bt-f-s { display: flex; justify-content: space-between; font: 600 12px var(--mono); color: var(--fg2); } .bt-st { display: flex; gap: 6px; } .bt-st i { font-style: normal; } .bt-st i.ok { color: var(--gold); }
+.bt-f.ko .bt-f-art { filter: grayscale(1) brightness(.4); transform: rotate(-6deg) scale(.92); transition: all .6s; }
+.bt-f.lunge.me { transform: translateX(12%) scale(1.04); } .bt-f.lunge.op { transform: translateX(-12%) scale(1.04); }
+.bt-f.hit .bt-f-art { animation: bt-hit .4s; } @keyframes bt-hit { 0%, 100% { translate: 0; filter: none; } 25% { translate: -8px; filter: brightness(2) saturate(.3); } 60% { translate: 8px; } }
+.bt-dmg { position: absolute; top: 30%; left: 50%; z-index: 5; font: 900 46px var(--disp); color: #ff4d5e; text-shadow: 0 3px 0 #000, 0 0 20px #ff4d5e; pointer-events: none; animation: bt-dmg 1.1s ease-out forwards; } .bt-dmg.heal { color: #4fd18b; text-shadow: 0 3px 0 #000, 0 0 20px #4fd18b; }
+@keyframes bt-dmg { from { transform: translate(-50%, 0) scale(.6); opacity: 0; } 20% { transform: translate(-50%, -20px) scale(1.15); opacity: 1; } to { transform: translate(-50%, -90px) scale(1); opacity: 0; } }
+.bt-fx { position: absolute; inset: 0; pointer-events: none; }
+.bt-slash { position: absolute; top: 35%; width: 46%; height: 70px; border-radius: 50%; background: linear-gradient(90deg, transparent, #ffffffcc, transparent); filter: blur(2px) drop-shadow(0 0 16px #fff); animation: bt-slash .7s ease-out forwards; }
+.bt-slash.to-op { left: 45%; } .bt-slash.to-me { left: 9%; }
+.bt-slash.k-burst { background: linear-gradient(90deg, transparent, #ff4d7a, #fff, transparent); filter: blur(1px) drop-shadow(0 0 22px #ff4d7a); height: 110px; }
+.bt-slash.k-poison { background: radial-gradient(circle, #b072ffdd, transparent 70%); filter: drop-shadow(0 0 24px #b072ff); border-radius: 50%; height: 180px; top: 25%; }
+.bt-slash.k-shield { background: radial-gradient(circle, #e8c77ecc, transparent 70%); filter: drop-shadow(0 0 22px #e8c77e); }
+.bt-slash.k-heal { background: radial-gradient(circle, #4fd18bcc, transparent 70%); filter: drop-shadow(0 0 22px #4fd18b); }
+@keyframes bt-slash { from { transform: scaleX(.2) rotate(-12deg); opacity: 0; } 30% { opacity: 1; } to { transform: scaleX(1.2) rotate(8deg); opacity: 0; } }
+.bt-log { min-height: 44px; padding: 10px 14px; border-radius: 12px; background: #0e0a1ecc; border: 1px solid #ffffff14; font-size: 14px; color: var(--fg2); line-height: 1.5; } .bt-log .good { color: #4fd18b; font-weight: 700; } .bt-log .bad { color: #ff4d5e; font-weight: 700; }
+.bt-acts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) auto; gap: 10px; align-items: stretch; }
+.bt-a { display: grid; grid-template-columns: 40px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line2); background: linear-gradient(160deg, #241a44, #140e22); color: var(--fg); text-align: left; cursor: pointer; transition: transform .12s, border-color .12s; }
+.bt-a:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--acc); } .bt-a:disabled { opacity: .45; cursor: default; }
+.bt-a > i { grid-row: span 2; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-style: normal; font-size: 20px; background: #ffffff10; }
+.bt-a b { font-size: 15px; } .bt-a small { font-size: 11.5px; color: var(--fg3); line-height: 1.3; }
+.bt-a.tech > i { background: #b072ff33; color: #d7b8ff; } .bt-a.def > i { background: #4d9bff33; } .bt-a.atk > i { background: #ff4d5e33; }
+.bt-sw { grid-column: 1 / -2; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .bt-sw > small { color: var(--fg3); }
+.bt-a.sw { grid-template-columns: 36px 1fr; padding: 6px 10px; } .bt-a.sw .bt-art { grid-row: span 2; width: 36px; height: 36px; border-radius: 50%; }
+.bt-quit { align-self: center; }
+.bt-intro { position: absolute; inset: 0; z-index: 20; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 30px; background: #0b0614ee; transition: opacity .5s; }
+.bt-intro.out { opacity: 0; } .bt-intro > i { font: 900 90px var(--disp); font-style: normal; background: linear-gradient(180deg, #ffe9a8, #ff4d7a); -webkit-background-clip: text; background-clip: text; color: transparent; animation: bt-vsin .6s cubic-bezier(.2, 1.6, .4, 1); }
+.bt-intro-s { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; animation: bt-in-l .6s ease-out; } .bt-intro-s.op { animation-name: bt-in-r; }
+.bt-intro-s .bt-art { width: 90px; aspect-ratio: 3 / 4; border-radius: 12px; border: 2px solid #ffffff44; } .bt-intro-s b { width: 100%; text-align: center; font: 800 20px var(--disp); }
+@keyframes bt-vsin { from { transform: scale(3); opacity: 0; } } @keyframes bt-in-l { from { transform: translateX(-60px); opacity: 0; } } @keyframes bt-in-r { from { transform: translateX(60px); opacity: 0; } }
+.bt-end { position: absolute; inset: 0; z-index: 15; display: grid; place-items: center; background: #0b0614d9; animation: bt-in-l .4s; }
+.bt-end-b { display: grid; gap: 12px; justify-items: center; text-align: center; padding: 28px; } .bt-end h2 { font: 900 clamp(48px, 9vw, 90px) var(--disp); margin: 0; }
+.bt-end.win h2 { background: linear-gradient(180deg, #fff3d0, #e8c77e); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 30px #e8c77e88); } .bt-end.lose h2 { color: #c9a0ff; }
+.bt-end-team { display: flex; gap: 10px; } .bt-end-team .bt-art { width: 90px; aspect-ratio: 3 / 4; border-radius: 12px; border: 2px solid #e8c77e66; }
+@media (max-width: 700px) {
+  .bt-team, .bt-modes { grid-template-columns: 1fr; } .bt-fiche-b { grid-template-columns: 1fr; } .bt-fiche-b .bt-art.big { max-width: 200px; }
+  .bt-stage { min-height: 280px; gap: 10px; } .bt-f-info { width: 44vw; padding: 8px; } .bt-f-art { width: 40vw; }
+  .bt-acts { grid-template-columns: 1fr 1fr; } .bt-sw, .bt-quit { grid-column: 1 / -1; } .bt-intro-s .bt-art { width: 64px; } .bt-intro > i { font-size: 54px; }
+}
+.cr-bt { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; border: 1px solid #b072ff55; background: #b072ff0d; } .cr-bt legend { padding: 0 6px; font: 700 13px var(--body); color: #c9a0ff; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -4051,7 +4134,7 @@ const BT_TEAM = 3;
 function btKitOf(who) {
   const p = PEOPLE[who] || {}, o = p.bt || {}, h = hashOf(who);
   const profil = BT_PROFILS[o.profil] ? o.profil : BT_PROFIL_IDS[h % 4];
-  const aff = BT_AFFINITES[o.affinite] ? o.affinite : BT_AFF_IDS[(h >> 4) % BT_AFF_IDS.length];
+  const aff = BT_AFFINITES[o.affinite] ? o.affinite : BT_AFF_IDS[(h >>> 4) % BT_AFF_IDS.length];
   const base = BT_PROFILS[profil].tech;
   return { profil, aff, tech: { ...base, nom: (o.tech && String(o.tech).slice(0, 40)) || base.nom } };
 }
@@ -5290,7 +5373,7 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légend
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
-  ["missions", "missions", "Missions", toClaim()], ["parrainage", "coffre", "Parrainage"], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
+  ["missions", "missions", "Missions", toClaim()], ["parrainage", "coffre", "Parrainage"], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ["arene", "duel", "Arène"], ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
   ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;
@@ -8596,7 +8679,7 @@ function crOpen(kind, id) {
   let f;
   if (kind === "perso") {
     const p = id ? PEOPLE[id] : null, c = id ? byId[id] : null;
-    f = p ? { name: p.name, fac: p.fac, kanji: p.kanji || "", color: p.color || "#5ab0ff", tag: p.tag || c?.title || "", power: p.power || "", look: p.look || "", ep: epOfCfg(CONFIG, id), branche: p.branche || "" }
+    f = p ? { name: p.name, fac: p.fac, kanji: p.kanji || "", color: p.color || "#5ab0ff", tag: p.tag || c?.title || "", power: p.power || "", look: p.look || "", ep: epOfCfg(CONFIG, id), branche: p.branche || "", btProfil: p.bt?.profil || "", btAff: p.bt?.affinite || "", btTech: p.bt?.tech || "" }
       : { name: "", fac: "irl", kanji: "", color: "#5ab0ff", tag: "", power: "", look: "", ep: Math.min(EP_MAX, (CONFIG.def || 1) + 1), branche: "", rar: "c" };
   } else if (kind === "carte") {
     const c = id ? byId[id] : null;
@@ -8623,7 +8706,9 @@ function crEditor() {
       ${isNew ? fld("Rareté de sa carte", sel("rar", crRar())) : ""}${fld("Titre de sa carte", txt("tag", 40, "Ex. Vent du QG"))}
       <div class="cr-2">${fld("Couleur", col("color"))}</div>
       ${fld("Épisode d'arrivée", sel("ep", Array.from({ length: EP_MAX }, (_, i) => [i + 1, epLabel(i + 1)])), "Caché aux joueurs tant que Billy n'a pas débloqué cet épisode.")}
-      ${fld("Branche en Confrontation", sel("branche", CR_BRANCHES))}${fld("Pouvoir", area("power", 220))}${fld("Apparence", area("look", 220))}${img}`;
+      ${fld("Branche en Confrontation", sel("branche", CR_BRANCHES))}${fld("Pouvoir", area("power", 220))}${fld("Apparence", area("look", 220))}${img}
+      ${E.id ? `<fieldset class="cr-bt"><legend>Arène (combats 3 contre 3)</legend>${(() => { const auto = btKitOf(E.id); return `<div class="cr-2">${fld("Profil", sel("btProfil", [["", `Automatique (${BT_PROFILS[auto.profil].label})`], ...BT_PROFIL_IDS.map((k) => [k, BT_PROFILS[k].label])]), "Assassin frappe fort, Mage empoisonne, Gardien encaisse, Soutien soigne.")}${fld("Affinité", sel("btAff", [["", `Automatique (${BT_AFFINITES[auto.aff].label})`], ...BT_AFF_IDS.map((k) => [k, BT_AFFINITES[k].label])]), "Feu > Vent > Terre > Eau > Feu ; Ombre et Lumière l'une contre l'autre.")}</div>
+        ${fld("Nom de sa technique spéciale", txt("btTech", 40, BT_PROFILS[f.btProfil || auto.profil].tech.nom), "Vide = nom par défaut du profil. L'effet dépend du profil.")}`; })()}</fieldset>` : ""}`;
   else if (E.kind === "carte") form = `${fld("Titre", txt("title", 40, "Ex. Tempête"))}${fld("Rareté", sel("rar", crRar()), isNew ? "" : "Changer la rareté change la valeur de la carte pour ceux qui l'ont déjà.")}
       ${img}<div class="cr-2">${fld(`Cadrage horizontal <b>${parseInt(f.pos)}%</b>`, `<input type="range" min="0" max="100" data-crpos="0" value="${parseInt(f.pos)}">`)}${fld(`Cadrage vertical <b>${parseInt(f.pos.split(" ")[1])}%</b>`, `<input type="range" min="0" max="100" data-crpos="1" value="${parseInt(f.pos.split(" ")[1])}">`)}</div>
       ${fld(`Zoom <b>×${(+f.zoom).toFixed(1)}</b>`, `<input type="range" min="1" max="3" step="0.1" data-crf="zoom" value="${f.zoom}">`)}${fld("Branche en Confrontation", sel("branche", CR_BRANCHES), "Vide : branche du perso (ou sa variante en Épique et plus).")}`;
@@ -8673,7 +8758,9 @@ async function crSave(reset) {
   const E = CR.edit; if (!E || CR.busy) return;
   const data = {};
   for (const [k, v] of Object.entries(E.f)) if (!E.id || JSON.stringify(v) !== JSON.stringify(E.start[k])) data[k] = k === "only" ? (v ? "sanctuaire" : "") : v;
-  if (E.kind === "perso" && E.id && "ep" in data) delete data.ep; // l'épisode d'un perso existant se règle dans Admin (il reste modifiable ici pour un nouveau)
+  if (E.kind === "perso" && E.id && "ep" in data) delete data.ep;
+  // Arène : les trois réglages partent ensemble
+  if (E.kind === "perso") { const ch = ["btProfil", "btAff", "btTech"].some((k) => k in data); for (const k of ["btProfil", "btAff", "btTech"]) delete data[k]; if (ch && E.id) data.bt = { profil: E.f.btProfil, affinite: E.f.btAff, tech: E.f.btTech }; } // l'épisode d'un perso existant se règle dans Admin (il reste modifiable ici pour un nouveau)
   CR.busy = true; draw();
   try {
     const r = await srv(reset ? "creations/reset" : "creations/save", reset ? { kind: E.kind, id: E.id } : { kind: E.kind, id: E.id, data, image: E.image || undefined });
@@ -11389,6 +11476,227 @@ const World3D = (() => {
   }
   return { start, setBg, setTint, get on() { return !!R; } };
 })();
+
+// ===== Arène : combats 3 contre 3 avec les persos de sa collection =====
+// #/arene : ton équipe, combattre l'IA, défier un ami · #/arene/<id> : le combat
+// Les règles sont dans game.js (btCreate, btResolve…) ; sur le site le serveur décide de tout, sur claude.ai
+// (sans serveur) les combats contre l'IA se jouent dans la page.
+ROUTES.push("arene");
+const BT = { list: null, fight: null, busy: false, timer: null, shown: 0, anim: false, pick: null, filtre: "tous", intro: null };
+const BT_KANJI = { assassin: "刃", mage: "魔", gardien: "盾", soutien: "癒" };
+const BT_AFF_K = { feu: ["火", "#ff6a3d"], vent: ["風", "#4fd18b"], terre: ["土", "#c8964a"], eau: ["水", "#4d9bff"], ombre: ["闇", "#b072ff"], lumiere: ["光", "#ffe27a"] };
+const btProfTag = (p) => `<span class="bt-tag p-${p}" title="${BT_PROFILS[p].label}"><i>${BT_KANJI[p]}</i>${BT_PROFILS[p].label}</span>`;
+const btAffTag = (a) => `<span class="bt-tag" style="--ac:${BT_AFF_K[a][1]}" title="Affinité ${BT_AFFINITES[a].label} : bat ${BT_AFFINITES[BT_AFFINITES[a].bat].label}"><i>${BT_AFF_K[a][0]}</i>${BT_AFFINITES[a].label}</span>`;
+const btArt = (id, cls = "") => { const c = byId[id]; return `<span class="bt-art ${cls}">${c ? artIn(c) : ""}</span>`; };
+
+// --- appels : serveur sur le site, moteur local sur claude.ai (IA seulement) ---
+const BT_LOCAL = { fights: {} };
+async function btCall(action, body = {}) {
+  if (SRV) return srv("combat/" + action, body);
+  const fail = (m) => { throw new Error(m); };
+  if (action === "team") { const o = btSetTeamS(save, body.ids); if (o.error) fail(o.error); persist(); return { ok: true }; }
+  if (action === "feed") { const o = btFeedS(save, body.id); if (o.error) fail(o.error); persist(); return o; }
+  if (action === "list") return { combats: [] };
+  if (action === "ia") {
+    const team = btTeamOf(save); if (team.length !== BT_TEAM) fail(`Choisis d'abord ton équipe de ${BT_TEAM} persos.`);
+    const niveau = body.niveau || "normal", ia = btIaTeam(mixPoolFor({}, CONFIG, ME), team, niveau, Math.random);
+    const id = "local" + Date.now().toString(36), bt = btCreate([{ uid: ME || "moi", nom: "Toi", team }, { uid: null, nom: `IA ${niveau}`, ia: niveau, team: ia }]);
+    BT_LOCAL.fights[id] = { id, kind: "ia", status: "combat", me: 0, bt };
+  }
+  const id = body.id || Object.keys(BT_LOCAL.fights).at(-1), f = BT_LOCAL.fights[id]; if (!f) fail("Combat introuvable.");
+  if (action === "act") {
+    if (!btValid(f.bt, 0, body.action)) fail("Action impossible.");
+    f.bt.sides[0].choix = body.action; f.bt.sides[1].choix = btIaChoice(f.bt, 1, f.bt.sides[1].ia);
+    btResolve(f.bt, Math.random);
+  }
+  if (action === "abandon") { f.bt.winner = 1; f.bt.abandon = 0; }
+  if (f.bt.winner != null && f.status !== "fini") { f.status = "fini"; f.bt.rewards = { 0: f.bt.abandon === 0 && f.bt.round < 4 ? null : btRewardS(save, f.bt.winner === 0, f.bt.sides[1].ia, f.bt.sides[0].team.map((x) => x.id)) }; persist(); }
+  return { ...f, actions: f.bt.winner == null ? btActions(f.bt, 0) : [] };
+}
+
+// --- la page Arène ---
+function btLoadList() { if (BT.listLoading) return; BT.listLoading = true; btCall("list").then((r) => { BT.list = r.combats || []; }).catch(() => { BT.list = []; }).finally(() => { BT.listLoading = false; if (view === "arene" && !param) draw(); }); }
+VIEWS.arene = () => (param ? btFightView() : btLobby());
+function btLobby() {
+  if (BT.list == null) btLoadList();
+  const team = btTeamOf(save), day = save.btDay?.day === dayKey() ? save.btDay.wins : 0, st = save.btStats || { win: 0, lose: 0 };
+  const recus = (BT.list || []).filter((c) => c.recu), enCours = (BT.list || []).filter((c) => !c.recu);
+  const friends = typeof FR !== "undefined" ? FR.list?.friends || [] : [];
+  if (SRV && typeof FR !== "undefined" && !FR.list) loadFriends().then(() => { if (view === "arene" && !param) draw(); });
+  return `<div class="wrap page bt-page">
+    ${head("Arène", "Arène", "Tes persos de collection se battent en équipe de 3. Chacun a son profil, son affinité et sa technique spéciale. Le premier qui met K.O. les 3 persos adverses gagne.")}
+    <section class="bt-team-box"><div class="bt-h"><h2>Ton équipe</h2><button class="btn" type="button" data-btteam>${team.length ? "Changer d'équipe" : "Choisir mon équipe"}</button></div>
+      ${team.length ? `<div class="bt-team">${team.map((t) => btTeamCard(t.id, t.lvl)).join("")}</div>` : `<p class="note">Choisis 3 persos différents de ta collection. Mélange les profils : un Gardien encaisse, un Assassin frappe fort, un Soutien soigne, un Mage empoisonne.</p>`}</section>
+    ${recus.length ? `<section class="sec"><h2>Défis reçus</h2>${recus.map((c) => `<div class="bt-row"><b>${esc(c.adversaire || "Un ami")}</b> te défie<span class="row"><button class="btn gold sm" type="button" data-btacc="${c.id}">Accepter</button><button class="btn sm" type="button" data-btref="${c.id}">Refuser</button></span></div>`).join("")}</section>` : ""}
+    ${enCours.length ? `<section class="sec"><h2>Combats en cours</h2>${enCours.map((c) => `<div class="bt-row"><b>${c.kind === "ia" ? "Contre l'IA" : `Contre ${esc(c.adversaire || "un ami")}`}</b>${c.status === "attente" ? '<span class="note">en attente de réponse</span>' : ""}<span class="row">${c.status === "combat" ? `<button class="btn gold sm" type="button" data-nav="arene" data-p="${c.id}">Reprendre</button>` : `<button class="btn sm" type="button" data-btref="${c.id}">Annuler</button>`}</span></div>`).join("")}</section>` : ""}
+    <section class="sec"><h2>Combattre</h2><p class="note">Victoires récompensées aujourd'hui : ${day}/${BT_DAILY_WINS} · Bilan : ${st.win} victoire${st.win > 1 ? "s" : ""}, ${st.lose} défaite${st.lose > 1 ? "s" : ""}. Chaque combat donne de l'expérience à ton équipe.</p>
+      <div class="bt-modes">${[["facile", "Facile", "Pour apprendre"], ["normal", "Normal", "L'IA place ses techniques"], ["difficile", "Difficile", "L'IA joue les affinités"]].map(([k, l, d]) => `<button class="bt-mode m-${k}" type="button" data-btia="${k}" ${team.length === BT_TEAM && !BT.busy ? "" : "disabled"}><b>${l}</b><small>${d}</small><em>+${BT_REWARD[k]} ◆</em></button>`).join("")}</div>
+      ${SRV ? `<h3>Défier un ami</h3>${friends.length ? `<div class="bt-friends">${friends.map((f) => `<button class="chip" type="button" data-btdefi="${f.uid}" ${team.length === BT_TEAM ? "" : "disabled"}>⚔ ${esc(f.name)}</button>`).join("")}</div>` : `<p class="note">Ajoute des amis (profil d'un joueur, « Ajouter en ami ») pour les défier. Victoire contre un ami : +${BT_REWARD.ami} ◆.</p>`}` : ""}</section>
+    <section class="sec"><h2>Comment ça marche</h2><div class="bt-how">
+      <div><b>Profils</b>${BT_PROFIL_IDS.map((p) => `<p>${btProfTag(p)} ${esc(BT_PROFILS[p].tech.nom)} : ${esc(BT_PROFILS[p].tech.desc)}</p>`).join("")}</div>
+      <div><b>Affinités</b><p>Feu bat Vent, Vent bat Terre, Terre bat Eau, Eau bat Feu. Ombre et Lumière se battent l'une l'autre. Affinité favorable : +25 % de dégâts.</p>
+        <b>À chaque tour</b><p>Attaque, Technique (puis recharge), Défense (dégâts divisés par 2) ou Changer de perso. Le plus rapide frappe en premier.</p>
+        <b>Niveaux</b><p>Chaque combat donne de l'expérience (niveau max ${BT_LVL_MAX}, +5 % de stats par niveau). Tu peux aussi donner un doublon d'une carte pour la faire monter.</p></div></div></section>
+  </div>`;
+}
+function btTeamCard(id, lvl) {
+  const f = btFighter(id, lvl), o = save.btLvl?.[id] || { lvl: 1, xp: 0 };
+  return `<button class="bt-tc r-${f.rar}" type="button" data-btfiche="${id}">${btArt(id)}<span class="bt-tc-b"><b>${esc(f.nom)}</b><small>Niv. ${f.lvl}${f.lvl < BT_LVL_MAX ? ` · ${o.xp}/${btXpNext(f.lvl)} xp` : " · max"}</small><span class="bt-tags">${btProfTag(f.profil)}${btAffTag(f.aff)}</span></span></button>`;
+}
+// fiche d'un combattant : stats, technique, monter de niveau avec un doublon
+function btFiche(id) {
+  const f = btFighter(id, btLvlOf(save, id)), o = own(id);
+  $("overlay").innerHTML = `<div class="sheet bt-fiche" role="dialog" aria-modal="true" aria-label="${esc(f.nom)}"><div class="sheet-h"><h2>${esc(f.nom)}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b bt-fiche-b">${btArt(id, "big r-" + f.rar)}<div>
+      <p class="note">${esc(f.titre || "")} · ${RAR[f.rar].label} · Niveau ${f.lvl}</p><div class="bt-tags">${btProfTag(f.profil)}${btAffTag(f.aff)}</div>
+      <table class="bt-stats">${[["PV", f.pvMax], ["Attaque", f.atk], ["Défense", f.def], ["Vitesse", f.vit]].map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</table>
+      <p><b>${esc(f.tech.nom)}</b> (recharge ${f.tech.cd} tours) : ${esc(f.tech.desc)}</p>
+      ${f.lvl < BT_LVL_MAX ? `<button class="btn" type="button" data-btfeed="${id}" ${o.n >= 2 ? "" : "disabled"}>Donner un doublon (+${BT_XP.feed} xp)${o.n >= 2 ? ` · ${o.n - 1} dispo` : ""}</button>` : `<p class="note">Niveau maximum.</p>`}</div></div></div>`;
+  $("overlay").hidden = false;
+}
+// choisir son équipe
+function btTeamSheet() {
+  BT.pick = BT.pick || [...(save.btTeam || [])].filter((id) => has(id));
+  const mine = ALL_CARDS.filter((c) => !c.skin && has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank || btLvlOf(save, b.id) - btLvlOf(save, a.id));
+  const list = mine.filter((c) => BT.filtre === "tous" || btKitOf(c.who).profil === BT.filtre);
+  $("overlay").innerHTML = `<div class="sheet pool-sh bt-pick" role="dialog" aria-modal="true" aria-label="Ton équipe"><div class="sheet-h"><h2>Ton équipe · ${BT.pick.length}/${BT_TEAM}</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="pool-bar"><div class="seg">${[["tous", "Tous"], ...BT_PROFIL_IDS.map((p) => [p, BT_PROFILS[p].label])].map(([k, l]) => `<button type="button" data-btfil="${k}" aria-pressed="${BT.filtre === k}">${l}</button>`).join("")}</div><span class="note">3 persos différents. Touche pour ajouter ou retirer.</span></div>
+    <div class="sheet-b"><div class="bt-grid">${list.length ? list.map((c) => { const f = btFighter(c.id, btLvlOf(save, c.id)), on = BT.pick.includes(c.id); return `<button type="button" class="bt-pc r-${c.rar} ${on ? "on" : ""}" data-btpick="${c.id}">${btArt(c.id)}<b>${esc(f.nom)}</b><small>Niv. ${f.lvl} · ${f.pvMax} PV · ${f.atk} att.</small><span class="bt-tags">${btProfTag(f.profil)}${btAffTag(f.aff)}</span>${on ? `<i class="bt-n">${BT.pick.indexOf(c.id) + 1}</i>` : ""}</button>`; }).join("") : `<p class="note">Aucune carte de ce profil dans ta collection.</p>`}</div></div>
+    <div class="voeu-ok"><button class="btn gold" type="button" data-btsave ${BT.pick.length === BT_TEAM ? "" : "disabled"}>Valider l'équipe</button></div></div>`;
+  $("overlay").hidden = false;
+}
+
+// --- le combat ---
+async function btOpen(id) {
+  clearTimeout(BT.timer);
+  try { const r = await btCall("state", { id }); BT.fight = r; } catch (e) { BT.fight = { error: e.message }; }
+  if (view === "arene" && param === id) draw();
+  btSchedule();
+}
+function btSchedule() {
+  clearTimeout(BT.timer); const f = BT.fight;
+  if (!SRV || !f || f.error || f.kind !== "ami" || f.status === "fini" || view !== "arene" || param !== f.id) return;
+  BT.timer = setTimeout(() => btOpen(f.id), document.hidden ? 10000 : 2000);
+}
+function btFightView() {
+  const F = BT.fight;
+  if (!F || F.id !== param) { if (!SRV && BT_LOCAL.fights[param]) BT.fight = { ...BT_LOCAL.fights[param], actions: btActions(BT_LOCAL.fights[param].bt, 0) }; else { btOpen(param); return `<div class="wrap page">${empty("Chargement du combat…")}</div>`; } }
+  if (BT.fight.error) return `<div class="wrap page">${empty(esc(BT.fight.error), `<button class="btn" type="button" data-nav="arene">Retour à l'Arène</button>`)}</div>`;
+  if (BT.fight.status === "attente") return `<div class="wrap page">${empty("En attente de la réponse de ton ami…", `<button class="btn" type="button" data-nav="arene">Retour à l'Arène</button>`)}</div>`;
+  const b = BT.fight.bt, me = BT.fight.me, op = 1 - me, A = b.sides[me], O = b.sides[op], fa = A.team[A.active], fo = O.team[O.active];
+  const acts = BT.fight.actions || [], last = b.log.at(-1), waiting = !acts.length && b.winner == null;
+  setTimeout(btAfterRender, 0);
+  return `<div class="bt-fight">
+    <div class="bt-top">${btBanner(A, "me")}<b class="bt-vs">VS</b>${btBanner(O, "op")}</div>
+    <div class="bt-stage">
+      ${btFighterBox(fo, "op")}${btFighterBox(fa, "me")}
+      <div class="bt-fx" id="bt-fx"></div>
+    </div>
+    <div class="bt-log" id="bt-log">${btLogHTML(last, me)}</div>
+    <div class="bt-acts">${b.winner != null ? "" : waiting ? `<p class="note">${BT.fight.kind === "ami" ? `En attente de ${esc(O.nom)}…` : "…"}</p>` : btActsHTML(fa, acts)}
+      <button class="btn sm bt-quit" type="button" data-btquit>${b.winner != null ? "Retour à l'Arène" : "Abandonner"}</button></div>
+    ${b.winner != null ? btEndHTML(b, me) : ""}
+    ${BT.intro === BT.fight.id ? btIntroHTML(A, O) : ""}
+  </div>`;
+}
+const btBanner = (S, cls) => `<div class="bt-ban ${cls}"><b>${esc(S.nom)}</b><span>${S.team.map((f, i) => `<i class="${f.ko ? "ko" : ""} ${i === S.active ? "on" : ""}" title="${esc(f.nom)}">${btArt(f.id)}</i>`).join("")}</span></div>`;
+function btFighterBox(f, cls) {
+  const pct = Math.max(0, f.pv / f.pvMax * 100), col = pct > 50 ? "#4fd18b" : pct > 25 ? "#f5c518" : "#ff4d5e";
+  return `<div class="bt-f ${cls} ${f.ko ? "ko" : ""}" data-btf="${cls}">
+    <div class="bt-f-info"><div class="bt-f-h"><b>${esc(f.nom)}</b><small>Niv. ${f.lvl}</small></div>
+      <div class="bt-hp"><i style="width:${pct}%;background:${col}"></i>${f.bouclier ? `<em style="width:${Math.min(100, f.bouclier / f.pvMax * 100)}%"></em>` : ""}</div>
+      <div class="bt-f-s"><span>${f.pv} / ${f.pvMax}</span><span class="bt-st">${f.bouclier ? `<i title="Bouclier ${f.bouclier}">🛡${f.bouclier}</i>` : ""}${f.poison ? `<i title="Poison : -${f.poison.n} PV pendant ${f.poison.tours} tour(s)">☠${f.poison.tours}</i>` : ""}${f.garde ? '<i title="En garde">✋</i>' : ""}${f.cd > 0 ? `<i title="Technique en recharge">⏳${f.cd}</i>` : '<i title="Technique prête" class="ok">✦</i>'}</span></div>
+      <div class="bt-tags">${btProfTag(f.profil)}${btAffTag(f.aff)}</div></div>
+    <button class="bt-f-art r-${f.rar}" type="button" data-btinfo="${cls}">${btArt(f.id)}</button></div>`;
+}
+function btActsHTML(f, acts) {
+  const has1 = (t) => acts.some((a) => a.type === t), sw = acts.filter((a) => a.type === "changer"), team = BT.fight.bt.sides[BT.fight.me].team;
+  return `<button class="bt-a atk" type="button" data-bta='{"type":"attaque"}'><i>⚔</i><b>Attaque</b><small>${f.atk} att. · toujours prête</small></button>
+    <button class="bt-a tech k-${f.tech.kind}" type="button" data-bta='{"type":"tech"}' ${has1("tech") ? "" : "disabled"}><i>${BT_KANJI[f.profil]}</i><b>${esc(f.tech.nom)}</b><small>${has1("tech") ? esc(f.tech.desc) : `Recharge : ${f.cd} tour${f.cd > 1 ? "s" : ""}`}</small></button>
+    <button class="bt-a def" type="button" data-bta='{"type":"defense"}'><i>✋</i><b>Défense</b><small>Dégâts reçus ÷ 2 ce tour</small></button>
+    ${sw.length ? `<div class="bt-sw"><small>Changer de perso</small>${sw.map((a) => `<button class="bt-a sw" type="button" data-bta='{"type":"changer","to":${a.to}}'>${btArt(team[a.to].id)}<b>${esc(team[a.to].nom)}</b><small>${team[a.to].pv}/${team[a.to].pvMax} PV</small></button>`).join("")}</div>` : ""}`;
+}
+// le dernier tour en phrases
+function btLogHTML(L, me) {
+  if (!L || !L.ev?.length) return "";
+  const who = (side) => (side === me ? "Ton perso" : "L'adversaire"), nm = (side, id) => esc(BT.fight.bt.sides[side].team.find((f) => f.id === id)?.nom || "");
+  return `<b>Tour ${L.round || 1}</b> ` + L.ev.map((e) => {
+    if (e.t === "debut") return "Le combat commence !";
+    if (e.t === "attaque" || e.t === "tech") return `${nm(e.side, e.id)} ${e.t === "tech" ? `lance <b>${esc(e.nom)}</b>` : "attaque"} : <span class="${e.side === me ? "good" : "bad"}">${e.n ? "-" + e.n : "bloqué"}</span>${e.adv === "fort" ? " (super efficace)" : e.adv === "faible" ? " (peu efficace)" : ""}.`;
+    if (e.t === "garde") return `${nm(e.side, e.id)} se met en garde.`;
+    if (e.t === "entre") return `${nm(e.side, e.id)} entre en jeu.`;
+    if (e.t === "soin") return `${nm(e.side, e.id)} récupère ${e.n} PV.`;
+    if (e.t === "bouclier") return `${nm(e.side, e.id)} se protège (bouclier ${e.n}).`;
+    if (e.t === "bouclier_absorbe") return `Le bouclier absorbe ${e.n}.`;
+    if (e.t === "poison_pose") return `${nm(e.side, e.id)} est empoisonné.`;
+    if (e.t === "poison") return `Le poison inflige ${e.n} à ${nm(e.side, e.id)}.`;
+    if (e.t === "ko") return `<b>${nm(e.side, e.id)} est K.O. !</b>`;
+    return "";
+  }).filter(Boolean).join(" ");
+}
+const btIntroHTML = (A, O) => `<div class="bt-intro" id="bt-intro"><div class="bt-intro-s me">${A.team.map((f) => btArt(f.id, "r-" + f.rar)).join("")}<b>${esc(A.nom)}</b></div><i>VS</i><div class="bt-intro-s op">${O.team.map((f) => btArt(f.id, "r-" + f.rar)).join("")}<b>${esc(O.nom)}</b></div></div>`;
+function btEndHTML(b, me) {
+  const won = b.winner === me, draw0 = b.winner === -1, r = b.rewards?.[me];
+  return `<div class="bt-end ${won ? "win" : "lose"}"><div class="bt-end-b"><h2>${draw0 ? "Égalité" : won ? "Victoire" : "Défaite"}</h2>
+    <div class="bt-end-team">${b.sides[me].team.map((f) => btArt(f.id, "r-" + f.rar)).join("")}</div>
+    ${b.rewards?.sans ? `<p class="note">Abandon trop rapide : pas de gains.</p>` : r ? `<p>${r.chakra ? `+${r.chakra} ◆` : won ? "Plus de gains d'essence aujourd'hui (5 victoires)." : "Pas d'essence pour une défaite."}</p><p class="note">${r.ups.map((u) => `${esc(byId[u.id] ? PEOPLE[byId[u.id].who].name : u.id)} : niveau ${u.lvl}${u.up ? " ⬆" : ""}`).join(" · ")}</p>` : ""}
+    <div class="row"><button class="btn gold" type="button" data-nav="arene">Retour à l'Arène</button>${BT.fight.kind === "ia" ? `<button class="btn" type="button" data-btia="${b.sides[1 - me].ia}">Rejouer</button>` : ""}</div></div></div>`;
+}
+// animations du dernier tour (une seule fois par tour)
+function btAfterRender() {
+  const b = BT.fight?.bt; if (!b) return;
+  const intro = $("bt-intro"); if (intro) setTimeout(() => { intro.classList.add("out"); setTimeout(() => { if (BT.intro === BT.fight?.id) BT.intro = null; intro.remove(); }, 500); }, 1600);
+  const key = BT.fight.id + ":" + b.round; if (BT.shown === key || reduced) { BT.shown = key; return; } BT.shown = key;
+  const L = b.log.at(-1), me = BT.fight.me; if (!L) return;
+  let t = 0;
+  for (const e of L.ev) {
+    const cls = e.side === me ? "me" : "op", tgt = e.side === me ? "op" : "me";
+    if (e.t === "attaque" || e.t === "tech") {
+      setTimeout(() => { const el = document.querySelector(`[data-btf="${cls}"]`); el?.classList.add("lunge"); setTimeout(() => el?.classList.remove("lunge"), 450);
+        const fx = $("bt-fx"); if (fx) { const s = document.createElement("i"); s.className = `bt-slash ${e.t === "tech" ? "k-" + e.kind : ""} to-${tgt}`; fx.appendChild(s); setTimeout(() => s.remove(), 800); }
+        const hit = document.querySelector(`[data-btf="${tgt}"]`); if (hit) { hit.classList.add("hit"); setTimeout(() => hit.classList.remove("hit"), 400); const n = document.createElement("b"); n.className = "bt-dmg"; n.textContent = e.n ? "-" + e.n : "Bloqué"; hit.appendChild(n); setTimeout(() => n.remove(), 1100); } }, t);
+      t += 650;
+    } else if (e.t === "soin" || e.t === "bouclier") {
+      setTimeout(() => { const el = document.querySelector(`[data-btf="${cls}"]`); if (el) { const n = document.createElement("b"); n.className = "bt-dmg heal"; n.textContent = (e.t === "soin" ? "+" : "🛡") + e.n; el.appendChild(n); setTimeout(() => n.remove(), 1100); } }, t);
+      t += 300;
+    }
+  }
+}
+async function btDo(fn) {
+  if (BT.busy) return; BT.busy = true;
+  try { await fn(); } catch (e) { toast(e.message); }
+  BT.busy = false; draw();
+}
+// clics de l'Arène : traités en premier (capture), sinon la fenêtre redessinée passerait pour un clic « en dehors » et se fermerait
+document.addEventListener("click", (e) => {
+  const t = e.target, mine = t.closest("[data-btteam],[data-btfil],[data-btpick],[data-btsave],[data-btfiche],[data-btfeed],[data-btia],[data-btdefi],[data-btacc],[data-btref],[data-bta],[data-btinfo],[data-btquit]");
+  if (!mine) return;
+  e.stopPropagation();
+  if (t.closest("[data-btteam]")) { BT.pick = null; return btTeamSheet(); }
+  const fil = t.closest("[data-btfil]"); if (fil) { BT.filtre = fil.dataset.btfil; return btTeamSheet(); }
+  const pk = t.closest("[data-btpick]"); if (pk) {
+    const id = pk.dataset.btpick, who = byId[id].who;
+    if (BT.pick.includes(id)) BT.pick = BT.pick.filter((x) => x !== id);
+    else if (BT.pick.some((x) => byId[x].who === who)) toast("Ce perso est déjà dans ton équipe.");
+    else if (BT.pick.length >= BT_TEAM) toast(`Ton équipe est complète (${BT_TEAM}) : retire d'abord un perso.`);
+    else BT.pick.push(id);
+    return btTeamSheet();
+  }
+  if (t.closest("[data-btsave]")) return btDo(async () => { await btCall("team", { ids: BT.pick }); $("overlay").hidden = true; toast("Équipe enregistrée."); });
+  const fi = t.closest("[data-btfiche]"); if (fi) return btFiche(fi.dataset.btfiche);
+  const fd = t.closest("[data-btfeed]"); if (fd) return btDo(async () => { const r = await btCall("feed", { id: fd.dataset.btfeed }); toast(r.up ? `Niveau ${r.lvl} !` : "Expérience gagnée."); btFiche(fd.dataset.btfeed); });
+  const ia = t.closest("[data-btia]"); if (ia) return btDo(async () => { const r = await btCall("ia", { niveau: ia.dataset.btia }); BT.fight = r; BT.intro = r.id; BT.shown = r.id + ":1"; nav("arene", r.id); });
+  const df = t.closest("[data-btdefi]"); if (df) return btDo(async () => { await btCall("defi", { uid: df.dataset.btdefi }); BT.list = null; toast("Défi envoyé : ton ami doit l'accepter."); });
+  const ac = t.closest("[data-btacc]"); if (ac) return btDo(async () => { const r = await btCall("accepter", { id: ac.dataset.btacc }); BT.fight = r; BT.intro = r.id; BT.shown = r.id + ":1"; BT.list = null; nav("arene", r.id); });
+  const rf = t.closest("[data-btref]"); if (rf) return btDo(async () => { await btCall("refuser", { id: rf.dataset.btref }); BT.list = null; });
+  const a = t.closest("[data-bta]"); if (a && BT.fight) return btDo(async () => { BT.fight = await btCall("act", { id: BT.fight.id, action: JSON.parse(a.dataset.bta) }); btSchedule(); });
+  const inf = t.closest("[data-btinfo]"); if (inf && BT.fight?.bt) { const b = BT.fight.bt, s = inf.dataset.btinfo === "me" ? BT.fight.me : 1 - BT.fight.me, f = b.sides[s].team[b.sides[s].active]; return toast(`${f.nom} · ${BT_PROFILS[f.profil].label} ${BT_AFFINITES[f.aff].label} · ${f.atk} att. · ${f.def} déf. · ${f.vit} vit. · ${f.tech.nom} : ${f.tech.desc}`); }
+  if (t.closest("[data-btquit]")) {
+    const b = BT.fight?.bt; if (!b || b.winner != null) { BT.list = null; return nav("arene"); }
+    if (!confirm("Abandonner ce combat ?")) return;
+    return btDo(async () => { BT.fight = await btCall("abandon", { id: BT.fight.id }); });
+  }
+}, true);
 
 // ===== Parrainage : lien perso, vidéos de Billy, paliers et classement (événement de 2 semaines) =====
 ROUTES.push("parrainage");

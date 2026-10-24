@@ -116,7 +116,7 @@ const names = async (env, ids) => {
 const SALON_MAX = 40, SALON_LEN = 120, SALON_GAP = 2000, SALON_EMOTES = ["salut", "haha", "respect", "defi", "grr", "quoi", "ouin", "pardon"];
 async function viewOf(env, g, uid) {
   const me = g.state.players.some((p) => p.id === uid) ? uid : null;
-  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, partage: !g.state.config.persoLibre, invite: g.invite || null, duel: g.duel || null, refuse: !!g.refuse, ferme: !!g.ferme, prets: g.prets || {}, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me), salon: (g.salon || []).slice(-SALON_MAX) };
+  return { gid: g.id, nom: g.nom, public: g.public, createur: g.createur, spectateur: !me, partage: !g.state.config.persoLibre, invite: g.invite || null, duel: g.duel || null, refuse: !!g.refuse, ferme: !!g.ferme, prets: g.prets || {}, noms: await names(env, g.state.players.map((p) => p.id)), vue: viewFor(g.state, me ?? uid), salon: (g.salon || []).slice(-SALON_MAX) };
 }
 // cartes de collection apportables : celles du joueur, avec leur branche (rien d'autre du catalogue n'est envoyé)
 // proposition : branche donnée à la création (carte, puis perso créé depuis l'app), sinon la table proposée

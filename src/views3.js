@@ -381,6 +381,8 @@ function pfDecoSheet() {
 }
 document.addEventListener("click", async (e) => {
   if (e.target.closest("[data-pf-deco]")) return pfDecoSheet();
+  // crayon sur l'avatar du menu : mon profil, avec la fenêtre d'équipement ouverte
+  if (e.target.closest("[data-acc-edit]")) { toggleMenu(false); nav("profil", SRV || ME ? ME : "moi"); return setTimeout(pfDecoSheet, 250); }
   const o = e.target.closest("[data-pfo]");
   if (o) { const id = o.dataset.pfo || null; try { const r = await zCall("avorn/equip", { id }, () => equipAvOrnS(save, id)); if (r?.state) Object.assign(save, r.state); toast(id ? `${COS_BY_ID[id].name} : sur ton avatar.` : "Ornement retiré."); header(); draw(); if ($("overlay").dataset.zit) zOpenItem($("overlay").dataset.zit); else pfDecoSheet(); } catch (err) { toast(err.message); } return; }
   const t = e.target.closest("[data-pfd]"); if (!t) return;

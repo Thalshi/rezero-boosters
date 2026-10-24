@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — Menu : crayon sur l'avatar (28e mise en ligne)
+- Un crayon doré sur l'avatar du menu ouvre ton profil avec « Équiper mon avatar » ; toucher ton nom ouvre ton profil public.
+- « Mon profil public » retiré du bloc du bas, « Se déconnecter » reste en bas (choix de Reichi).
+
 ## 2026-10-24 — Créateur : compteur de raretés par perso (27e mise en ligne)
 - Persos et cartes : sous chaque tête, le nombre de cartes par rareté (M, L, E, R, U, C) et les skins à part ; en titre de chaque épisode, le total par rareté. Pour repérer les persos à étaler.
 

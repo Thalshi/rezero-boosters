@@ -9269,7 +9269,7 @@ const Arena = (() => {
   let inspKey = "";
   function renderInsp() {
     const box = $a("insp"), v = CF.table?.vue, c = st?.sel ? v?.main?.find((x) => x.uid === st.sel) : null;
-    if (!box) return; if (!c) { inspKey = ""; box.hidden = true; return; }
+    if (!box) return; if (!c) { inspKey = ""; box.hidden = true; box.innerHTML = ""; return; }
     const ps = plays(c.uid), free = ps.find((a) => !a.cible), tg = [...new Set(ps.filter((a) => a.cible).map((a) => a.cible))], fin = finAct(), dm = st.discMode && fin?.aDefausser > 0, key = c.uid + "|" + ps.length + "|" + tg.join(",") + "|" + dm;
     if (key === inspKey && !box.hidden) return; inspKey = key;
     const d = defOf(c), big = cardEl(c); big.classList.add("ar-insp-card"); big.removeAttribute("data-cu");

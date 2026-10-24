@@ -660,6 +660,37 @@ function qgDoneS(s, cfg, uid) {
   const got = who.filter((w) => [...CARDS, ...SKINS].some((c) => c.who === w && hasCard(s, c.id))).length;
   return { ok: who.length > 0 && got === who.length, got, total: who.length };
 }
+// ===== Parrainage (événement, décidé avec Reichi le 24/10) =====
+// un filleul = un nouveau compte arrivé par ton lien, validé quand il a ouvert REF_MIN_OPENED boosters
+const REF_START = 0;                   // pas lancé : le dev le lance (Gestion › Dev) le jour de la présentation au QG
+const REF_END = 0;
+const REF_MIN_OPENED = 5;
+const REF_NEW_MS = 48 * 3600e3;          // le lien ne compte que pour un compte créé il y a moins de 48 h
+const REF_GAIN = { boosters: 2 };        // pour le parrain et pour le filleul, à chaque filleul validé
+const REF_TIERS = [
+  { n: 3,  label: "Un coffre (2 boosters)",                     reward: { boosters: 2 } },
+  { n: 6,  label: "3 invocations gratuites",                    reward: { summons: 3 } },
+  { n: 10, label: "Aura écarlate (Mythique) et titre Recruteur", reward: { cos: "aura-ecarlate" } },
+  { n: 20, label: "Une carte Légendaire garantie",              reward: { legend: 1 } },
+];
+const REF_PRIZES = [
+  { from: 1, to: 3,  label: "Une carte Légendaire garantie", reward: { legend: 1 } },
+  { from: 4, to: 10, label: "Un coffre (2 boosters)",        reward: { boosters: 2 } },
+];
+const REF_VIDEOS = [{ ep: 1, url: "https://www.youtube.com/watch?v=mFQ4USNq0k8" }];
+const refOpenAt = (now = Date.now()) => now >= REF_START && now <= REF_END;
+// donne une récompense de parrainage : boosters, invocations, objet exclusif, Légendaire au hasard (parmi les persos sortis)
+function refRewardS(s, r, rng, now, legends = []) {
+  giveRewardS(s, r);
+  const out = [];
+  if (r.cos) {
+    const cos = cosOf(s);
+    if (ownsCosS(s, r.cos)) { s.freeSum = (s.freeSum || 0) + 5; out.push("5 invocations gratuites (objet déjà possédé)"); }
+    else { let i; do i = (now.toString(36) + Math.floor(rng() * 1e9).toString(36)).slice(-12); while (cos.inst.some((x) => x.i === i)); cos.inst.push({ i, c: r.cos, t: now }); out.push(COS_BY_ID[r.cos]?.name || r.cos); }
+  }
+  if (r.legend && legends.length) for (let k = 0; k < r.legend; k++) { const c = legends[Math.floor(rng() * legends.length)]; addCardS(s, c.id, false, now); out.push(`${PEOPLE[c.who].name} · ${c.title}`); }
+  return out;
+}
 // carte vœu : une par mois, choisie parmi les cartes déjà sorties
 const monthKey = (ts = Date.now()) => dayKey(ts).slice(0, 7);
 function setVoeuS(s, id, cfg, uid, now = Date.now()) {
@@ -1214,6 +1245,7 @@ const defileCanVote = (s, member, now = Date.now()) => !!member && s.opened >= D
 const TITLE_CATS = { ouverture: "Ouvertures", invocation: "Invocations", confrontation: "Confrontation", defile: "Défilé", collection: "Collection", oracle: "Prédictions" };
 const rarCount = (list, test) => list.filter((x) => test(RANKS.indexOf(x.rar))).length;
 const TITLES = [
+  { id: "c-recruteur", name: "Recruteur", kanji: "招", cat: "collection", rar: "l", desc: "Parrainer 10 joueurs pendant un événement", val: (s) => s.counts?.recruit || 0, goal: 10 },
   { id: "o-2l", name: "Double couronne", kanji: "冠", cat: "ouverture", rar: "l", desc: "Deux Légendaires dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 4) >= 2 },
   { id: "o-2m", name: "Cœurs jumeaux", kanji: "双", cat: "ouverture", rar: "m", desc: "Deux Mythiques dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 5) >= 2 },
   { id: "o-lm", name: "Alignement des astres", kanji: "星", cat: "ouverture", rar: "m", desc: "Une Légendaire et une Mythique dans la même ouverture", hit: (o) => rarCount(o.open, (r) => r === 4) >= 1 && rarCount(o.open, (r) => r === 5) >= 1 },
@@ -1297,4 +1329,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re : LOL · Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, VOEU_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, SUMMON_FREE_MAX, SUMMON_FREE_REGEN, summonRegenS, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, qgDoneS, monthKey, setVoeuS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, ownsCosS, equipAvOrnS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, COS_RECYCLE, cosDupesS, recycleCosS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, VOEU_CHANCE, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, SUMMON_FREE_MAX, SUMMON_FREE_REGEN, summonRegenS, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, qgDoneS, REF_START, REF_END, REF_MIN_OPENED, REF_NEW_MS, REF_GAIN, REF_TIERS, REF_PRIZES, REF_VIDEOS, refOpenAt, refRewardS, monthKey, setVoeuS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, ownsCosS, equipAvOrnS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, COS_RECYCLE, cosDupesS, recycleCosS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

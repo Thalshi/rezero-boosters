@@ -105,7 +105,7 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légend
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
-  ["missions", "missions", "Missions", toClaim()], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
+  ["missions", "missions", "Missions", toClaim()], ["parrainage", "coffre", "Parrainage"], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
   ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;

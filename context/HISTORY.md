@@ -5,6 +5,13 @@
 
 ---
 
+## 2026-10-24 — Parrainage, remise à zéro complète, missions cliquables (36e mise en ligne)
+- Parrainage (menu « Parrainage ») : lien perso `/?ref=…`, accueil avec la vidéo de Billy, filleul validé après 5 boosters (compte de moins de 48 h), +2 boosters pour les deux, paliers 3 (coffre) / 6 (3 invocations) / 10 (Aura écarlate + titre Recruteur) / 20 (Légendaire garantie), classement (1er à 3e : Légendaire garantie, 4e à 10e : coffre), prix donnés à la fin.
+- L'événement ne démarre que lancé à la main : Gestion › Dev › « Lancer le parrainage (2 semaines) ».
+- Gestion › Dev › « Tout remettre à zéro… » (dev seulement, il faut écrire TOUT EFFACER) : efface collections, essence, marché, échanges, chat, amis, messages, Défilé, Confrontation, parrainage de tous les joueurs ; garde comptes, épisodes, créations, prédictions, avis et bugs ; plus de reprise d'ancienne partie. Option : lancer le parrainage dans la foulée.
+- Missions : toucher une mission en cours t'emmène où elle se fait (boosters, collection, envies, chat, amis, marché, prédictions, wiki…).
+- Reste à fournir : lien de la vidéo de l'épisode 2 (`REF_VIDEOS` dans src/game.js).
+
 ## 2026-10-24 — Vente ouverte aux non-membres côté navigateur (35e mise en ligne)
 - Le navigateur demandait encore « Connecte-toi avec Discord pour vendre » aux joueurs connectés non membres du QG (reste de l'ancienne règle) : tout est ouvert dès qu'on est connecté, le serveur vérifie lui-même.
 

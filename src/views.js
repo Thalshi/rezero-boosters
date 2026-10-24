@@ -22,10 +22,7 @@ addEventListener("hashchange", route);
 const fmtN = (n) => (+n || 0).toLocaleString("fr-FR");
 const LETTER = { c: "C", pc: "U", r: "R", e: "E", l: "L", m: "M" };
 const noOf = (id) => `#${String(CATALOG_NO[id] || 0).padStart(4, "0")}/${String(ALL_CARDS.length).padStart(4, "0")}`;
-const hashOf = (s) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
 const hueOf = (who) => hashOf(who) % 360;
-const POW = { c: [52, 9], pc: [64, 9], r: [76, 9], e: [86, 7], l: [93, 5], m: [97, 3] }, AURA = { c: [38, 6], pc: [44, 6], r: [51, 6], e: [58, 7], l: [66, 7], m: [80, 7] };
-const statsOf = (c) => { const h = hashOf(c.id); return [POW[c.rar][0] + (h % POW[c.rar][1]), AURA[c.rar][0] + ((h >> 5) % AURA[c.rar][1])]; };
 const imgKey = (c) => (c.img && (ART[c.img] || PHOTO[c.img]) ? c.img : ART[c.who] ? c.who : PHOTO[c.who] ? c.who : null);
 function artIn(c) {
   const k = imgKey(c);
@@ -105,7 +102,7 @@ const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légend
 let menuOpen = false;
 const MENU = () => [
   ["boosters", "boosters", "Boosters"], ["collection", "collection", "Collection"], ["market", "market", "Marché", pendingTrades().length],
-  ["missions", "missions", "Missions", toClaim()], ["parrainage", "coffre", "Parrainage"], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
+  ["missions", "missions", "Missions", toClaim()], ["parrainage", "coffre", "Parrainage"], ...(featureOn(CONFIG, "defile") ? [["defile", "defile", "Défilé"]] : []), ...(featureOn(CONFIG, "confrontation") ? [["confront", "confront", "Confrontation"]] : []), ["arene", "duel", "Arène"], ...(featureOn(CONFIG, "boutique") ? [["boutique", "boutique", "Boutique"]] : []), ...(featureOn(CONFIG, "sanctuaire") ? [["sanctuaire", "sanctuaire", "Sanctuaire"]] : []), ["atelier", "atelier", "Atelier"], ["pred", "pred", "Prédictions", openPredCount(), "gold"], ["wiki", "wiki", "Wiki"],
   ["classement", "classement", "Classement"], ["avis", "avis", "Avis et bugs"], ...(IS_ADMIN || IS_DEV ? [[gestHome(), "admin", "Gestion"]] : []),
 ];
 const openPredCount = () => pred.questions.filter((q) => q.status === "open" && pred.mine[q.id] == null).length;

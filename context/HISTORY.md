@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-10-24 — Arène : combats 3 contre 3 (38e mise en ligne)
+- Nouveau mode « Arène » (menu) : équipe de 3 persos de sa collection, combat au tour par tour contre l'IA (facile, normal, difficile) ou un ami en direct (défi, il accepte avec son équipe, 1 min par tour).
+- Chaque carte = un combattant : PV, attaque, défense, vitesse tirés de sa rareté et de ses POW / AURA ; 4 profils (Assassin, Mage, Gardien, Soutien) avec leur technique ; 6 affinités (Feu > Vent > Terre > Eau > Feu, Ombre <> Lumière, +25 %). Actions : Attaque, Technique (recharge), Défense, Changer.
+- Gains : 10 / 20 / 35 ◆ contre l'IA, 25 ◆ contre un ami, 5 victoires récompensées par jour ; expérience et niveaux (1 à 10, +5 % de stats par niveau), un doublon donné = +60 xp. Abandon avant le 4e tour : pas de gains.
+- Équilibré sur 3 000 combats simulés : chaque profil gagne 46 à 53 % du temps, ~12 tours par combat.
+- Créateur : bloc « Arène » sur chaque perso (profil, affinité, nom de la technique ; vide = automatique).
+- Sur claude.ai (sans serveur) : combats contre l'IA joués dans la page.
+
 ## 2026-10-24 — Confrontation : « Rejoindre » par lien (37e mise en ligne)
 - « Partager le salon » › « Envoyer au comptoir… » : le comptoir s'ouvre avec le message prêt, on l'envoie au QG ou à un ami en privé (onglet Amis), ou on annule. Plus d'envoi direct au QG.
 - « Quitter le salon » ramène à la liste des salons (avant, on restait dessus en spectateur) ; « Fermer » aussi directement dans la liste pour les salons qu'on a créés (deuxième toucher pour confirmer).

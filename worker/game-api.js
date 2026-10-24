@@ -6,6 +6,7 @@ import { creationsRoute, ensureCreations } from "./creations-api.js";
 import { labRoute } from "./lab-api.js";
 import { defileRoute } from "./defile-api.js";
 import { confrontRoute, confrontLocked } from "./confront-api.js";
+import { combatRoute, ensureCombatSchema } from "./combat-api.js";
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const fail = (status, message, extra = {}) => json({ error: message, ...extra }, status);
@@ -449,6 +450,8 @@ export async function gameRoute(req, env, user, path) {
     if (labRes) return labRes;
     const defRes = await defileRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
     if (defRes) return defRes;
+    const btRes = await combatRoute(env, user, path, body, { mutate, notify, loadRow, cfg, publishStats });
+    if (btRes) return btRes;
     const cfRes = await confrontRoute(env, user, path, body, { mutate, notify, loadRow, cfg });
     if (cfRes) return cfRes;
 

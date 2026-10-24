@@ -2,6 +2,7 @@
 // qui reproduit ce que la version claude.ai fait avec ses capacités `db` et `user`.
 // Le jeu lui-même (tirages, essence, marché, échanges) est décidé par game-api.js.
 import { ensureGameSchema, gameRoute, afterAdminWrite, stampPredq } from "./game-api.js";
+import { ensureCombatSchema } from "./combat-api.js";
 import { SYNC_SCHEMA, bumpRev, revKeyOf } from "./sync.js";
 
 const SESSION_DAYS = 30;
@@ -19,6 +20,7 @@ async function ensureSchema(db) {
     db.prepare("CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, uid TEXT NOT NULL, expires INTEGER NOT NULL)"),
   ]);
   await ensureGameSchema(db);
+  await ensureCombatSchema(db);
   // compteurs de synchro (ajouts seulement) : un échec ici ne doit jamais bloquer le site
   try { await db.batch(SYNC_SCHEMA.map((sql) => db.prepare(sql))); } catch (e) { console.error("sync_rev : schéma non créé", e?.message); }
   schemaReady = true;

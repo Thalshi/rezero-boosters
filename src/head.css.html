@@ -410,6 +410,15 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
   .bt-acts { grid-template-columns: 1fr 1fr; } .bt-sw, .bt-quit { grid-column: 1 / -1; } .bt-intro-s .bt-art { width: 64px; } .bt-intro > i { font-size: 54px; }
 }
 .cr-bt { margin: 14px 0 0; padding: 12px 14px; border-radius: 12px; border: 1px solid #b072ff55; background: #b072ff0d; } .cr-bt legend { padding: 0 6px; font: 700 13px var(--body); color: #c9a0ff; }
+/* Arène en 3D : la scène derrière l'écran du combat */
+.bt3d-host { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 50% 30%, #2a1640, #0a0612 75%); }
+.bt3d-host .bt-canvas { width: 100%; height: 100%; display: block; }
+body.bt3d .bt-fight { background: none; position: relative; z-index: 1; }
+body.bt3d .bt-f-art, body.bt3d .bt-slash { display: none; }
+body.bt3d .bt-stage { min-height: 46vh; align-items: start; }
+body.bt3d .bt-f { align-self: start; } body.bt3d .bt-f.me { justify-items: start; } body.bt3d .bt-f.op { justify-items: end; }
+body.bt3d .bt-dmg { top: 120%; }
+body.bt3d .w3d { visibility: hidden; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }

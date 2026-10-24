@@ -164,11 +164,17 @@ function btEndHTML(b, me) {
     <div class="row"><button class="btn gold" type="button" data-nav="arene">Retour à l'Arène</button>${BT.fight.kind === "ia" ? `<button class="btn" type="button" data-btia="${b.sides[1 - me].ia}">Rejouer</button>` : ""}</div></div></div>`;
 }
 // animations du dernier tour (une seule fois par tour)
+// scène 3D : un hôte fixe hors de la page (la page est redessinée à chaque action, la scène reste)
+function bt3dHost() { let h = $("bt3d-host"); if (!h) { h = document.createElement("div"); h.id = "bt3d-host"; h.className = "bt3d-host"; document.body.appendChild(h); } return h; }
+function bt3dOff() { if (typeof Bt3D !== "undefined" && Bt3D.on) Bt3D.unmount(); document.body.classList.remove("bt3d"); const h = $("bt3d-host"); if (h) h.hidden = true; }
+addEventListener("hashchange", () => { if (!/^#\/arene\/./.test(location.hash)) bt3dOff(); });
 function btAfterRender() {
   const b = BT.fight?.bt; if (!b) return;
+  if (typeof Bt3D !== "undefined") { const h = bt3dHost(); h.hidden = false; Bt3D.mount(h, b, BT.fight.me).then((ok) => { document.body.classList.toggle("bt3d", !!ok); if (!ok) h.hidden = true; }); }
   const intro = $("bt-intro"); if (intro) setTimeout(() => { intro.classList.add("out"); setTimeout(() => { if (BT.intro === BT.fight?.id) BT.intro = null; intro.remove(); }, 500); }, 1600);
   const key = BT.fight.id + ":" + b.round; if (BT.shown === key || reduced) { BT.shown = key; return; } BT.shown = key;
   const L = b.log.at(-1), me = BT.fight.me; if (!L) return;
+  if (typeof Bt3D !== "undefined" && Bt3D.on) Bt3D.play(L.ev, me, b);
   let t = 0;
   for (const e of L.ev) {
     const cls = e.side === me ? "me" : "op", tgt = e.side === me ? "op" : "me";

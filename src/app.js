@@ -716,7 +716,7 @@ function goTo(go) {
 
 // --- appel régulier au serveur ---
 let pulseT = null, pulsing = false;
-function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open && !document.hidden ? 3000 : window.__asleep?.() || document.hidden ? 5 * 60e3 : 30000); }
+function schedulePulse() { clearTimeout(pulseT); if (SRV) pulseT = setTimeout(pulse, chat.open && !document.hidden ? 3000 : window.__asleep?.() || document.hidden ? 5 * 60e3 : 10000); }
 addEventListener("rz-wake", () => { if (SRV && !pulsing) { clearTimeout(pulseT); pulse(); } });
 async function pulse() {
   if (!SRV || pulsing) return;

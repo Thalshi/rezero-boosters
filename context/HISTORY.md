@@ -11,6 +11,7 @@
 - Gestion › Dev › « Tout remettre à zéro… » (dev seulement, il faut écrire TOUT EFFACER) : efface collections, essence, marché, échanges, chat, amis, messages, Défilé, Confrontation, parrainage de tous les joueurs ; garde comptes, épisodes, créations, prédictions, avis et bugs ; plus de reprise d'ancienne partie. Option : lancer le parrainage dans la foulée.
 - Missions : toucher une mission en cours t'emmène où elle se fait (boosters, collection, envies, chat, amis, marché, prédictions, wiki…).
 - Comptoir : toucher l'avatar de quelqu'un ouvre son profil.
+- Notifications plus rapides : vérification toutes les 10 s quand on est sur la page (avant 30 s), toujours en pause quand l'onglet dort.
 - Reste à fournir : lien de la vidéo de l'épisode 2 (`REF_VIDEOS` dans src/game.js).
 
 ## 2026-10-24 — Vente ouverte aux non-membres côté navigateur (35e mise en ligne)

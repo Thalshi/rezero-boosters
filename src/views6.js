@@ -21,6 +21,8 @@ async function cfLoadTable(gid) {
   CF.fails = 0;
   if (view === "confront" && param === gid) CF.timer = setTimeout(() => cfLoadTable(gid), document.hidden ? 30000 : CF.table?.vue?.phase === "fin" ? 15000 : 1800);
 }
+// retour sur l'onglet (ou premier geste après une pause) : la table se met à jour tout de suite
+addEventListener("rz-wake", () => { if (SRV && view === "confront" && param && CF.table && !CF.table.error) cfLoadTable(param); });
 async function cfAct(action) {
   if (CF.busy) return; CF.busy = true;
   try {

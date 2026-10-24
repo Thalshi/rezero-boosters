@@ -2368,6 +2368,7 @@ svg.dk .fx-breath { transform-box: view-box; transform-origin: 17px 1px; animati
 .pfd-t b { margin-top: 18px; font-size: 13px; text-align: center; } .pfd-t small { font-size: 11px; color: var(--mut, #b8aecb); } .pfd-t.on { border-color: #3fdc8f; box-shadow: 0 0 0 2px #3fdc8f66; } .pfd-t:hover { border-color: var(--gold, #e8c77e); }
 .zs-prev.orn { flex-direction: row; justify-content: center; align-items: center; gap: 40px; padding: 100px 16px 30px; flex-wrap: wrap; } .zs-prev.orn .zs-prof { display: none; }
 .zs-prev-av { display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 0 10px; } .zs-prev-av .eyebrow { margin: 0; order: 2; margin-top: 8px; }
+.zrec-g .kcw { --w: 110px !important; pointer-events: none; }
 .cri-drop { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 34px 20px; border: 2px dashed #ffffff30; border-radius: 16px; background: #0b0916a8; margin: 14px 0; }
 .cri-drop.on { border-color: var(--gold, #e8c77e); background: #2a1d0ca8; } .cri-drop small { color: var(--mut, #b8aecb); max-width: 640px; }
 .cri-bar { justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
@@ -2645,12 +2646,12 @@ const PACKS = [
   { id: "coffre",  name: "Coffre hextech", sub: "Skins des membres du QG",            kanji: "匠", color: "#b04ce0", fac: ["irl"], skins: true },
 ];
 const RAR = {
-  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 0 },
-  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 1 },
-  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 1 },
-  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 4 },
-  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 10 },
-  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 25 },
+  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 1 },
+  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 3 },
+  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 6 },
+  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 15 },
+  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 40 },
+  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 100 },
 };
 const RANKS = ["c", "pc", "r", "e", "l", "m"];
 const SLOT = { c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 };   // cartes 1 à 4
@@ -3507,6 +3508,33 @@ function dropDesignIfGoneS(s, cardId) {
   const cos = cosOf(s); delete cos.designs[cardId];
   if (s.featured === cardId) s.featured = null;
   s.showcase = (s.showcase || []).filter((x) => x !== cardId);
+}
+// objets du Sanctuaire en double : les exemplaires libres (posés sur aucune carte) d'un objet qu'on a déjà
+// (en objet de compte, sur une carte, ou en un autre exemplaire gardé) ; on garde toujours au moins un exemplaire
+const COS_RECYCLE = { c: 10, pc: 20, r: 40, e: 80, l: 200, m: 500 };
+function cosDupesS(s) {
+  const c = cosOf(s), used = usedInstances(s), by = {};
+  for (const it of c.inst) if (COS_BY_ID[it.c]) (by[it.c] ||= []).push(it);
+  const out = [];
+  for (const [id, list] of Object.entries(by)) {
+    const free = list.filter((it) => !used[it.i]), keep = c.own[id] || list.length > free.length ? 0 : 1, n = free.length - keep;
+    if (n > 0) out.push({ id, n, value: COS_RECYCLE[COS_BY_ID[id].rar] || 0, ids: free.slice(keep).map((it) => it.i) });
+  }
+  return out.sort((a, b) => RAR[COS_BY_ID[b.id].rar].rank - RAR[COS_BY_ID[a.id].rar].rank);
+}
+// pick : [{ id, n }] (objets choisis par le joueur)
+function recycleCosS(s, pick, now = Date.now()) {
+  const dl = cosDupesS(s), c = cosOf(s), want = [];
+  for (const p of Array.isArray(pick) ? pick : []) {
+    const d = dl.find((x) => x.id === p.id), n = Math.floor(+p.n || 0);
+    if (!d || n < 1 || n > d.n) return { error: "Ces doublons ne sont plus disponibles." };
+    want.push([d, n]);
+  }
+  if (!want.length) return { error: "Choisis au moins un objet à recycler." };
+  let v = 0;
+  for (const [d, n] of want) { const drop = new Set(d.ids.slice(0, n)); c.inst = c.inst.filter((it) => !drop.has(it.i)); v += d.value * n; }
+  s.chakra += v; trackS(s, "recycle", 1, now);
+  return { value: v };
 }
 const usedInstances = (s) => { const u = {}; for (const [cid, d] of Object.entries(cosOf(s).designs)) for (const r of Object.values(d)) if (r.startsWith("i:")) u[r.slice(2)] = cid; return u; };
 
@@ -6790,7 +6818,7 @@ function zInventory() {
       <div class="zt-t"><b>${esc(it.name)}</b><span style="color:${RAR[it.rar].color}">${RAR[it.rar].label}</span><small>${x.kind}${on.length && !x.ref.startsWith("i:") ? ` · sur ${on.length} carte${on.length > 1 ? "s" : ""}` : ""}</small></div>
       ${mine.length ? `<div class="zt-as"><select class="in" aria-label="Carte à décorer" id="zas-${esc(x.ref)}">${mine.map((c) => `<option value="${c.id}" ${on.includes(c.id) ? "selected" : ""}>${esc(nameOf(c))} · ${esc(c.title)}${on.includes(c.id) ? " ✓" : ""}</option>`).join("")}</select>
         <button class="btn sm gold" type="button" data-zas="${esc(x.ref)}" data-slot="${x.slot}">Mettre sur cette carte</button></div>` : `<p class="note">Ouvre un booster pour avoir une carte à décorer.</p>`}</div>`; };
-  return `${seg("zInv", [["", "Tout"], ["deco", "Décoration"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
+  return `${zRecBtn()}${seg("zInv", [["", "Tout"], ["deco", "Décoration"], ...COS_SLOTS.map((s) => [s.id, s.label])], zInvSlot)}
     ${items.length ? `<div class="zgrid">${items.map(tile).join("")}</div>` : `<p class="note">Ton inventaire est vide. Achète des cosmétiques à la <a href="#/boutique">Boutique</a> ou invoque-en au <a href="#/sanctuaire">Sanctuaire</a>.</p>`}`;
 }
 // poser un objet de l'inventaire sur une carte : il rejoint son design (le reste du design ne bouge pas)
@@ -6821,6 +6849,7 @@ function viewSanctuaire() {
       <p class="note">Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte. ×5 et ×10 : 10 % moins cher.</p>
       <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
       <label class="zopt-line"><input type="checkbox" id="zSkip" ${zSkipAnim ? "checked" : ""}> Passer l'animation</label>
+      ${zRecBtn()}
     </div>${zDrops()}</div>`;
 }
 // aperçu d'un objet du Sanctuaire sur une de tes cartes (au choix) ; s'il est à toi, on peut le poser
@@ -6912,6 +6941,40 @@ document.addEventListener("click", async (e) => {
     if (r?.state) Object.assign(save, r.state);
     toast(id ? `${DECO_BY_ID[id].name} : portée.` : "Décoration retirée.");
     header(); draw(); pfDecoSheet();
+  } catch (err) { toast(err.message); }
+});
+
+// ===== Recycler les objets du Sanctuaire en double =====
+const ZR = { pick: {} };
+function zRecBtn() {
+  const dl = cosDupesS(save), n = dl.reduce((a, d) => a + d.n, 0);
+  return n ? `<button class="btn" type="button" data-zrec-open>♻ Recycler mes objets en double · ${n}</button>` : `<p class="note">Aucun objet en double : un exemplaire invoqué de trop (ni posé sur une carte, ni le seul que tu as) pourra être recyclé en essence.</p>`;
+}
+function zRecSheet() {
+  const dl = cosDupesS(save); for (const k of Object.keys(ZR.pick)) if (!dl.some((d) => d.id === k)) delete ZR.pick[k];
+  const total = dl.reduce((a, d) => a + (ZR.pick[d.id] || 0) * d.value, 0), nb = Object.values(ZR.pick).reduce((a, b) => a + b, 0);
+  const row = (d) => { const c = COS_BY_ID[d.id], k = ZR.pick[d.id] || 0;
+    return `<div class="dup-it ${k ? "on" : ""}"><div class="zrec-g">${zGhost(c)}</div><b style="font-size:13px;text-align:center">${esc(c.name)}</b>
+      <div class="dup-ct"><button class="btn sm" type="button" data-zrec="${d.id}" data-d="-1" ${k ? "" : "disabled"}>−</button><b>${k}/${d.n}</b><button class="btn sm" type="button" data-zrec="${d.id}" data-d="1" ${k < d.n ? "" : "disabled"}>+</button></div>
+      <span class="dup-v">${fmtN(d.value)} ◆ l'un</span></div>`; };
+  $("overlay").innerHTML = `<div class="sheet dup-sheet" role="dialog" aria-modal="true" aria-label="Recycler mes objets en double"><div class="sheet-h"><h2>Recycler mes objets en double</h2><button class="x" type="button" data-act="close" aria-label="Fermer">✕</button></div>
+    <div class="sheet-b"><p class="note">Seuls les exemplaires en trop sont proposés : jamais ceux posés sur une carte, et tu gardes toujours au moins un exemplaire de chaque objet. Valeur : ${RANKS.map((r) => `${RAR[r].label} ${COS_RECYCLE[r]} ◆`).join(" · ")}.</p>
+      ${dl.length ? `<div class="row"><button class="btn sm" type="button" data-zrec-all>Tout cocher</button><button class="btn sm" type="button" data-zrec-none>Tout décocher</button></div><div class="dup-grid">${dl.map(row).join("")}</div>
+      <button class="btn gold big block" type="button" data-zrec-go ${nb ? "" : "disabled"}>${nb ? `Recycler ${nb} objet${nb > 1 ? "s" : ""} · +${fmtN(total)} ◆` : "Choisis les objets à recycler"}</button>` : `<p class="note">Aucun objet en double.</p>`}</div></div>`;
+  $("overlay").hidden = false;
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.closest("[data-zrec-open]")) { ZR.pick = {}; return zRecSheet(); }
+  const b = t.closest("[data-zrec]"); if (b) { const id = b.dataset.zrec, d = cosDupesS(save).find((x) => x.id === id); ZR.pick[id] = Math.max(0, Math.min(d?.n || 0, (ZR.pick[id] || 0) + +b.dataset.d)); return zRecSheet(); }
+  if (t.closest("[data-zrec-all]")) { for (const d of cosDupesS(save)) ZR.pick[d.id] = d.n; return zRecSheet(); }
+  if (t.closest("[data-zrec-none]")) { ZR.pick = {}; return zRecSheet(); }
+  const go = t.closest("[data-zrec-go]"); if (!go || !sure(go, "Toucher encore pour recycler")) return;
+  const pick = Object.entries(ZR.pick).filter(([, n]) => n > 0).map(([id, n]) => ({ id, n }));
+  try {
+    const r = await zCall("cos/recycle", { pick }, () => recycleCosS(save, pick));
+    if (r?.state) Object.assign(save, r.state);
+    toast(`Recyclés : +${fmtN(r.value)} ◆`); ZR.pick = {}; header(); draw(); $("overlay").hidden = true;
   } catch (err) { toast(err.message); }
 });
 

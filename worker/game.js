@@ -181,12 +181,12 @@ const PACKS = [
   { id: "coffre",  name: "Coffre hextech", sub: "Skins des membres du QG",            kanji: "匠", color: "#b04ce0", fac: ["irl"], skins: true },
 ];
 const RAR = {
-  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 0 },
-  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 1 },
-  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 1 },
-  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 4 },
-  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 10 },
-  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 25 },
+  c:  { label: "Commune",     color: "var(--r-c)",  rank: 0, chakra: 1 },
+  pc: { label: "Peu commune", color: "var(--r-pc)", rank: 1, chakra: 3 },
+  r:  { label: "Rare",        color: "var(--r-r)",  rank: 2, chakra: 6 },
+  e:  { label: "Épique",      color: "var(--r-e)",  rank: 3, chakra: 15 },
+  l:  { label: "Légendaire",  color: "var(--r-l)",  rank: 4, chakra: 40 },
+  m:  { label: "Mythique",    color: "var(--r-m)",  rank: 5, chakra: 100 },
 };
 const RANKS = ["c", "pc", "r", "e", "l", "m"];
 const SLOT = { c: 56, pc: 28, r: 12, e: 3.2, l: 0.65, m: 0.15 };   // cartes 1 à 4
@@ -1044,6 +1044,33 @@ function dropDesignIfGoneS(s, cardId) {
   if (s.featured === cardId) s.featured = null;
   s.showcase = (s.showcase || []).filter((x) => x !== cardId);
 }
+// objets du Sanctuaire en double : les exemplaires libres (posés sur aucune carte) d'un objet qu'on a déjà
+// (en objet de compte, sur une carte, ou en un autre exemplaire gardé) ; on garde toujours au moins un exemplaire
+const COS_RECYCLE = { c: 10, pc: 20, r: 40, e: 80, l: 200, m: 500 };
+function cosDupesS(s) {
+  const c = cosOf(s), used = usedInstances(s), by = {};
+  for (const it of c.inst) if (COS_BY_ID[it.c]) (by[it.c] ||= []).push(it);
+  const out = [];
+  for (const [id, list] of Object.entries(by)) {
+    const free = list.filter((it) => !used[it.i]), keep = c.own[id] || list.length > free.length ? 0 : 1, n = free.length - keep;
+    if (n > 0) out.push({ id, n, value: COS_RECYCLE[COS_BY_ID[id].rar] || 0, ids: free.slice(keep).map((it) => it.i) });
+  }
+  return out.sort((a, b) => RAR[COS_BY_ID[b.id].rar].rank - RAR[COS_BY_ID[a.id].rar].rank);
+}
+// pick : [{ id, n }] (objets choisis par le joueur)
+function recycleCosS(s, pick, now = Date.now()) {
+  const dl = cosDupesS(s), c = cosOf(s), want = [];
+  for (const p of Array.isArray(pick) ? pick : []) {
+    const d = dl.find((x) => x.id === p.id), n = Math.floor(+p.n || 0);
+    if (!d || n < 1 || n > d.n) return { error: "Ces doublons ne sont plus disponibles." };
+    want.push([d, n]);
+  }
+  if (!want.length) return { error: "Choisis au moins un objet à recycler." };
+  let v = 0;
+  for (const [d, n] of want) { const drop = new Set(d.ids.slice(0, n)); c.inst = c.inst.filter((it) => !drop.has(it.i)); v += d.value * n; }
+  s.chakra += v; trackS(s, "recycle", 1, now);
+  return { value: v };
+}
 const usedInstances = (s) => { const u = {}; for (const [cid, d] of Object.entries(cosOf(s).designs)) for (const r of Object.values(d)) if (r.startsWith("i:")) u[r.slice(2)] = cid; return u; };
 
 // ===== Coffre arcanique : moteur de scénarios d'ouverture =====
@@ -1233,4 +1260,4 @@ function giveDesignS(s, cardId, inst, now = Date.now()) {
 const FEATURES = [["boutique", "Boutique Arcanique"], ["sanctuaire", "Sanctuaire des Invocations"], ["defile", "Défilé des Légendes"], ["marcheDesign", "Vente avec design au marché"], ["confrontation", "Re : LOL · Confrontation"]];
 const featureOn = (cfg, f) => cfg?.features?.[f] !== false;
 
-export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, ownsCosS, equipAvOrnS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };
+export { FACTIONS, PEOPLE, VARIANTS, CARDS, PACKS, RAR, RANKS, SLOT, LAST, PACK, FREE_MAX, REGEN, PRICE, GOLD_EVERY, MYTHIC_PITY, LEGEND_PITY, GOLD_CHANCE, NEW_BIAS, THEME_MIN, THEME_RARITIES, DAILY_LAST, STREAK, DAILY_N, WEEKLY_N, MISSIONS, LIMITED_END, EP1, EP_MAX, HIDDEN, DEFAULT_CONFIG, SKIN_LINES, SKINNED, SKINS, ALL_CARDS, CARD_BY_ID, CATALOG_NO, MARKET_FEE, marketNet, MARKET_MIN_OPENED, CRAFT_COST, TRADE_FREE_VALUE, TRADE_MAX_RATIO, DIVINE_CHANCE, dayKey, prevDay, freshSave, normalizeSave, ownOf, hasCard, regenS, ensureDailyS, trackS, WEEKLY, DAILY_BONUS, WEEKLY_BONUS, WEEKLY_BONUS_N, CF_REWARD, FIRST_STEPS, FIRST_BONUS, ACHIEVEMENTS, factionsDoneS, PRED_REWARD, predRewardOf, weekKey, ensureWeeklyS, weeklyS, firstStepsS, achievementsS, claimAnyS, claimableCountS, DAY_THEMES, dayNumber, dailyThemeOf, dailyPackOf, missionsTodayS, streakStateS, giveRewardS, claimStreakS, claimMissionS, limitedOnAt, packsAt, packOfAt, epOfCfg, progressOfCfg, unlockedFor, canPackFor, poolFor, mixPoolFor, themeSize, packOpenFor, dailyOpenFor, packOpensAt, mixFillOf, configFrom, boosted, rollWith, pickWith, addCardS, removeCardS, openPackS, takeAndOpenS, openEv, openManyS, packChance, cardValue, dupesValueS, dupeListS, recycleS, disenchantS, craftableDupes, craftS, statsS, itemsValue, TRADE_WEEK, tradesLeftS, useTradeS, tradeRarKey, tradeSameRar, tradeFair, IMPORT_RARITIES, IMPORT_MAX_CARDS, importSaveS, predOpen, predVoteOk, COS_SLOTS, COSMETICS, COS_BY_ID, CREA_BASE, refill, applyCreations, COS_PRICE, SUMMON_COST, SUMMON_DISCOUNT_5, SUMMON_RATES, SUMMON_PITY_M, SUMMON_PITY_L, SUMMON_5_FLOOR, SUMMON_10_FLOOR, SUMMON_COUNTS, summonCost, cosOf, refCos, designOfS, DECO_COLLS, DECOS, DECO_BY_ID, decosOf, buyDecoS, equipDecoS, ownsCosS, equipAvOrnS, buyCosmeticS, SUMMON_POOL, summonS, saveDesignS, dropDesignIfGoneS, COS_RECYCLE, cosDupesS, recycleCosS, usedInstances, CHEST_BEATS, CHEST_SCENARIOS, CHEST_BY_ID, CHEST_W, chestItem, chestCtx, chestEligible, pickWeighted, pickScenarioS, LAB_START, labForcedOpenS, labSummonForcedS, DEFILE_REWARDS, DEFILE_PARTICIPATION, DEFILE_TITLES, DEFILE_TITLE_IDS, DEFILE_VOTE_MIN_OPENED, DEFILE_VOTE_MIN_DAYS, DEFILE_HALL_DAYS, defileCanVote, TITLE_CATS, rarCount, TITLES, TITLE_BY_ID, titleGoal, titleIdOf, grantTitlesS, showTitleS, titlesProgressS, defileRank, takeDesignForSaleS, giveDesignS, FEATURES, featureOn };

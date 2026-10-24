@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — Recyclage relevé, objets du Sanctuaire recyclables (20e mise en ligne)
+- Cartes en double : 1/3/6/15/40/100 ◆ de Commune à Mythique (dorée ×3), au lieu de 0/1/1/4/10/25 (accord de Reichi).
+- Objets du Sanctuaire en double : « Recycler mes objets en double » au Sanctuaire et dans l'inventaire de l'Atelier, 10/20/40/80/200/500 ◆ ; jamais un objet posé sur une carte, toujours au moins un exemplaire gardé.
+
 ## 2026-10-24 — Boutique sans doublons, ornements dans Décorations (19e mise en ligne)
 - Retirées des décorations car en double avec un objet : Aura d'ombre, Mains des abysses, Éclipse noire (auras), Cornes d'ombre, Auréole, Ailes de lumière, Couronne (ornements), Pluie de pétales, Neige (particules).
 - Les ornements quittent « Objets pour tes cartes » : nouvelle rangée « Couvre-chefs et ornements » dans l'onglet Décorations (aperçu sur l'avatar, fiche avec carte + avatar).

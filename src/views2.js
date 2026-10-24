@@ -371,12 +371,12 @@ function viewProfil() {
   const facs = FACS().map((f) => { const list = ALL_CARDS.filter((c) => facOf(c) === f); return [f, list.filter((c) => ids.includes(c.id)).length, list.length]; });
   const realUid = isMe ? ME : uid;
   return `<div class="pf-head"><div class="wrap head">
-      ${(() => { const L = avDecoHTML(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), false); return `<span class="pf-av" ${isMe ? `data-pf-deco role="button" tabindex="0" title="Changer la décoration de ton avatar" style="cursor:pointer"` : ""}>${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
+      ${(() => { const L = avLayers(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), isMe ? ornOfUid(ME) : (p.avOrn ? COS_BY_ID[p.avOrn] : ornOfUid(uid)), false); return `<span class="pf-av" ${isMe ? `data-pf-deco role="button" tabindex="0" title="Changer la décoration de ton avatar" style="cursor:pointer"` : ""}>${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
       ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
-      <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Décoration de l'avatar</button>` : ""}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
+      <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Équiper mon avatar</button>` : ""}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>
     </div></div>
     <div class="wrap page" style="padding-top:24px">
@@ -696,7 +696,7 @@ function cardChip(id, gold) {
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
-  const avd0 = decoOfUid(m.uid), L0 = avDecoHTML(avd0, true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`;
+  const avd0 = decoOfUid(m.uid) || ornOfUid(m.uid), L0 = avLayers(decoOfUid(m.uid), ornOfUid(m.uid), true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());

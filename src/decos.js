@@ -89,5 +89,15 @@ function avDecoHTML(d, lite = true) {
   if (!d) return { back: "", front: "" };
   return (typeof fxBuild === "function" && fxBuild(d.k, d.c1, d.c2 || d.c1, "round", lite)) || { back: "", front: decoSVG(d) };
 }
+// ornement porté sur l'avatar (chapeau, couronne, masque…)
+function ornOfUid(uid) {
+  const id = uid === ME || uid === "moi" ? save.cos?.avOrn : (shared.players || []).find((p) => p.uid === uid)?.avOrn;
+  return id && typeof COS_BY_ID === "object" ? COS_BY_ID[id] || null : null;
+}
+// décoration + ornement autour d'un avatar
+function avLayers(d, o, lite = true) {
+  const L = avDecoHTML(d, lite), O = o && typeof fxBuild === "function" ? fxBuild("o-" + o.k, o.c1, o.c2 || o.c1, "round", lite) || { back: "", front: "" } : { back: "", front: "" };
+  return { back: L.back + O.back, front: L.front + O.front };
+}
 // un avatar avec sa décoration (même rendu que av(), entouré)
-const avd = (uid, cls = "", d = undefined, lite = true) => { const dd = d === undefined ? decoOfUid(uid) : d; if (!dd) return av(uid, cls); const L = avDecoHTML(dd, lite); return `<span class="avd">${L.back}${av(uid, cls)}${L.front}</span>`; };
+const avd = (uid, cls = "", d = undefined, lite = true) => { const dd = d === undefined ? decoOfUid(uid) : d, oo = d === undefined ? ornOfUid(uid) : null; if (!dd && !oo) return av(uid, cls); const L = avLayers(dd, oo, lite); return `<span class="avd">${L.back}${av(uid, cls)}${L.front}</span>`; };

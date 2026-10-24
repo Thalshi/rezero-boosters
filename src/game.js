@@ -793,6 +793,10 @@ const COSMETICS = [
   { id: "aura-solaire", slot: "aura", name: "Aura solaire", rar: "e", k: "flow", c1: "#ffd24d" },
   { id: "aura-spectre", slot: "aura", name: "Aura spectrale", rar: "l", k: "flow", c1: "#e8f4ff" },
   { id: "aura-ecarlate", slot: "aura", name: "Aura écarlate", rar: "m", k: "flow", c1: "#ff2e4d", only: "sanctuaire" },
+  { id: "aura-ombre", slot: "aura", name: "Aura d'ombre", rar: "e", k: "ombre", c1: "#b072ff", c2: "#2a0a4a" },
+  { id: "aura-ombre-sang", slot: "aura", name: "Ombre sanglante", rar: "l", k: "ombre", c1: "#ff2e4d", c2: "#3a0410" },
+  { id: "aura-abysse", slot: "aura", name: "Mains des abysses", rar: "l", k: "abysse", c1: "#b072ff", c2: "#1a0a3a" },
+  { id: "aura-eclipse", slot: "aura", name: "Éclipse noire", rar: "m", k: "eclipse", c1: "#ff7a2e", c2: "#3a0a04", only: "sanctuaire" },
   { id: "orn-etoile", slot: "orn", name: "Étoile du QG", rar: "c", k: "etoile", c1: "#f5c518" },
   { id: "orn-kanji", slot: "orn", name: "Emblème flottant", rar: "pc", k: "kanji", c1: "#ff4d2e" },
   { id: "orn-aureole", slot: "orn", name: "Auréole", rar: "r", k: "aureole", c1: "#fff3b0" },
@@ -929,6 +933,9 @@ const DECOS = [
   { id: "deco-lunesang", coll: "cosmos", name: "Lune de sang", k: "lunesang", c1: "#ff3a3a", c2: "#4a0410", rar: "l" },
   { id: "deco-glace", coll: "elements", name: "Couronne de givre", k: "glace", c1: "#8fe3ff", c2: "#2a6fff", rar: "l" },
   { id: "deco-maree", coll: "elements", name: "Marée", k: "maree", c1: "#4dd6ff", c2: "#0a3a6a", rar: "e" },
+  { id: "deco-aura-ombre", coll: "elements", name: "Aura d'ombre", k: "a-ombre", c1: "#b072ff", c2: "#2a0a4a", rar: "e" },
+  { id: "deco-abysse", coll: "elements", name: "Mains des abysses", k: "a-abysse", c1: "#b072ff", c2: "#1a0a3a", rar: "l" },
+  { id: "deco-eclipse", coll: "cosmos", name: "Éclipse noire", k: "a-eclipse", c1: "#ff7a2e", c2: "#3a0a04", rar: "m" },
   { id: "deco-ombre", coll: "elements", name: "Ombres vivantes", k: "ombre", c1: "#b072ff", c2: "#2a0a4a", rar: "l" },
   { id: "deco-ombre-sang", coll: "elements", name: "Ombres de sang", k: "ombre", c1: "#ff3a4d", c2: "#3a0410", rar: "m" },
   { id: "deco-chaines", coll: "elements", name: "Chaînes spectrales", k: "chaines", c1: "#c8c8f0", c2: "#4a2a7a", rar: "e" },
@@ -988,6 +995,13 @@ function buyDecoS(s, id) {
 function equipDecoS(s, id) {
   if (id && !decosOf(s)[id]) return { error: "Achète d'abord cette décoration." };
   cosOf(s).deco = id || null; return {};
+}
+// ornement porté sur l'avatar (en plus de la décoration) : un ornement possédé, en objet de compte ou invoqué
+const ownsCosS = (s, id) => { const c = cosOf(s); return !!(c.own[id] || c.inst.some((x) => x.c === id)); };
+function equipAvOrnS(s, id) {
+  if (id && (!COS_BY_ID[id] || COS_BY_ID[id].slot !== "orn")) return { error: "Ce n'est pas un ornement." };
+  if (id && !ownsCosS(s, id)) return { error: "Tu n'as pas cet ornement." };
+  cosOf(s).avOrn = id || null; return {};
 }
 function buyCosmeticS(s, id) {
   const c = COS_BY_ID[id], cos = cosOf(s);

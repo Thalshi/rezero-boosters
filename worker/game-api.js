@@ -331,7 +331,7 @@ async function chatRoute(env, user, path, body) {
   if (path === "/api/game/chat/delete") {
     const m = await env.DB.prepare("SELECT uid FROM chat WHERE id = ?").bind(+body.id || 0).first();
     if (!m) return fail(404, "Message introuvable.");
-    if (m.uid !== user.id && !user.admin) return fail(403, "Tu ne peux effacer que tes messages.");
+    if (m.uid !== user.id && !user.admin && !user.dev) return fail(403, "Tu ne peux effacer que tes messages.");
     await env.DB.prepare("UPDATE chat SET deleted = 1 WHERE id = ?").bind(+body.id).run();
     await bumpRev(env, "chat");
     return json({ ok: true });

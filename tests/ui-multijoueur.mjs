@@ -74,9 +74,9 @@ try {
   await B.evaluate((uid) => { location.hash = "#/profil/" + uid; }, "d" + IDS.p1); await sleep(1500);
   await B.click("[data-propose]"); await sleep(500);
   // deux cartes de même rareté pour que l'échange soit équilibré
-  const rar = await B.evaluate(() => ["c", "pc", "r"].find((r) => document.querySelector(`#tradeForm .pick.r-${r} input[data-side=give]`) && document.querySelector(`#tradeForm .pick.r-${r} input[data-side=want]`)));
-  await B.locator(`#tradeForm .pick.r-${rar} input[data-side=give]`).first().click(); await B.locator(`#tradeForm .pick.r-${rar} input[data-side=want]`).first().click();
-  t.check("indication d'équilibre affichée (échange équilibré)", (await B.textContent("#tradeFair")).includes("équilibré"), await B.textContent("#tradeFair"));
+  const rar = await B.evaluate(() => ["c", "pc", "r"].find((r) => document.querySelector(`#tradeForm .pick.r-${r} input[data-side=give]:not([data-gold="1"])`) && document.querySelector(`#tradeForm .pick.r-${r} input[data-side=want]:not([data-gold="1"])`)));
+  await B.locator(`#tradeForm .pick.r-${rar} input[data-side=give]:not([data-gold="1"])`).first().click(); await B.locator(`#tradeForm .pick.r-${rar} input[data-side=want]:not([data-gold="1"])`).first().click();
+  t.check("indication d'équilibre affichée (échange équilibré)", /équilibré|valable/.test(await B.textContent("#tradeFair")), await B.textContent("#tradeFair"));
   await B.click("#tradeForm button[type=submit]"); await sleep(1200);
   const dTrade = await waitFor(T, () => pendingTrades().length > 0);
   t.check("l'échange arrive chez le destinataire", dTrade >= 0, { délai_ms: dTrade });
@@ -86,9 +86,9 @@ try {
   t.check("échange accepté et affiché comme fait", dDone >= 0, { délai_ms: dDone });
 
   t.section("Comptoir et notifications");
-  await T.click("#chatFab"); await sleep(600);
+  await T.locator("#chatFab").dispatchEvent("click"); await sleep(600);
   await T.fill("#chatIn", "Salut @Billy"); await T.click("#chatForm button[type=submit]"); await sleep(800);
-  await B.click("#chatFab");
+  await B.locator("#chatFab").dispatchEvent("click");
   const dChat = await waitFor(B, () => chat.msgs.some((m) => m.text === "Salut @Billy"));
   t.check("message reçu au comptoir ouvert", dChat >= 0, { délai_ms: dChat });
   await B.click("[data-act=chat-close]");

@@ -7682,7 +7682,11 @@ async function cfLoadTable(gid) {
 }
 async function cfAct(action) {
   if (CF.busy) return; CF.busy = true;
-  try { CF.table = await srv("confront/act", { gid: CF.gid, action }); CF.sel = null; CF.defausse = []; CF.garder = []; }
+  try {
+    CF.table = await srv("confront/act", { gid: CF.gid, action }); CF.sel = null; CF.defausse = []; CF.garder = [];
+    // quitter le salon : on revient à la liste des salons (avant, on restait dessus en spectateur)
+    if (action.type === "quitter") { CF.busy = false; CF.list = null; toast("Tu as quitté le salon."); return nav("confront"); }
+  }
   catch (e) { toast(e.message); }
   CF.busy = false; draw();
 }
@@ -7788,7 +7792,7 @@ function viewConfront() {
   if (param) { if (CF.gid !== param) { CF.gid = param; CF.table = null; CF.contrib = {}; } if (!CF.table) cfLoadTable(param); return cfTableHTML(); }
   CF.gid = null; clearTimeout(CF.timer);
   if (!CF.list) cfLoadList();
-  const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · ${g.partage ? "cartes partagées" : "chacun son deck"} · code <span class="mono">${g.gid}</span></span><button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></div>`;
+  const L = CF.list, row = (g, btn) => `<div class="cf-row"><b>${esc(g.nom)}</b><span class="note">${PHASE_LABEL[g.phase]} · ${g.joueurs} joueur${g.joueurs > 1 ? "s" : ""} · ${g.partage ? "cartes partagées" : "chacun son deck"} · code <span class="mono">${g.gid}</span></span><span class="row" style="gap:6px;flex-wrap:nowrap;margin-left:auto">${g.phase === "lobby" && (g.createur === ME || IS_ADMIN) ? `<button class="btn sm" type="button" data-cfclose="${g.gid}">Fermer</button>` : ""}<button class="btn sm" type="button" data-nav="confront" data-p="${g.gid}">${btn}</button></span></div>`;
   return `<div class="wrap page">${head("Confrontation", "Re : LOL · Confrontation", "De 2 à 7 joueurs. Chacun apporte une carte par branche (des cartes de prêt complètent), on mélange, chacun choisit un perso parmi deux. Tes cartes restent à toi : rien ne change de propriétaire.")}
     <div class="cf-howto"><div><b>Nouveau sur Confrontation ?</b><span>Rôles secrets, personnages, distance, cartes : tout est dans le livret illustré.</span></div><button class="btn gold" type="button" data-nav="confront" data-p="regles">Comment jouer</button></div>
     ${L?.verrou ? `<p class="note">Tu as des cartes engagées dans la partie <span class="mono">${L.verrou.gid}</span> : elles ne peuvent pas être vendues ni échangées tant qu'elle n'est pas finie.</p>` : ""}
@@ -7974,6 +7978,9 @@ document.addEventListener("click", (e) => {
   const dr = t.closest("[data-cfdrop]"); if (dr) { delete CF.contrib[dr.dataset.cfdrop]; return draw(); }
   const rd = t.closest("[data-cfready]"); if (rd) return srv("confront/pret", { gid: CF.gid, pret: rd.dataset.cfready === "1" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   const sh = t.closest("[data-cfsh]"); if (sh) return cfShareDo(sh.dataset.cfsh);
+  // fermer un de mes salons depuis la liste (deuxième toucher pour confirmer)
+  const fc = t.closest("[data-cfclose]"); if (fc) { if (!fc.dataset.sure) { fc.dataset.sure = "1"; fc.textContent = "Fermer pour tous ?"; setTimeout(() => { if (fc.isConnected) { delete fc.dataset.sure; fc.textContent = "Fermer"; } }, 4000); return; }
+    return srv("confront/fermer", { gid: fc.dataset.cfclose }).then(() => { CF.list = null; toast("Salon fermé."); draw(); }).catch((err) => toast(err.message)); }
   const md = t.closest("[data-cfmode]"); if (md) return srv("confront/reglage", { gid: CF.gid, partage: md.dataset.cfmode === "partage" }).then((r) => { CF.table = r; draw(); }).catch((err) => toast(err.message));
   const ac = t.closest("[data-cfaccept]"); if (ac) return srv("confront/act", { gid: ac.dataset.cfaccept, action: { type: "rejoindre" } }).then(() => { CF.list = null; nav("confront", ac.dataset.cfaccept); }).catch((err) => toast(err.message));
   const rf = t.closest("[data-cfrefuse]"); if (rf) return srv("confront/refuser", { gid: rf.dataset.cfrefuse }).then(() => { CF.list = null; toast("Défi refusé."); cfLoadList(); draw(); }).catch((err) => toast(err.message));

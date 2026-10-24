@@ -233,10 +233,10 @@ function qsHTML() {
   const next = save.free < FREE_MAX ? `+1 dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}` : "réserve pleine";
   return `<div class="qs">
     <div style="--c:var(--acc)"><span class="k">${ico("coffre")}</span><b>${save.free}/${FREE_MAX}</b><span>gratuits · ${next}</span></div>
-    <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
-    <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">${ico("feu")}</span><b>J${st.n}/7</b><span>connexion à la suite</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
-    <div style="--c:var(--gold)"><span class="k">${ico("piece")}</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le booster doré</span></div>
-    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire sûre</span></div>
+    <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
+    <button type="button" ${st.canClaim ? 'data-claim="streak"' : 'data-nav="missions"'} style="--c:var(--r-e)"><span class="k">${ico("feu")}</span><b>J${st.n}/7</b><span>série</span>${st.canClaim ? '<span class="act">Récupérer</span>' : ""}</button>
+    <div style="--c:var(--gold)"><span class="k">${ico("piece")}</span><b>${Math.max(0, GOLD_EVERY - save.sinceGold)}</b><span>avant le doré</span></div>
+    <div style="--c:var(--acc)"><span class="k">${ico("couronne")}</span><b>${Math.max(0, LEGEND_PITY - (save.sinceLegend || 0))}</b><span>avant Légendaire</span></div>
   </div>`;
 }
 function packsForTab() {

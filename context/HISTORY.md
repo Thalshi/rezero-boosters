@@ -5,6 +5,9 @@
 
 ---
 
+## 2026-10-24 — Pastilles des boosters lisibles (30e mise en ligne)
+- Textes raccourcis pour ne plus être coupés : « à récupérer », « série », « avant le doré », « avant Légendaire ».
+
 ## 2026-10-24 — 3 missions du jour (29e mise en ligne)
 - Missions du jour : 3 au lieu de 2 (conseil validé par Reichi), bonus de 1 booster quand les 3 sont réclamées.
 - Le tirage du jour est refait sans perdre la progression ni les missions déjà réclamées (pas de double récompense).

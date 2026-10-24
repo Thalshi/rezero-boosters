@@ -1203,7 +1203,7 @@ export function viewFor(s, playerId = null, { log = true } = {}) {
     if (s.config.errant?.coupDeGrace) v.errantCoupDeGrace = true;
     if (started && me.vivant) { v.limiteMain = limiteMain(s, me); v.porteeArme = porteeArme(s, me); v.frappesMax = frappesMax(s, me); }
     v.actions = legalActions(s, me.id);
-  }
+  } else if (playerId != null) v.actions = legalActions(s, playerId); // spectateur connecté : « Rejoindre » tant que le salon est ouvert
   if (log) v.journal = s.log.filter((e) => visible(e, me ? me.id : null)).map(({ vis, ...e }) => e);
   return v;
 }

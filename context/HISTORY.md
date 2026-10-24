@@ -5,6 +5,9 @@
 
 ---
 
+## 2026-10-24 — Confrontation : « Rejoindre » par lien (37e mise en ligne)
+- Arrivé dans un salon par un lien partagé, on était spectateur sans bouton « Rejoindre » (le serveur ne calculait les actions que pour les joueurs déjà assis). Corrigé.
+
 ## 2026-10-24 — Parrainage, remise à zéro complète, missions cliquables (36e mise en ligne)
 - Parrainage (menu « Parrainage ») : lien perso `/?ref=…`, accueil avec la vidéo de Billy, filleul validé après 5 boosters (compte de moins de 48 h), +2 boosters pour les deux, paliers 3 (coffre) / 6 (3 invocations) / 10 (Aura écarlate + titre Recruteur) / 20 (Légendaire garantie), classement (1er à 3e : Légendaire garantie, 4e à 10e : coffre), prix donnés à la fin.
 - L'événement ne démarre que lancé à la main : Gestion › Dev › « Lancer le parrainage (2 semaines) ».

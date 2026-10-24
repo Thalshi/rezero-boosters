@@ -186,7 +186,6 @@ export async function confrontRoute(env, user, path, body, h) {
       defis: rows.filter((g) => g.invite === user.id && g.state.phase === "lobby" && !g.state.players.some((p) => p.id === user.id)).map(pub), cartes: s ? myCards(s, await branchChoices(env)) : [], deck: s?.cfDeck || [], verrou: s?.confront || null });
   }
   if (a === "create") {
-    if (!user.member && !user.admin) return fail(403, "Réservé aux membres du QG de Shinjuku.");
     const gid = newGid(), now = Date.now();
     // défi en duel depuis un profil : table privée, la personne défiée reçoit une notification
     const invite = body.invite ? String(body.invite) : null;
@@ -279,7 +278,6 @@ export async function confrontRoute(env, user, path, body, h) {
     const action = body.action && typeof body.action === "object" ? { ...body.action } : null;
     if (!action || typeof action.type !== "string") return fail(400, "Action invalide.");
     const row = await h.loadRow(env, user.id), s = G.normalizeSave(JSON.parse(row.data));
-    if (action.type === "rejoindre" && !user.member && !user.admin) return fail(403, "Réservé aux membres du QG de Shinjuku.");
     if (action.type === "contribuer") {
       // la contribution vient de la vraie collection : une carte possédée par branche, branche donnée par le serveur
       const ids = [...new Set((Array.isArray(action.cartes) ? action.cartes : []).map(String))].slice(0, BRANCH_IDS.length);

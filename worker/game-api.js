@@ -51,9 +51,9 @@ async function mutate(env, uid, fn) {
 // carte vedette publique : la carte et son design, seulement si elle est encore dans la collection
 const featuredOf = (s) => (s.featured && G.hasCard(s, s.featured) ? { featured: s.featured, fd: G.designOfS(s, s.featured) } : { featured: null });
 async function publishStats(env, uid, s) {
-  const st = G.statsS(s);
+  const st = G.statsS(s), qg = !!(await env.DB.prepare("SELECT member FROM users WHERE id = ?").bind(uid).first())?.member;
   await env.DB.prepare("INSERT INTO docs (path, coll, id, data, version, updated) VALUES (?, 'players', ?, ?, 1, ?) ON CONFLICT(path) DO UPDATE SET data = excluded.data, version = docs.version + 1, updated = excluded.updated")
-    .bind("players/" + uid, uid, JSON.stringify({ uid, ...st, ...featuredOf(s), title: s.titleShown || null, deco: s.cos?.deco && G.DECO_BY_ID[s.cos.deco] ? s.cos.deco : null, avOrn: s.cos?.avOrn && G.COS_BY_ID[s.cos.avOrn] ? s.cos.avOrn : null, t: Date.now() }), Date.now()).run();
+    .bind("players/" + uid, uid, JSON.stringify({ uid, qg, ...st, ...featuredOf(s), title: s.titleShown || null, deco: s.cos?.deco && G.DECO_BY_ID[s.cos.deco] ? s.cos.deco : null, avOrn: s.cos?.avOrn && G.COS_BY_ID[s.cos.avOrn] ? s.cos.avOrn : null, t: Date.now() }), Date.now()).run();
   await bumpRev(env, "players");
 }
 async function getConfig(env) {
@@ -186,7 +186,6 @@ async function chatRoute(env, user, path, body) {
     return json({ ok: true });
   }
   if (path === "/api/game/chat/send") {
-    if (!user.member && !user.admin) return fail(403, "Le chat est réservé aux membres du QG de Shinjuku.");
     const text = String(body.text || "").replace(/\s+/g, " ").trim().slice(0, CHAT_MAX);
     const card = body.card && G.CARD_BY_ID[body.card] ? body.card : null, gold = !!body.gold && !!card;
     if (!text && !card) return fail(400, "Écris un message.");
@@ -247,7 +246,7 @@ async function ensurePlayer(env, user, guest) {
 }
 
 // ---------- routes ----------
-const canMarket = (user, s) => (user.member || user.admin) && s.opened >= G.MARKET_MIN_OPENED;
+const canMarket = (user, s) => s.opened >= G.MARKET_MIN_OPENED;
 const marketBlock = (s) => `Le marché et les échanges s'ouvrent après ${G.MARKET_MIN_OPENED} boosters (tu en as ouvert ${s.opened}).`;
 
 export async function gameRoute(req, env, user, path) {
@@ -423,7 +422,6 @@ export async function gameRoute(req, env, user, path) {
     }
     if (path === "/api/game/vote") {
       // le vote passe par le serveur : refusé dès que la question est fermée ou résolue
-      if (!user.member && !user.admin) return fail(403, "Il faut être membre du QG de Shinjuku pour voter.");
       const now = Date.now(), qid = String(body.qid || ""), idx = Number(body.idx);
       const q = qid && (await readDoc(env, "predq/" + qid))?.data;
       if (!q) return fail(404, "Cette question n'existe plus.");

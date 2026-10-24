@@ -93,7 +93,10 @@ const nm = (uid) => `<b data-uid="${uid}">…</b>`;
 // titre choisi par un joueur (le sien vient de la sauvegarde, les autres du classement partagé)
 const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
 const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${ico(TITLE_ICON[t.cat])}</i>${esc(t.name)}</span>` : "");
-const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
+// membres du serveur Discord QG de Shinjuku : un badge à côté du nom (le jeu est ouvert à tous depuis le 24/10)
+const isQG = (uid) => (uid && uid === ME ? !!ACCT?.member : !!shared.players.find((p) => p.uid === uid)?.qg);
+const qgTag = (uid, cls = "") => (isQG(uid) ? `<span class="qg-tag ${cls}" title="Membre du serveur QG de Shinjuku">QG</span>` : "");
+const ttag = (uid, cls) => qgTag(uid, cls) + ttagOf(shownTitleOf(uid), cls);
 const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${avd(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
 const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légende"] : unique >= 90 ? [ico("rang4"), "Maître"] : unique >= 50 ? [ico("rang3"), "Expert"] : unique >= 20 ? [ico("rang2"), "Confirmé"] : [ico("rang1"), "Débutant"];

@@ -41,10 +41,9 @@ export async function defileRoute(env, user, path, body, h) {
   if (path === "/api/game/defile/state") {
     const [cur, hall, arch] = await Promise.all([readJSON(env, "defile/current"), readJSON(env, "defile/hall"), readJSON(env, "defile/archives")]);
     const row = await h.loadRow(env, user.id), s = row ? G.normalizeSave(JSON.parse(row.data)) : null;
-    return json({ current: publicView(cur?.data, user.id), hall: hall?.data?.until > now ? hall.data : null, archives: arch?.data?.list || [], canVote: s ? G.defileCanVote(s, user.member || user.admin, now) : false });
+    return json({ current: publicView(cur?.data, user.id), hall: hall?.data?.until > now ? hall.data : null, archives: arch?.data?.list || [], canVote: s ? G.defileCanVote(s, true, now) : false });
   }
   if (path === "/api/game/defile/enter") {
-    if (!user.member && !user.admin) return fail(403, "Le Défilé est réservé aux membres du QG de Shinjuku.");
     const row = await h.loadRow(env, user.id), s = G.normalizeSave(JSON.parse(row.data)), card = String(body.card || "");
     if (!G.CARD_BY_ID[card] || !G.hasCard(s, card)) return fail(400, "Tu n'as pas cette carte.");
     // copie figée : la carte, sa variante et son design au moment de l'inscription
@@ -62,7 +61,7 @@ export async function defileRoute(env, user, path, body, h) {
   }
   if (path === "/api/game/defile/vote") {
     const row = await h.loadRow(env, user.id), s = G.normalizeSave(JSON.parse(row.data));
-    if (!G.defileCanVote(s, user.member || user.admin, now)) return fail(403, `Pour voter : être membre du QG, avoir ouvert ${G.DEFILE_VOTE_MIN_OPENED} boosters et un compte de plus de ${G.DEFILE_VOTE_MIN_DAYS} jours.`);
+    if (!G.defileCanVote(s, true, now)) return fail(403, `Pour voter : être membre du QG, avoir ouvert ${G.DEFILE_VOTE_MIN_OPENED} boosters et un compte de plus de ${G.DEFILE_VOTE_MIN_DAYS} jours.`);
     const to = String(body.entry || "");
     const r = await editCurrent(env, (d) => {
       if (d.phase !== "votes") return { error: "Les votes ne sont pas ouverts." };

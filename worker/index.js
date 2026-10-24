@@ -58,8 +58,8 @@ function allowed(user, segs, op) {
   }
   if (["config", "predq", "pred"].includes(top)) return !write || user.admin;
   // avis : chacun écrit le sien ; bugs : on peut en envoyer, seul l'admin les lit
-  if (top === "avis") return !write || (segs[1] === user.id && (user.member || user.admin));
-  if (top === "bugs") return write ? user.member || user.admin : user.admin;
+  if (top === "avis") return !write || segs[1] === user.id;
+  if (top === "bugs") return write ? true : user.admin;
   return !write || user.member || user.admin;
 }
 
@@ -254,7 +254,7 @@ export default {
       // connexion factice, uniquement pour les tests en local (wrangler dev)
       const fake = url.searchParams.get("id") || "100000000000000001", uid = "d" + fake, token = randomToken();
       await env.DB.batch([
-        env.DB.prepare("INSERT OR REPLACE INTO users (id, name, avatar, member, updated) VALUES (?, ?, ?, 1, ?)").bind(uid, url.searchParams.get("name") || "Testeur", "https://cdn.discordapp.com/embed/avatars/0.png", Date.now()),
+        env.DB.prepare("INSERT OR REPLACE INTO users (id, name, avatar, member, updated) VALUES (?, ?, ?, ?, ?)").bind(uid, url.searchParams.get("name") || "Testeur", "https://cdn.discordapp.com/embed/avatars/0.png", url.searchParams.get("member") === "0" ? 0 : 1, Date.now()),
         env.DB.prepare("INSERT INTO sessions (token, uid, expires) VALUES (?, ?, ?)").bind(token, uid, Date.now() + 86400e3),
       ]);
       await bumpRev(env, "users");

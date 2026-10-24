@@ -288,6 +288,8 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .cr-grp h3 .cr-rars { display: inline-flex; margin: 0 0 0 10px; vertical-align: middle; }
 .cr-grp h3 .cr-rars i { font-size: 12px; padding: 2px 8px; }
 .z-free b { color: var(--fg); } .z-free.on { color: #4fd18b; } .z-free.on b { color: #4fd18b; }
+.qg-tag { display: inline-flex; align-items: center; margin-right: 4px; padding: 1px 6px; border-radius: 6px; font: 800 10px var(--mono); letter-spacing: .08em; color: #0b1a2a; background: linear-gradient(180deg, #8fd0ff, #3d8fe0); box-shadow: 0 0 8px #5ab0ff66; vertical-align: middle; }
+.qg-tag.lg { font-size: 12px; padding: 3px 9px; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -2621,7 +2623,7 @@ html.w3d-on body::before { background:
     id: async () => (await me())?.id ?? null,
     isOwner: async () => !!(await me())?.admin,
     canEdit: async () => !!(await me())?.admin,
-    can: async () => { const m = await me(); return m ? m.member || m.admin : false; },
+    can: async () => { const m = await me(); return !!m; }, // ouvert à tous depuis le 24/10 (plus besoin d'être membre du serveur QG)
     me: async () => { const m = await me(); return { id: m?.id ?? null, name: m?.name || "", avatarUrl: m?.avatar || "", color: "#0ac8b9", email: null, isOwner: !!m?.admin, canEdit: !!m?.admin }; },
     async profiles(ids) {
       ids = [...new Set([].concat(ids))];
@@ -5014,7 +5016,10 @@ const nm = (uid) => `<b data-uid="${uid}">…</b>`;
 // titre choisi par un joueur (le sien vient de la sauvegarde, les autres du classement partagé)
 const shownTitleOf = (uid) => TITLE_BY_ID[uid && uid === ME ? save.titleShown : shared.players.find((p) => p.uid === uid)?.title] || null;
 const ttagOf = (t, cls = "") => (t ? `<span class="ttag r-${t.rar} ${cls}" title="${esc(t.desc)}"><i>${ico(TITLE_ICON[t.cat])}</i>${esc(t.name)}</span>` : "");
-const ttag = (uid, cls) => ttagOf(shownTitleOf(uid), cls);
+// membres du serveur Discord QG de Shinjuku : un badge à côté du nom (le jeu est ouvert à tous depuis le 24/10)
+const isQG = (uid) => (uid && uid === ME ? !!ACCT?.member : !!shared.players.find((p) => p.uid === uid)?.qg);
+const qgTag = (uid, cls = "") => (isQG(uid) ? `<span class="qg-tag ${cls}" title="Membre du serveur QG de Shinjuku">QG</span>` : "");
+const ttag = (uid, cls) => qgTag(uid, cls) + ttagOf(shownTitleOf(uid), cls);
 const who = (uid) => `<button class="who" type="button" data-nav="profil" data-p="${uid}">${avd(uid)}${nm(uid)}</button>`;
 const empty = (txt, btn = "") => `<div class="empty"><div class="o"></div>${txt}${btn ? `<div style="margin-top:14px">${btn}</div>` : ""}</div>`;
 const titleOf = (unique) => unique >= ALL_CARDS.length ? [ico("rang5"), "Légende"] : unique >= 90 ? [ico("rang4"), "Maître"] : unique >= 50 ? [ico("rang3"), "Expert"] : unique >= 20 ? [ico("rang2"), "Confirmé"] : [ico("rang1"), "Débutant"];
@@ -5755,7 +5760,7 @@ function viewProfil() {
       ${(() => { const L = avLayers(isMe ? decoOfUid(ME) : (p.deco ? DECO_BY_ID[p.deco] : decoOfUid(uid)), isMe ? ornOfUid(ME) : (p.avOrn ? COS_BY_ID[p.avOrn] : ornOfUid(uid)), false); return `<span class="pf-av" ${isMe ? `data-pf-deco role="button" tabindex="0" title="Changer la décoration de ton avatar" style="cursor:pointer"` : ""}>${L.back}${realUid ? `<img data-uid="${realUid}" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">` : `<span>${esc((ACCT?.name || "I")[0])}</span>`}${L.front}</span>`; })()}
       <p class="eyebrow">Collectionneur</p>
       <div class="pf-name"><h1 style="margin:0">${realUid ? `<span data-uid="${realUid}">…</span>` : esc(ACCT?.name || "Invité")}</h1><span class="seal"><b>${tk}</b><small>${tl.toUpperCase()}</small></span></div>
-      ${TITLE_BY_ID[p.titleShown] ? `<div class="pf-ttl">${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
+      ${TITLE_BY_ID[p.titleShown] || isQG(p.uid) ? `<div class="pf-ttl">${qgTag(p.uid, "lg")}${ttagOf(TITLE_BY_ID[p.titleShown], "lg")}</div>` : ""}
       ${st.since ? `<p class="note">Joue depuis le ${new Date(st.since).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>` : ""}
       <div class="row">${isMe ? `<button class="btn gold" type="button" data-pf-deco>✦ Équiper mon avatar</button>` : ""}${!isMe ? `<button class="btn acc" type="button" data-propose="${uid}" ${save.opened < MARKET_MIN_OPENED ? "disabled" : ""}>⇄ Proposer un échange</button>${SRV && featureOn(CONFIG, "confrontation") ? `<button class="btn" type="button" data-cfdefi="${uid}">${ico("confront")} Défier en duel</button>` : ""}` : `<button class="btn" type="button" data-nav="collection">Ma collection</button>`}
         <button class="btn" type="button" data-act="copy-link">Copier le lien</button></div>

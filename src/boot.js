@@ -121,7 +121,7 @@ setInterval(() => { const full = save.free >= FREE_MAX; if (full && !wasFull) pu
 setInterval(() => { if (regen()) persist(); if (!opening && $("overlay").hidden && !menuOpen && view === "boosters" && !document.activeElement?.closest?.("input,select,textarea")) draw(); else header(); }, 30000);
 setInterval(() => { if (view === "boosters" && !opening && $("overlay").hidden && Date.now() - heroPause > 15000 && !document.hidden) { heroIdx++; refreshHero(); } }, 7000);
 // en mode serveur, on resynchronise de temps en temps (ventes conclues, échanges reçus…)
-setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden) srv("state").then(() => header()).catch(() => {}); }, 45000);
+setInterval(() => { if (SRV && !busy && !opening && $("overlay").hidden && !window.__asleep?.()) srv("state").then(() => header()).catch(() => {}); }, 120000);
 connect();
 
 // le monde du QG en fond du site (même décor que l'arène 3D)

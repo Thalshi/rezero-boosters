@@ -369,7 +369,7 @@ const ensureDaily = () => ensureDailyS(save);
 const track = (key, n = 1) => trackS(save, key, n);
 const missionsToday = () => missionsTodayS(save);
 const streakState = () => streakStateS(save);
-const rewardText = (r) => [r.boosters ? `${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.chakra ? `${r.chakra} ◆` : ""].filter(Boolean).join(" + ");
+const rewardText = (r) => [r.boosters ? `${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.chakra ? `${r.chakra} ◆` : "", r.summons ? `${r.summons} invocation${r.summons > 1 ? "s" : ""} gratuite${r.summons > 1 ? "s" : ""}` : ""].filter(Boolean).join(" + ");
 const toClaim = () => claimableCountS(save);
 
 // ===== Carte =====

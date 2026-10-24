@@ -286,14 +286,15 @@ let zBusy = false;
 const Z_OFFERS = [[1, "Une carte", "Se retourne toute seule", "carte"], [5, "Une pochette", "Au moins une Rare", "pochette"], [10, "Le coffre", "Au moins une Épique", "coffre"]];
 function viewSanctuaire() {
   if (!featureOn(CONFIG, "sanctuaire")) return closedHTML("Sanctuaire des Invocations");
-  const cos = cosOf(save);
+  const cos = cosOf(save); summonRegenS(save);
+  const fs = save.freeSum || 0, fsNext = fs < SUMMON_FREE_MAX ? ` · +1 dans ${fmtWait(SUMMON_FREE_REGEN - (Date.now() - save.freeSumTs))}` : "";
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
   return `<div class="wrap page">${head("Sanctuaire des Invocations", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
-    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Légendaire garantie dans <b>${Math.max(0, SUMMON_PITY_L - cos.sinceL)}</b> invocations</span></div>
-    <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${save.chakra < summonCost(n) || zBusy ? "disabled" : ""}>
+    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="z-free ${fs ? "on" : ""}">Invocations gratuites : <b>${fs}</b>/${SUMMON_FREE_MAX}${fsNext}</span><span>Légendaire garantie dans <b>${Math.max(0, SUMMON_PITY_L - cos.sinceL)}</b> invocations</span></div>
+    <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${n === 1 && fs ? "data-zfree=\"1\"" : ""} ${(save.chakra < summonCost(n) && !(n === 1 && fs)) || zBusy ? "disabled" : ""}>
       <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${ico(k)}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${ico(k)}</b></span>` : `<span class="zo-card"><b>${ico(k)}</b></span>`}</span>
       <span class="zo-n">×${n}</span><b class="zo-t">${t}</b><span class="zo-s">${sub}</span>
-      <span class="zo-p">${fmtN(summonCost(n))} ◆${n > 1 ? ` <s>${fmtN(SUMMON_COST * n)}</s>` : ""}</span></button>`).join("")}</div>
+      <span class="zo-p">${n === 1 && fs ? `Gratuit <s>${fmtN(SUMMON_COST)} ◆</s>` : `${fmtN(summonCost(n))} ◆${n > 1 ? ` <s>${fmtN(SUMMON_COST * n)}</s>` : ""}`}</span></button>`).join("")}</div>
     <div class="zs-side">
       <p class="note">Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte. ×5 et ×10 : 10 % moins cher.</p>
       <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
@@ -336,11 +337,11 @@ function zDrops() {
 }
 let zSkipAnim = false;
 try { zSkipAnim = localStorage.getItem("rz-skip-summon") === "1"; } catch (e) {}
-async function zSummon(n) {
+async function zSummon(n, free = false) {
   if (zBusy) return; // pas de double invocation
   zBusy = true; draw();
   let r;
-  try { r = await zCall("summon", { n }, () => summonS(save, n, Math.random)); }
+  try { r = await zCall("summon", { n, free }, () => summonS(save, n, Math.random, Date.now(), free)); }
   catch (e) { toast(e.message); return draw(); }
   finally { zBusy = false; }
   summonOpening(r.got, r.scenario, zSkipAnim ? { phase: "done", flipped: true } : {});
@@ -360,7 +361,7 @@ document.addEventListener("click", (e) => {
   if (t.closest("[data-zsave]")) return zSaveDesign();
   if (t.closest("[data-zclear]")) { zDraft = {}; return draw(); }
   const f = t.closest("[data-zfeat]"); if (f) return zFeature(f.dataset.zfeat || null);
-  const sm = t.closest("[data-zsum]"); if (sm) return zSummon(+sm.dataset.zsum);
+  const sm = t.closest("[data-zsum]"); if (sm) return zSummon(+sm.dataset.zsum, !!sm.dataset.zfree);
 });
 document.addEventListener("change", (e) => {
   if (e.target.id === "zCard") { zDraftCard = e.target.value; zDraft = null; nav("atelier", zDraftCard); }

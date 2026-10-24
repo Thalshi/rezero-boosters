@@ -287,6 +287,7 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .cr-rars i.sk { --rc: #b04ce0; }
 .cr-grp h3 .cr-rars { display: inline-flex; margin: 0 0 0 10px; vertical-align: middle; }
 .cr-grp h3 .cr-rars i { font-size: 12px; padding: 2px 8px; }
+.z-free b { color: var(--fg); } .z-free.on { color: #4fd18b; } .z-free.on b { color: #4fd18b; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -2916,12 +2917,24 @@ function normalizeSave(s, now = Date.now()) {
 const ownOf = (s, id) => s.owned[id] || { n: 0, gold: 0, first: 0 };
 const hasCard = (s, id) => ownOf(s, id).n + ownOf(s, id).gold > 0;
 
+// invocations gratuites au Sanctuaire : une toutes les 12 h, réserve de 2 (les cadeaux peuvent dépasser)
+const SUMMON_FREE_MAX = 2;
+const SUMMON_FREE_REGEN = 12 * 3600e3;
+function summonRegenS(s, now = Date.now()) {
+  if (typeof s.freeSum !== "number") { s.freeSum = 1; s.freeSumTs = now; return true; }
+  if (s.freeSum >= SUMMON_FREE_MAX) { s.freeSumTs = now; return false; }
+  let changed = false;
+  while (s.freeSum < SUMMON_FREE_MAX && now - s.freeSumTs >= SUMMON_FREE_REGEN) { s.freeSum++; s.freeSumTs += SUMMON_FREE_REGEN; changed = true; }
+  if (s.freeSum >= SUMMON_FREE_MAX) s.freeSumTs = now;
+  return changed;
+}
 function regenS(s, now = Date.now()) {
-  if (s.free >= FREE_MAX) { s.freeTs = now; return false; }
+  const sc = summonRegenS(s, now);
+  if (s.free >= FREE_MAX) { s.freeTs = now; return sc; }
   let changed = false;
   while (s.free < FREE_MAX && now - s.freeTs >= REGEN) { s.free++; s.freeTs += REGEN; changed = true; }
   if (s.free >= FREE_MAX) s.freeTs = now;
-  return changed;
+  return changed || sc;
 }
 
 function ensureDailyS(s, now = Date.now()) {
@@ -2956,7 +2969,7 @@ const WEEKLY = [
   { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
 ];
 const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
-const WEEKLY_BONUS = { boosters: 3 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
+const WEEKLY_BONUS = { boosters: 3, summons: 1 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
 const WEEKLY_BONUS_N = 3;
 // Confrontation : jouable à l'infini, mais l'essence ne vient que des premières parties valables du jour
 const CF_REWARD = { partie: 10, victoire: 10, max: 3 };
@@ -2971,7 +2984,7 @@ const FIRST_STEPS = [
   { id: "f-sheet",  label: "Ouvre une fiche de perso",     test: (s) => (s.counts?.sheet || 0) >= 1,             reward: { chakra: 20 } },
   { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
 ];
-const FIRST_BONUS = { boosters: 3 };
+const FIRST_BONUS = { boosters: 3, summons: 1 };
 const ACHIEVEMENTS = [
   { id: "a-open10",   label: "Premiers pas",        desc: "Ouvrir 10 boosters",                 val: (s) => s.opened, goal: 10,   reward: { chakra: 10 } },
   { id: "a-open100",  label: "Habitué",             desc: "Ouvrir 100 boosters",                val: (s) => s.opened, goal: 100,  reward: { chakra: 50 } },
@@ -3112,6 +3125,7 @@ function streakStateS(s, now = Date.now()) {
 function giveRewardS(s, r) {
   if (r.boosters) s.free += r.boosters;
   if (r.chakra) s.chakra += r.chakra;
+  if (r.summons) s.freeSum = (s.freeSum || 0) + r.summons;
 }
 function claimStreakS(s, now = Date.now()) {
   const st = streakStateS(s, now);
@@ -3665,10 +3679,13 @@ function buyCosmeticS(s, id) {
   return { bought: id, price };
 }
 const SUMMON_POOL = (rar) => COSMETICS.filter((c) => c.rar === rar);
-function summonS(s, n, rng, now = Date.now()) {
+function summonS(s, n, rng, now = Date.now(), free = false) {
   if (!SUMMON_COUNTS.includes(n)) return { error: "On invoque 1, 5 ou 10 objets à la fois." };
-  const cost = summonCost(n), cos = cosOf(s);
-  if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
+  summonRegenS(s, now);
+  if (free && n !== 1) return { error: "Une invocation gratuite se fait une à la fois." };
+  const cost = free ? 0 : summonCost(n), cos = cosOf(s);
+  if (free) { if (!(s.freeSum > 0)) return { error: "Plus d'invocation gratuite pour l'instant." }; s.freeSum--; }
+  else if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
   for (let k = 0; k < n; k++) { cos.sinceM++; cos.sinceL++; let r = rollWith(SUMMON_RATES, rng); if (SUMMON_PITY_M && cos.sinceM >= SUMMON_PITY_M) r = "m"; if (SUMMON_PITY_L && cos.sinceL >= SUMMON_PITY_L && r !== "m") r = "l"; if (r === "m") cos.sinceM = 0; if (r === "l" || r === "m") cos.sinceL = 0; rars.push(r); }
@@ -4456,7 +4473,7 @@ const ensureDaily = () => ensureDailyS(save);
 const track = (key, n = 1) => trackS(save, key, n);
 const missionsToday = () => missionsTodayS(save);
 const streakState = () => streakStateS(save);
-const rewardText = (r) => [r.boosters ? `${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.chakra ? `${r.chakra} ◆` : ""].filter(Boolean).join(" + ");
+const rewardText = (r) => [r.boosters ? `${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.chakra ? `${r.chakra} ◆` : "", r.summons ? `${r.summons} invocation${r.summons > 1 ? "s" : ""} gratuite${r.summons > 1 ? "s" : ""}` : ""].filter(Boolean).join(" + ");
 const toClaim = () => claimableCountS(save);
 
 // ===== Carte =====
@@ -5521,7 +5538,7 @@ function mrHTML(m, kind, id) {
     <div class="rw">${rewardShort(m.reward)}</div>
     <div class="s">${m.claimed ? "Fait ✓" : ok ? `<button class="btn gold sm" type="button" data-claim="${kind}" data-id="${id}">Réclamer</button>` : "En cours"}</div></div>`;
 }
-const rewardShort = (r) => [r.chakra ? `+${r.chakra} <span class="dia"></span>` : "", r.boosters ? `+${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
+const rewardShort = (r) => [r.chakra ? `+${r.chakra} <span class="dia"></span>` : "", r.boosters ? `+${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.summons ? `+${r.summons} invocation${r.summons > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
 function viewMissions() {
   const st = streakState(), ms = missionsToday(), ws = weeklyS(save), fs = firstStepsS(save), as = achievementsS(save);
   const d = ensureDailyS(save), w = ensureWeeklyS(save), n = toClaim();
@@ -7076,14 +7093,15 @@ let zBusy = false;
 const Z_OFFERS = [[1, "Une carte", "Se retourne toute seule", "carte"], [5, "Une pochette", "Au moins une Rare", "pochette"], [10, "Le coffre", "Au moins une Épique", "coffre"]];
 function viewSanctuaire() {
   if (!featureOn(CONFIG, "sanctuaire")) return closedHTML("Sanctuaire des Invocations");
-  const cos = cosOf(save);
+  const cos = cosOf(save); summonRegenS(save);
+  const fs = save.freeSum || 0, fsNext = fs < SUMMON_FREE_MAX ? ` · +1 dans ${fmtWait(SUMMON_FREE_REGEN - (Date.now() - save.freeSumTs))}` : "";
   const rates = RANKS.map((r) => `<span><i style="background:${RAR[r].color}"></i>${RAR[r].label} ${String(SUMMON_RATES[r]).replace(".", ",")} %</span>`).join("");
   return `<div class="wrap page">${head("Sanctuaire des Invocations", "Sanctuaire des Invocations", "Invoque des cosmétiques uniques. Les invocations ne donnent jamais de personnages : ceux-là sortent des boosters.")}
-    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span>Légendaire garantie dans <b>${Math.max(0, SUMMON_PITY_L - cos.sinceL)}</b> invocations</span></div>
-    <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${save.chakra < summonCost(n) || zBusy ? "disabled" : ""}>
+    <div class="z-bar"><span>Essence : <b>${fmtN(save.chakra)} ◆</b></span><span class="z-free ${fs ? "on" : ""}">Invocations gratuites : <b>${fs}</b>/${SUMMON_FREE_MAX}${fsNext}</span><span>Légendaire garantie dans <b>${Math.max(0, SUMMON_PITY_L - cos.sinceL)}</b> invocations</span></div>
+    <div class="zoffers">${Z_OFFERS.map(([n, t, sub, k]) => `<button class="zoffer n${n}" type="button" data-zsum="${n}" ${n === 1 && fs ? "data-zfree=\"1\"" : ""} ${(save.chakra < summonCost(n) && !(n === 1 && fs)) || zBusy ? "disabled" : ""}>
       <span class="zo-art" aria-hidden="true">${n === 10 ? `<span class="zo-chest"><i></i><b>${ico(k)}</b></span>` : n === 5 ? `<span class="zo-pouch"><b>${ico(k)}</b></span>` : `<span class="zo-card"><b>${ico(k)}</b></span>`}</span>
       <span class="zo-n">×${n}</span><b class="zo-t">${t}</b><span class="zo-s">${sub}</span>
-      <span class="zo-p">${fmtN(summonCost(n))} ◆${n > 1 ? ` <s>${fmtN(SUMMON_COST * n)}</s>` : ""}</span></button>`).join("")}</div>
+      <span class="zo-p">${n === 1 && fs ? `Gratuit <s>${fmtN(SUMMON_COST)} ◆</s>` : `${fmtN(summonCost(n))} ◆${n > 1 ? ` <s>${fmtN(SUMMON_COST * n)}</s>` : ""}`}</span></button>`).join("")}</div>
     <div class="zs-side">
       <p class="note">Chaque objet invoqué est une instance unique, que tu peux équiper à l'Atelier ou vendre avec ta carte. ×5 et ×10 : 10 % moins cher.</p>
       <p class="eyebrow mut">Chances par objet (provisoires)</p><div class="zrates">${rates}</div>
@@ -7126,11 +7144,11 @@ function zDrops() {
 }
 let zSkipAnim = false;
 try { zSkipAnim = localStorage.getItem("rz-skip-summon") === "1"; } catch (e) {}
-async function zSummon(n) {
+async function zSummon(n, free = false) {
   if (zBusy) return; // pas de double invocation
   zBusy = true; draw();
   let r;
-  try { r = await zCall("summon", { n }, () => summonS(save, n, Math.random)); }
+  try { r = await zCall("summon", { n, free }, () => summonS(save, n, Math.random, Date.now(), free)); }
   catch (e) { toast(e.message); return draw(); }
   finally { zBusy = false; }
   summonOpening(r.got, r.scenario, zSkipAnim ? { phase: "done", flipped: true } : {});
@@ -7150,7 +7168,7 @@ document.addEventListener("click", (e) => {
   if (t.closest("[data-zsave]")) return zSaveDesign();
   if (t.closest("[data-zclear]")) { zDraft = {}; return draw(); }
   const f = t.closest("[data-zfeat]"); if (f) return zFeature(f.dataset.zfeat || null);
-  const sm = t.closest("[data-zsum]"); if (sm) return zSummon(+sm.dataset.zsum);
+  const sm = t.closest("[data-zsum]"); if (sm) return zSummon(+sm.dataset.zsum, !!sm.dataset.zfree);
 });
 document.addEventListener("change", (e) => {
   if (e.target.id === "zCard") { zDraftCard = e.target.value; zDraft = null; nav("atelier", zDraftCard); }

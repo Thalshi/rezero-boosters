@@ -399,7 +399,7 @@ export async function gameRoute(req, env, user, path) {
     if (path === "/api/game/summon") {
       if (!G.featureOn(cfg, "sanctuaire")) return fail(403, "Le Sanctuaire des Invocations n'est pas encore ouvert.");
       // le tirage est fait ici, avant toute animation : le navigateur ne fait que montrer le résultat
-      const r = await mutate(env, user.id, (s, now) => { const o = G.summonS(s, G.SUMMON_COUNTS.includes(+body.n) ? +body.n : 0, rng, now); return o.error ? { abort: true, error: o.error } : o; });
+      const r = await mutate(env, user.id, (s, now) => { const o = G.summonS(s, G.SUMMON_COUNTS.includes(+body.n) ? +body.n : 0, rng, now, !!body.free); return o.error ? { abort: true, error: o.error } : o; });
       if (r.error) return fail(400, r.error);
       return json(r);
     }

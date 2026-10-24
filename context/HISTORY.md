@@ -5,6 +5,11 @@
 
 ---
 
+## 2026-10-24 — Livre lisible (armes, effets des cartes), fin de tour souple (21e mise en ligne)
+- Livre, chapitre Distance : tuiles d'armes sombres et lisibles, « distance depuis toi » visible, plus de chevauchement avec la note.
+- Livre, chapitre Cartes : effets des cartes, titres de familles et quantités (×22…) en encre foncée sur le parchemin.
+- Fin du tour avec trop de cartes : on peut encore jouer une carte jouable (oubli) ; si la main tient alors dans la limite, plus rien à défausser. Les cartes non jouables se défaussent d'un toucher, les jouables via « Défausser cette carte ».
+
 ## 2026-10-24 — Recyclage relevé, objets du Sanctuaire recyclables (20e mise en ligne)
 - Cartes en double : 1/3/6/15/40/100 ◆ de Commune à Mythique (dorée ×3), au lieu de 0/1/1/4/10/25 (accord de Reichi).
 - Objets du Sanctuaire en double : « Recycler mes objets en double » au Sanctuaire et dans l'inventaire de l'Atelier, 10/20/40/80/200/500 ◆ ; jamais un objet posé sur une carte, toujours au moins un exemplaire gardé.

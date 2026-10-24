@@ -274,6 +274,8 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 @media (min-width: 560px) { .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 900px) { .cgrid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; } }
 @media (min-width: 1200px) { .cgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.odds .n small { display: block; font: 500 10px var(--mono); letter-spacing: .04em; color: var(--fg3); text-transform: none; }
+.odds .m.mx i { opacity: .45; background-image: repeating-linear-gradient(45deg, #0004 0 3px, transparent 3px 6px) !important; }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -5115,7 +5117,7 @@ function heroHTML() {
 }
 function qsHTML() {
   const st = streakState(), n = toClaim();
-  const next = save.free < FREE_MAX ? `prochain dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}` : "réserve pleine";
+  const next = save.free < FREE_MAX ? `+1 dans ${fmtWait(REGEN - (Date.now() - save.freeTs))}` : "réserve pleine";
   return `<div class="qs">
     <div style="--c:var(--acc)"><span class="k">${ico("coffre")}</span><b>${save.free}/${FREE_MAX}</b><span>gratuits · ${next}</span></div>
     <button type="button" data-nav="missions" style="--c:var(--ok)"><span class="k">${ico("missions")}</span><b>${n}</b><span>récompense${n > 1 ? "s" : ""} à récupérer</span>${n ? '<span class="act">Récupérer</span>' : ""}</button>
@@ -5166,8 +5168,8 @@ function boosterZone() {
         <button class="btn sq block" type="button" data-act="pool" data-p="${pk.id}" style="border-color:#f5c51855;background:#f5c5180d">Voir les ${pool.length} persos</button>
         ${voeuBox()}
         <p class="eyebrow mut" style="margin-top:4px">Chance par booster</p>
-        <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); return `<span class="n" style="color:${RAR[r].color}"><i></i>${RAR[r].label}</span><span class="m"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
-        ${fill.length ? `<p class="note">Pas encore de carte ${fill.map((r) => RAR[r].label).join(" ni ")} dans ce booster : ${fill.length > 1 ? "ces raretés viennent" : "cette rareté vient"} du Mix, avec les mêmes chances.</p>` : ""}
+        <div class="odds">${["r", "e", "l", "m"].map((r) => { const v = packChance(r, k, pk.daily ? DAILY_LAST : LAST); const mx = fill.includes(r); return `<span class="n ${mx ? "mx" : ""}" style="color:${RAR[r].color}"><i></i><span>${RAR[r].label}${mx ? "<small>perso du Mix</small>" : ""}</span></span><span class="m ${mx ? "mx" : ""}"><i style="width:${Math.max(1.5, v * 100)}%;background:${RAR[r].color};color:${RAR[r].color}"></i></span><span class="p">${pct(v)}</span>`; }).join("")}</div>
+        ${fill.filter((r) => RANKS.indexOf(r) >= 2).length ? `<p class="note">${esc(pk.daily ? pk.name.replace("Pack du jour · ", "") : pk.name)} n'a encore aucun perso ${fill.filter((r) => RANKS.indexOf(r) >= 2).map((r) => RAR[r].label).join(" ni ")}. Si cette rareté tombe, tu reçois à la place un perso ${fill.filter((r) => RANKS.indexOf(r) >= 2).length > 1 ? "de la même rareté" : "de cette rareté"} pris dans tout le Mix : les taux ci-dessus restent vrais.</p>` : ""}
         ${btn}
       </div>
     </div>

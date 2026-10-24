@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — Taux des boosters à thème clarifiés (25e mise en ligne)
+- Raretés sans perso dans un booster (ex. Le Monde : Épique, Légendaire) : marquées « perso du Mix » dans les chances, avec une note claire.
+- Pastille des gratuits : « +1 dans 1 h 20 » au lieu de « prochain dans… » coupé.
+
 ## 2026-10-24 — Raretés plus dures, plus de boosters, carte vœu du mois (24e mise en ligne)
 - Mythique ÷3 (0,05 % par carte, 0,17 % en 5e carte, 0,5 % au pack du jour), Légendaire ÷2, garantie Légendaire au 60e booster (avant 40).
 - Plus de boosters : réserve de 5 (avant 3), un gratuit toutes les 2 h (avant 3 h).

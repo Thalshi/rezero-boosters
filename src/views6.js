@@ -107,14 +107,15 @@ async function cfShare(gid, nom) {
   const url = `${location.origin}/#/confront/${gid}`, text = `Viens jouer à Confrontation : ${nom || "ma table"} (code ${gid})`;
   $("overlay").innerHTML = `<div class="sheet cf-share" role="dialog" aria-label="Partager le salon" style="max-width:420px"><h2>Partager le salon</h2>
     <p class="note">Code <b class="mono">${gid}</b></p><input type="text" readonly value="${esc(url)}" class="gal-note" onclick="this.select()">
-    <div class="row"><button class="btn gold" type="button" data-cfsh="chat">Envoyer dans le chat du QG</button><button class="btn" type="button" data-cfsh="copy">Copier le lien</button>${navigator.share ? `<button class="btn" type="button" data-cfsh="os">Autre appli…</button>` : ""}</div>
+    <div class="row"><button class="btn gold" type="button" data-cfsh="chat">Envoyer au comptoir…</button><button class="btn" type="button" data-cfsh="copy">Copier le lien</button>${navigator.share ? `<button class="btn" type="button" data-cfsh="os">Autre appli…</button>` : ""}</div>
     <button class="btn sm" type="button" data-act="close">Fermer</button></div>`;
   $("overlay").hidden = false; CF.share = { url, text };
 }
 async function cfShareDo(k) {
   const { url, text } = CF.share || {}; if (!url) return;
   try {
-    if (k === "chat") { await srv("chat/send", { text: `${text} ${url}` }); toast("Envoyé dans le chat du QG."); }
+    // le comptoir s'ouvre avec le message prêt : à toi de l'envoyer au QG ou à un ami en privé
+    if (k === "chat") { $("overlay").hidden = true; return shareToChat(`${text} ${url}`); }
     if (k === "copy") { await navigator.clipboard.writeText(url); toast("Lien copié."); }
     if (k === "os") await navigator.share({ title: "Confrontation", text, url });
     $("overlay").hidden = true;

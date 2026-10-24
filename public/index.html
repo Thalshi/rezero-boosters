@@ -328,6 +328,7 @@ h3 { font: 700 20px/1.2 var(--disp); margin: 0; }
 .mr.go { cursor: pointer; transition: border-color .15s, background .15s; } .mr.go:hover { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 6%, transparent); }
 .mr-go { margin-left: 8px; font: 700 11px var(--body); font-style: normal; color: var(--acc); opacity: .8; }
 .cm-av { flex: none; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; align-self: flex-start; transition: transform .15s; } .cm-av:hover { transform: scale(1.08); }
+.chat-draft { display: flex; gap: 10px; align-items: center; justify-content: space-between; margin: 0 14px 8px; padding: 8px 12px; border-radius: 10px; border: 1px dashed var(--gold); background: #f5c51812; font-size: 12.5px; color: var(--fg2); }
 /* carte vœu du mois */
 .voeu { display: grid; gap: 6px; }
 .voeu-c { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #b072ff66; background: linear-gradient(90deg, #b072ff1c, #b072ff08); color: var(--fg); text-align: left; cursor: pointer; }
@@ -4959,7 +4960,7 @@ async function sendChat() {
   const body = { text, card: card?.id || null, gold: !!card?.gold };
   inp.value = ""; chat.card = null; $("chatAtt").hidden = true; $("chatAtt").innerHTML = "";
   try {
-    if (SRV) { await srv("chat/send", body); await pulse(); }
+    if (SRV) { await srv("chat/send", body); if (chat.draft) { chat.draft = ""; drawChat(); } await pulse(); }
     else { await DB.collection("chat").add({ uid: ME, kind: "msg", text: text.slice(0, 300), card: body.card, gold: body.gold, t: Date.now() }); track("chat"); persist(); }
   } catch (e) { inp.value = text; chat.card = card; toast(e.message || "Message pas envoyé."); }
 }
@@ -6246,9 +6247,14 @@ function drawChat() {
   const tabs = SRV ? `<div class="chat-tabs"><button type="button" data-ctab="qg" aria-pressed="${chat.tab !== "amis"}">Le QG</button><button type="button" data-ctab="amis" aria-pressed="${chat.tab === "amis"}">Amis${n ? `<i class="badge">${n > 9 ? "9+" : n}</i>` : ""}</button></div>` : "";
   if (SRV && chat.tab === "amis") return drawFriends(tabs);
   $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir</small>Le QG en direct</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>
-    ${tabs}<div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
+    ${tabs}${draftBar()}<div class="chat-list" id="chatList" aria-live="polite"></div><div class="chat-foot">${foot}</div>`;
+  if (chat.draft && $("chatIn")) $("chatIn").value = chat.draft;
   drawChatList();
 }
+// message à partager (lien d'un salon…) : prêt dans le champ, on choisit où l'envoyer
+const draftBar = () => (chat.draft ? `<div class="chat-draft"><span>Message prêt : envoie-le au QG, ou à un ami depuis l'onglet « Amis ».</span><button class="linkbtn" type="button" data-draftx>Annuler</button></div>` : "");
+function shareToChat(text) { chat.draft = text; chat.tab = "qg"; FR.peer = null; if (!chat.open) openChat(true); else drawChat(); }
+document.addEventListener("click", (e) => { if (e.target.closest("[data-draftx]")) { chat.draft = ""; if ($("chatIn")) $("chatIn").value = ""; if ($("dmIn")) $("dmIn").value = ""; drawChat(); } });
 // ===== Amis : demandes, liste, comptoir privé =====
 const FR = { list: null, peer: null, msgs: [], last: 0, busy: false };
 async function loadFriends() { try { FR.list = await srv("friends"); } catch (e) { FR.list = FR.list || { friends: [], incoming: [], outgoing: [] }; } return FR.list; }
@@ -6259,15 +6265,16 @@ function drawFriends(tabs) {
   const body = !L ? `<p class="chat-empty">Chargement…</p>` : `
     ${L.incoming.length ? `<p class="fr-h">Demandes reçues</p>${L.incoming.map((f) => `<div class="fr-row">${frAv(f)}<b data-nav="profil" data-p="${f.uid}">${esc(f.name)}</b><span class="fr-act"><button class="btn acc sm" type="button" data-fracc="${f.uid}">Accepter</button><button class="btn sm" type="button" data-frdel="${f.uid}">Refuser</button></span></div>`).join("")}` : ""}
     <p class="fr-h">Mes amis · ${L.friends.length}</p>
-    ${L.friends.length ? L.friends.map((f) => `<button class="fr-row fr-go" type="button" data-frdm="${f.uid}">${frAv(f)}<b>${esc(f.name)}</b>${qgTag(f.uid)}${f.unread ? `<i class="badge">${f.unread}</i>` : ""}<span class="fr-open">Écrire ›</span></button>`).join("") : `<p class="chat-empty">Pas encore d'ami. Ouvre le profil d'un joueur (classement, chat, marché) et touche « Ajouter en ami ».</p>`}
+    ${L.friends.length ? L.friends.map((f) => `<button class="fr-row fr-go" type="button" data-frdm="${f.uid}">${frAv(f)}<b>${esc(f.name)}</b>${qgTag(f.uid)}${f.unread ? `<i class="badge">${f.unread}</i>` : ""}<span class="fr-open">${chat.draft ? "Envoyer ›" : "Écrire ›"}</span></button>`).join("") : `<p class="chat-empty">Pas encore d'ami. Ouvre le profil d'un joueur (classement, chat, marché) et touche « Ajouter en ami ».</p>`}
     ${L.outgoing.length ? `<p class="fr-h">Demandes envoyées</p>${L.outgoing.map((f) => `<div class="fr-row">${frAv(f)}<b data-nav="profil" data-p="${f.uid}">${esc(f.name)}</b><span class="fr-act"><span class="note">en attente</span><button class="btn sm" type="button" data-frdel="${f.uid}">Annuler</button></span></div>`).join("")}` : ""}`;
-  $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir</small>Mes amis</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>${tabs}<div class="chat-list fr-list">${body}</div>`;
+  $("chatPanel").innerHTML = `<div class="chat-head"><h2><small>Comptoir</small>Mes amis</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>${tabs}${draftBar()}<div class="chat-list fr-list">${body}</div>`;
 }
 function drawDM(tabs) {
   const f = FR.list?.friends.find((x) => x.uid === FR.peer) || { uid: FR.peer, name: "Ami" };
   $("chatPanel").innerHTML = `<div class="chat-head"><h2><small><button class="linkbtn" type="button" data-frback>‹ Mes amis</button></small>${esc(f.name)}</h2><button class="chat-x" type="button" data-act="chat-close" aria-label="Fermer le comptoir">✕</button></div>${tabs}
-    <div class="chat-list" id="dmList" aria-live="polite"></div>
+    ${draftBar()}<div class="chat-list" id="dmList" aria-live="polite"></div>
     <div class="chat-foot"><form class="chat-form" id="dmForm" autocomplete="off"><input id="dmIn" maxlength="300" placeholder="Écris à ${esc(f.name)}…" aria-label="Message privé"><button class="btn acc sm" type="submit">Envoyer</button></form></div>`;
+  if (chat.draft && $("dmIn")) $("dmIn").value = chat.draft;
   drawDMList();
 }
 function drawDMList() {
@@ -6316,7 +6323,7 @@ document.addEventListener("submit", async (e) => {
   if (e.target.id !== "dmForm") return;
   e.preventDefault(); const inp = $("dmIn"), text = inp.value.trim(); if (!text || !FR.peer) return;
   inp.value = "";
-  try { await srv("dm/send", { uid: FR.peer, text }); await pollDM(); } catch (err) { inp.value = text; toast(err.message); }
+  try { await srv("dm/send", { uid: FR.peer, text }); if (chat.draft) { chat.draft = ""; drawChat(); } await pollDM(); } catch (err) { inp.value = text; toast(err.message); }
 });
 function pickChatCard() {
   const mine = ALL_CARDS.filter((c) => has(c.id)).sort((a, b) => RAR[b.rar].rank - RAR[a.rar].rank);
@@ -7759,14 +7766,15 @@ async function cfShare(gid, nom) {
   const url = `${location.origin}/#/confront/${gid}`, text = `Viens jouer à Confrontation : ${nom || "ma table"} (code ${gid})`;
   $("overlay").innerHTML = `<div class="sheet cf-share" role="dialog" aria-label="Partager le salon" style="max-width:420px"><h2>Partager le salon</h2>
     <p class="note">Code <b class="mono">${gid}</b></p><input type="text" readonly value="${esc(url)}" class="gal-note" onclick="this.select()">
-    <div class="row"><button class="btn gold" type="button" data-cfsh="chat">Envoyer dans le chat du QG</button><button class="btn" type="button" data-cfsh="copy">Copier le lien</button>${navigator.share ? `<button class="btn" type="button" data-cfsh="os">Autre appli…</button>` : ""}</div>
+    <div class="row"><button class="btn gold" type="button" data-cfsh="chat">Envoyer au comptoir…</button><button class="btn" type="button" data-cfsh="copy">Copier le lien</button>${navigator.share ? `<button class="btn" type="button" data-cfsh="os">Autre appli…</button>` : ""}</div>
     <button class="btn sm" type="button" data-act="close">Fermer</button></div>`;
   $("overlay").hidden = false; CF.share = { url, text };
 }
 async function cfShareDo(k) {
   const { url, text } = CF.share || {}; if (!url) return;
   try {
-    if (k === "chat") { await srv("chat/send", { text: `${text} ${url}` }); toast("Envoyé dans le chat du QG."); }
+    // le comptoir s'ouvre avec le message prêt : à toi de l'envoyer au QG ou à un ami en privé
+    if (k === "chat") { $("overlay").hidden = true; return shareToChat(`${text} ${url}`); }
     if (k === "copy") { await navigator.clipboard.writeText(url); toast("Lien copié."); }
     if (k === "os") await navigator.share({ title: "Confrontation", text, url });
     $("overlay").hidden = true;

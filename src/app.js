@@ -779,7 +779,7 @@ async function sendChat() {
   const body = { text, card: card?.id || null, gold: !!card?.gold };
   inp.value = ""; chat.card = null; $("chatAtt").hidden = true; $("chatAtt").innerHTML = "";
   try {
-    if (SRV) { await srv("chat/send", body); await pulse(); }
+    if (SRV) { await srv("chat/send", body); if (chat.draft) { chat.draft = ""; drawChat(); } await pulse(); }
     else { await DB.collection("chat").add({ uid: ME, kind: "msg", text: text.slice(0, 300), card: body.card, gold: body.gold, t: Date.now() }); track("chat"); persist(); }
   } catch (e) { inp.value = text; chat.card = card; toast(e.message || "Message pas envoyé."); }
 }

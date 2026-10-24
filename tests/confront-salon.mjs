@@ -80,7 +80,11 @@ try {
     t.check(`${label} · l'hôte passe en « cartes partagées »`, (await page.locator('.cf-modebox .cf-mode.on').innerText()).includes("partagées"));
     await page.click('[data-act="cf-share"]'); await page.waitForTimeout(400);
     t.check(`${label} · partager : le lien du salon`, (await page.locator(".cf-share input").inputValue()).includes("/#/confront/"));
+    // le comptoir s'ouvre avec le message prêt : on l'envoie au QG
     await page.click('[data-cfsh="chat"]'); await page.waitForTimeout(1000);
+    t.check(`${label} · le comptoir s'ouvre avec le lien prêt`, (await page.inputValue("#chatIn").catch(() => "")).includes("Salon " + label));
+    await page.locator("#chatForm button[type=submit]").dispatchEvent("click"); await page.waitForTimeout(1200);
+    await page.locator('[data-act="chat-close"]').dispatchEvent("click"); await page.waitForTimeout(300);
     const chatMsgs = (await A.api("pulse", { after: null })).chat?.msgs || (await A.api("pulse", { after: null })).chat || [];
     t.check(`${label} · partager dans le chat du QG`, JSON.stringify(chatMsgs).includes("Salon " + label), chatMsgs);
     await page.screenshot({ path: `tests/reports/confront-salon-${label}.png`, fullPage: true });

@@ -6,6 +6,7 @@
 ---
 
 ## 2026-10-24 — Confrontation : « Rejoindre » par lien (37e mise en ligne)
+- « Partager le salon » › « Envoyer au comptoir… » : le comptoir s'ouvre avec le message prêt, on l'envoie au QG ou à un ami en privé (onglet Amis), ou on annule. Plus d'envoi direct au QG.
 - Arrivé dans un salon par un lien partagé, on était spectateur sans bouton « Rejoindre » (le serveur ne calculait les actions que pour les joueurs déjà assis). Corrigé.
 
 ## 2026-10-24 — Parrainage, remise à zéro complète, missions cliquables (36e mise en ligne)

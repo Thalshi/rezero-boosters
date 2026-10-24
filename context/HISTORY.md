@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — Jeu ouvert à tous, badge QG pour les membres (33e mise en ligne)
+- Plus besoin d'être membre du serveur Discord QG pour : marché et échanges, chat, votes (prédictions, Défilé), inscription au Défilé, avis et bugs, Confrontation (créer et rejoindre un salon).
+- Les membres du serveur gardent un badge « QG » bleu à côté de leur nom (profil, classement, chat).
+
 ## 2026-10-24 — Invocations gratuites au Sanctuaire (32e mise en ligne)
 - Une invocation gratuite toutes les 12 h (réserve de 2), affichée au Sanctuaire (« Invocations gratuites : 1/2 · +1 dans… ») ; la carte ×1 devient « Gratuit ».
 - +1 invocation gratuite dans le bonus des premiers pas et dans le bonus de la semaine. Idée de Reichi pour adoucir les raretés plus dures.

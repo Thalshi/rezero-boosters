@@ -92,7 +92,7 @@
     id: async () => (await me())?.id ?? null,
     isOwner: async () => !!(await me())?.admin,
     canEdit: async () => !!(await me())?.admin,
-    can: async () => { const m = await me(); return m ? m.member || m.admin : false; },
+    can: async () => { const m = await me(); return !!m; }, // ouvert à tous depuis le 24/10 (plus besoin d'être membre du serveur QG)
     me: async () => { const m = await me(); return { id: m?.id ?? null, name: m?.name || "", avatarUrl: m?.avatar || "", color: "#0ac8b9", email: null, isOwner: !!m?.admin, canEdit: !!m?.admin }; },
     async profiles(ids) {
       ids = [...new Set([].concat(ids))];

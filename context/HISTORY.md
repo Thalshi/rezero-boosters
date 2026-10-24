@@ -5,6 +5,10 @@
 
 ---
 
+## 2026-10-24 — « Voir les persos » façon Kyara (22e mise en ligne)
+- Fenêtre des persos d'un booster refaite : compteur « possédés », recherche, filtre Tous / Manquants, rangées par rareté avec compte (ex. 0/10).
+- Cartes manquantes en portrait net noir et blanc avec un « ? » (plus de flou), grille propre (fini les cartes qui se chevauchent). Les persos pas encore sortis restent cachés.
+
 ## 2026-10-24 — Livre lisible (armes, effets des cartes), fin de tour souple (21e mise en ligne)
 - Livre, chapitre Distance : tuiles d'armes sombres et lisibles, « distance depuis toi » visible, plus de chevauchement avec la note.
 - Livre, chapitre Cartes : effets des cartes, titres de familles et quantités (×22…) en encre foncée sur le parchemin.

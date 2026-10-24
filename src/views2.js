@@ -157,7 +157,7 @@ function mrHTML(m, kind, id) {
     <div class="rw">${rewardShort(m.reward)}</div>
     <div class="s">${m.claimed ? "Fait ✓" : ok ? `<button class="btn gold sm" type="button" data-claim="${kind}" data-id="${id}">Réclamer</button>` : "En cours"}</div></div>`;
 }
-const rewardShort = (r) => [r.chakra ? `+${r.chakra} <span class="dia"></span>` : "", r.boosters ? `+${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
+const rewardShort = (r) => [r.chakra ? `+${r.chakra} <span class="dia"></span>` : "", r.boosters ? `+${r.boosters} booster${r.boosters > 1 ? "s" : ""}` : "", r.summons ? `+${r.summons} invocation${r.summons > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
 function viewMissions() {
   const st = streakState(), ms = missionsToday(), ws = weeklyS(save), fs = firstStepsS(save), as = achievementsS(save);
   const d = ensureDailyS(save), w = ensureWeeklyS(save), n = toClaim();

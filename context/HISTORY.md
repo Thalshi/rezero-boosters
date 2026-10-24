@@ -5,6 +5,14 @@
 
 ---
 
+## 2026-10-24 — Invocations gratuites au Sanctuaire (32e mise en ligne)
+- Une invocation gratuite toutes les 12 h (réserve de 2), affichée au Sanctuaire (« Invocations gratuites : 1/2 · +1 dans… ») ; la carte ×1 devient « Gratuit ».
+- +1 invocation gratuite dans le bonus des premiers pas et dans le bonus de la semaine. Idée de Reichi pour adoucir les raretés plus dures.
+
+## 2026-10-24 — Parrainage prévu pour la semaine prochaine
+- Idée validée (façon Kyara) : lien perso → vidéos de Billy (épisodes 1 et 2) → filleuls qui rapportent des boosters, paliers et classement. Ouvert à tous.
+- Reporté à la semaine prochaine (budget hebdo presque épuisé). Plan et questions d'équilibrage dans `docs/PARRAINAGE.md`.
+
 ## 2026-10-24 — Moins d'appels au serveur (31e mise en ligne)
 - Constat : un seul onglet ouvert faisait ~1 500 appels par heure (20 000 dans la journée pour Reichi seul, quota gratuit Cloudflare : 100 000).
 - Synchro toutes les 20 s (avant 6 s), resynchro complète toutes les 10 min (avant 1 min), pouls 30 s (avant 15 s), état 2 min (avant 45 s).

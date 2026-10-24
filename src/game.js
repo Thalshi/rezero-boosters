@@ -273,12 +273,24 @@ function normalizeSave(s, now = Date.now()) {
 const ownOf = (s, id) => s.owned[id] || { n: 0, gold: 0, first: 0 };
 const hasCard = (s, id) => ownOf(s, id).n + ownOf(s, id).gold > 0;
 
+// invocations gratuites au Sanctuaire : une toutes les 12 h, réserve de 2 (les cadeaux peuvent dépasser)
+const SUMMON_FREE_MAX = 2;
+const SUMMON_FREE_REGEN = 12 * 3600e3;
+function summonRegenS(s, now = Date.now()) {
+  if (typeof s.freeSum !== "number") { s.freeSum = 1; s.freeSumTs = now; return true; }
+  if (s.freeSum >= SUMMON_FREE_MAX) { s.freeSumTs = now; return false; }
+  let changed = false;
+  while (s.freeSum < SUMMON_FREE_MAX && now - s.freeSumTs >= SUMMON_FREE_REGEN) { s.freeSum++; s.freeSumTs += SUMMON_FREE_REGEN; changed = true; }
+  if (s.freeSum >= SUMMON_FREE_MAX) s.freeSumTs = now;
+  return changed;
+}
 function regenS(s, now = Date.now()) {
-  if (s.free >= FREE_MAX) { s.freeTs = now; return false; }
+  const sc = summonRegenS(s, now);
+  if (s.free >= FREE_MAX) { s.freeTs = now; return sc; }
   let changed = false;
   while (s.free < FREE_MAX && now - s.freeTs >= REGEN) { s.free++; s.freeTs += REGEN; changed = true; }
   if (s.free >= FREE_MAX) s.freeTs = now;
-  return changed;
+  return changed || sc;
 }
 
 function ensureDailyS(s, now = Date.now()) {
@@ -313,7 +325,7 @@ const WEEKLY = [
   { id: "w-chat15", label: "Écris 15 messages dans le chat",   key: "chat",    goal: 15, reward: { chakra: 60 } },
 ];
 const DAILY_BONUS = { boosters: 1 };     // toutes les missions du jour réclamées
-const WEEKLY_BONUS = { boosters: 3 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
+const WEEKLY_BONUS = { boosters: 3, summons: 1 };    // dès WEEKLY_BONUS_N missions de la semaine réclamées
 const WEEKLY_BONUS_N = 3;
 // Confrontation : jouable à l'infini, mais l'essence ne vient que des premières parties valables du jour
 const CF_REWARD = { partie: 10, victoire: 10, max: 3 };
@@ -328,7 +340,7 @@ const FIRST_STEPS = [
   { id: "f-sheet",  label: "Ouvre une fiche de perso",     test: (s) => (s.counts?.sheet || 0) >= 1,             reward: { chakra: 20 } },
   { id: "f-disc",   label: "Lie ton compte Discord",       test: (s) => !!s.linked,                               reward: { chakra: 150 } },
 ];
-const FIRST_BONUS = { boosters: 3 };
+const FIRST_BONUS = { boosters: 3, summons: 1 };
 const ACHIEVEMENTS = [
   { id: "a-open10",   label: "Premiers pas",        desc: "Ouvrir 10 boosters",                 val: (s) => s.opened, goal: 10,   reward: { chakra: 10 } },
   { id: "a-open100",  label: "Habitué",             desc: "Ouvrir 100 boosters",                val: (s) => s.opened, goal: 100,  reward: { chakra: 50 } },
@@ -469,6 +481,7 @@ function streakStateS(s, now = Date.now()) {
 function giveRewardS(s, r) {
   if (r.boosters) s.free += r.boosters;
   if (r.chakra) s.chakra += r.chakra;
+  if (r.summons) s.freeSum = (s.freeSum || 0) + r.summons;
 }
 function claimStreakS(s, now = Date.now()) {
   const st = streakStateS(s, now);
@@ -1022,10 +1035,13 @@ function buyCosmeticS(s, id) {
   return { bought: id, price };
 }
 const SUMMON_POOL = (rar) => COSMETICS.filter((c) => c.rar === rar);
-function summonS(s, n, rng, now = Date.now()) {
+function summonS(s, n, rng, now = Date.now(), free = false) {
   if (!SUMMON_COUNTS.includes(n)) return { error: "On invoque 1, 5 ou 10 objets à la fois." };
-  const cost = summonCost(n), cos = cosOf(s);
-  if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
+  summonRegenS(s, now);
+  if (free && n !== 1) return { error: "Une invocation gratuite se fait une à la fois." };
+  const cost = free ? 0 : summonCost(n), cos = cosOf(s);
+  if (free) { if (!(s.freeSum > 0)) return { error: "Plus d'invocation gratuite pour l'instant." }; s.freeSum--; }
+  else if (s.chakra < cost) return { error: `Il te faut ${cost} ◆ (tu en as ${s.chakra}).` };
   s.chakra -= cost;
   const rars = [];
   for (let k = 0; k < n; k++) { cos.sinceM++; cos.sinceL++; let r = rollWith(SUMMON_RATES, rng); if (SUMMON_PITY_M && cos.sinceM >= SUMMON_PITY_M) r = "m"; if (SUMMON_PITY_L && cos.sinceL >= SUMMON_PITY_L && r !== "m") r = "l"; if (r === "m") cos.sinceM = 0; if (r === "l" || r === "m") cos.sinceL = 0; rars.push(r); }

@@ -332,14 +332,16 @@ function crList() {
   return Object.entries(PEOPLE).filter(([k, p]) => !k.startsWith("__") && (!q || criNorm(p.name).includes(q)) && (ep === "all" || epOfCfg(CONFIG, k) === +ep))
     .sort((a, b) => epOfCfg(CONFIG, a[0]) - epOfCfg(CONFIG, b[0]) || Object.keys(FACTIONS).indexOf(a[1].fac) - Object.keys(FACTIONS).indexOf(b[1].fac) || a[1].name.localeCompare(b[1].name)).map(([k]) => k);
 }
+// compteur par rareté (cartes de booster, hors skins) : pour voir d'un coup d'œil s'il faut étaler les variantes
+const crRars = (cards) => `<span class="cr-rars">${RANKS.slice().reverse().map((r) => { const n = cards.filter((c) => !c.skin && c.rar === r).length; return n ? `<i style="--rc:var(--r-${r})" title="${RAR[r].label}">${LETTER[r]}${n > 1 ? `×${n}` : ""}</i>` : ""; }).join("")}${cards.some((c) => c.skin) ? `<i class="sk" title="Skins du coffre">+${cards.filter((c) => c.skin).length} skins</i>` : ""}</span>`;
 const crHead = (k, extra = "") => { const p = PEOPLE[k], n = crCardsOf(k).length;
-  return `<button type="button" class="cr-hd ${extra}" data-cr-p="${k}" style="--fc:${FACTIONS[p.fac]?.color || "#888"}"><span class="cr-hd-img">${thumb(crFace(k), "crh")}</span><b>${esc(p.name)}</b><small>${n} carte${n > 1 ? "s" : ""}</small>${crBadge("perso", k)}</button>`; };
+  return `<button type="button" class="cr-hd ${extra}" data-cr-p="${k}" style="--fc:${FACTIONS[p.fac]?.color || "#888"}"><span class="cr-hd-img">${thumb(crFace(k), "crh")}</span><b>${esc(p.name)}</b><small>${n} carte${n > 1 ? "s" : ""}</small>${crRars(crCardsOf(k))}${crBadge("perso", k)}</button>`; };
 function crBoard() {
   const eps = crEps(), ep = CR.ep ?? "all", list = crList();
   const chips = `<div class="cr-eps">${[["all", "Tous"], ...eps.map((e) => [String(e), epLabel(e)])].map(([v, l]) => `<button type="button" class="chip ${String(ep) === v ? "on" : ""}" data-cr-ep-f="${v}">${l}</button>`).join("")}</div>`;
   const groups = ep === "all" ? eps.map((e) => [e, list.filter((k) => epOfCfg(CONFIG, k) === e)]).filter(([, l]) => l.length) : [[+ep, list]];
   return `<div class="row"><button class="btn gold" type="button" data-cr-new="perso">+ Nouveau perso</button><input class="in cr-q" type="search" id="crQ" placeholder="Chercher un perso" value="${esc(CR.q)}"></div>${chips}
-    ${groups.map(([e, l]) => `<section class="cr-grp"><h3>${epLabel(e)} <small>${l.length} perso${l.length > 1 ? "s" : ""}</small></h3><div class="cr-hds">${l.map((k) => crHead(k)).join("")}</div></section>`).join("") || `<p class="note">Aucun perso.</p>`}`;
+    ${groups.map(([e, l]) => `<section class="cr-grp"><h3>${epLabel(e)} <small>${l.length} perso${l.length > 1 ? "s" : ""}</small>${crRars(l.flatMap((k) => crCardsOf(k)))}</h3><div class="cr-hds">${l.map((k) => crHead(k)).join("")}</div></section>`).join("") || `<p class="note">Aucun perso.</p>`}`;
 }
 function crSheet(k) {
   const p = PEOPLE[k], list = crList(), i = list.indexOf(k), prev = list[(i - 1 + list.length) % list.length], next = list[(i + 1) % list.length], cards = crCardsOf(k);

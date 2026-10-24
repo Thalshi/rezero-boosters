@@ -753,13 +753,25 @@ function cardChip(id, gold) {
   return `<button class="cchip" type="button" ${vis ? `data-card="${id}"` : ""} style="--cc:${gold ? "#f0c860" : RAR[c.rar].color}">${thumb(vis ? c : null)}<span><em>${RAR[c.rar].label}${gold ? " · dorée" : ""}</em>${vis ? `${esc(nameOf(c))} · ${esc(c.title)}` : "Perso secret"}</span></button>`;
 }
 const hhmm = (t) => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+// liens cliquables dans les messages : un lien du site (salon, profil…) s'ouvre dans l'app, les autres dans un nouvel onglet
+function linkify(html) {
+  return html.replace(/https?:\/\/[^\s<]+[^\s<.,!?;:)]/g, (u) => {
+    const raw = u.replace(/&amp;/g, "&"), own = raw.startsWith(location.origin);
+    return own ? `<a class="cm-link" href="${u}" data-inlink="${esc(raw.slice(location.origin.length) || "/")}">${u.replace(/^https?:\/\//, "")}</a>` : `<a class="cm-link" href="${u}" target="_blank" rel="noopener nofollow">${u.replace(/^https?:\/\//, "")}</a>`;
+  });
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-inlink]"); if (!a) return;
+  e.preventDefault(); const to = a.dataset.inlink;
+  if (to.includes("#")) location.hash = to.slice(to.indexOf("#")); else location.href = to;
+});
 function msgHTML(m) {
   const name = m.name ? `<b data-mention="${esc(m.name)}">${esc(m.name)}</b>` : `<b data-uid="${esc(m.uid)}">…</b>`;
   const avd0 = decoOfUid(m.uid) || ornOfUid(m.uid), L0 = avLayers(decoOfUid(m.uid), ornOfUid(m.uid), true), avi = `${avd0 ? `<span class="avd">${L0.back}` : ""}<img class="av" ${m.avatar ? `src="${esc(m.avatar)}"` : `data-uid="${esc(m.uid)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACw="`} alt="">${avd0 ? `${L0.front}</span>` : ""}`, avb = `<button class="cm-av" type="button" data-nav="profil" data-p="${esc(m.uid)}" title="Voir le profil" aria-label="Voir le profil">${avi}</button>`;
   if (m.kind === "pull") return `<div class="cm sys pull">${name}<span>a tiré ✦</span>${cardChip(m.card, m.gold)}</div>`;
   if (m.kind === "announce") return `<div class="cm sys ann"><b>Annonce</b>${esc(m.text)}</div>`;
   const mine = m.uid === ME, ping = !mine && MYNAME && m.text.toLowerCase().includes("@" + MYNAME.toLowerCase());
-  const text = esc(m.text).replace(/@([^\s@&<,.!?;:]{2,32})/g, "<mark>@$1</mark>");
+  const text = linkify(esc(m.text)).replace(/(^|[^\w\/])@([^\s@&<,.!?;:]{2,32})/g, "$1<mark>@$2</mark>");
   return `<div class="cm ${mine ? "me" : ""} ${ping ? "ping" : ""}">${avb}<div class="cm-b"><div class="cm-h">${name}${m.admin ? '<em class="tagadm">Admin</em>' : ""}<time>${hhmm(m.ts)}</time>${SRV && (mine || IS_ADMIN || IS_DEV) ? `<button class="cm-del" type="button" data-chatdel="${m.id}" aria-label="Effacer ce message">✕</button>` : ""}</div>${m.text ? `<p>${text}</p>` : ""}${m.card ? cardChip(m.card, m.gold) : ""}</div></div>`;
 }
 function drawChatList() {
@@ -814,7 +826,7 @@ function drawDM(tabs) {
 }
 function drawDMList() {
   const list = $("dmList"); if (!list) return;
-  list.innerHTML = FR.msgs.length ? FR.msgs.map((m) => `<div class="cm ${m.uid === ME ? "me" : ""}"><div class="cm-b"><div class="cm-h"><time>${hhmm(m.ts)}</time></div><p>${esc(m.text)}</p></div></div>`).join("") : `<p class="chat-empty">Écris le premier message, il n'y a que vous deux ici.</p>`;
+  list.innerHTML = FR.msgs.length ? FR.msgs.map((m) => `<div class="cm ${m.uid === ME ? "me" : ""}"><div class="cm-b"><div class="cm-h"><time>${hhmm(m.ts)}</time></div><p>${linkify(esc(m.text))}</p></div></div>`).join("") : `<p class="chat-empty">Écris le premier message, il n'y a que vous deux ici.</p>`;
   list.scrollTop = list.scrollHeight;
 }
 async function pollDM() {
